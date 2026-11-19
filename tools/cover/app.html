@@ -1815,7 +1815,7 @@ function tkIcon(el, name) {
       ['#tpls .tbtn', function (el) { var n = el.textContent.trim(); return E('يُدرج «' + n + '» جاهزًا بستايل علا تحت آخر عنصر في الشريحة الحالية.', 'Inserts a ready "' + n + '" in UULA style under the last object on the current slide.', n); }],
       ['#solBtn', E('يخفي الحلول في الشرائح أو يظهرها، لعمل نسخة للطالب بدون إجابات.', 'Hides or shows the solutions on the slides, to make a student copy without answers.')],
       ['#solLines [data-v="0"]', E('عند إخفاء الحل يبقى مكانه فارغًا بدون سطور.', 'When a solution is hidden, its place stays empty with no lines.')],
-      ['#solLines [data-v="1"]', E('عند إخفاء الحل تُرسم مكانه سطور فارغة ليكتب الطالب عليها. تختفي السطور عند إظهار الحلول.', 'When a solution is hidden, empty lines are drawn in its place for the student to write on. They go away when solutions are shown.')],
+      ['#solLines [data-v="1"]', E('كل سطر من الحل يختفي ينزل مكانه سطر رمادي فارغ ليكتب الطالب عليه. تختفي السطور عند إظهار الحلول.', 'Every hidden solution line gets an empty grey line for the student to write on. They go away when solutions are shown.')],
       ['label:has(#numChk)', E('يضيف رقم الصفحة أسفل الشرائح بعد كل تحويل.', 'Adds the page number at the bottom of the slides after each conversion.', 'ترقيم الصفحات', 'Page numbers')],
       ['#numStart', E('رقم الشريحة التي يبدأ منها الترقيم.', 'The slide where numbering starts.', 'بداية الترقيم', 'Numbering start')],
       ['#numHere', E('يجعل الترقيم يبدأ من الشريحة المحددة الآن.', 'Makes numbering start at the slide selected now.', 'الحالية', 'Current')],

@@ -1741,10 +1741,11 @@ function findSolutions(pkg) {
   return found;
 }
 // empty writing lines in the place of a hidden solution box (one group, removed again by showSolutions)
-function writingLines(doc, g) {
-  const step = 2 * ROW, n = Math.max(1, Math.floor((g.h + ROW * 0.6) / step));
+// g: the box; ys (optional): the y of each line, else one under every text line of the box
+function writingLines(doc, g, ys) {
   const x = Math.round(g.x), w = Math.round(g.w), top = Math.round(g.y);
-  const ys = []; for (let k = 1; k <= n; k++) ys.push(top + Math.min(g.h, k * step) - 1);
+  if (!ys) { const n = Math.max(1, Math.round((g.h - 7.2 * PT) / ROW)); ys = []; for (let k = 1; k <= n; k++) ys.push(top + Math.round(3.6 * PT) + k * ROW); }
+  if (!ys.length) return null;
   const y0 = ys[0], hh = Math.max(1, ys[ys.length - 1] - y0);
   let lines = '';
   ys.forEach((y, k) => {
@@ -1755,6 +1756,17 @@ function writingLines(doc, g) {
   return frag(doc, '<p:grpSp><p:nvGrpSpPr><p:cNvPr id="' + (NEXT++) + '" name="UULA SolView Lines"/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>'
     + '<p:grpSpPr><a:xfrm><a:off x="' + x + '" y="' + y0 + '"/><a:ext cx="' + w + '" cy="' + hh + '"/><a:chOff x="' + x + '" y="' + y0 + '"/><a:chExt cx="' + w + '" cy="' + hh + '"/></a:xfrm></p:grpSpPr>'
     + lines + '</p:grpSp>');
+}
+let MEASURE = null;
+function paraLines(p, boxW) {
+  const txt = paraText(p).trim(); if (!txt) return 1;
+  const sz = (runSz(p) || 1100) / 100;                      // pt
+  let wd = txt.length * sz * 0.5;
+  try {
+    if (!MEASURE) MEASURE = document.createElement('canvas').getContext('2d');
+    MEASURE.font = sz + 'px "UULA Sans", Arial, sans-serif'; wd = MEASURE.measureText(txt).width;
+  } catch (e) {}
+  return Math.max(1, Math.ceil(wd / Math.max(20, boxW / PT - 14.4)));
 }
 function hideSolutions(pkg, grids, opts) {
   grids = grids || {}; opts = opts || {};
@@ -1772,7 +1784,7 @@ function hideSolutions(pkg, grids, opts) {
     n++;
     const view = f.how === 'hide' ? null : t.el.cloneNode(true);
     for (const c of allCores(t.el)) { const nv = cnvOf(c); if (nv) { nv.setAttribute('hidden', '1'); nv.setAttribute('name', 'UULA SolHidden ' + (nv.getAttribute('name') || '')); } }
-    if (!view && opts.lines && t.kind === 'text') t.el.parentNode.insertBefore(writingLines(doc, t.g), t.el.nextSibling);
+    if (!view && opts.lines && t.kind === 'text') { const lg = writingLines(doc, t.g); if (lg) t.el.parentNode.insertBefore(lg, t.el.nextSibling); }
     if (!view) continue;
     for (const c of allCores(view)) { const nv = cnvOf(c); if (nv) { nv.setAttribute('id', String(NEXT++)); nv.setAttribute('name', 'UULA SolView ' + (nv.getAttribute('name') || '')); nv.removeAttribute('hidden'); } }
     const vt = { c: core(view), el: view, text: t.text, g: t.g, box: null, ph: null };
@@ -1802,6 +1814,17 @@ function hideSolutions(pkg, grids, opts) {
         else { placeChild(pr, solid(doc, '000000'), RPR_ORDER); pr.setAttribute('b', '0'); }
       }
       for (const tn of [...desc(view, 'a', 't'), ...desc(view, 'm', 't')]) tn.textContent = [...tn.textContent].map(NEG).join('');
+      // a grey line under every line that disappeared (whole answer paragraphs)
+      if (opts.lines && !f.correct) {
+        let at = 0; const ys = [], top = Math.round(t.g.y) + Math.round(3.6 * PT);
+        for (const r of roles) {
+          const nl = paraLines(r.p, t.g.w);
+          if (r.text && r.role === 'answer') for (let k = 1; k <= nl; k++) ys.push(top + (at + k) * ROW);
+          at += nl;
+        }
+        const lg = ys.length && writingLines(doc, t.g, ys.filter(y => y <= t.g.y + t.g.h + ROW));
+        if (lg) t.el.parentNode.insertBefore(lg, t.el.nextSibling);
+      }
     } else if (t.kind === 'table') {
       for (const tr of desc(view, 'a', 'tr')) {
         const tcs = kids(tr, 'tc', 'a');
