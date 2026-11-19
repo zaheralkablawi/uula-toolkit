@@ -39,9 +39,16 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 .mbox h3{margin:0 0 8px;font-size:1rem}.mbox p{margin:6px 0}
 .mbox .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
 .mini{font:inherit;font-size:.75rem;border:1px solid var(--line);background:var(--panel);color:var(--accent);border-radius:6px;padding:1px 8px;cursor:pointer}
-.mrow{display:flex;align-items:center;gap:10px;padding:7px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+.mrow{display:flex;align-items:center;gap:10px;padding:7px 2px;border-bottom:1px solid var(--line)}
+.mrow.off svg.ic2,.mrow.off b{opacity:.45}
+.arw{display:inline-grid;place-items:center;width:26px;height:24px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--accent);cursor:pointer;padding:0}
+.arw svg{width:14px!important;height:14px!important}
+.arw:hover{border-color:var(--accent);background:var(--accent-soft)}
+.arw:disabled{color:#c3cad4;border-color:var(--line);background:var(--panel);cursor:default}
+.mfoot{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.linkb{font:inherit;font-size:.76rem;border:0;background:none;color:var(--muted);text-decoration:underline;cursor:pointer;padding:0}
 .mrow:last-child{border-bottom:0}
-.mrow svg{width:24px;height:24px;flex:none}
+.mrow svg.ic2{width:24px;height:24px;flex:none}
 .mrow b{flex:1;font-weight:600;font-size:.9rem;direction:ltr;text-align:right}
 .sw{appearance:none;-webkit-appearance:none;margin:0;flex:none;width:34px;height:20px;border-radius:10px;background:#c9d1dc;position:relative;cursor:pointer;transition:background .15s}
 .sw::after{content:"";position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:right .15s}
@@ -76,6 +83,7 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 var TK_ICONS = {
   upd: '<path d="M20 11a8 8 0 0 0-14.9-3.5L4 9"/><path d="M4 4v5h5"/><path d="M4 13a8 8 0 0 0 14.9 3.5L20 15"/><path d="M20 20v-5h-5"/>',
   lang: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/>',
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
   tools: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
   about: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/>',
   new: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M12 11v6M9 14h6"/>',
@@ -100,10 +108,10 @@ const VER = '1.0';
 const $ = id => document.getElementById(id);
 // ---- texts in Arabic and English (only the words change, the layout stays the same) ----
 const D = {
-  ar: { langBtn: 'EN', langName: 'English', update: 'تحديث جديد', menu: 'القائمة', chkUpd: 'التحقق من التحديثات', about: 'حول الأداة', close: 'إغلاق', manage: 'إظهار وإخفاء الأدوات', manageNote: 'اختر الأدوات التي تظهر في القائمة. يُحفظ اختيارك على هذا الجهاز.', allHidden: 'كل الأدوات مخفية.', showAll: 'إظهار كل الأدوات',
+  ar: { langBtn: 'EN', langName: 'English', update: 'تحديث جديد', menu: 'القائمة', chkUpd: 'التحقق من التحديثات', about: 'حول الأداة', close: 'إغلاق', manage: 'تحرير الأدوات', manageNote: 'أظهر أو أخفِ الأدوات، ورتّبها بالأسهم. يُحفظ اختيارك على هذا الجهاز.', up: 'نقل للأعلى', down: 'نقل للأسفل', reset: 'استعادة الوضع الافتراضي', allHidden: 'كل الأدوات مخفية.', showAll: 'إظهار كل الأدوات',
         latest: 'لديك أحدث نسخة', noConn: 'لا يوجد اتصال', hasUpd: 'يوجد تحديث جديد',
         aboutHtml: '<p>كل أدوات علا للباوربوينت والوورد في مكان واحد. اختر الأداة من القائمة، وارجع للقائمة من زر "كل الأدوات" في أعلى الأداة.</p>' },
-  en: { langBtn: 'ع', langName: 'العربية', update: 'New update', menu: 'Menu', chkUpd: 'Check for updates', about: 'About', close: 'Close', manage: 'Show and hide tools', manageNote: 'Choose which tools appear in the list. Your choice is saved on this device.', allHidden: 'All tools are hidden.', showAll: 'Show all tools',
+  en: { langBtn: 'ع', langName: 'العربية', update: 'New update', menu: 'Menu', chkUpd: 'Check for updates', about: 'About', close: 'Close', manage: 'Edit tools', manageNote: 'Show or hide tools, and order them with the arrows. Your choice is saved on this device.', up: 'Move up', down: 'Move down', reset: 'Restore default', allHidden: 'All tools are hidden.', showAll: 'Show all tools',
         latest: 'You have the latest version', noConn: 'No connection', hasUpd: 'A new update is available',
         aboutHtml: '<p>All UULA tools for PowerPoint and Word in one place. Pick a tool from the list, and go back to the list with the "All tools" button at the top of the tool.</p>' }
 };
@@ -140,12 +148,20 @@ let host = '';
 let hidden = [];
 try { hidden = JSON.parse(localStorage.getItem('tk-hidden')) || []; } catch (e) {}
 const saveHidden = () => { try { localStorage.setItem('tk-hidden', JSON.stringify(hidden)); } catch (e) {} };
+let order = [];
+try { order = JSON.parse(localStorage.getItem('tk-order')) || []; } catch (e) {}
+const saveOrder = () => { try { localStorage.setItem('tk-order', JSON.stringify(order)); } catch (e) {} };
+// tools in the user's order; tools added later (not in the saved order) go to the end
+const ordered = () => TOOLS.slice().sort((a, b) => {
+  const i = order.indexOf(a.id), j = order.indexOf(b.id);
+  return (i < 0 ? 1e3 + TOOLS.indexOf(a) : i) - (j < 0 ? 1e3 + TOOLS.indexOf(b) : j);
+});
 function desc(t) {
   const h = host === 'word' && t.desc.word ? 'word' : 'ppt', sfx = lang === 'en' ? '_en' : '';
   return t.desc[h + sfx] || t.desc['ppt' + sfx] || t.desc.ppt;
 }
 function draw() {
-  const avail = TOOLS.filter(t => !host || t.hosts.includes(host));
+  const avail = ordered().filter(t => !host || t.hosts.includes(host));
   const list = avail.filter(t => !hidden.includes(t.id));
   if (!list.length) { $('list').innerHTML = '<div class="empty">' + T('allHidden') + ' <button type="button" id="showAll">' + T('showAll') + '</button></div>'; return; }
   $('list').innerHTML = list.map(t =>
@@ -166,19 +182,38 @@ $('menuBtn').addEventListener('click', e => { e.stopPropagation(); menu($('appMe
 document.addEventListener('click', e => { if (!e.target.closest('.appmenu')) menu(false); });
 $('modalX').addEventListener('click', () => { $('modal').hidden = true; });
 $('modal').addEventListener('click', e => { if (e.target === $('modal')) $('modal').hidden = true; });
+const ARW = d => '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="' + (d ? 'M5 8l5 5 5-5' : 'M5 12l5-5 5 5') + '"/></svg>';
+function drawManage() {
+  const avail = ordered().filter(t => !host || t.hosts.includes(host));
+  $('modalB').innerHTML = '<p class="mnote">' + T('manageNote') + '</p>' + avail.map((t, k) => {
+    const on = !hidden.includes(t.id);
+    return '<div class="mrow' + (on ? '' : ' off') + '"><svg class="ic2" viewBox="0 0 32 32" aria-hidden="true">' + t.icon + '</svg><b>' + t.name + '</b>' +
+      '<button type="button" class="arw" data-mv="-1" data-id="' + t.id + '" title="' + T('up') + '" aria-label="' + T('up') + '"' + (k ? '' : ' disabled') + '>' + ARW(0) + '</button>' +
+      '<button type="button" class="arw" data-mv="1" data-id="' + t.id + '" title="' + T('down') + '" aria-label="' + T('down') + '"' + (k < avail.length - 1 ? '' : ' disabled') + '>' + ARW(1) + '</button>' +
+      '<input type="checkbox" class="sw" data-id="' + t.id + '" aria-label="' + t.name + '"' + (on ? ' checked' : '') + '></div>';
+  }).join('') + '<div class="mfoot"><button type="button" class="linkb" id="resetTools">' + T('reset') + '</button></div>';
+}
 $('toolsItem').addEventListener('click', () => {
   menu(false);
-  const avail = TOOLS.filter(t => !host || t.hosts.includes(host));
   $('modalT').textContent = T('manage');
-  $('modalB').innerHTML = '<p class="mnote">' + T('manageNote') + '</p>' + avail.map(t =>
-    '<label class="mrow"><svg viewBox="0 0 32 32" aria-hidden="true">' + t.icon + '</svg><b>' + t.name + '</b>' +
-    '<input type="checkbox" class="sw" data-id="' + t.id + '"' + (hidden.includes(t.id) ? '' : ' checked') + '></label>').join('');
+  drawManage();
   $('modal').hidden = false;
 });
 $('modalB').addEventListener('change', e => {
   const c = e.target.closest('.sw'); if (!c) return;
   hidden = hidden.filter(x => x !== c.dataset.id); if (!c.checked) hidden.push(c.dataset.id);
-  saveHidden(); draw();
+  saveHidden(); draw(); c.closest('.mrow').classList.toggle('off', !c.checked);
+});
+$('modalB').addEventListener('click', e => {
+  if (e.target.closest('#resetTools')) { hidden = []; order = []; saveHidden(); saveOrder(); draw(); drawManage(); return; }
+  const a = e.target.closest('.arw'); if (!a || a.disabled) return;
+  // move inside the full list (tools of the other program keep their places)
+  const all = ordered().map(t => t.id), vis = ordered().filter(t => !host || t.hosts.includes(host)).map(t => t.id);
+  const k = vis.indexOf(a.dataset.id), other = vis[k + Number(a.dataset.mv)]; if (!other) return;
+  const i = all.indexOf(a.dataset.id), j = all.indexOf(other); all[i] = other; all[j] = a.dataset.id;
+  order = all; saveOrder(); draw(); drawManage();
+  const again = $('modalB').querySelector('.arw[data-id="' + a.dataset.id + '"][data-mv="' + a.dataset.mv + '"]');
+  if (again && !again.disabled) again.focus();
 });
 $('aboutBtn').addEventListener('click', () => {
   menu(false);
@@ -212,7 +247,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { menu(false
 // ---- start ----
 $('appVer').textContent = VER;
 { const st = document.createElement('style'); st.textContent = TK_MENU_CSS; document.head.appendChild(st);
-  tkIcon($('chkUpd'), 'upd'); tkIcon($('toolsItem'), 'tools'); tkIcon($('langItem'), 'lang'); tkIcon($('aboutBtn'), 'about'); }
+  tkIcon($('chkUpd'), 'upd'); tkIcon($('toolsItem'), 'edit'); tkIcon($('langItem'), 'lang'); tkIcon($('aboutBtn'), 'about'); }
 $('langItem').addEventListener('click', () => { menu(false); setLang(lang === 'ar' ? 'en' : 'ar'); });
 applyLang();
 if (window.Office && Office.onReady) Office.onReady(info => {
