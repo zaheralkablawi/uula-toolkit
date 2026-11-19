@@ -87,6 +87,7 @@ out('restyle', inline(SRC / 'restyle', [('JSZIP', 'jszip.min.js'), ('ASSETS', 'a
                                          ('TEMPLATES', 'templates.js'), ('WORD', 'word.js'), ('APP', 'app.js')]))
 out('math', (SRC / 'math' / 'app.html').read_text(encoding='utf8'))
 out('graph', (SRC / 'graph' / 'app.html').read_text(encoding='utf8'))
+out('pdf', inline(SRC / 'pdf', [('PDFLIB', 'pdf-lib.min.js'), ('CORE', 'pptcore.js'), ('OPT', 'pdfopt.js'), ('APP', 'app.js')]))
 
 # home page: put the shared menu icons into index.html (between the markers)
 import re as _re

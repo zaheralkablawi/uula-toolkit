@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<title>UULA PDF</title>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+<style>
+:root{--bg:#f3f5f8;--panel:#fff;--ink:#18212e;--muted:#5d6878;--line:#d9dfe7;--accent:#1f71de;--accent-soft:#e7effc;--ok:#1f9d55;--warn:#e8590c;--bad:#d62f2f;
+  --f:"UULA Sans",-apple-system,"Segoe UI",Tahoma,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.6}
+[hidden]{display:none!important}
+button{font-family:inherit}
+.wrap{padding:10px 14px 16px;display:grid;gap:10px}
+header{display:flex;align-items:center;gap:8px;direction:rtl;padding-inline:13px}
+h1{margin:0;display:flex;align-items:center;gap:7px;font-weight:500;direction:ltr;margin-left:auto}
+h1 .bt{display:flex;flex-direction:column;justify-content:center;align-items:flex-end;text-align:right;height:30px}
+h1 .root{color:#2072e0;font-size:14px;line-height:15px;font-weight:600;letter-spacing:.03em}
+h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
+.ib{display:inline-grid;place-items:center;width:30px;height:28px;border:1px solid var(--line);background:var(--panel);color:var(--accent);border-radius:7px;cursor:pointer;padding:0}
+.ib:hover,.ib[aria-expanded="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.ib.updbtn{position:relative;color:#e8590c;border-color:#e8590c}
+.updbtn .dot{position:absolute;top:-3px;inset-inline-end:-3px;width:8px;height:8px;border-radius:50%;background:#e8590c;animation:updp 1.6s ease-in-out infinite}
+@keyframes updp{50%{transform:scale(1.5);opacity:.5}}
+.appmenu{position:relative}
+.menu{position:absolute;inset-inline-end:0;top:calc(100% + 4px);z-index:40;min-width:190px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgb(0 0 0 / .18);padding:5px}
+.menu button{display:flex;align-items:center;gap:8px;width:100%;font-size:12.5px;text-align:start;background:none;border:0;border-radius:7px;padding:6px 10px;color:var(--ink);cursor:pointer}
+.menu button:hover{background:var(--accent-soft)}
+.menu svg{width:15px;height:15px;flex:none}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:10px}
+.label{font-size:12px;font-weight:600;color:var(--muted)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font-size:12.5px;height:26px;border:0;border-inline-start:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;padding:0 4px}
+.seg button:first-child{border-inline-start:0}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.chk{display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer}
+.chk input{accent-color:var(--accent);margin:0}
+.go{display:flex;align-items:center;justify-content:center;gap:8px;height:38px;border:0;border-radius:9px;background:var(--accent);color:#fff;font-size:14px;font-weight:600;cursor:pointer}
+.go:hover{filter:brightness(1.07)}.go:disabled{opacity:.55;cursor:default}
+.go.alt{background:var(--panel);color:var(--accent);border:1.5px solid var(--accent)}
+.go.alt:hover{background:var(--accent-soft);filter:none}
+.go.alt .spin{border-color:rgb(31 113 222 / .3);border-top-color:var(--accent)}
+.go .num{font-size:15px;font-weight:600;line-height:1}
+.sep{height:1px;background:var(--line);margin:2px 0}
+.note{font-size:11.8px;color:var(--muted);text-align:center;margin-top:-4px}
+.go svg{width:18px;height:18px}
+.status{font-size:12.8px;color:var(--muted);min-height:1.2em;text-align:center}
+.status.ok{color:var(--ok)}.status.bad{color:var(--bad)}
+.sum{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.pill{font-size:11.8px;border-radius:20px;padding:1px 9px;background:#eef1f5;color:var(--muted)}
+.pill.ok{background:#e4f5ea;color:var(--ok)}.pill.warn{background:#fdeee4;color:var(--warn)}.pill.bad{background:#fbe5e5;color:var(--bad)}
+.list{display:grid;gap:6px}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:start;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 9px;cursor:pointer}
+.row:hover{border-color:var(--accent)}
+.row .ic{width:18px;height:18px;margin-top:2px}
+.row .code{font-size:13px;white-space:pre-wrap;word-break:break-word;direction:rtl;unicode-bidi:plaintext}
+.row .meta{font-size:11px;color:var(--muted)}
+.row .note{font-size:11.5px;color:var(--warn)}
+.row.ok .ic{color:var(--ok)}.row.warn .ic{color:var(--warn)}.row.bad .ic{color:var(--bad)}.row.skip .ic{color:#9aa3b0}
+.mini{font-size:11.5px;border:1px solid var(--line);background:var(--panel);color:var(--accent);border-radius:6px;padding:1px 8px;cursor:pointer;white-space:nowrap}
+.mini.del{color:var(--bad)}
+.hint{font-size:11.8px;color:var(--muted);text-align:center;line-height:1.7}
+.hint b{color:var(--ink);font-weight:600}
+.modal{position:fixed;inset:0;z-index:60;background:rgb(0 0 0 / .35);display:grid;place-items:center;padding:16px}
+.mbox{background:var(--panel);border-radius:12px;max-width:420px;width:100%;max-height:80vh;overflow:auto;padding:14px 16px;box-shadow:0 16px 40px rgb(0 0 0 / .3)}
+.mbox h3{margin:0 0 8px;font-size:1rem}.mbox p{margin:6px 0;font-size:13px}
+.mbox .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.credit{text-align:center;font-size:11.5px;color:var(--muted);padding:6px 0 0}
+.spin{width:16px;height:16px;border:2px solid rgb(255 255 255 / .45);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.seg.two{grid-template-columns:1fr 1fr}
+.result{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:8px;text-align:center}
+.result .name{font-size:13px;font-weight:600;word-break:break-all;direction:ltr}
+.result .size{font-size:12.5px;color:var(--muted)}
+.result .size b{color:var(--ok)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.steps{font-size:12px;color:var(--muted);text-align:center;min-height:1.2em}
+h1 svg{width:30px;height:30px;flex:none;display:block}
+html[dir="ltr"] .note,html[dir="ltr"] .status,html[dir="ltr"] .steps{text-align:center}
+</style>
+</head><body>
+<div class="wrap">
+  <header>
+    <h1><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/><path d="M12.3 9.4h5.2l3.2 3.2v9.2a.8.8 0 0 1-.8.8h-7.6a.8.8 0 0 1-.8-.8V10.2a.8.8 0 0 1 .8-.8z" fill="#1f71de"/><path d="M13.9 16.6l2.1 2.1 2.1-2.1M16 13.4v5.2" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="bt"><span class="root">UULA</span><span class="sub">PDF</span></span></h1>
+    <button type="button" class="ib updbtn" id="updBtn" hidden data-i18n-title="update"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10a6 6 0 1 1-1.8-4.3"/><path d="M16.2 3.2v3.5h-3.5"/></svg><span class="dot"></span></button>
+    <div class="appmenu">
+      <button type="button" class="ib" id="menuBtn" aria-expanded="false" data-i18n-title="menu"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h12M4 10h12M4 14h12"/></svg></button>
+      <div class="menu" id="appMenu" hidden data-i18n-dir>
+        <button type="button" id="chkUpd" data-i18n="chkUpd"></button>
+        <button type="button" id="langItem" data-i18n="langName"></button>
+        <button type="button" id="aboutBtn" data-i18n="about"></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="panel">
+    <div class="label" data-i18n="digitsLabel"></div>
+    <div class="seg two" id="digits">
+      <button type="button" data-v="hindi" aria-pressed="true" data-i18n="hindi"></button>
+      <button type="button" data-v="latin" data-i18n="latin"></button>
+    </div>
+    <div class="label" data-i18n="qualityLabel"></div>
+    <div class="seg two" id="quality">
+      <button type="button" data-v="high" aria-pressed="true" data-i18n="high"></button>
+      <button type="button" data-v="medium" data-i18n="medium"></button>
+    </div>
+    <label class="chk"><input type="checkbox" id="links" checked> <span data-i18n="linksChk"></span></label>
+    <button type="button" class="go" id="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6M9.5 14.5 12 17l2.5-2.5"/></svg><span id="goTxt" data-i18n="export"></span></button>
+    <div class="note" data-i18n="restoreNote"></div>
+  </div>
+
+  <div class="steps" id="steps"></div>
+  <div class="status" id="status" role="status"></div>
+
+  <div class="result" id="result" hidden>
+    <div class="name" id="rName"></div>
+    <div class="size" id="rSize" dir="ltr"></div>
+    <div class="row2">
+      <button type="button" class="go" id="dl"><span data-i18n="download"></span></button>
+      <button type="button" class="go alt" id="open"><span data-i18n="open"></span></button>
+    </div>
+  </div>
+
+  <div class="modal" id="modal" hidden><div class="mbox" role="dialog" aria-modal="true"><h3 id="modalT"></h3><div id="modalB"></div><div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="mini" id="modalOk" hidden></button><button type="button" class="mini" id="modalX" data-i18n="close"></button></div></div></div>
+  <footer class="credit" dir="ltr">By Zaher Alkablawi <span id="appVer"></span></footer>
+</div>
+<script>
+/*PDFLIB*/
+</script>
+<script>
+/*CORE*/
+</script>
+<script>
+/*OPT*/
+</script>
+<script>
+/*APP*/
+</script>
+</body></html>
