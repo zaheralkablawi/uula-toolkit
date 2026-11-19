@@ -371,16 +371,9 @@ function fillPlaceholder(doc, idx, text, layout, scheme) {
   return spec;
 }
 const tSay = m => { $('tStatus').textContent = m || ''; };
-let tPos = load('ud-tpos', 'start'), hasSel = false;
-function paintPos() {
-  $('tPos').querySelectorAll('button').forEach(b => {
-    b.disabled = b.dataset.v !== 'start' && !hasSel;
-    b.setAttribute('aria-pressed', String(b.dataset.v === tPos));
-  });
-  $('tSelNote').hidden = hasSel;
-}
-function setPos(v) { tPos = v; save('ud-tpos', v); paintPos(); }
-$('tPos').addEventListener('click', e => { const b = e.target.closest('button'); if (b && !b.disabled) setPos(b.dataset.v); });
+let hasSel = false;
+function paintPos() {}
+$('tPos').addEventListener('click', e => { const b = e.target.closest('button'); if (b) insertTitle(b.dataset.v); });
 let selBusy = false;
 async function refreshSel() {
   if (!supported || selBusy) return;
@@ -389,13 +382,10 @@ async function refreshSel() {
     await run(async ctx => { const s = ctx.presentation.getSelectedSlides(); s.load('items/id'); await ctx.sync(); hasSel = s.items.length > 0; });
   } catch (e) { hasSel = false; }
   selBusy = false;
-  if (!hasSel && tPos !== 'start') tPos = 'start';
-  if (!hasSel && iPos !== 'end') iPos = 'end';
-  paintPos(); if (typeof paintInner === 'function') paintInner();
 }
 paintPos();
 // ---------- inner slides (UULA video template: three styles, with or without a header) ----------
-let iVar = load('ud-ivar', 1), iPos = load('ud-ipos', 'end');
+let iVar = load('ud-ivar', 1);
 function paintInner() {
   const box = $('iThumbs'); box.innerHTML = '';
   for (let k = 1; k <= 3; k++) {
@@ -405,19 +395,14 @@ function paintInner() {
     b.appendChild(im); b.addEventListener('click', () => { iVar = k; save('ud-ivar', k); paintInner(); });
     box.appendChild(b);
   }
-  $('iPos').querySelectorAll('button').forEach(b => {
-    b.disabled = b.dataset.v !== 'end' && !hasSel;
-    b.setAttribute('aria-pressed', String(b.dataset.v === iPos));
-  });
-  $('iSelNote').hidden = hasSel;
 }
-$('iPos').addEventListener('click', e => { const b = e.target.closest('button'); if (b && !b.disabled) { iPos = b.dataset.v; save('ud-ipos', iPos); paintInner(); } });
+$('iPos').addEventListener('click', e => { const b = e.target.closest('button'); if (b) insertInner(b.dataset.v); });
 $('iHead').checked = !!load('ud-ihead', false);
 $('iHead').addEventListener('change', () => save('ud-ihead', $('iHead').checked));
-$('iInsert').addEventListener('click', async () => {
+async function insertInner(pos) {
   if (!supported || busy) return;
   const say2 = m => { $('iStatus').textContent = m || ''; };
-  busy = true; refreshLock(); $('iInsert').disabled = true; say2(T('inserting'));
+  busy = true; refreshLock(); say2(T('inserting'));
   try {
     const r = await fetch('templates/inner-' + iVar + '-' + ($('iHead').checked ? 2 : 1) + '.pptx', { cache: 'no-cache' });
     if (!r.ok) throw new Error(T('tplFail'));
@@ -432,13 +417,13 @@ $('iInsert').addEventListener('click', async () => {
       const all = ctx.presentation.slides; all.load('items/id'); await ctx.sync();
       const opts = { formatting: 'KeepSourceFormatting' };
       const ids = all.items.map(x => x.id), selIds = sel.items.map(x => x.id);
-      if (iPos === 'end' && ids.length) opts.targetSlideId = ids[ids.length - 1];
-      if (iPos === 'after' && selIds.length) opts.targetSlideId = selIds[selIds.length - 1];
-      if (iPos === 'before' && selIds.length) {
+      if (pos === 'end' && ids.length) opts.targetSlideId = ids[ids.length - 1];
+      if (pos === 'after' && selIds.length) opts.targetSlideId = selIds[selIds.length - 1];
+      if (pos === 'before' && selIds.length) {
         const first = Math.min(...selIds.map(i => ids.indexOf(i)));
         if (first > 0) opts.targetSlideId = ids[first - 1];
       }
-      if ((iPos === 'before' || iPos === 'after') && !selIds.length) throw new Error(T('selFirst'));
+      if ((pos === 'before' || pos === 'after') && !selIds.length) throw new Error(T('selFirst'));
       ctx.presentation.insertSlidesFromBase64(b64, opts); await ctx.sync();
       const after = ctx.presentation.slides; after.load('items/id'); await ctx.sync();
       const before = new Set(ids);
@@ -447,12 +432,13 @@ $('iInsert').addEventListener('click', async () => {
     });
     say2(T('iInserted'));
   } catch (e) { say2(T('insertFail') + errText(e)); }
-  finally { busy = false; $('iInsert').disabled = false; refreshLock(); }
-});
+  finally { busy = false; refreshLock(); }
+}
+
 paintInner();
-$('tInsert').addEventListener('click', async () => {
+async function insertTitle(pos) {
   if (!supported || busy) return;
-  busy = true; refreshLock(); $('tInsert').disabled = true; tSay(T('inserting'));
+  busy = true; refreshLock(); tSay(T('inserting'));
   try {
     const r = await fetch('templates/title-' + tType + '-' + tVar + '.pptx', { cache: 'no-cache' });
     if (!r.ok) throw new Error(T('tplFail'));
@@ -466,12 +452,12 @@ $('tInsert').addEventListener('click', async () => {
       const all = ctx.presentation.slides; all.load('items/id'); await ctx.sync();
       const opts = { formatting: 'KeepSourceFormatting' };
       const ids = all.items.map(x => x.id), selIds = sel.items.map(x => x.id);
-      if (tPos === 'after' && selIds.length) opts.targetSlideId = selIds[selIds.length - 1];
-      if (tPos === 'before' && selIds.length) {
+      if (pos === 'after' && selIds.length) opts.targetSlideId = selIds[selIds.length - 1];
+      if (pos === 'before' && selIds.length) {
         const first = Math.min(...selIds.map(i => ids.indexOf(i)));
         if (first > 0) opts.targetSlideId = ids[first - 1];
       }
-      if ((tPos === 'before' || tPos === 'after') && !selIds.length) throw new Error(T('selFirst'));
+      if ((pos === 'before' || pos === 'after') && !selIds.length) throw new Error(T('selFirst'));
       ctx.presentation.insertSlidesFromBase64(b64, opts); await ctx.sync();
       const after = ctx.presentation.slides; after.load('items/id'); await ctx.sync();
       const before = new Set(all.items.map(x => x.id));
@@ -497,8 +483,9 @@ $('tInsert').addEventListener('click', async () => {
     });
     tSay(T('inserted'));
   } catch (e) { tSay(T('insertFail') + errText(e)); }
-  finally { busy = false; $('tInsert').disabled = false; refreshLock(); }
-});
+  finally { busy = false; refreshLock(); }
+}
+
 
 // ---------- language ----------
 function setLang(l) {

@@ -121,6 +121,8 @@ header{direction:rtl}
 body.m-dark .tabs,body.m-cover .tabs{display:none}
 .gt2{font-size:.88rem;font-weight:600;color:var(--ink)}
 #tTitle,#tSub{text-align:center}
+#tPos button,#iPos button{color:var(--ink);font-weight:600}
+#tPos button:hover,#iPos button:hover{background:var(--accent-soft);color:var(--accent)}
 </style></head><body>
 <div class="wrap">
   <header>
@@ -208,28 +210,24 @@ body.m-dark .tabs,body.m-cover .tabs{display:none}
     <div class="thumbs" id="tThumbs"></div>
     <input type="text" class="tin" id="tTitle" data-i18n-ph="tTitlePh" dir="auto">
     <input type="text" class="tin" id="tSub" data-i18n-ph="tSubPh" dir="auto">
-    <span class="label" data-i18n="posLabel"></span>
+    <span class="label" data-i18n="insLabel"></span>
     <div class="seg seg3" id="tPos">
-      <button type="button" data-v="start" aria-pressed="true" data-i18n="posStart"></button>
-      <button type="button" data-v="before" aria-pressed="false" data-i18n="posBefore"></button>
-      <button type="button" data-v="after" aria-pressed="false" data-i18n="posAfter"></button>
+      <button type="button" data-v="start" data-i18n="posStart"></button>
+      <button type="button" data-v="before" data-i18n="posBefore"></button>
+      <button type="button" data-v="after" data-i18n="posAfter"></button>
     </div>
-    <div class="note" id="tSelNote" hidden data-i18n="tNeedSel"></div>
-    <button type="button" class="act" id="tInsert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 10h8M10 14h4"/></svg><span data-i18n="tInsert"></span></button>
     <div class="status" id="tStatus"></div>
   </section>
   <section class="panel" id="innerPanel">
     <span class="gt2" data-i18n="innerHead"></span>
     <div class="thumbs" id="iThumbs"></div>
     <label class="chk"><input type="checkbox" id="iHead"> <span data-i18n="iHead"></span></label>
-    <span class="label" data-i18n="posLabel"></span>
+    <span class="label" data-i18n="insLabel"></span>
     <div class="seg seg3" id="iPos">
-      <button type="button" data-v="end" aria-pressed="true" data-i18n="posEnd"></button>
-      <button type="button" data-v="before" aria-pressed="false" data-i18n="posBefore"></button>
-      <button type="button" data-v="after" aria-pressed="false" data-i18n="posAfter"></button>
+      <button type="button" data-v="end" data-i18n="posEnd"></button>
+      <button type="button" data-v="before" data-i18n="posBefore"></button>
+      <button type="button" data-v="after" data-i18n="posAfter"></button>
     </div>
-    <div class="note" id="iSelNote" hidden data-i18n="tNeedSel"></div>
-    <button type="button" class="act" id="iInsert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 12.5h10M7 16h6"/></svg><span data-i18n="iInsert"></span></button>
     <div class="status" id="iStatus"></div>
   </section>
   </div>
@@ -247,7 +245,7 @@ const I18N = (() => {
       dir: 'rtl', langBtn: 'EN', langName: 'English',
       update: 'تحديث جديد', menu: 'القائمة', chkUpd: 'التحقق من التحديثات', about: 'حول الأداة', close: 'إغلاق',
       tabDark: 'التحويل إلى الداكن', tabTitle: 'شريحة العنوان',
-      stepsLabel: 'قبل التحويل: خطوتان تقوم بهما أنت', n1: '١', n2: '٢',
+      stepsLabel: 'قبل التحويل: خطوتان تقوم بهما أنت', n1: '1', n2: '2',
       s1Title: 'قسّم الشرائح', s1Note: 'اقترح الفواصل ثم راجعها، أو أضف فاصلًا بنفسك، أو حدّد عناصر واضغط «جزء مستقل». لا تُعتمد إلا الفواصل والأجزاء المضافة من هنا.',
       suggestSep: 'اقترح الفواصل', addSep: 'أضف فاصلًا', makePart: 'جزء مستقل', clearParts: 'إلغاء الأجزاء', s1Done: 'تم تقسيم الشرائح',
       suggesting: (k, n) => 'فحص الشريحة ' + k + ' من ' + n + '…',
@@ -258,12 +256,12 @@ const I18N = (() => {
       partsCleared: n => '✓ أُلغيت الأجزاء في ' + cntAr(n) + '.',
       s2Title: 'حوّل مقاس الشرائح إلى 16:9', s2Note: 'من تبويب تصميم ← حجم الشريحة ← شاشة عريضة (16:9).', s2Done: 'تم تحويل المقاس',
       darkHead: 'التحويل إلى الوضع الداكن', scopeSel: 'الشرائح المحددة', scopeAll: 'كل الشرائح', convert: 'تحويل',
-      lockBoth: 'أكمل الخطوتين ١ و٢ أولًا.', lockOne: k => 'أكمل الخطوة ' + (k === 1 ? '١' : '٢') + ' أولًا.',
+      lockBoth: 'أكمل الخطوتين 1 و2 أولًا.', lockOne: k => 'أكمل الخطوة ' + k + ' أولًا.',
       settings: 'الإعدادات', bgColor: 'لون الخلفية', textColor: 'لون النص', accentColor: 'الأزرق يصير',
       imgChk: 'تلوين الصور الكبيرة بالأبيض', fontNote: 'الخط: UULA Sans Medium', reset: 'استعادة الافتراضي',
       tExplain: 'الشرح', tBetter: 'الزبدة', tBank: 'بنك الأسئلة', tPractice: 'التدريبات',
       tTitlePh: 'عنوان الفيديو', tSubPh: 'العنوان الثانوي (اختياري)', style: k => 'نمط ' + k,
-      posLabel: 'مكان الإدراج', posStart: 'بداية الملف', posEnd: 'نهاية الملف',
+      posLabel: 'مكان الإدراج', insLabel: 'أدرج الشريحة في', posStart: 'بداية الملف', posEnd: 'نهاية الملف',
       coverHead: 'شريحة الغلاف', innerHead: 'الشرائح الداخلية', iHead: 'مع رأس أعلى الشريحة', iInsert: 'إدراج شريحة داخلية', iInserted: '✓ تم إدراج الشريحة الداخلية.', posBefore: 'قبل المحددة', posAfter: 'بعد المحددة',
       tInsert: 'إدراج شريحة الغلاف', tNeedSel: 'حدّد شريحة لتفعيل «قبل» و«بعد».',
       inserting: 'جارٍ الإدراج…', inserted: '✓ تم إدراج شريحة الغلاف.', insertFail: 'تعذّر الإدراج: ', tplFail: 'تعذّر تحميل القالب',
@@ -306,7 +304,7 @@ const I18N = (() => {
       imgChk: 'Turn large pictures white', fontNote: 'Font: UULA Sans Medium', reset: 'Restore defaults',
       tExplain: 'Lessons', tBetter: 'Better', tBank: 'Question bank', tPractice: 'Practice',
       tTitlePh: 'Video title', tSubPh: 'Subtitle (optional)', style: k => 'Style ' + k,
-      posLabel: 'Insert at', posStart: 'Start of file', posEnd: 'End of file',
+      posLabel: 'Insert at', insLabel: 'Insert the slide at', posStart: 'Start of file', posEnd: 'End of file',
       coverHead: 'Cover slide', innerHead: 'Inner slides', iHead: 'With a header at the top', iInsert: 'Insert inner slide', iInserted: '✓ Inner slide inserted.', posBefore: 'Before selected', posAfter: 'After selected',
       tInsert: 'Insert cover slide', tNeedSel: 'Select a slide to enable “Before” and “After”.',
       inserting: 'Inserting…', inserted: '✓ Title slide inserted.', insertFail: 'Could not insert: ', tplFail: 'Could not load the template',
@@ -1397,16 +1395,9 @@ function fillPlaceholder(doc, idx, text, layout, scheme) {
   return spec;
 }
 const tSay = m => { $('tStatus').textContent = m || ''; };
-let tPos = load('ud-tpos', 'start'), hasSel = false;
-function paintPos() {
-  $('tPos').querySelectorAll('button').forEach(b => {
-    b.disabled = b.dataset.v !== 'start' && !hasSel;
-    b.setAttribute('aria-pressed', String(b.dataset.v === tPos));
-  });
-  $('tSelNote').hidden = hasSel;
-}
-function setPos(v) { tPos = v; save('ud-tpos', v); paintPos(); }
-$('tPos').addEventListener('click', e => { const b = e.target.closest('button'); if (b && !b.disabled) setPos(b.dataset.v); });
+let hasSel = false;
+function paintPos() {}
+$('tPos').addEventListener('click', e => { const b = e.target.closest('button'); if (b) insertTitle(b.dataset.v); });
 let selBusy = false;
 async function refreshSel() {
   if (!supported || selBusy) return;
@@ -1415,13 +1406,10 @@ async function refreshSel() {
     await run(async ctx => { const s = ctx.presentation.getSelectedSlides(); s.load('items/id'); await ctx.sync(); hasSel = s.items.length > 0; });
   } catch (e) { hasSel = false; }
   selBusy = false;
-  if (!hasSel && tPos !== 'start') tPos = 'start';
-  if (!hasSel && iPos !== 'end') iPos = 'end';
-  paintPos(); if (typeof paintInner === 'function') paintInner();
 }
 paintPos();
 // ---------- inner slides (UULA video template: three styles, with or without a header) ----------
-let iVar = load('ud-ivar', 1), iPos = load('ud-ipos', 'end');
+let iVar = load('ud-ivar', 1);
 function paintInner() {
   const box = $('iThumbs'); box.innerHTML = '';
   for (let k = 1; k <= 3; k++) {
@@ -1431,19 +1419,14 @@ function paintInner() {
     b.appendChild(im); b.addEventListener('click', () => { iVar = k; save('ud-ivar', k); paintInner(); });
     box.appendChild(b);
   }
-  $('iPos').querySelectorAll('button').forEach(b => {
-    b.disabled = b.dataset.v !== 'end' && !hasSel;
-    b.setAttribute('aria-pressed', String(b.dataset.v === iPos));
-  });
-  $('iSelNote').hidden = hasSel;
 }
-$('iPos').addEventListener('click', e => { const b = e.target.closest('button'); if (b && !b.disabled) { iPos = b.dataset.v; save('ud-ipos', iPos); paintInner(); } });
+$('iPos').addEventListener('click', e => { const b = e.target.closest('button'); if (b) insertInner(b.dataset.v); });
 $('iHead').checked = !!load('ud-ihead', false);
 $('iHead').addEventListener('change', () => save('ud-ihead', $('iHead').checked));
-$('iInsert').addEventListener('click', async () => {
+async function insertInner(pos) {
   if (!supported || busy) return;
   const say2 = m => { $('iStatus').textContent = m || ''; };
-  busy = true; refreshLock(); $('iInsert').disabled = true; say2(T('inserting'));
+  busy = true; refreshLock(); say2(T('inserting'));
   try {
     const r = await fetch('templates/inner-' + iVar + '-' + ($('iHead').checked ? 2 : 1) + '.pptx', { cache: 'no-cache' });
     if (!r.ok) throw new Error(T('tplFail'));
@@ -1458,13 +1441,13 @@ $('iInsert').addEventListener('click', async () => {
       const all = ctx.presentation.slides; all.load('items/id'); await ctx.sync();
       const opts = { formatting: 'KeepSourceFormatting' };
       const ids = all.items.map(x => x.id), selIds = sel.items.map(x => x.id);
-      if (iPos === 'end' && ids.length) opts.targetSlideId = ids[ids.length - 1];
-      if (iPos === 'after' && selIds.length) opts.targetSlideId = selIds[selIds.length - 1];
-      if (iPos === 'before' && selIds.length) {
+      if (pos === 'end' && ids.length) opts.targetSlideId = ids[ids.length - 1];
+      if (pos === 'after' && selIds.length) opts.targetSlideId = selIds[selIds.length - 1];
+      if (pos === 'before' && selIds.length) {
         const first = Math.min(...selIds.map(i => ids.indexOf(i)));
         if (first > 0) opts.targetSlideId = ids[first - 1];
       }
-      if ((iPos === 'before' || iPos === 'after') && !selIds.length) throw new Error(T('selFirst'));
+      if ((pos === 'before' || pos === 'after') && !selIds.length) throw new Error(T('selFirst'));
       ctx.presentation.insertSlidesFromBase64(b64, opts); await ctx.sync();
       const after = ctx.presentation.slides; after.load('items/id'); await ctx.sync();
       const before = new Set(ids);
@@ -1473,12 +1456,13 @@ $('iInsert').addEventListener('click', async () => {
     });
     say2(T('iInserted'));
   } catch (e) { say2(T('insertFail') + errText(e)); }
-  finally { busy = false; $('iInsert').disabled = false; refreshLock(); }
-});
+  finally { busy = false; refreshLock(); }
+}
+
 paintInner();
-$('tInsert').addEventListener('click', async () => {
+async function insertTitle(pos) {
   if (!supported || busy) return;
-  busy = true; refreshLock(); $('tInsert').disabled = true; tSay(T('inserting'));
+  busy = true; refreshLock(); tSay(T('inserting'));
   try {
     const r = await fetch('templates/title-' + tType + '-' + tVar + '.pptx', { cache: 'no-cache' });
     if (!r.ok) throw new Error(T('tplFail'));
@@ -1492,12 +1476,12 @@ $('tInsert').addEventListener('click', async () => {
       const all = ctx.presentation.slides; all.load('items/id'); await ctx.sync();
       const opts = { formatting: 'KeepSourceFormatting' };
       const ids = all.items.map(x => x.id), selIds = sel.items.map(x => x.id);
-      if (tPos === 'after' && selIds.length) opts.targetSlideId = selIds[selIds.length - 1];
-      if (tPos === 'before' && selIds.length) {
+      if (pos === 'after' && selIds.length) opts.targetSlideId = selIds[selIds.length - 1];
+      if (pos === 'before' && selIds.length) {
         const first = Math.min(...selIds.map(i => ids.indexOf(i)));
         if (first > 0) opts.targetSlideId = ids[first - 1];
       }
-      if ((tPos === 'before' || tPos === 'after') && !selIds.length) throw new Error(T('selFirst'));
+      if ((pos === 'before' || pos === 'after') && !selIds.length) throw new Error(T('selFirst'));
       ctx.presentation.insertSlidesFromBase64(b64, opts); await ctx.sync();
       const after = ctx.presentation.slides; after.load('items/id'); await ctx.sync();
       const before = new Set(all.items.map(x => x.id));
@@ -1523,8 +1507,9 @@ $('tInsert').addEventListener('click', async () => {
     });
     tSay(T('inserted'));
   } catch (e) { tSay(T('insertFail') + errText(e)); }
-  finally { busy = false; $('tInsert').disabled = false; refreshLock(); }
-});
+  finally { busy = false; refreshLock(); }
+}
+
 
 // ---------- language ----------
 function setLang(l) {
@@ -1789,7 +1774,7 @@ function tkIcon(el, name) {
       ['label:has(#s2Done)', E('علّمها بعد تغيير مقاس الشرائح إلى 16:9 من تبويب تصميم ← حجم الشريحة.', 'Tick it after changing the slide size to 16:9 (Design ← Slide Size).', 'تم تحويل المقاس', 'Size changed')],
       ['#scope [data-v="sel"]', E('يحوّل الشرائح التي حددتها فقط.', 'Converts only the slides you selected.')],
       ['#scope [data-v="all"]', E('يحوّل كل شرائح الملف.', 'Converts every slide in the file.')],
-      ['#darkBtn', E('يحوّل الشرائح إلى الوضع الداكن: شريحة لكل جزء بين فاصلين، بخلفية داكنة ونص أبيض. يعمل بعد إكمال الخطوتين ١ و٢.', 'Converts the slides to dark mode: one slide per part between separators, dark background and white text. Works after steps 1 and 2.', 'تحويل', 'Convert')],
+      ['#darkBtn', E('يحوّل الشرائح إلى الوضع الداكن: شريحة لكل جزء بين فاصلين، بخلفية داكنة ونص أبيض. يعمل بعد إكمال الخطوتين 1 و2.', 'Converts the slides to dark mode: one slide per part between separators, dark background and white text. Works after steps 1 and 2.', 'تحويل', 'Convert')],
       ['#setTog', E('ألوان الخلفية والنص وخيار الصور المستخدمة في التحويل.', 'The background, text and image options used when converting.', 'الإعدادات', 'Settings')],
       ['.colorbtn[data-k="bg"]', E('لون خلفية الشرائح الداكنة.', 'Background colour of the dark slides.', 'لون الخلفية', 'Background colour')],
       ['.colorbtn[data-k="text"]', E('لون النص بعد التحويل.', 'Text colour after converting.', 'لون النص', 'Text colour')],
@@ -1800,16 +1785,14 @@ function tkIcon(el, name) {
       ['#tThumbs button', E('اختر شكل الغلاف من أشكال هذا النوع.', 'Pick the cover design for this type.', 'شكل الغلاف', 'Cover design')],
       ['#tTitle', E('اكتب عنوان الفيديو كما يظهر على الغلاف.', 'Type the video title as it should appear on the cover.', 'عنوان الفيديو', 'Video title')],
       ['#tSub', E('سطر ثانٍ تحت العنوان، ويمكن تركه فارغًا.', 'A second line under the title; it can stay empty.', 'العنوان الثانوي', 'Subtitle')],
-      ['#tPos [data-v="start"]', E('تُضاف شريحة الغلاف في أول الملف.', 'The cover slide goes at the start of the file.')],
-      ['#tPos [data-v="before"]', E('تُضاف قبل الشريحة المحددة. حدّد شريحة أولًا.', 'Goes before the selected slide. Select a slide first.')],
-      ['#tPos [data-v="after"]', E('تُضاف بعد الشريحة المحددة. حدّد شريحة أولًا.', 'Goes after the selected slide. Select a slide first.')],
+      ['#tPos [data-v="start"]', E('يُدرج شريحة الغلاف بالعنوان المكتوب في بداية الملف مباشرة.', 'Inserts the cover slide with your title at the start of the file right away.', 'بداية الملف', 'Start of file')],
+      ['#tPos [data-v="before"]', E('يُدرج شريحة الغلاف قبل الشريحة المحددة. حدّد شريحة أولًا.', 'Inserts the cover slide before the selected slide. Select a slide first.', 'قبل المحددة', 'Before selected')],
+      ['#tPos [data-v="after"]', E('يُدرج شريحة الغلاف بعد الشريحة المحددة. حدّد شريحة أولًا.', 'Inserts the cover slide after the selected slide. Select a slide first.', 'بعد المحددة', 'After selected')],
       ['#iThumbs button', E('اختر نمط الشريحة الداخلية من الأنماط الثلاثة في قالب الفيديو.', 'Pick one of the three inner slide styles of the video template.', 'نمط الشريحة', 'Slide style')],
       ['label:has(#iHead)', E('تُدرج الشريحة بمكان للرأس أعلاها (عنوان قصير) فوق مكان المحتوى.', 'The slide gets a header area at the top (a short heading) above the content.', 'مع رأس', 'With a header')],
-      ['#iPos [data-v="end"]', E('تُضاف الشريحة في آخر الملف.', 'The slide goes at the end of the file.')],
-      ['#iPos [data-v="before"]', E('تُضاف قبل الشريحة المحددة. حدّد شريحة أولًا.', 'Goes before the selected slide. Select a slide first.')],
-      ['#iPos [data-v="after"]', E('تُضاف بعد الشريحة المحددة. حدّد شريحة أولًا.', 'Goes after the selected slide. Select a slide first.')],
-      ['#iInsert', E('يُدرج شريحة داخلية فارغة بالنمط المختار، فيها مكان المحتوى وتعليمات التنسيق من القالب.', 'Inserts an empty inner slide in the chosen style, with the template\'s content area and formatting notes.', 'إدراج شريحة داخلية', 'Insert inner slide')],
-      ['#tInsert', E('يُدرج شريحة الغلاف بالعنوان المكتوب في المكان المختار، ولا يغيّر باقي الشرائح.', 'Inserts the cover slide with your title where you chose, without changing other slides.', 'إدراج شريحة الغلاف', 'Insert cover slide')]
+      ['#iPos [data-v="end"]', E('يُدرج شريحة داخلية بالنمط المختار في نهاية الملف مباشرة.', 'Inserts an inner slide in the chosen style at the end of the file right away.', 'نهاية الملف', 'End of file')],
+      ['#iPos [data-v="before"]', E('يُدرج شريحة داخلية قبل الشريحة المحددة. حدّد شريحة أولًا.', 'Inserts an inner slide before the selected slide. Select a slide first.', 'قبل المحددة', 'Before selected')],
+      ['#iPos [data-v="after"]', E('يُدرج شريحة داخلية بعد الشريحة المحددة. حدّد شريحة أولًا.', 'Inserts an inner slide after the selected slide. Select a slide first.', 'بعد المحددة', 'After selected')],
     ],
 
     restyle: [
