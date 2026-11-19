@@ -1740,8 +1740,24 @@ function findSolutions(pkg) {
   }
   return found;
 }
-function hideSolutions(pkg, grids) {
-  grids = grids || {};
+// empty writing lines in the place of a hidden solution box (one group, removed again by showSolutions)
+function writingLines(doc, g) {
+  const step = 2 * ROW, n = Math.max(1, Math.floor((g.h + ROW * 0.6) / step));
+  const x = Math.round(g.x), w = Math.round(g.w), top = Math.round(g.y);
+  const ys = []; for (let k = 1; k <= n; k++) ys.push(top + Math.min(g.h, k * step) - 1);
+  const y0 = ys[0], hh = Math.max(1, ys[ys.length - 1] - y0);
+  let lines = '';
+  ys.forEach((y, k) => {
+    lines += '<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="' + (NEXT++) + '" name="UULA SolLine ' + (k + 1) + '"/><p:cNvCxnSpPr/><p:nvPr/></p:nvCxnSpPr>'
+      + '<p:spPr><a:xfrm><a:off x="' + x + '" y="' + y + '"/><a:ext cx="' + w + '" cy="0"/></a:xfrm><a:prstGeom prst="line"><a:avLst/></a:prstGeom>'
+      + '<a:ln w="9525"><a:solidFill><a:srgbClr val="A6A6A6"/></a:solidFill></a:ln></p:spPr></p:cxnSp>';
+  });
+  return frag(doc, '<p:grpSp><p:nvGrpSpPr><p:cNvPr id="' + (NEXT++) + '" name="UULA SolView Lines"/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>'
+    + '<p:grpSpPr><a:xfrm><a:off x="' + x + '" y="' + y0 + '"/><a:ext cx="' + w + '" cy="' + hh + '"/><a:chOff x="' + x + '" y="' + y0 + '"/><a:chExt cx="' + w + '" cy="' + hh + '"/></a:xfrm></p:grpSpPr>'
+    + lines + '</p:grpSp>');
+}
+function hideSolutions(pkg, grids, opts) {
+  grids = grids || {}; opts = opts || {};
   const W = pkg.slideW;
   const doc = parseXml(pkg.files.slide);
   const ctx = { scheme: readTheme(pkg.files), bodySz: 1100 };
@@ -1756,6 +1772,7 @@ function hideSolutions(pkg, grids) {
     n++;
     const view = f.how === 'hide' ? null : t.el.cloneNode(true);
     for (const c of allCores(t.el)) { const nv = cnvOf(c); if (nv) { nv.setAttribute('hidden', '1'); nv.setAttribute('name', 'UULA SolHidden ' + (nv.getAttribute('name') || '')); } }
+    if (!view && opts.lines && t.kind === 'text') t.el.parentNode.insertBefore(writingLines(doc, t.g), t.el.nextSibling);
     if (!view) continue;
     for (const c of allCores(view)) { const nv = cnvOf(c); if (nv) { nv.setAttribute('id', String(NEXT++)); nv.setAttribute('name', 'UULA SolView ' + (nv.getAttribute('name') || '')); nv.removeAttribute('hidden'); } }
     const vt = { c: core(view), el: view, text: t.text, g: t.g, box: null, ph: null };

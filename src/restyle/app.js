@@ -577,6 +577,11 @@ async function emptyGrid(b64, ext) {
   g.putImageData(im, 0, 0);
   return cv.toDataURL('image/png').split(',')[1];
 }
+// empty lines for the student in the place of a hidden solution, or nothing (saved on this device)
+let solLines = !!load('ur-sollines', false);
+function paintSolLines() { document.querySelectorAll('#solLines button').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.v === '1') === solLines))); }
+document.getElementById('solLines').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; solLines = b.dataset.v === '1'; save('ur-sollines', solLines); paintSolLines(); });
+paintSolLines();
 function solHidden() { const s = docSettings(); return !!(s && s.get('urSolHidden')); }
 function solLabel() { const h = solHidden(); $('solLbl').textContent = h ? L('إظهار الحلول', 'Show solutions') : L('إخفاء الحلول', 'Hide solutions'); $('solSlash').style.display = h ? 'none' : ''; }
 async function solSlide(id, mode) {
@@ -592,7 +597,7 @@ async function solSlide(id, mode) {
       const file = pkg.zip.file(f.media); if (!file || !/\.(png|jpe?g)$/i.test(f.media)) continue;
       try { const png = await emptyGrid(await file.async('base64'), f.media); if (png) grids[f.i] = png; } catch (e) {}
     }
-    r = UR.hideSolutions(pkg, grids);
+    r = UR.hideSolutions(pkg, grids, { lines: solLines });
   }
   if (!r.count) return 0;
   const newId = await insertAfter(await UR.buildPackage(pkg, r.xml, r.rels), id);
