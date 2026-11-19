@@ -1,7 +1,7 @@
 // UULA PDF — export to a small, high-quality PDF (Arabic / English interface)
 (function(){
 'use strict';
-const VER = '1.0';
+const VER = '1.1';
 const $ = id => document.getElementById(id);
 const I18N = (() => {
   const D = {
@@ -17,7 +17,7 @@ const I18N = (() => {
       done: 'تم.', restoreFail: ' تنبيه: تعذّر إرجاع بعض التغييرات، استخدم ⌘Z.', fail: 'تعذّر التصدير: ', dlHint: 'إن لم يبدأ التنزيل، اضغط «فتح» ثم احفظ الملف من النافذة.', noWin: 'تعذّر فتح نافذة جديدة.',
       aboutHtml: '<p>تصدّر العرض التقديمي إلى PDF من باوربوينت نفسه (بنفس الشكل والخطوط والمعادلات)، ثم تصغّر حجمه بضغط الصور وحذف المكرر منها.</p>' +
         '<p><b>الأرقام</b>: هندية أو إنجليزية في الـ PDF، ثم يرجع العرض كما كان. الشرائح التي فيها معادلات باوربوينت تُنسخ مؤقتًا لتتحول أرقامها دون أن تتفكك، ثم تُعاد الأصلية.</p>' +
-        '<p><b>روابط الصور</b>: كل صورة أو شكل عليه رابط يبقى قابلًا للضغط في الـ PDF.</p><p>نصوص القالب (مثل السنة في التذييل) لا تتغير أرقامها.</p>' },
+        '<p><b>روابط الصور</b>: كل صورة أو شكل عليه رابط يبقى قابلًا للضغط في الـ PDF.</p><p>تتغير أرقام محتوى الشرائح فقط: أرقام الصفحات والتذييل والقالب والخلفية تبقى كما هي.</p>' },
     en: { dir: 'ltr', langName: 'العربية', update: 'New update', menu: 'Menu', chkUpd: 'Check for updates', about: 'About', close: 'Close', ok: 'Continue',
       digitsLabel: 'Digits in the PDF', hindi: 'Arabic ١٢٣', latin: 'English 123', qualityLabel: 'Quality', high: 'High', medium: 'Medium (smaller)',
       linksChk: 'Picture links are clickable', export: 'Export PDF', exporting: 'Exporting…', restoreNote: 'The presentation goes back as it was after the export.',
@@ -30,7 +30,7 @@ const I18N = (() => {
       done: 'Done.', restoreFail: ' Note: some changes could not be put back, use ⌘Z.', fail: 'Export failed: ', dlHint: 'If the download does not start, press “Open” and save it from the window.', noWin: 'Could not open a new window.',
       aboutHtml: '<p>Exports the presentation to PDF from PowerPoint itself (same look, fonts and equations), then makes it smaller by compressing pictures and removing duplicates.</p>' +
         '<p><b>Digits</b>: Arabic or English in the PDF, then the presentation goes back as it was. Slides with PowerPoint equations are copied for a moment so their digits change without breaking.</p>' +
-        '<p><b>Picture links</b>: every picture or shape with a link stays clickable in the PDF.</p><p>Template texts (like the year in the footer) keep their digits.</p>' }
+        '<p><b>Picture links</b>: every picture or shape with a link stays clickable in the PDF.</p><p>Only the slides’ content changes: page numbers, footers, the template and the background keep their digits.</p>' }
   };
   let lang = 'ar';
   try { lang = localStorage.getItem('tkpdf-lang') || (localStorage.getItem('tk-lang') === 'en' ? 'en' : 'ar'); } catch (e) {}
@@ -118,14 +118,14 @@ const MB = n => (n / 1048576).toFixed(n < 10485760 ? 1 : 0) + ' MB';
 const TEXT_TYPES = new Set(['GeometricShape','TextBox','Placeholder','Callout','Freeform']);
 
 // ---- 1) digits in ordinary text boxes (not on rebuilt slides, never in boxes with equations); returns an undo list ----
-async function textDigits(dir, skipSlides, mathShapes){
+async function textDigits(dir, skipSlides, mathShapes, SH){
   const undo = [];
   await PowerPoint.run(async ctx => {
     const slides = ctx.presentation.slides; slides.load('items/id'); await ctx.sync();
     for (let si = 0; si < slides.items.length; si++){
       if (skipSlides.has(si)) continue;
       const sl = slides.items[si];
-      const PROPS = 'items/id,items/type,items/name,items/left,items/top';
+      const PROPS = 'items/id,items/type,items/name,items/left,items/top,items/height';
       const leaves = [];
       let level = [{ c: sl.shapes, path: [] }]; sl.shapes.load(PROPS); await ctx.sync();
       for (let depth = 0; level.length && depth < 6; depth++){
@@ -139,13 +139,18 @@ async function textDigits(dir, skipSlides, mathShapes){
       }
       const ms = mathShapes[si] || [];
       const isMath = sh => ms.some(x => (String(x.id) === String(sh.id) && x.name === sh.name) || (x.name === sh.name && Math.abs(x.left - sh.left) + Math.abs(x.top - sh.top) < 3));
-      const text = leaves.filter(sh => sh.type !== 'Table' && !isMath(sh));
+      // page numbers, footers and dates keep their digits
+      for (const sh of leaves){ sh._num = sh.tags.getItemOrNullObject('MYNUMBER'); sh._num.load('value'); if (sh.type === 'Placeholder'){ try { sh.placeholderFormat.load('type'); } catch (e){} } }
+      await ctx.sync();
+      const pageNo = sh => !sh._num.isNullObject || (sh.type === 'Placeholder' && sh.placeholderFormat && ['SlideNumber', 'Footer', 'Date'].includes(sh.placeholderFormat.type));
+      const text = leaves.filter(sh => sh.type !== 'Table' && !isMath(sh) && !pageNo(sh));
       for (const sh of text){ sh._tr = sh.textFrame.textRange; sh._tr.load('text'); }
       try { await ctx.sync(); }
       catch (e){ for (const sh of text){ try { sh._tr = sh.textFrame.textRange; sh._tr.load('text'); await ctx.sync(); } catch (e2){ sh._tr = null; } } }
       for (const sh of text){
         if (!sh._tr) continue; let t; try { t = sh._tr.text; } catch (e){ continue; }
         if (!t) continue;
+        if (SH && sh.top > SH * 0.88 && /^[\s0-9٠-٩\-—–|/.]+$/.test(t)) continue; // a lone number at the bottom: the page number
         for (const r of MTC.digitEdits(t, dir)){
           sh._tr.getSubstring(r.start, r.len).text = r.rep;
           undo.push({ slide: sl.id, path: sh._path, start: r.start, len: r.len, orig: t.substr(r.start, r.len) });
@@ -242,7 +247,8 @@ async function run(){
     const skip = new Set(rebuild);
     try {
       step(T('sDigits'));
-      tUndo = await textDigits(dir, skip, mathShapes);
+      const SH = (await MTC.slideHeight(MTC.openZip(pptx))) / 12700;
+      tUndo = await textDigits(dir, skip, mathShapes, SH);
       if (rebuild.length) sUndo = await rebuildSlides(rebuild, dir);
       step(T('sPdf'));
       pdf = await fileBytes(Office.FileType.Pdf);

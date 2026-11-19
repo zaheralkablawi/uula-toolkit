@@ -471,34 +471,61 @@ function digitEdits(t, dir){
   }
   return runs;
 }
-// whole slide XML: text (a:t) and equations (m:t)
-function slideDigits(xml, dir){
+// page numbers, footers and dates are not content: they keep their digits
+// ctx: { SH: slide height (EMU), tagNames: { rId: 'MYNUMBER …' } }
+function isPageNumberSp(sp, ctx){
+  if (/<p:ph\b[^>]*type="(?:sldNum|ftr|dt)"/.test(sp)) return true;
+  const tg = /<p:tags r:id="([^"]+)"/.exec(sp);
+  if (tg && ctx && ctx.tagNames && /MYNUMBER/i.test(ctx.tagNames[tg[1]] || '')) return true;
+  const text = (sp.match(/<a:t>([^<]*)<\/a:t>/g) || []).map(t => t.replace(/<\/?a:t>/g, '')).join('');
+  const off = /<a:off x="-?\d+" y="(-?\d+)"\/>/.exec(sp);
+  if (ctx && ctx.SH && off && +off[1] > ctx.SH * 0.88 && /^[\s0-9٠-٩\-—–|/.]+$/.test(text)) return true;
+  return false;
+}
+// whole slide XML: text (a:t) and equations (m:t), page numbers left alone
+function slideDigits(xml, dir, ctx){
   let n = 0;
   const conv = t => dir === 'hindi'
     ? t.replace(/\S+/g, w => /[A-Za-z]/.test(w) ? w : w.replace(/[0-9]/g, c => { n++; return HINDI_D[+c]; }))
     : t.replace(/[٠-٩]/g, c => { n++; return LATIN_D[HINDI_D.indexOf(c)]; });
-  const out = xml.replace(/(<a:t>)([^<]*)(<\/a:t>)/g, (m, a, t, b) => a + conv(t) + b)
-                 .replace(/(<m:t(?:\s[^>]*)?>)([^<]*)(<\/m:t>)/g, (m, a, t, b) => a + conv(t) + b);
+  const fix = part => part.replace(/(<a:t>)([^<]*)(<\/a:t>)/g, (m, a, t, b) => a + conv(t) + b)
+                          .replace(/(<m:t(?:\s[^>]*)?>)([^<]*)(<\/m:t>)/g, (m, a, t, b) => a + conv(t) + b);
+  const out = xml.replace(/<p:sp>[\s\S]*?<\/p:sp>|<p:graphicFrame>[\s\S]*?<\/p:graphicFrame>/g, el => (el.startsWith('<p:sp>') && isPageNumberSp(el, ctx)) ? el : fix(el));
   return { xml: out, n };
 }
+// what a slide's page-number check needs: slide height and the names inside its tags
+async function slideCtx(zip, path, SH){
+  const i0 = path.lastIndexOf('/');
+  const rt = await zip.text(path.slice(0, i0) + '/_rels/' + path.slice(i0 + 1) + '.rels') || '';
+  const tagNames = {};
+  for (const r of rt.match(/<Relationship\b[^>]*>/g) || []){
+    if (!/\/tags"/.test(r)) continue;
+    const t = resolve(path, attr(r, 'Target')); tagNames[attr(r, 'Id')] = (await zip.text(t)) || '';
+  }
+  return { SH, tagNames };
+}
+async function slideHeight(zip){ const p = await zip.text('ppt/presentation.xml'); const m = p && /<p:sldSz\b[^>]*\bcy="(\d+)"/.exec(p); return m ? +m[1] : 0; }
 // slides (index) whose equation text boxes need digits changed in direction dir
 async function slidesNeedingRebuild(u8, dir){
   const zip = openZip(u8);
   const pres = await zip.text('ppt/presentation.xml'), prel = await rels(zip, 'ppt/presentation.xml');
+  const SH = await slideHeight(zip);
   const ids = (pres.match(/<p:sldId\b[^>]*>/g) || []).map(s => attr(s, 'r:id'));
   const out = [];
   for (let i = 0; i < ids.length; i++){
     const x = await zip.text(prel[ids[i]]); if (!x || !x.includes('a14:m')) continue;
-    const need = (x.match(/<p:sp>[\s\S]*?<\/p:sp>/g) || []).some(sp => sp.includes('a14:m') && slideDigits(sp, dir).n);
+    const ctx = await slideCtx(zip, prel[ids[i]], SH);
+    const need = (x.match(/<p:sp>[\s\S]*?<\/p:sp>/g) || []).some(sp => sp.includes('a14:m') && !isPageNumberSp(sp, ctx) && slideDigits(sp, dir, ctx).n);
     if (need) out.push(i);
   }
   return out;
 }
 async function slideRebuildBytes(u8, dir){
   const zip = openZip(u8), changed = {}; let n = 0;
+  const SH = await slideHeight(zip);
   for (const name of Object.keys(zip.files)){
     if (!/^ppt\/slides\/slide\d+\.xml$/.test(name)) continue;
-    const r = slideDigits(await zip.text(name), dir); if (!r.n) continue;
+    const r = slideDigits(await zip.text(name), dir, await slideCtx(zip, name, SH)); if (!r.n) continue;
     n += r.n; changed[name] = new TextEncoder().encode(r.xml);
   }
   return n ? { bytes: rezip(u8, changed), n } : null;
@@ -554,7 +581,7 @@ async function pictureLinks(u8){
   return out;
 }
 
-return { digitEdits, slideDigits, slidesNeedingRebuild, slideRebuildBytes, pictureLinks, scan, openZip, cfbStream, parseMTEF, convert, mathParas, textSpans, startsWithMath, slideMathDigits, slidesWithMathDigits, rezip, crc32, mathDigits, fixMathShapesDigits };
+return { digitEdits, slideDigits, isPageNumberSp, slideHeight, slidesNeedingRebuild, slideRebuildBytes, pictureLinks, scan, openZip, cfbStream, parseMTEF, convert, mathParas, textSpans, startsWithMath, slideMathDigits, slidesWithMathDigits, rezip, crc32, mathDigits, fixMathShapesDigits };
 
 })();
 if (typeof module !== 'undefined') module.exports = MTC;
