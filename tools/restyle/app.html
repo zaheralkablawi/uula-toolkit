@@ -2138,12 +2138,12 @@ const LIST = [
   { g: 'أسئلة', id: 'mcq', name: 'اختيار متعدد', en: 'Choices', full: 'اختيار من متعدد' },
   { g: 'أسئلة', id: 'problem', name: 'مسألة', en: 'Problem', full: 'مسألة: معطيات وقانون وحل' },
   { g: 'أسئلة', id: 'other', name: 'صيغة أخرى', en: 'Other form', full: 'السؤال بصيغة أخرى' },
-  { g: 'حاويات', id: 'note', name: 'ملاحظة', en: 'Note', full: 'ملاحظة مهمة' },
-  { g: 'حاويات', id: 'quote', name: 'نص مقتطف', en: 'Quote' },
-  { g: 'حاويات', id: 'formula', name: 'قوانين', en: 'Formulas', full: 'معادلات وقوانين' },
-  { g: 'حاويات', id: 'activity', name: 'نشاط', en: 'Activity' },
-  { g: 'حاويات', id: 'mars', name: 'من المريخ', en: 'Challenge', full: 'أسئلة من المريخ' },
-  { g: 'حاويات', id: 'cancelled', name: 'محتوى معلّق', en: 'Suspended' },
+  { g: 'إطارات', id: 'note', name: 'ملاحظة', en: 'Note', full: 'ملاحظة مهمة' },
+  { g: 'إطارات', id: 'quote', name: 'نص مقتطف', en: 'Quote' },
+  { g: 'إطارات', id: 'formula', name: 'قوانين', en: 'Formulas', full: 'معادلات وقوانين' },
+  { g: 'إطارات', id: 'activity', name: 'نشاط', en: 'Activity' },
+  { g: 'إطارات', id: 'mars', name: 'من المريخ', en: 'Challenge', full: 'أسئلة من المريخ' },
+  { g: 'إطارات', id: 'cancelled', name: 'محتوى معلّق', en: 'Suspended' },
   { g: 'جداول', id: 'table', name: 'جدول', en: 'Table' },
   { g: 'جداول', id: 'tableMain', name: 'جدول رئيسي', en: 'Main table', full: 'جدول بعمود رئيسي' },
   { g: 'جداول', id: 'solTable', name: 'جدول الحل', en: 'Answers', full: 'جدول حل التمارين الموضوعية' },
@@ -2376,7 +2376,7 @@ function apply(pkg, id) {
   return { xml: UR.serialize(doc), rels, built, top: ft.top, first: total - els.length, count: els.length, bottom: pl.bottom, fits: pl.bottom <= pkg.slideH - UR.FOOT };
 }
 
-const GROUP_EN = { 'عناوين': 'Headings', 'نصوص': 'Text', 'أسئلة': 'Questions', 'حاويات': 'Containers', 'جداول': 'Tables', 'نهاية الدرس': 'Lesson end' };
+const GROUP_EN = { 'عناوين': 'Headings', 'نصوص': 'Text', 'أسئلة': 'Questions', 'إطارات': 'Frames', 'جداول': 'Tables', 'نهاية الدرس': 'Lesson end' };
 return { LIST, GROUP_EN, spec, build, place, freeTop, apply };
 })();
 if (typeof module !== 'undefined') module.exports = URT;
@@ -2403,7 +2403,7 @@ const TYPES = [
     ['body', 'فقرة', 'Paragraph', '8C8C8C'], ['bullets', 'نقاط', 'Bullets', '8C8C8C'], ['qhead', 'عنوان أسئلة', 'Q head', 'C00000'],
     ['question', 'سؤال', 'Question', 'FF0000'], ['choice', 'خيارات', 'Choices', '7030A0'], ['answer', 'حل', 'Solution', '1F71DE'],
     ['correct', 'الخيار الصحيح', 'Correct choice', '2070DF']] },
-  { g: 'حاويات', ge: 'Containers', items: [
+  { g: 'إطارات', ge: 'Frames', items: [
     ['note', 'ملاحظة', 'Note', 'E69138'], ['def', 'تعريف', 'Definition', '2AB672'], ['quote', 'نص مقتطف', 'Quote', '2AB672'],
     ['formula', 'قوانين', 'Formulas', '5B9BD5'], ['other', 'صيغة أخرى', 'Other form', 'C45A11'], ['activity', 'نشاط', 'Activity', '7F7F7F'],
     ['mars', 'من المريخ', 'Challenge', '595959']] },
@@ -3381,7 +3381,7 @@ async function insertTemplate(tid) {
 const ROLES = [
   { g: 'نصوص', ge: 'Text', items: [['chapter', 'اسم الوحدة', 'A6A6A6'], ['lesson', 'اسم الدرس', '1F71DD'], ['topic', 'موضوع', '000000'], ['body', 'فقرة', 'FFFFFF'], ['bullets', 'نقاط', 'FFFFFF'], ['qhead', 'عنوان أسئلة', 'FF0000'], ['question', 'سؤال', 'FF0000'], ['choice', 'خيارات', 'FFFFFF']] },
   { g: 'للحلول', ge: 'For solutions', items: [['answer', 'حل', '1F71DE'], ['correct', 'الخيار الصحيح', '2070DF'], ['given', 'شكل من السؤال', 'A6A6A6']] },
-  { g: 'حاويات', ge: 'Containers', items: [['note', 'ملاحظة', 'FBEBD3'], ['quote', 'نص مقتطف', 'E2F0D9'], ['def', 'تعريف', 'E2F0D9'], ['formula', 'قوانين', 'D3E4F5'], ['other', 'صيغة أخرى', 'FBEBD3'], ['activity', 'نشاط', 'F1F1F1'], ['mars', 'من المريخ', 'F1F1F1']] }
+  { g: 'إطارات', ge: 'Frames', items: [['note', 'ملاحظة', 'FBEBD3'], ['quote', 'نص مقتطف', 'E2F0D9'], ['def', 'تعريف', 'E2F0D9'], ['formula', 'قوانين', 'D3E4F5'], ['other', 'صيغة أخرى', 'FBEBD3'], ['activity', 'نشاط', 'F1F1F1'], ['mars', 'من المريخ', 'F1F1F1']] }
 ];
 const ROLE_EN = { chapter: 'Unit', lesson: 'Lesson', topic: 'Topic', body: 'Paragraph', bullets: 'Bullets', qhead: 'Q head', question: 'Question', answer: 'Solution', choice: 'Choices',
   correct: 'Correct choice', given: 'Part of question', note: 'Note', quote: 'Quote', def: 'Definition', formula: 'Formulas', other: 'Other form', activity: 'Activity', mars: 'Challenge' };

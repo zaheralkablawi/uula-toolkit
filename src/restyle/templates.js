@@ -37,12 +37,12 @@ const LIST = [
   { g: 'أسئلة', id: 'mcq', name: 'اختيار متعدد', en: 'Choices', full: 'اختيار من متعدد' },
   { g: 'أسئلة', id: 'problem', name: 'مسألة', en: 'Problem', full: 'مسألة: معطيات وقانون وحل' },
   { g: 'أسئلة', id: 'other', name: 'صيغة أخرى', en: 'Other form', full: 'السؤال بصيغة أخرى' },
-  { g: 'حاويات', id: 'note', name: 'ملاحظة', en: 'Note', full: 'ملاحظة مهمة' },
-  { g: 'حاويات', id: 'quote', name: 'نص مقتطف', en: 'Quote' },
-  { g: 'حاويات', id: 'formula', name: 'قوانين', en: 'Formulas', full: 'معادلات وقوانين' },
-  { g: 'حاويات', id: 'activity', name: 'نشاط', en: 'Activity' },
-  { g: 'حاويات', id: 'mars', name: 'من المريخ', en: 'Challenge', full: 'أسئلة من المريخ' },
-  { g: 'حاويات', id: 'cancelled', name: 'محتوى معلّق', en: 'Suspended' },
+  { g: 'إطارات', id: 'note', name: 'ملاحظة', en: 'Note', full: 'ملاحظة مهمة' },
+  { g: 'إطارات', id: 'quote', name: 'نص مقتطف', en: 'Quote' },
+  { g: 'إطارات', id: 'formula', name: 'قوانين', en: 'Formulas', full: 'معادلات وقوانين' },
+  { g: 'إطارات', id: 'activity', name: 'نشاط', en: 'Activity' },
+  { g: 'إطارات', id: 'mars', name: 'من المريخ', en: 'Challenge', full: 'أسئلة من المريخ' },
+  { g: 'إطارات', id: 'cancelled', name: 'محتوى معلّق', en: 'Suspended' },
   { g: 'جداول', id: 'table', name: 'جدول', en: 'Table' },
   { g: 'جداول', id: 'tableMain', name: 'جدول رئيسي', en: 'Main table', full: 'جدول بعمود رئيسي' },
   { g: 'جداول', id: 'solTable', name: 'جدول الحل', en: 'Answers', full: 'جدول حل التمارين الموضوعية' },
@@ -275,7 +275,7 @@ function apply(pkg, id) {
   return { xml: UR.serialize(doc), rels, built, top: ft.top, first: total - els.length, count: els.length, bottom: pl.bottom, fits: pl.bottom <= pkg.slideH - UR.FOOT };
 }
 
-const GROUP_EN = { 'عناوين': 'Headings', 'نصوص': 'Text', 'أسئلة': 'Questions', 'حاويات': 'Containers', 'جداول': 'Tables', 'نهاية الدرس': 'Lesson end' };
+const GROUP_EN = { 'عناوين': 'Headings', 'نصوص': 'Text', 'أسئلة': 'Questions', 'إطارات': 'Frames', 'جداول': 'Tables', 'نهاية الدرس': 'Lesson end' };
 return { LIST, GROUP_EN, spec, build, place, freeTop, apply };
 })();
 if (typeof module !== 'undefined') module.exports = URT;
