@@ -1657,6 +1657,16 @@ function tkIcon(el, name) {
       m.insertBefore(li, q('#aboutBtn'));
     }
     if (lb && q('#langItem')) lb.style.display = 'none';
+    // keep the menu inside the pane in both languages (in English some tools open it towards the outside)
+    var fit = function () {
+      if (m.hidden) return;
+      var d = document.documentElement.lang === 'en' ? 'ltr' : 'rtl'; if (m.dir !== d) m.dir = d;
+      m.style.left = ''; m.style.right = '';
+      var r = m.getBoundingClientRect();
+      if (r.left < 4) { m.style.left = '0'; m.style.right = 'auto'; }
+      else if (r.right > window.innerWidth - 4) { m.style.right = '0'; m.style.left = 'auto'; }
+    };
+    new MutationObserver(fit).observe(m, { attributes: true, attributeFilter: ['hidden', 'dir'] });
     tkIcon(q('#chkUpd'), 'upd'); tkIcon(q('#langItem'), 'lang'); tkIcon(q('#aboutBtn'), 'about');
     ['new', 'help', 'keys', 'news', 'about'].forEach(function (a) { tkIcon(q('[data-act="' + a + '"]'), a); });
   }
