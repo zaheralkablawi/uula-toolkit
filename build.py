@@ -73,3 +73,12 @@ out('restyle', inline(SRC / 'restyle', [('JSZIP', 'jszip.min.js'), ('ASSETS', 'a
                                          ('TEMPLATES', 'templates.js'), ('WORD', 'word.js'), ('APP', 'app.js')]))
 out('math', (SRC / 'math' / 'app.html').read_text(encoding='utf8'))
 out('graph', (SRC / 'graph' / 'app.html').read_text(encoding='utf8'))
+
+# home page: put the shared menu icons into index.html (between the markers)
+import re as _re
+idx = ROOT / 'index.html'
+h = idx.read_text(encoding='utf8')
+mi = '/*MI*/\n' + (SRC / 'menu-icons.js').read_text(encoding='utf8') + '/*MI-END*/\n'
+h = _re.sub(r'/\*MI\*/\n(?:.*?/\*MI-END\*/\n)?', lambda m: mi, h, count=1, flags=_re.S)
+idx.write_text(h, encoding='utf8')
+print('index.html: menu icons updated')
