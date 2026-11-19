@@ -1,7 +1,7 @@
 # UULA Toolkit — builds every tool into tools/<name>/app.html (one self-contained file per tool,
 # so each tool's own update check covers it) and adds the "كل الأدوات" bar on top of each tool.
 #   python3 build.py
-import pathlib, shutil
+import pathlib, re, shutil
 
 ROOT = pathlib.Path(__file__).parent
 SRC = ROOT / 'src'
@@ -19,6 +19,9 @@ def inline(folder, parts, extra=None):
 
 
 def out(name, html):
+    # inside the toolkit the tools show their own name only (no "UULA" above it)
+    html = re.sub(r'<span class="root">UULA</span><span class="sub">([^<]*)</span>', r'<span class="root">\1</span>', html, count=1)
+    html = html.replace('<b>UULA</b><i>Graph</i>', '<b>Graph</b>', 1)
     d = ROOT / 'tools' / name
     d.mkdir(parents=True, exist_ok=True)
     i = html.rfind('</body>')

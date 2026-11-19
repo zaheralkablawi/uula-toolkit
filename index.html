@@ -43,7 +43,7 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 </style></head><body>
 <div class="wrap">
   <header>
-    <h1><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/><g fill="#1f71de"><rect x="9.6" y="9.6" width="5.6" height="5.6" rx="1"/><rect x="16.8" y="9.6" width="5.6" height="5.6" rx="1"/><rect x="9.6" y="16.8" width="5.6" height="5.6" rx="1"/><rect x="16.8" y="16.8" width="5.6" height="5.6" rx="1"/></g></svg><span class="bt"><span class="root">UULA</span><span class="sub">Toolkit</span></span></h1>
+    <h1><img src="logo.png" alt="" width="30" height="30" style="display:block;flex:none"><span class="bt"><span class="root">UULA</span><span class="sub">Toolkit</span></span></h1>
     <button type="button" class="ib updbtn" id="updBtn" hidden title="تحديث جديد"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10a6 6 0 1 1-1.8-4.3"/><path d="M16.2 3.2v3.5h-3.5"/></svg><span class="dot"></span></button>
     <div class="appmenu">
       <button type="button" class="ib" id="menuBtn" aria-expanded="false" title="القائمة"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h12M4 10h12M4 14h12"/></svg></button>
@@ -66,19 +66,19 @@ const $ = id => document.getElementById(id);
 const C = '<circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/>';
 // ---- the tools list: to add a new tool, add one line here and put its page in tools/<id>/app.html ----
 const TOOLS = [
-  { id: 'restyle', name: 'UULA Restyle', hosts: ['ppt', 'word'],
+  { id: 'restyle', name: 'Restyle', hosts: ['ppt', 'word'],
     desc: { ppt: 'تحويل الشرائح لستايل علا وقوالب المذكرة', word: 'تمييز أجزاء المذكرة لنقلها إلى الباوربوينت' },
     icon: C + '<path fill="#1f71de" d="M16 7.2l2.1 5.6 5.7 2.2-5.7 2.2L16 22.8l-2.1-5.6-5.7-2.2 5.7-2.2z"/><circle cx="22.3" cy="22.3" r="1.9" fill="#1f71de"/>' },
-  { id: 'math', name: 'UULA Arabic Math', hosts: ['ppt', 'word'],
+  { id: 'math', name: 'Arabic Math', hosts: ['ppt', 'word'],
     desc: { ppt: 'كتابة المعادلات العربية وإدراجها', word: 'كتابة المعادلات العربية وإدراجها' },
     icon: C + '<path d="M8.5 16.5l2.4 4.6 4.2-11.1h8.4" fill="none" stroke="#1f71de" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>' },
-  { id: 'graph', name: 'UULA Graph', hosts: ['ppt', 'word'],
+  { id: 'graph', name: 'Graph', hosts: ['ppt', 'word'],
     desc: { ppt: 'رسم الدوال وإدراجها صورةً', word: 'رسم الدوال وإدراجها صورةً' },
     icon: C + '<path d="M9 16h14M16 9v14" stroke="#9aa3b0" stroke-width="1.4"/><path d="M10.5 9.5c2 9 9 9 11 0" fill="none" stroke="#1f71de" stroke-width="2.4" stroke-linecap="round"/>' },
-  { id: 'dark', name: 'UULA Dark', hosts: ['ppt'],
+  { id: 'dark', name: 'Dark', hosts: ['ppt'],
     desc: { ppt: 'تقسيم أوراق العمل وتحويلها إلى الوضع الداكن' },
     icon: C + '<path d="M16 3.5a12.5 12.5 0 0 1 0 25z" fill="#1f71de"/>' },
-  { id: 'cover', name: 'UULA Cover', hosts: ['ppt'],
+  { id: 'cover', name: 'Cover', hosts: ['ppt'],
     desc: { ppt: 'إدراج شريحة الغلاف من قالب فيديو علا' },
     icon: C + '<rect x="8.6" y="11" width="14.8" height="10" rx="1.6" fill="#1f71de"/><path d="M12 15h8M13.5 18h5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>' }
 ];
