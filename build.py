@@ -5,6 +5,8 @@ import pathlib, re, shutil
 
 ROOT = pathlib.Path(__file__).parent
 SRC = ROOT / 'src'
+MATH_LOGO = ('<circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/>'
+             '<path d="M8.5 16.5l2.4 4.6 4.2-11.1h8.4" fill="none" stroke="#1f71de" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>')
 BAR = '<script>' + (SRC / 'home-bar.js').read_text(encoding='utf8') + '</script>\n'
 
 
@@ -22,6 +24,9 @@ def out(name, html):
     # inside the toolkit the tools show their own name only (no "UULA" above it)
     html = re.sub(r'<span class="root">UULA</span><span class="sub">([^<]*)</span>', r'<span class="root">\1</span>', html, count=1)
     html = html.replace('<b>UULA</b><i>Graph</i>', '<b>Graph</b>', 1)
+    # Arabic Math: same logo style as the other tools (blue ring + symbol), instead of the UULA picture
+    html = re.sub(r'<h1 dir="ltr"><img class="logo" alt="" src="data:image/png;base64,[A-Za-z0-9+/=]*"[^>]*>',
+                  '<h1 dir="ltr"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true">' + MATH_LOGO + '</svg>', html, count=1)
     d = ROOT / 'tools' / name
     d.mkdir(parents=True, exist_ok=True)
     i = html.rfind('</body>')
