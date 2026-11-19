@@ -10,7 +10,7 @@ MATH_LOGO = ('<circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stro
 GRAPH_LOGO = ('<circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/>'
               '<path d="M9 16h14M16 9v14" stroke="#9aa3b0" stroke-width="1.4"/>'
               '<path d="M10.5 9.5c2 9 9 9 11 0" fill="none" stroke="#1f71de" stroke-width="2.4" stroke-linecap="round"/>')
-BAR = '<script>' + (SRC / 'home-bar.js').read_text(encoding='utf8') + '</script>\n'
+BAR = '<script>' + (SRC / 'menu-icons.js').read_text(encoding='utf8') + (SRC / 'home-bar.js').read_text(encoding='utf8') + '</script>\n'
 
 
 def inline(folder, parts, extra=None):

@@ -23,6 +23,28 @@
       location.href = '../../index.html?v=' + Date.now();
     });
     document.body.insertBefore(b, document.body.firstChild);
+    menuIcons();
+  }
+  function menuIcons() {
+    var css2 = document.createElement('style'); css2.textContent = TK_MENU_CSS; document.head.appendChild(css2);
+    var m = document.getElementById('appMenu'); if (!m) return;
+    var q = function (s) { return m.querySelector(s); };
+    var lb = document.getElementById('langBtn');
+    // a tool with a language button but no language item in its menu (Restyle): add the item, so the button can go
+    if (lb && !q('#langItem')) {
+      var li = document.createElement('button'); li.type = 'button'; li.id = 'langItem';
+      var label = function () { li.textContent = document.documentElement.lang === 'en' ? 'العربية' : 'English'; };
+      label();
+      li.addEventListener('click', function (e) {
+        e.stopPropagation(); m.hidden = true;
+        var mb = document.getElementById('menuBtn'); if (mb) mb.setAttribute('aria-expanded', 'false');
+        lb.click(); label();
+      });
+      m.insertBefore(li, q('#aboutBtn'));
+    }
+    if (lb && q('#langItem')) lb.style.display = 'none';
+    tkIcon(q('#chkUpd'), 'upd'); tkIcon(q('#langItem'), 'lang'); tkIcon(q('#aboutBtn'), 'about');
+    ['new', 'help', 'keys', 'news', 'about'].forEach(function (a) { tkIcon(q('[data-act="' + a + '"]'), a); });
   }
   if (document.body) add(); else document.addEventListener('DOMContentLoaded', add);
 })();
