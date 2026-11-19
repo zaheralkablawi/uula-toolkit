@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<title>UULA Toolkit</title>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+<style>
+:root{--bg:#f3f5f8;--panel:#fff;--ink:#18212e;--muted:#5d6878;--line:#d9dfe7;--accent:#1f71de;--accent-soft:#e7effc;
+  --f:"UULA Sans",-apple-system,"Segoe UI",Tahoma,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.6}
+[hidden]{display:none!important}
+.wrap{padding:10px 14px 16px;display:grid;gap:10px}
+header{display:flex;align-items:center;gap:8px;direction:rtl}
+h1{margin:0;display:flex;align-items:center;gap:7px;font-weight:500;direction:ltr;margin-left:auto}
+h1 svg{width:30px;height:30px;flex:none}
+h1 .bt{display:flex;flex-direction:column;justify-content:center;height:30px}
+h1 .root{color:#2072e0;font-size:14px;line-height:15px;font-weight:600;letter-spacing:.03em}
+h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
+.ib{display:inline-grid;place-items:center;width:30px;height:28px;border:1px solid var(--line);background:var(--panel);color:var(--accent);border-radius:7px;cursor:pointer;padding:0}
+.ib:hover,.ib[aria-expanded="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.ib.updbtn{position:relative;color:#e8590c;border-color:#e8590c}
+.updbtn .dot{position:absolute;top:-3px;inset-inline-end:-3px;width:8px;height:8px;border-radius:50%;background:#e8590c;animation:updp 1.6s ease-in-out infinite}
+@keyframes updp{50%{transform:scale(1.5);opacity:.5}}
+.appmenu{position:relative}
+.menu{position:absolute;inset-inline-end:0;top:calc(100% + 4px);z-index:40;min-width:190px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgb(0 0 0 / .18);padding:5px}
+.menu button{display:block;width:100%;font:inherit;font-size:.86rem;text-align:start;background:none;border:0;border-radius:7px;padding:6px 10px;color:var(--ink);cursor:pointer}
+.menu button:hover{background:var(--accent-soft)}
+.list{display:grid;gap:8px}
+.tool{display:flex;align-items:center;gap:11px;width:100%;font:inherit;text-align:start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);cursor:pointer}
+.tool:hover{border-color:var(--accent);background:var(--accent-soft)}
+.tool svg.ic{width:32px;height:32px;flex:none}
+.tool .tx{display:grid;min-width:0;flex:1}
+.tool b{font-weight:600;font-size:.95rem;direction:ltr;text-align:right}
+.tool small{color:var(--muted);font-size:.76rem;line-height:1.4}
+.tool .go{width:14px;height:14px;flex:none;color:#9aa3b0}
+.status{font-size:.82rem;color:var(--muted);min-height:1.2em;text-align:center}
+.modal{position:fixed;inset:0;z-index:60;background:rgb(0 0 0 / .35);display:grid;place-items:center;padding:16px}
+.mbox{background:var(--panel);border-radius:12px;max-width:420px;width:100%;max-height:80vh;overflow:auto;padding:14px 16px;box-shadow:0 16px 40px rgb(0 0 0 / .3)}
+.mbox h3{margin:0 0 8px;font-size:1rem}.mbox p{margin:6px 0}
+.mbox .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.mini{font:inherit;font-size:.75rem;border:1px solid var(--line);background:var(--panel);color:var(--accent);border-radius:6px;padding:1px 8px;cursor:pointer}
+.credit{text-align:center;font-size:.72rem;color:var(--muted);padding:6px 0 0}
+</style></head><body>
+<div class="wrap">
+  <header>
+    <h1><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/><g fill="#1f71de"><rect x="9.6" y="9.6" width="5.6" height="5.6" rx="1"/><rect x="16.8" y="9.6" width="5.6" height="5.6" rx="1"/><rect x="9.6" y="16.8" width="5.6" height="5.6" rx="1"/><rect x="16.8" y="16.8" width="5.6" height="5.6" rx="1"/></g></svg><span class="bt"><span class="root">UULA</span><span class="sub">Toolkit</span></span></h1>
+    <button type="button" class="ib updbtn" id="updBtn" hidden title="تحديث جديد"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10a6 6 0 1 1-1.8-4.3"/><path d="M16.2 3.2v3.5h-3.5"/></svg><span class="dot"></span></button>
+    <div class="appmenu">
+      <button type="button" class="ib" id="menuBtn" aria-expanded="false" title="القائمة"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h12M4 10h12M4 14h12"/></svg></button>
+      <div class="menu" id="appMenu" hidden>
+        <button type="button" id="chkUpd">التحقق من التحديثات</button>
+        <button type="button" id="aboutBtn">حول الأداة</button>
+      </div>
+    </div>
+  </header>
+  <div class="list" id="list"></div>
+  <div class="status" id="status" role="status"></div>
+  <div class="modal" id="modal" hidden><div class="mbox" role="dialog" aria-modal="true"><h3 id="modalT"></h3><div id="modalB"></div><button type="button" class="mini" id="modalX" style="margin-top:10px">إغلاق</button></div></div>
+  <footer class="credit" dir="ltr">By Zaher Alkablawi <span id="appVer"></span></footer>
+</div>
+<script>
+(function () {
+'use strict';
+const VER = '1.0';
+const $ = id => document.getElementById(id);
+const C = '<circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/>';
+// ---- the tools list: to add a new tool, add one line here and put its page in tools/<id>/app.html ----
+const TOOLS = [
+  { id: 'restyle', name: 'UULA Restyle', hosts: ['ppt', 'word'],
+    desc: { ppt: 'تحويل الشرائح لستايل علا وقوالب المذكرة', word: 'تمييز أجزاء المذكرة لنقلها إلى الباوربوينت' },
+    icon: C + '<path fill="#1f71de" d="M16 7.2l2.1 5.6 5.7 2.2-5.7 2.2L16 22.8l-2.1-5.6-5.7-2.2 5.7-2.2z"/><circle cx="22.3" cy="22.3" r="1.9" fill="#1f71de"/>' },
+  { id: 'math', name: 'UULA Arabic Math', hosts: ['ppt', 'word'],
+    desc: { ppt: 'كتابة المعادلات العربية وإدراجها', word: 'كتابة المعادلات العربية وإدراجها' },
+    icon: C + '<path d="M8.5 16.5l2.4 4.6 4.2-11.1h8.4" fill="none" stroke="#1f71de" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>' },
+  { id: 'graph', name: 'UULA Graph', hosts: ['ppt', 'word'],
+    desc: { ppt: 'رسم الدوال وإدراجها صورةً', word: 'رسم الدوال وإدراجها صورةً' },
+    icon: C + '<path d="M9 16h14M16 9v14" stroke="#9aa3b0" stroke-width="1.4"/><path d="M10.5 9.5c2 9 9 9 11 0" fill="none" stroke="#1f71de" stroke-width="2.4" stroke-linecap="round"/>' },
+  { id: 'dark', name: 'UULA Dark', hosts: ['ppt'],
+    desc: { ppt: 'تقسيم أوراق العمل وتحويلها إلى الوضع الداكن' },
+    icon: C + '<path d="M16 3.5a12.5 12.5 0 0 1 0 25z" fill="#1f71de"/>' },
+  { id: 'cover', name: 'UULA Cover', hosts: ['ppt'],
+    desc: { ppt: 'إدراج شريحة الغلاف من قالب فيديو علا' },
+    icon: C + '<rect x="8.6" y="11" width="14.8" height="10" rx="1.6" fill="#1f71de"/><path d="M12 15h8M13.5 18h5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>' }
+];
+let host = '';
+function draw() {
+  const list = TOOLS.filter(t => !host || t.hosts.includes(host));
+  $('list').innerHTML = list.map(t =>
+    '<button type="button" class="tool" data-id="' + t.id + '"><svg class="ic" viewBox="0 0 32 32" aria-hidden="true">' + t.icon + '</svg>' +
+    '<span class="tx"><b>' + t.name + '</b><small>' + (t.desc[host] || t.desc.ppt) + '</small></span>' +
+    '<svg class="go" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l-6 6 6 6"/></svg></button>').join('');
+}
+$('list').addEventListener('click', e => {
+  const b = e.target.closest('.tool'); if (!b) return;
+  location.href = 'tools/' + b.dataset.id + '/app.html?v=' + Date.now();
+});
+
+// ---- menu / about ----
+const say = m => { $('status').textContent = m; if (m) setTimeout(() => { if ($('status').textContent === m) $('status').textContent = ''; }, 5000); };
+function menu(o) { $('appMenu').hidden = !o; $('menuBtn').setAttribute('aria-expanded', String(o)); }
+$('menuBtn').addEventListener('click', e => { e.stopPropagation(); menu($('appMenu').hidden); });
+document.addEventListener('click', e => { if (!e.target.closest('.appmenu')) menu(false); });
+$('modalX').addEventListener('click', () => { $('modal').hidden = true; });
+$('modal').addEventListener('click', e => { if (e.target === $('modal')) $('modal').hidden = true; });
+$('aboutBtn').addEventListener('click', () => {
+  menu(false);
+  $('modalT').textContent = 'حول الأداة';
+  $('modalB').innerHTML = '<p>كل أدوات علا للباوربوينت والوورد في مكان واحد. اختر الأداة من القائمة، وارجع للقائمة من زر "كل الأدوات" في أعلى الأداة.</p>' +
+    '<p class="foot" dir="ltr">Developed by <b>Zaher Alkablawi</b> · Version ' + VER + '<br>© 2026 UULA. All rights reserved.</p>';
+  $('modal').hidden = false;
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { menu(false); $('modal').hidden = true; } });
+
+// ---- updates (same method as UULA Arabic Math) ----
+(function () {
+  const head = () => fetch('index.html?chk=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
+    .then(r => r.ok ? (r.headers.get('etag') || r.headers.get('last-modified')) : null).catch(() => null);
+  let base = null, last = 0;
+  async function check(manual) {
+    last = Date.now(); const t = await head();
+    if (!base) { base = t; if (manual) say(t ? 'لديك أحدث نسخة' : 'لا يوجد اتصال'); return; }
+    if (t && t !== base) { $('updBtn').hidden = false; if (manual) say('يوجد تحديث جديد'); }
+    else if (manual) say(t ? 'لديك أحدث نسخة' : 'لا يوجد اتصال');
+  }
+  head().then(t => { base = t; });
+  setInterval(() => check(false), 60 * 60 * 1000);
+  const soon = () => { if (Date.now() - last > 60 * 60 * 1000) check(false); };
+  window.addEventListener('focus', soon);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) soon(); });
+  $('updBtn').addEventListener('click', () => location.replace('index.html?v=' + Date.now()));
+  $('chkUpd').addEventListener('click', () => { menu(false); check(true); });
+})();
+
+// ---- start ----
+$('appVer').textContent = VER;
+draw();
+if (window.Office && Office.onReady) Office.onReady(info => {
+  host = info && info.host === Office.HostType.Word ? 'word' : info && info.host === Office.HostType.PowerPoint ? 'ppt' : '';
+  draw();
+});
+})();
+</script>
+</body></html>

@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<title>UULA Restyle</title>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+<style>
+:root{
+  --bg:#f3f5f8; --panel:#ffffff; --ink:#18212e; --muted:#5d6878; --line:#d9dfe7;
+  --accent:#1f71de; --accent-soft:#e7effc; --ok:#1f8a4c; --warn:#b4541a; --err:#c62828;
+  --f:"UULA Sans",-apple-system,"Segoe UI",Tahoma,sans-serif; color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.6}
+[hidden]{display:none!important}
+.wrap{padding:8px 10px 12px;display:grid;gap:8px}
+header{display:flex;align-items:center;gap:8px}
+h1{margin:0;display:flex;align-items:center;gap:7px;font-weight:500;direction:ltr;margin-left:auto}
+h1 svg{width:30px;height:30px;flex:none}
+h1 .bt{display:flex;flex-direction:column;justify-content:center;height:30px}
+h1 .root{color:#2072e0;font-size:14px;line-height:15px;font-weight:600;letter-spacing:.03em}
+h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
+.ib{display:inline-grid;place-items:center;width:30px;height:28px;border:1px solid var(--line);background:var(--panel);color:var(--accent);border-radius:7px;cursor:pointer;padding:0}
+.ib:hover,.ib[aria-expanded="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.ib.updbtn{position:relative;color:#e8590c;border-color:#e8590c}
+.updbtn .dot{position:absolute;top:-3px;inset-inline-end:-3px;width:8px;height:8px;border-radius:50%;background:#e8590c;animation:updp 1.6s ease-in-out infinite}
+@keyframes updp{50%{transform:scale(1.5);opacity:.5}}
+.appmenu{position:relative}
+.menu{position:absolute;inset-inline-end:0;top:calc(100% + 4px);z-index:40;min-width:190px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgb(0 0 0 / .18);padding:5px}
+.menu button{display:block;width:100%;font:inherit;font-size:.86rem;text-align:start;background:none;border:0;border-radius:7px;padding:6px 10px;color:var(--ink);cursor:pointer}
+.menu button:hover{background:var(--accent-soft)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:grid;gap:6px}
+.label{font-size:.78rem;color:var(--muted);font-weight:600}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:inherit;font-size:.8rem;height:28px;border:0;background:var(--panel);color:var(--muted);cursor:pointer}
+.seg button+button{border-inline-start:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.big{font:inherit;font-size:.95rem;font-weight:700;height:36px;border:0;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.big:hover{filter:brightness(1.07)}.big:disabled{background:#c7cfdb;cursor:not-allowed;filter:none}
+.big svg{width:20px;height:20px}
+.sprow{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;align-items:center}.splab{font-size:.8rem;font-weight:600;color:var(--muted)}
+.sprow2{display:grid;grid-template-columns:auto 1fr;gap:6px;align-items:center}.sprow2 .splab{font-weight:500;font-size:.74rem}
+.seg3{grid-template-columns:1fr 1fr 1fr}.seg3 button{height:24px;font-size:.74rem}
+.sec{display:inline-flex;align-items:center;justify-content:center;gap:5px;font:inherit;font-size:.82rem;font-weight:600;height:28px;border:1px solid var(--accent);border-radius:9px;background:var(--panel);color:var(--accent);cursor:pointer}
+.sec:hover{background:var(--accent-soft)}.sec:disabled{border-color:#c7cfdb;color:#9aa3b0;cursor:not-allowed;background:var(--panel)}
+.chead{display:flex;align-items:center;gap:7px;font-size:.95rem}.chead b{font-weight:600}.chead svg{color:var(--accent)}
+.row{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.chk{display:flex;align-items:center;gap:8px;font-size:.84rem;cursor:pointer}
+.mini{font:inherit;font-size:.75rem;border:1px solid var(--line);background:var(--panel);color:var(--accent);border-radius:6px;padding:1px 8px;cursor:pointer;height:26px;display:inline-flex;align-items:center;gap:5px}
+.mini:hover{border-color:var(--accent);background:var(--accent-soft)}
+.num{width:52px;font:inherit;font-size:.84rem;height:26px;border:1px solid var(--line);border-radius:6px;text-align:center}
+.tog{display:flex;align-items:center;gap:6px;width:100%;padding:0;border:0;background:none;color:var(--muted);font:inherit;font-size:.78rem;font-weight:600;cursor:pointer}
+.tog svg{transition:transform .15s}.tog[aria-expanded="false"] svg{transform:rotate(90deg)}
+.prog{height:6px;border-radius:3px;background:var(--line);overflow:hidden}.prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.status{font-size:.82rem;color:var(--muted);min-height:1.2em}
+.res{display:grid;gap:4px;font-size:.84rem}
+.res .ln{display:flex;gap:6px;align-items:baseline}
+.res .ok{color:var(--ok)}.res .warn{color:var(--warn)}.res .err{color:var(--err)}
+.res a{color:var(--accent);cursor:pointer;text-decoration:underline;unicode-bidi:isolate}
+.note{font-size:.74rem;color:var(--muted)}
+.tgroup{display:grid;gap:3px}
+.tgroup .gt{font-size:.7rem;color:var(--muted);font-weight:600;margin-top:1px}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.tbtn{font:inherit;font-size:.72rem;min-height:24px;padding:1px 5px;white-space:nowrap;overflow:hidden;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);cursor:pointer;text-align:start;display:flex;align-items:center;gap:4px;line-height:1.2}
+.drop{display:flex;align-items:center;gap:7px;width:100%;padding:0;border:0;background:none;color:var(--ink);font:inherit;font-size:.95rem;cursor:pointer;text-align:start}
+.drop b{font-weight:600}.drop>svg:first-child{color:var(--accent)}
+.drop .chev{margin-inline-start:auto;color:var(--muted);transition:transform .15s}
+.drop[aria-expanded="false"] .chev{transform:rotate(90deg)}
+.tbtn:hover{border-color:var(--accent);background:var(--accent-soft)}
+.tbtn:disabled{opacity:.5;cursor:default}
+.tbtn span{overflow:hidden;text-overflow:ellipsis}
+.tbtn i{flex:none;width:10px;height:10px;border-radius:2px;border:1px solid rgb(0 0 0 / .12)}
+.modal{position:fixed;inset:0;z-index:60;background:rgb(0 0 0 / .35);display:grid;place-items:center;padding:16px}
+.mbox{background:var(--panel);border-radius:12px;max-width:420px;width:100%;max-height:80vh;overflow:auto;padding:14px 16px;box-shadow:0 16px 40px rgb(0 0 0 / .3)}
+.mbox h3{margin:0 0 8px;font-size:1rem}.mbox p{margin:6px 0}.mbox ul{margin:6px 0;padding-inline-start:1.2em}
+.mbox .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.tabs button{font:inherit;font-size:.68rem;border:0;background:none;color:var(--muted);border-radius:7px;padding:4px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.2}
+.tabs button:hover{color:var(--accent)}
+.tabs button[aria-selected="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.ib.lang{font:inherit;font-size:.72rem;font-weight:700;width:30px}
+.gt2{font-size:.84rem;font-weight:600}
+.sep{height:1px;background:var(--line);margin:2px 0}
+.wlist{display:grid;gap:3px;max-height:340px;overflow:auto}
+.witem{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:7px;padding:3px 6px;font-size:.74rem;cursor:pointer;background:var(--panel)}
+.witem:hover{border-color:var(--accent);background:var(--accent-soft)}
+.witem i{flex:none;width:9px;height:9px;border-radius:2px}
+.witem b{flex:none;font-weight:600}
+.witem span{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--muted)}
+.witem .x{flex:none;border:0;background:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0 2px;line-height:1}
+.witem .x:hover{color:var(--err)}
+.wsum{display:flex;flex-wrap:wrap;gap:4px}
+.wsum span{font-size:.7rem;border-radius:10px;padding:0 7px;background:var(--bg);border:1px solid var(--line)}
+.btnrow{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.credit{text-align:center;font-size:.72rem;color:var(--muted);padding:6px 0 0}
+</style></head><body>
+<div class="wrap">
+  <header dir="rtl">
+    <h1><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/><path fill="#1f71de" d="M16 7.2l2.1 5.6 5.7 2.2-5.7 2.2L16 22.8l-2.1-5.6-5.7-2.2 5.7-2.2z"/><circle cx="22.3" cy="22.3" r="1.9" fill="#1f71de"/></svg><span class="bt"><span class="root">UULA</span><span class="sub">Restyle</span></span></h1>
+    <button type="button" class="ib updbtn" id="updBtn" hidden aria-label="Update" data-ar-title="تحديث جديد" data-en-title="New update"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10a6 6 0 1 1-1.8-4.3"/><path d="M16.2 3.2v3.5h-3.5"/></svg><span class="dot"></span></button>
+    <button type="button" class="ib lang" id="langBtn" data-ar-title="English" data-en-title="العربية">EN</button>
+    <div class="appmenu">
+      <button type="button" class="ib" id="menuBtn" aria-expanded="false" aria-label="Menu" data-ar-title="القائمة" data-en-title="Menu"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h12M4 10h12M4 14h12"/></svg></button>
+      <div class="menu" id="appMenu" hidden>
+        <button type="button" id="chkUpd" data-en="Check for updates">التحقق من التحديثات</button>
+        <button type="button" id="aboutBtn" data-en="About">حول الأداة</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs" role="tablist">
+    <button type="button" role="tab" data-tab="conv" aria-selected="true"><svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor"><path d="M10 2.5l1.7 4.6 4.8 1.8-4.8 1.8L10 15.5l-1.7-4.8-4.8-1.8 4.8-1.8z"/></svg><span data-en="Restyle">تحويل</span></button>
+    <button type="button" role="tab" data-tab="obj" aria-selected="false"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 3l11 6-5 1.5L8 16z"/></svg><span data-en="Format">تنسيق</span></button>
+    <button type="button" role="tab" data-tab="spc" aria-selected="false"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 3v14M7 5.5 10 2.8l3 2.7M7 14.5l3 2.7 3-2.7M3 10h3M14 10h3"/></svg><span data-en="Spacing">تنسيق المسافات</span></button>
+    <button type="button" role="tab" data-tab="ins" aria-selected="false"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="14" height="5" rx="1.2"/><rect x="3" y="10" width="6" height="7" rx="1.2"/><rect x="11" y="10" width="6" height="7" rx="1.2"/></svg><span data-en="Insert">إدراج</span></button>
+    <button type="button" role="tab" data-tab="set" aria-selected="false"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2.2M10 15.3v2.2M2.5 10h2.2M15.3 10h2.2M4.7 4.7l1.6 1.6M13.7 13.7l1.6 1.6M4.7 15.3l1.6-1.6M13.7 6.3l1.6-1.6"/></svg><span data-en="Options">الخيارات</span></button>
+  </nav>
+  <nav class="tabs" id="wtabs" role="tablist" hidden style="grid-template-columns:1fr 1fr">
+    <button type="button" role="tab" data-tab="wtag" aria-selected="true"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="14" height="12" rx="1.5" stroke-dasharray="3 2"/><path d="M6.5 8h7M6.5 11h5" stroke-linecap="round"/></svg><span data-en="Tag">تمييز</span></button>
+    <button type="button" role="tab" data-tab="wrev" aria-selected="false"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 5h10M7 10h10M7 15h10"/><circle cx="3.5" cy="5" r="1"/><circle cx="3.5" cy="10" r="1"/><circle cx="3.5" cy="15" r="1"/></svg><span data-en="Review">مراجعة</span></button>
+  </nav>
+
+
+  <section class="panel" data-pane="conv">
+    <div class="seg scopeSeg">
+      <button type="button" data-v="cur" aria-pressed="true" data-en="Current slide">الشريحة الحالية</button>
+      <button type="button" data-v="all" aria-pressed="false" data-en="All slides">كل الشرائح</button>
+    </div>
+    <button type="button" class="big" id="goBtn" data-en="Restyle">تحويل</button>
+  </section>
+
+  <section class="panel" data-pane="obj" hidden>
+    <span class="note" data-en="Select a box on the slide, then pick what it is.">حدّد مربعًا في الشريحة، ثم اختر نوعه.</span>
+    <div id="roles" style="display:grid;gap:4px"></div>
+  </section>
+
+  <section class="panel" data-pane="spc" hidden>
+    <div class="seg scopeSeg">
+      <button type="button" data-v="cur" aria-pressed="true" data-en="Current slide">الشريحة الحالية</button>
+      <button type="button" data-v="all" aria-pressed="false" data-en="All slides">كل الشرائح</button>
+    </div>
+    <div class="sprow"><span class="splab" data-en="Spacing">تنسيق المسافات</span>
+      <button type="button" class="sec" id="spV" data-ar-title="ضبط المسافات بين الكائنات من الأعلى والأسفل" data-en-title="Fix the vertical gaps between objects"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 2v12M5 4.5 8 1.8l3 2.7M5 11.5 8 14.2l3-2.7"/></svg><span data-en="Vertical">رأسي</span></button>
+      <button type="button" class="sec" id="spH" data-ar-title="محاذاة الكائنات إلى اليمين أو اليسار" data-en-title="Align objects to the right or left"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 8h12M4.5 5 1.8 8l2.7 3M11.5 5l2.7 3-2.7 3"/></svg><span data-en="Horizontal">أفقي</span></button>
+    </div>
+    <div class="sprow2"><span class="splab" data-en="Alignment">المحاذاة الأفقية</span><div class="seg seg3" id="hAlign">
+      <button type="button" data-v="auto" aria-pressed="true" data-en="Auto">تلقائي</button>
+      <button type="button" data-v="right" aria-pressed="false" data-en="Right">يمين</button>
+      <button type="button" data-v="left" aria-pressed="false" data-en="Left">يسار</button>
+    </div></div>
+  </section>
+
+  <section class="panel" data-pane="ins" hidden>
+    <button type="button" class="sec" id="docxBtn" data-ar-title="كل جزء مميز في ملف الوورد يصبح مربعًا مستقلًا بستايل علا" data-en-title="Every tagged part of the Word file becomes its own UULA box"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 1.5h6l3 3v10h-9z"/><path d="M5.5 7.5l1 4 1.5-3 1.5 3 1-4" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-en="Insert a Word file…">إدراج ملف وورد…</span></button>
+    <input type="file" id="docxFile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+    <div class="sep"></div>
+    <span class="note" data-en="Added under the last object on the current slide.">يُضاف تحت آخر عنصر في الشريحة الحالية.</span>
+    <div id="tpls" style="display:grid;gap:4px"></div>
+  </section>
+
+  <section class="panel" data-pane="set" hidden>
+    <div class="seg scopeSeg">
+      <button type="button" data-v="cur" aria-pressed="true" data-en="Current slide">الشريحة الحالية</button>
+      <button type="button" data-v="all" aria-pressed="false" data-en="All slides">كل الشرائح</button>
+    </div>
+    <button type="button" class="sec" id="solBtn"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/><path id="solSlash" d="M2.5 13.5l11-11"/></svg><span id="solLbl">إخفاء الحلول</span></button>
+    <div class="sep"></div>
+    <label class="chk"><input type="checkbox" id="numChk" checked> <span data-en="Page numbers">ترقيم الصفحات</span></label>
+    <div class="row" id="numRow"><span style="font-size:.82rem" data-en="Numbering starts at slide">يبدأ الترقيم من الشريحة</span><span style="display:flex;gap:6px;align-items:center"><input type="number" min="1" class="num" id="numStart" value="1"><button type="button" class="mini" id="numHere" data-en="Current">الحالية</button></span></div>
+    <button type="button" class="mini" id="numAll" style="justify-self:start" data-en="Update page numbers now">تحديث أرقام الصفحات الآن</button>
+    <span class="note" data-en="The background, watermark and footer come from the slide layout; the tool leaves them as they are.">الخلفية والعلامة المائية والتذييل تأتي من تخطيط الشريحة (Layout)، والأداة لا تغيّرها.</span>
+  </section>
+
+  <section class="panel" data-pane="wtag" hidden>
+    <span class="note" data-en="Select content, then pick its type. No need to select a whole paragraph or text box: put the cursor in it.">حدّد المحتوى ثم اختر نوعه. ولا داعي لتحديد فقرة أو مربع نص كامل: يكفي وضع المؤشر داخله.</span>
+    <span class="note" data-en="Picture of a question: put it inside the question's frame. An answer of a word or two inside the question: select those words and press Solution.">صورة السؤال: اجعلها داخل إطار السؤال. وإجابة من كلمة أو كلمتين داخل السؤال: حدّد الكلمات واضغط «حل».</span>
+    <div id="wroles" style="display:grid;gap:4px"></div>
+    <div class="sep"></div>
+    <div class="btnrow">
+      <button type="button" class="sec" id="wAuto" data-ar-title="تمييز كل المحتوى غير المميز حسب كلماته وألوانه" data-en-title="Tag all untagged content by its words and colours"><span data-en="Auto-tag">تمييز تلقائي</span></button>
+      <button type="button" class="sec" id="wUntag" data-ar-title="إزالة التمييز عن المحتوى المحدد (يبقى النص)" data-en-title="Remove the tag from the selected content (the text stays)"><span data-en="Remove tag">إزالة التمييز</span></button>
+    </div>
+  </section>
+
+  <section class="panel" data-pane="wrev" hidden>
+    <div class="row"><span class="gt2" data-en="Tagged parts">الأجزاء المميزة</span><button type="button" class="mini" id="wRefresh" data-en="Refresh">تحديث</button></div>
+    <div class="wsum" id="wsum"></div>
+    <div id="wwarn" hidden style="display:grid;gap:5px;border:1px solid #e8590c;background:#fff4e6;border-radius:8px;padding:6px 8px">
+      <span id="wwarnT" style="font-size:.78rem;color:#b4541a;font-weight:600"></span>
+      <div class="btnrow"><button type="button" class="mini" id="wMark" data-en="Colour untagged">لوّن غير المميز</button><button type="button" class="mini" id="wUnmark" data-en="Remove colouring">إزالة التلوين</button></div>
+    </div>
+    <div class="wlist" id="wlist"></div>
+    <span class="note" data-en="Click a part to go to it. To change its type, click it and pick the new type in Tag.">اضغط جزءًا للانتقال إليه. لتغيير نوعه اضغطه ثم اختر النوع الجديد من «تمييز».</span>
+    <span class="note" data-en="Only tagged parts are brought into PowerPoint.">تُنقل إلى الباوربوينت الأجزاء المميزة فقط.</span>
+    <button type="button" class="mini" id="wClear" style="justify-self:start" data-en="Remove all tags">إزالة كل التمييز</button>
+  </section>
+
+  <div class="prog" id="prog" hidden><i></i></div>
+  <div class="status" id="status" role="status"></div>
+  <div class="res" id="res"></div>
+  <div class="modal" id="modal" hidden><div class="mbox" role="dialog" aria-modal="true"><h3 id="modalT"></h3><div id="modalB"></div><button type="button" class="mini" id="modalX" style="margin-top:10px" data-en="Close">إغلاق</button></div></div>
+  <footer class="credit" dir="ltr">By Zaher Alkablawi <span id="appVer">1.1</span></footer>
+</div>
+<script>/*JSZIP*/</script>
+<script>/*ASSETS*/</script>
+<script>/*ENGINE*/</script>
+<script>/*TEMPLATES*/</script>
+<script>/*WORD*/</script>
+<script>/*APP*/</script>
+</body></html>
