@@ -1,7 +1,7 @@
 // UULA PDF — export to a small, high-quality PDF (Arabic / English interface)
 (function(){
 'use strict';
-const VER = '1.2';
+const VER = '1.3';
 const $ = id => document.getElementById(id);
 const I18N = (() => {
   const D = {
@@ -278,9 +278,7 @@ const blobUrl = () => { if (url) URL.revokeObjectURL(url); url = URL.createObjec
 $('dl').addEventListener('click', () => {
   if (!result) return;
   const a = document.createElement('a'); a.href = blobUrl(); a.download = result.name; document.body.appendChild(a); a.click(); a.remove();
-  say(T('dlHint'));
 });
-$('open').addEventListener('click', () => { if (result){ const w = window.open(blobUrl(), '_blank'); if (!w) say(T('noWin'), 'bad'); } });
 
 $('appVer').textContent = VER;
 if (window.Office && Office.onReady) Office.onReady(() => {});
