@@ -2017,7 +2017,16 @@ function hideSolutions(pkg, grids, opts) {
     n++;
     const view = f.how === 'hide' ? null : t.el.cloneNode(true);
     for (const c of allCores(t.el)) { const nv = cnvOf(c); if (nv) { nv.setAttribute('hidden', '1'); nv.setAttribute('name', 'UULA SolHidden ' + (nv.getAttribute('name') || '')); } }
-    if (!view && opts.lines && t.kind === 'text') { const lg = writingLines(doc, t.g); if (lg) t.el.parentNode.insertBefore(lg, t.el.nextSibling); }
+    if (!view && opts.lines && t.kind === 'text') {
+      // one line under every text line: counted from the text itself (the box can be shorter than its text)
+      const ps = kids(kid(t.c, 'txBody', 'p'), 'p', 'a');
+      let n = 0; for (const p of ps) n += paraLines(p, t.g.w);
+      while (ps.length && n > 1 && !paraText(ps[ps.length - 1]).trim()) { n--; ps.pop(); }   // empty paragraphs at the end
+      n = Math.max(n, Math.round((t.g.h - 7.2 * PT) / ROW), 1);
+      const top = Math.round(t.g.y) + Math.round(3.6 * PT), ys = [];
+      for (let k = 1; k <= n; k++) ys.push(top + k * ROW);
+      const lg = writingLines(doc, t.g, ys); if (lg) t.el.parentNode.insertBefore(lg, t.el.nextSibling);
+    }
     if (!view) continue;
     for (const c of allCores(view)) { const nv = cnvOf(c); if (nv) { nv.setAttribute('id', String(NEXT++)); nv.setAttribute('name', 'UULA SolView ' + (nv.getAttribute('name') || '')); nv.removeAttribute('hidden'); } }
     const vt = { c: core(view), el: view, text: t.text, g: t.g, box: null, ph: null };
