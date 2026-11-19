@@ -2787,6 +2787,9 @@ if (window.Office) Office.onReady(info => {
 (function () {
   function add() {
     if (document.getElementById('tkBar')) return;
+    var en = false;
+    try { en = localStorage.getItem('tk-lang') === 'en'; } catch (e) {}
+    var label = en ? 'All tools' : 'كل الأدوات';
     var css = document.createElement('style');
     css.textContent =
       '#tkBar{position:sticky;top:0;z-index:1000;display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;' +
@@ -2799,8 +2802,8 @@ if (window.Office) Office.onReady(info => {
     var b = document.createElement('div');
     b.id = 'tkBar';
     b.innerHTML =
-      '<button type="button" title="كل الأدوات"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
-      '<path d="M8 4l6 6-6 6"/></svg>كل الأدوات</button><span>UULA Toolkit</span>';
+      '<button type="button" title="' + label + '"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M8 4l6 6-6 6"/></svg>' + label + '</button><span>UULA Toolkit</span>';
     b.querySelector('button').addEventListener('click', function () {
       location.href = '../../index.html?v=' + Date.now();
     });
