@@ -10,6 +10,7 @@ MATH_LOGO = ('<circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stro
 GRAPH_LOGO = ('<circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/>'
               '<path d="M9 16h14M16 9v14" stroke="#9aa3b0" stroke-width="1.4"/>'
               '<path d="M10.5 9.5c2 9 9 9 11 0" fill="none" stroke="#1f71de" stroke-width="2.4" stroke-linecap="round"/>')
+TIPS = (SRC / 'tips.js').read_text(encoding='utf8').replace('</script', '<\\/script')
 BAR = '<script>' + (SRC / 'menu-icons.js').read_text(encoding='utf8') + (SRC / 'home-bar.js').read_text(encoding='utf8') + '</script>\n'
 
 
@@ -40,6 +41,10 @@ def out(name, html):
     if name in FIX_CSS:
         tag = '<style>' + FIX_CSS[name] + '</style>'
         html = html.replace('</head>', tag + '</head>', 1) if '</head>' in html else html.replace('</style>', '</style>' + tag, 1)
+    if name == 'math':  # let the shared tooltips read Arabic Math's typed forms and shortcuts
+        anchor = "document.addEventListener('pointerdown', ()=>{ tip.hidden=true; tipEl=null; });"
+        assert anchor in html
+        html = html.replace(anchor, anchor + "\nwindow.TK_MATH = { get TIPEX(){ return TIPEX; }, get SB(){ return typeof SHORT_BY_INS !== 'undefined' ? SHORT_BY_INS : null; }, get K(){ return K; } };", 1)
     if name == 'restyle':  # Restyle: booklet-page logo
         html = html.replace(RESTYLE_OLD, RESTYLE_LOGO, 1)
     if name == 'cover':  # Cover gets its own logo (the slide), not Dark's half circle
@@ -55,8 +60,9 @@ def out(name, html):
                   '<svg class="lg" width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">' + GRAPH_LOGO + '</svg>', html, count=1, flags=re.S)
     d = ROOT / 'tools' / name
     d.mkdir(parents=True, exist_ok=True)
+    bar = BAR + '<script>window.TK_TOOL = ' + repr(name) + ';\n' + TIPS + '</script>\n'
     i = html.rfind('</body>')
-    html = html[:i] + BAR + html[i:] if i >= 0 else html + '\n' + BAR
+    html = html[:i] + bar + html[i:] if i >= 0 else html + '\n' + bar
     (d / 'app.html').write_text(html, encoding='utf8')
     print(f'tools/{name}/app.html', len(html))
 
@@ -80,5 +86,7 @@ idx = ROOT / 'index.html'
 h = idx.read_text(encoding='utf8')
 mi = '/*MI*/\n' + (SRC / 'menu-icons.js').read_text(encoding='utf8') + '/*MI-END*/\n'
 h = _re.sub(r'/\*MI\*/\n(?:.*?/\*MI-END\*/\n)?', lambda m: mi, h, count=1, flags=_re.S)
+tips = "/*TIPS*/\nwindow.TK_TOOL = 'home';\n" + TIPS + '/*TIPS-END*/\n'
+h = _re.sub(r'/\*TIPS\*/\n(?:.*?/\*TIPS-END\*/\n)?', lambda m: tips, h, count=1, flags=_re.S)
 idx.write_text(h, encoding='utf8')
 print('index.html: menu icons updated')
