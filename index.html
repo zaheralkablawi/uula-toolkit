@@ -41,12 +41,10 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 .mini{font:inherit;font-size:.75rem;border:1px solid var(--line);background:var(--panel);color:var(--accent);border-radius:6px;padding:1px 8px;cursor:pointer}
 .mrow{display:flex;align-items:center;gap:10px;padding:7px 2px;border-bottom:1px solid var(--line)}
 .mrow.off svg.ic2,.mrow.off b{opacity:.45}
-.arw{display:inline-grid;place-items:center;width:26px;height:24px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--accent);cursor:pointer;padding:0}
-.arw svg{width:14px!important;height:14px!important}
-.arw:hover{border-color:var(--accent);background:var(--accent-soft)}
-.arw:disabled{color:#c3cad4;border-color:var(--line);background:var(--panel);cursor:default}
-.mfoot{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
-.linkb{font:inherit;font-size:.76rem;border:0;background:none;color:var(--muted);text-decoration:underline;cursor:pointer;padding:0}
+.mlist{position:relative;touch-action:none}
+.mrow{background:var(--panel);cursor:grab;user-select:none;-webkit-user-select:none}
+.mrow .grip{width:16px;height:16px;flex:none;color:#9aa3b0}
+.mrow.drag{position:relative;z-index:2;cursor:grabbing;box-shadow:0 6px 18px rgb(0 0 0 / .16);border-radius:8px;border-bottom-color:transparent}
 .mrow:last-child{border-bottom:0}
 .mrow svg.ic2{width:24px;height:24px;flex:none}
 .mrow b{flex:1;font-weight:600;font-size:.9rem;direction:ltr;text-align:right}
@@ -108,10 +106,10 @@ const VER = '1.0';
 const $ = id => document.getElementById(id);
 // ---- texts in Arabic and English (only the words change, the layout stays the same) ----
 const D = {
-  ar: { langBtn: 'EN', langName: 'English', update: 'تحديث جديد', menu: 'القائمة', chkUpd: 'التحقق من التحديثات', about: 'حول الأداة', close: 'إغلاق', manage: 'تحرير الأدوات', manageNote: 'أظهر أو أخفِ الأدوات، ورتّبها بالأسهم. يُحفظ اختيارك على هذا الجهاز.', up: 'نقل للأعلى', down: 'نقل للأسفل', reset: 'استعادة الوضع الافتراضي', allHidden: 'كل الأدوات مخفية.', showAll: 'إظهار كل الأدوات',
+  ar: { langBtn: 'EN', langName: 'English', update: 'تحديث جديد', menu: 'القائمة', chkUpd: 'التحقق من التحديثات', about: 'حول الأداة', close: 'إغلاق', manage: 'تحرير الأدوات', manageNote: 'أظهر أو أخفِ الأدوات، واسحبها لترتيبها. يُحفظ اختيارك على هذا الجهاز.', drag: 'اسحب للترتيب', allHidden: 'كل الأدوات مخفية.', showAll: 'إظهار كل الأدوات',
         latest: 'لديك أحدث نسخة', noConn: 'لا يوجد اتصال', hasUpd: 'يوجد تحديث جديد',
         aboutHtml: '<p>كل أدوات علا للباوربوينت والوورد في مكان واحد. اختر الأداة من القائمة، وارجع للقائمة من زر "كل الأدوات" في أعلى الأداة.</p>' },
-  en: { langBtn: 'ع', langName: 'العربية', update: 'New update', menu: 'Menu', chkUpd: 'Check for updates', about: 'About', close: 'Close', manage: 'Edit tools', manageNote: 'Show or hide tools, and order them with the arrows. Your choice is saved on this device.', up: 'Move up', down: 'Move down', reset: 'Restore default', allHidden: 'All tools are hidden.', showAll: 'Show all tools',
+  en: { langBtn: 'ع', langName: 'العربية', update: 'New update', menu: 'Menu', chkUpd: 'Check for updates', about: 'About', close: 'Close', manage: 'Edit tools', manageNote: 'Show or hide tools, and drag them to order. Your choice is saved on this device.', drag: 'Drag to order', allHidden: 'All tools are hidden.', showAll: 'Show all tools',
         latest: 'You have the latest version', noConn: 'No connection', hasUpd: 'A new update is available',
         aboutHtml: '<p>All UULA tools for PowerPoint and Word in one place. Pick a tool from the list, and go back to the list with the "All tools" button at the top of the tool.</p>' }
 };
@@ -182,16 +180,14 @@ $('menuBtn').addEventListener('click', e => { e.stopPropagation(); menu($('appMe
 document.addEventListener('click', e => { if (!e.target.closest('.appmenu')) menu(false); });
 $('modalX').addEventListener('click', () => { $('modal').hidden = true; });
 $('modal').addEventListener('click', e => { if (e.target === $('modal')) $('modal').hidden = true; });
-const ARW = d => '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="' + (d ? 'M5 8l5 5 5-5' : 'M5 12l5-5 5 5') + '"/></svg>';
+const GRIP = '<svg class="grip" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="5.5" cy="3.5" r="1.4"/><circle cx="10.5" cy="3.5" r="1.4"/><circle cx="5.5" cy="8" r="1.4"/><circle cx="10.5" cy="8" r="1.4"/><circle cx="5.5" cy="12.5" r="1.4"/><circle cx="10.5" cy="12.5" r="1.4"/></svg>';
 function drawManage() {
   const avail = ordered().filter(t => !host || t.hosts.includes(host));
-  $('modalB').innerHTML = '<p class="mnote">' + T('manageNote') + '</p>' + avail.map((t, k) => {
+  $('modalB').innerHTML = '<p class="mnote">' + T('manageNote') + '</p><div class="mlist" id="mlist">' + avail.map(t => {
     const on = !hidden.includes(t.id);
-    return '<div class="mrow' + (on ? '' : ' off') + '"><svg class="ic2" viewBox="0 0 32 32" aria-hidden="true">' + t.icon + '</svg><b>' + t.name + '</b>' +
-      '<button type="button" class="arw" data-mv="-1" data-id="' + t.id + '" title="' + T('up') + '" aria-label="' + T('up') + '"' + (k ? '' : ' disabled') + '>' + ARW(0) + '</button>' +
-      '<button type="button" class="arw" data-mv="1" data-id="' + t.id + '" title="' + T('down') + '" aria-label="' + T('down') + '"' + (k < avail.length - 1 ? '' : ' disabled') + '>' + ARW(1) + '</button>' +
-      '<input type="checkbox" class="sw" data-id="' + t.id + '" aria-label="' + t.name + '"' + (on ? ' checked' : '') + '></div>';
-  }).join('') + '<div class="mfoot"><button type="button" class="linkb" id="resetTools">' + T('reset') + '</button></div>';
+    return '<div class="mrow' + (on ? '' : ' off') + '" data-id="' + t.id + '" title="' + T('drag') + '"><svg class="ic2" viewBox="0 0 32 32" aria-hidden="true">' + t.icon + '</svg><b>' + t.name + '</b>' +
+      '<input type="checkbox" class="sw" data-id="' + t.id + '" aria-label="' + t.name + '"' + (on ? ' checked' : '') + '>' + GRIP + '</div>';
+  }).join('') + '</div>';
 }
 $('toolsItem').addEventListener('click', () => {
   menu(false);
@@ -204,17 +200,37 @@ $('modalB').addEventListener('change', e => {
   hidden = hidden.filter(x => x !== c.dataset.id); if (!c.checked) hidden.push(c.dataset.id);
   saveHidden(); draw(); c.closest('.mrow').classList.toggle('off', !c.checked);
 });
-$('modalB').addEventListener('click', e => {
-  if (e.target.closest('#resetTools')) { hidden = []; order = []; saveHidden(); saveOrder(); draw(); drawManage(); return; }
-  const a = e.target.closest('.arw'); if (!a || a.disabled) return;
-  // move inside the full list (tools of the other program keep their places)
-  const all = ordered().map(t => t.id), vis = ordered().filter(t => !host || t.hosts.includes(host)).map(t => t.id);
-  const k = vis.indexOf(a.dataset.id), other = vis[k + Number(a.dataset.mv)]; if (!other) return;
-  const i = all.indexOf(a.dataset.id), j = all.indexOf(other); all[i] = other; all[j] = a.dataset.id;
-  order = all; saveOrder(); draw(); drawManage();
-  const again = $('modalB').querySelector('.arw[data-id="' + a.dataset.id + '"][data-mv="' + a.dataset.mv + '"]');
-  if (again && !again.disabled) again.focus();
+// ---- drag to order (pointer events: works with mouse, touch and pen) ----
+let drag = null;
+$('modalB').addEventListener('pointerdown', e => {
+  const row = e.target.closest('.mrow'); if (!row || e.target.closest('.sw') || e.button > 0) return;
+  e.preventDefault();
+  drag = { row, y0: e.clientY, off: 0 };
+  row.classList.add('drag'); row.setPointerCapture(e.pointerId);
 });
+$('modalB').addEventListener('pointermove', e => {
+  if (!drag) return;
+  const { row } = drag;
+  row.style.transform = 'translateY(' + (e.clientY - drag.y0) + 'px)';
+  const prev = row.previousElementSibling, next = row.nextElementSibling;
+  const mid = el => { const r = el.getBoundingClientRect(); return r.top + r.height / 2; };
+  const me = row.getBoundingClientRect(), myMid = me.top + me.height / 2;
+  if (prev && myMid < mid(prev)) { const h = prev.getBoundingClientRect().height; row.parentNode.insertBefore(row, prev); drag.y0 -= h; }
+  else if (next && myMid > mid(next)) { const h = next.getBoundingClientRect().height; row.parentNode.insertBefore(next, row); drag.y0 += h; }
+  row.style.transform = 'translateY(' + (e.clientY - drag.y0) + 'px)';
+});
+const endDrag = () => {
+  if (!drag) return;
+  const { row } = drag; drag = null;
+  row.classList.remove('drag'); row.style.transform = '';
+  // new order: the dragged list, with tools of the other program kept in their places
+  const vis = [...$('mlist').children].map(r => r.dataset.id);
+  const all = ordered().map(t => t.id); let k = 0;
+  order = all.map(id => vis.includes(id) ? vis[k++] : id);
+  saveOrder(); draw();
+};
+$('modalB').addEventListener('pointerup', endDrag);
+$('modalB').addEventListener('pointercancel', endDrag);
 $('aboutBtn').addEventListener('click', () => {
   menu(false);
   $('modalT').textContent = T('about');
