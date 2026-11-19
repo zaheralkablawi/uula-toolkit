@@ -32,11 +32,16 @@ FIX_CSS = {
 COVER_LOGO = ('<rect x="8.6" y="11" width="14.8" height="10" rx="1.6" fill="#1f71de"/>'
               '<path d="M12 15h8M13.5 18h5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>')
 
+RESTYLE_OLD = '<path fill="#1f71de" d="M16 7.2l2.1 5.6 5.7 2.2-5.7 2.2L16 22.8l-2.1-5.6-5.7-2.2 5.7-2.2z"/><circle cx="22.3" cy="22.3" r="1.9" fill="#1f71de"/>'
+RESTYLE_LOGO = '<rect x="10.5" y="9" width="11" height="14" rx="1.6" fill="#1f71de"/><path d="M13 12.5h6M13 15.5h6M13 18.5h3.5" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/>'
+
 
 def out(name, html):
     if name in FIX_CSS:
         tag = '<style>' + FIX_CSS[name] + '</style>'
         html = html.replace('</head>', tag + '</head>', 1) if '</head>' in html else html.replace('</style>', '</style>' + tag, 1)
+    if name == 'restyle':  # Restyle: booklet-page logo
+        html = html.replace(RESTYLE_OLD, RESTYLE_LOGO, 1)
     if name == 'cover':  # Cover gets its own logo (the slide), not Dark's half circle
         html = html.replace('<path d="M16 3.5a12.5 12.5 0 0 1 0 25z" fill="#1f71de"/></svg><span class="bt">', COVER_LOGO + '</svg><span class="bt">', 1)
     # inside the toolkit the tools show their own name only (no "UULA" above it)
