@@ -1,7 +1,7 @@
 // UULA PDF — export to a small, high-quality PDF (Arabic / English interface)
 (function(){
 'use strict';
-const VER = '1.3';
+const VER = '1.4';
 const $ = id => document.getElementById(id);
 const I18N = (() => {
   const D = {
@@ -11,9 +11,9 @@ const I18N = (() => {
       download: 'تنزيل PDF', open: 'فتح', latest: 'لديك أحدث نسخة.', offline: 'لا يوجد اتصال.', newUpd: 'يوجد تحديث جديد: اضغط زر التحديث.',
       onlyPpt: 'تعمل الأداة في PowerPoint فقط (نسخة حديثة).', sRead: 'قراءة الملف…', sDigits: 'تحويل الأرقام…', sSlide: n => 'تجهيز الشريحة ' + n + '…',
       sPdf: 'إنشاء الـ PDF…', sRestore: 'إرجاع العرض كما كان…', sSmall: 'تصغير الحجم…',
-      mathTitle: 'شرائح فيها معادلات',
-      mathAsk: n => '<p>في ' + n + ' من الشرائح أرقام داخل مربعات فيها معادلات. لتتحول دون أن تتفكك المعادلات، تُنسخ هذه الشرائح مؤقتًا بالأرقام الجديدة، ثم تُعاد الأصلية بعد التصدير.</p><p>احفظ الملف قبل المتابعة احتياطًا.</p>',
-      oldPpt: ' أرقام المعادلات بقيت كما هي (نسخة PowerPoint قديمة).', mathSkipped: ' أرقام الشرائح التي فيها معادلات بقيت كما هي.',
+      mathTitle: 'نسخ مؤقت لبعض الشرائح',
+      mathAsk: n => '<p>' + n + ' من الشرائح تحتاج نسخة مؤقتة: الشرائح التي فيها معادلات (لتتحول أرقامها دون أن تتفكك)، والغلاف والصفحات الأولى (لتبقى أرقامها إنجليزية في الـ PDF). بعد التصدير تُعاد الأصلية.</p><p>احفظ الملف قبل المتابعة احتياطًا.</p>',
+      oldPpt: ' أرقام المعادلات بقيت كما هي (نسخة PowerPoint قديمة).', mathSkipped: ' الشرائح التي فيها معادلات والغلاف بقيت كما هي.',
       done: 'تم.', restoreFail: ' تنبيه: تعذّر إرجاع بعض التغييرات، استخدم ⌘Z.', fail: 'تعذّر التصدير: ', dlHint: 'إن لم يبدأ التنزيل، اضغط «فتح» ثم احفظ الملف من النافذة.', noWin: 'تعذّر فتح نافذة جديدة.',
       aboutHtml: '<p>تصدّر العرض التقديمي إلى PDF من باوربوينت نفسه (بنفس الشكل والخطوط والمعادلات)، ثم تصغّر حجمه بضغط الصور وحذف المكرر منها.</p>' +
         '<p><b>الأرقام</b>: هندية أو إنجليزية في الـ PDF، ثم يرجع العرض كما كان. الشرائح التي فيها معادلات باوربوينت تُنسخ مؤقتًا لتتحول أرقامها دون أن تتفكك، ثم تُعاد الأصلية.</p>' +
@@ -24,8 +24,8 @@ const I18N = (() => {
       download: 'Download PDF', open: 'Open', latest: 'You have the latest version.', offline: 'No connection.', newUpd: 'A new update is ready: press the update button.',
       onlyPpt: 'This tool works in PowerPoint only (recent version).', sRead: 'Reading the file…', sDigits: 'Changing digits…', sSlide: n => 'Preparing slide ' + n + '…',
       sPdf: 'Creating the PDF…', sRestore: 'Putting the presentation back…', sSmall: 'Making it smaller…',
-      mathTitle: 'Slides with equations',
-      mathAsk: n => '<p>' + n + ' slides have digits in text boxes with equations. So the equations stay whole, these slides are copied for a moment with the new digits, and the originals come back after the export.</p><p>Save the file before you continue, just in case.</p>',
+      mathTitle: 'Copying some slides for a moment',
+      mathAsk: n => '<p>' + n + ' slides need a copy for a moment: slides with equations (so their digits change without breaking them) and the cover and front pages (so their digits stay English in the PDF). The originals come back after the export.</p><p>Save the file before you continue, just in case.</p>',
       oldPpt: ' Digits in equations stayed as they are (older PowerPoint).', mathSkipped: ' Digits on slides with equations stayed as they are.',
       done: 'Done.', restoreFail: ' Note: some changes could not be put back, use ⌘Z.', fail: 'Export failed: ', dlHint: 'If the download does not start, press “Open” and save it from the window.', noWin: 'Could not open a new window.',
       aboutHtml: '<p>Exports the presentation to PDF from PowerPoint itself (same look, fonts and equations), then makes it smaller by compressing pictures and removing duplicates.</p>' +
@@ -189,14 +189,15 @@ async function undoText(undo){
   });
 }
 // ---- 2) slides with equations: a copy with changed digits takes the place of the slide; returns an undo list ----
-async function rebuildSlides(list, dir){
+async function rebuildSlides(list, dir, covers){
+  covers = new Set(covers || []);
   const undo = [];
   for (const idx of list.slice().sort((a, b) => b - a)){
     step(T('sSlide', idx + 1));
     await PowerPoint.run(async ctx => {
       const all = ctx.presentation.slides; all.load('items/id'); await ctx.sync();
       const slide = all.items[idx]; const ex = slide.exportAsBase64(); await ctx.sync();
-      const r = await MTC.slideRebuildBytes(b64.from(ex.value), dir); if (!r) return;
+      const r = covers.has(idx) ? await MTC.coverLatinBytes(b64.from(ex.value)) : await MTC.slideRebuildBytes(b64.from(ex.value), dir); if (!r) return;
       ctx.presentation.insertSlidesFromBase64(b64.to(r.bytes), { formatting: 'UseDestinationTheme', targetSlideId: slide.id });
       await ctx.sync(); all.load('items/id'); await ctx.sync();
       const fresh = all.items[idx + 1]; if (!fresh || fresh.id === slide.id) throw new Error('insert');
@@ -241,10 +242,11 @@ async function run(){
     let rebuild = (await MTC.slidesNeedingRebuild(pptx, dir)).filter(i => !content || content.includes(i));
     const mp = await MTC.mathParas(pptx);
     const mathShapes = {}; for (const s of mp) mathShapes[s.slide] = s.shapes;
+    let covers = await MTC.coverSlides(pptx, content);
     let skipNote = '';
-    if (rebuild.length){
-      if (!Office.context.requirements.isSetSupported('PowerPointApi', '1.8')){ skipNote = T('oldPpt'); rebuild = []; }
-      else if (!(await ask(T('mathTitle'), T('mathAsk', rebuild.length)))){ rebuild = []; skipNote = T('mathSkipped'); }
+    if (rebuild.length || covers.length){
+      if (!Office.context.requirements.isSetSupported('PowerPointApi', '1.8')){ skipNote = T('oldPpt'); rebuild = []; covers = []; }
+      else if (!(await ask(T('mathTitle'), T('mathAsk', rebuild.length + covers.length)))){ rebuild = []; covers = []; skipNote = T('mathSkipped'); }
     }
     const skip = new Set(rebuild);
     if (content){ const n = (await PowerPoint.run(async ctx => { const c = ctx.presentation.slides; c.load('items'); await ctx.sync(); return c.items.length; })); for (let i = 0; i < n; i++) if (!content.includes(i)) skip.add(i); }
@@ -252,7 +254,7 @@ async function run(){
       step(T('sDigits'));
       const SH = (await MTC.slideHeight(MTC.openZip(pptx))) / 12700;
       tUndo = await textDigits(dir, skip, mathShapes, SH);
-      if (rebuild.length) sUndo = await rebuildSlides(rebuild, dir);
+      if (rebuild.length || covers.length) sUndo = await rebuildSlides(rebuild.concat(covers), dir, covers);
       step(T('sPdf'));
       pdf = await fileBytes(Office.FileType.Pdf);
     } finally {

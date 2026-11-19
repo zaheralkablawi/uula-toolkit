@@ -505,6 +505,40 @@ async function slideCtx(zip, path, SH){
   return { SH, tagNames };
 }
 async function slideHeight(zip){ const p = await zip.text('ppt/presentation.xml'); const m = p && /<p:sldSz\b[^>]*\bcy="(\d+)"/.exec(p); return m ? +m[1] : 0; }
+// cover / front pages: when macOS makes the PDF, digits in a paragraph marked Arabic (its end mark, or an Arabic
+// "complex script" font on the run) come out Hindi although the screen shows them English. In paragraphs that hold
+// digits and no Arabic letters: English language everywhere, no complex-script font -> the PDF keeps them as typed.
+function coverLatin(xml){
+  let n = 0;
+  const out = xml.replace(/<a:p>[\s\S]*?<\/a:p>/g, p => {
+    const t = (p.match(/<a:t>([^<]*)<\/a:t>/g) || []).join('');
+    if (!/[0-9]/.test(t) || /[\u0621-\u064A]/.test(t)) return p;
+    const q = p.replace(/(<a:(?:rPr|endParaRPr)\b[^>]*?)\blang="[^"]*"/g, '$1lang="en-US"')
+               .replace(/\s+altLang="[^"]*"/g, '')
+               .replace(/<a:cs\b[^>]*\/>/g, '');
+    if (q !== p) n++;
+    return q;
+  });
+  return { xml: out, n };
+}
+async function coverSlides(u8, content){
+  if (!content) return [];
+  const zip = openZip(u8);
+  const pres = await zip.text('ppt/presentation.xml'), prel = await rels(zip, 'ppt/presentation.xml');
+  const ids = (pres.match(/<p:sldId\b[^>]*>/g) || []).map(s => attr(s, 'r:id'));
+  const out = [];
+  for (let i = 0; i < ids.length; i++){ if (content.includes(i)) continue; const x = await zip.text(prel[ids[i]]); if (x && coverLatin(x).n) out.push(i); }
+  return out;
+}
+async function coverLatinBytes(u8){
+  const zip = openZip(u8), changed = {}; let n = 0;
+  for (const name of Object.keys(zip.files)){
+    if (!/^ppt\/slides\/slide\d+\.xml$/.test(name)) continue;
+    const r = coverLatin(await zip.text(name)); if (!r.n) continue;
+    n += r.n; changed[name] = new TextEncoder().encode(r.xml);
+  }
+  return n ? { bytes: rezip(u8, changed), n } : null;
+}
 // content slides = slides with a page number (MYNUMBER box or slide-number placeholder); the cover and front pages have none.
 // -> array of indexes, or null when the file has no page numbers at all (then every slide counts)
 async function contentSlides(u8){
@@ -597,7 +631,7 @@ async function pictureLinks(u8){
   return out;
 }
 
-return { digitEdits, slideDigits, isPageNumberSp, slideHeight, contentSlides, slidesNeedingRebuild, slideRebuildBytes, pictureLinks, scan, openZip, cfbStream, parseMTEF, convert, mathParas, textSpans, startsWithMath, slideMathDigits, slidesWithMathDigits, rezip, crc32, mathDigits, fixMathShapesDigits };
+return { digitEdits, slideDigits, isPageNumberSp, slideHeight, contentSlides, coverSlides, coverLatinBytes, coverLatin, slidesNeedingRebuild, slideRebuildBytes, pictureLinks, scan, openZip, cfbStream, parseMTEF, convert, mathParas, textSpans, startsWithMath, slideMathDigits, slidesWithMathDigits, rezip, crc32, mathDigits, fixMathShapesDigits };
 
 })();
 if (typeof module !== 'undefined') module.exports = MTC;
