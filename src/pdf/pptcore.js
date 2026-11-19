@@ -505,6 +505,22 @@ async function slideCtx(zip, path, SH){
   return { SH, tagNames };
 }
 async function slideHeight(zip){ const p = await zip.text('ppt/presentation.xml'); const m = p && /<p:sldSz\b[^>]*\bcy="(\d+)"/.exec(p); return m ? +m[1] : 0; }
+// content slides = slides with a page number (MYNUMBER box or slide-number placeholder); the cover and front pages have none.
+// -> array of indexes, or null when the file has no page numbers at all (then every slide counts)
+async function contentSlides(u8){
+  const zip = openZip(u8);
+  const pres = await zip.text('ppt/presentation.xml'), prel = await rels(zip, 'ppt/presentation.xml');
+  const ids = (pres.match(/<p:sldId\b[^>]*>/g) || []).map(s => attr(s, 'r:id'));
+  const out = [];
+  for (let i = 0; i < ids.length; i++){
+    const x = await zip.text(prel[ids[i]]); if (!x) continue;
+    if (/<p:ph\b[^>]*type="sldNum"/.test(x)){ out.push(i); continue; }
+    if (!x.includes('<p:tags ')) continue;
+    const ctx = await slideCtx(zip, prel[ids[i]], 0);
+    if (Object.values(ctx.tagNames).some(t => /MYNUMBER/i.test(t))) out.push(i);
+  }
+  return out.length ? out : null;
+}
 // slides (index) whose equation text boxes need digits changed in direction dir
 async function slidesNeedingRebuild(u8, dir){
   const zip = openZip(u8);
@@ -581,7 +597,7 @@ async function pictureLinks(u8){
   return out;
 }
 
-return { digitEdits, slideDigits, isPageNumberSp, slideHeight, slidesNeedingRebuild, slideRebuildBytes, pictureLinks, scan, openZip, cfbStream, parseMTEF, convert, mathParas, textSpans, startsWithMath, slideMathDigits, slidesWithMathDigits, rezip, crc32, mathDigits, fixMathShapesDigits };
+return { digitEdits, slideDigits, isPageNumberSp, slideHeight, contentSlides, slidesNeedingRebuild, slideRebuildBytes, pictureLinks, scan, openZip, cfbStream, parseMTEF, convert, mathParas, textSpans, startsWithMath, slideMathDigits, slidesWithMathDigits, rezip, crc32, mathDigits, fixMathShapesDigits };
 
 })();
 if (typeof module !== 'undefined') module.exports = MTC;

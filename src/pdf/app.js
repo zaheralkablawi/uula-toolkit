@@ -1,7 +1,7 @@
 // UULA PDF — export to a small, high-quality PDF (Arabic / English interface)
 (function(){
 'use strict';
-const VER = '1.1';
+const VER = '1.2';
 const $ = id => document.getElementById(id);
 const I18N = (() => {
   const D = {
@@ -17,7 +17,7 @@ const I18N = (() => {
       done: 'تم.', restoreFail: ' تنبيه: تعذّر إرجاع بعض التغييرات، استخدم ⌘Z.', fail: 'تعذّر التصدير: ', dlHint: 'إن لم يبدأ التنزيل، اضغط «فتح» ثم احفظ الملف من النافذة.', noWin: 'تعذّر فتح نافذة جديدة.',
       aboutHtml: '<p>تصدّر العرض التقديمي إلى PDF من باوربوينت نفسه (بنفس الشكل والخطوط والمعادلات)، ثم تصغّر حجمه بضغط الصور وحذف المكرر منها.</p>' +
         '<p><b>الأرقام</b>: هندية أو إنجليزية في الـ PDF، ثم يرجع العرض كما كان. الشرائح التي فيها معادلات باوربوينت تُنسخ مؤقتًا لتتحول أرقامها دون أن تتفكك، ثم تُعاد الأصلية.</p>' +
-        '<p><b>روابط الصور</b>: كل صورة أو شكل عليه رابط يبقى قابلًا للضغط في الـ PDF.</p><p>تتغير أرقام محتوى الشرائح فقط: أرقام الصفحات والتذييل والقالب والخلفية تبقى كما هي.</p>' },
+        '<p><b>روابط الصور</b>: كل صورة أو شكل عليه رابط يبقى قابلًا للضغط في الـ PDF.</p><p>تتغير أرقام المحتوى العلمي فقط (الشرائح التي عليها رقم صفحة): الغلاف والصفحات الأولى وأرقام الصفحات والتذييل والقالب والخلفية تبقى كما هي.</p>' },
     en: { dir: 'ltr', langName: 'العربية', update: 'New update', menu: 'Menu', chkUpd: 'Check for updates', about: 'About', close: 'Close', ok: 'Continue',
       digitsLabel: 'Digits in the PDF', hindi: 'Arabic ١٢٣', latin: 'English 123', qualityLabel: 'Quality', high: 'High', medium: 'Medium (smaller)',
       linksChk: 'Picture links are clickable', export: 'Export PDF', exporting: 'Exporting…', restoreNote: 'The presentation goes back as it was after the export.',
@@ -30,7 +30,7 @@ const I18N = (() => {
       done: 'Done.', restoreFail: ' Note: some changes could not be put back, use ⌘Z.', fail: 'Export failed: ', dlHint: 'If the download does not start, press “Open” and save it from the window.', noWin: 'Could not open a new window.',
       aboutHtml: '<p>Exports the presentation to PDF from PowerPoint itself (same look, fonts and equations), then makes it smaller by compressing pictures and removing duplicates.</p>' +
         '<p><b>Digits</b>: Arabic or English in the PDF, then the presentation goes back as it was. Slides with PowerPoint equations are copied for a moment so their digits change without breaking.</p>' +
-        '<p><b>Picture links</b>: every picture or shape with a link stays clickable in the PDF.</p><p>Only the slides’ content changes: page numbers, footers, the template and the background keep their digits.</p>' }
+        '<p><b>Picture links</b>: every picture or shape with a link stays clickable in the PDF.</p><p>Only the content slides change (those with a page number): the cover, front pages, page numbers, footers, the template and the background keep their digits.</p>' }
   };
   let lang = 'ar';
   try { lang = localStorage.getItem('tkpdf-lang') || (localStorage.getItem('tk-lang') === 'en' ? 'en' : 'ar'); } catch (e) {}
@@ -236,7 +236,9 @@ async function run(){
     const pptx = await fileBytes(Office.FileType.Compressed);
     const dir = opt.digits;
     const links = $('links').checked ? await MTC.pictureLinks(pptx) : [];
-    let rebuild = await MTC.slidesNeedingRebuild(pptx, dir);
+    // only the scientific content: slides with a page number (not the cover or front pages)
+    const content = await MTC.contentSlides(pptx);
+    let rebuild = (await MTC.slidesNeedingRebuild(pptx, dir)).filter(i => !content || content.includes(i));
     const mp = await MTC.mathParas(pptx);
     const mathShapes = {}; for (const s of mp) mathShapes[s.slide] = s.shapes;
     let skipNote = '';
@@ -245,6 +247,7 @@ async function run(){
       else if (!(await ask(T('mathTitle'), T('mathAsk', rebuild.length)))){ rebuild = []; skipNote = T('mathSkipped'); }
     }
     const skip = new Set(rebuild);
+    if (content){ const n = (await PowerPoint.run(async ctx => { const c = ctx.presentation.slides; c.load('items'); await ctx.sync(); return c.items.length; })); for (let i = 0; i < n; i++) if (!content.includes(i)) skip.add(i); }
     try {
       step(T('sDigits'));
       const SH = (await MTC.slideHeight(MTC.openZip(pptx))) / 12700;
