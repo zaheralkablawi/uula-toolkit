@@ -72,7 +72,7 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 .mbox{background:var(--panel);border-radius:12px;max-width:420px;width:100%;max-height:80vh;overflow:auto;padding:14px 16px;box-shadow:0 16px 40px rgb(0 0 0 / .3)}
 .mbox h3{margin:0 0 8px;font-size:1rem}.mbox p{margin:6px 0}.mbox ul{margin:6px 0;padding-inline-start:1.2em}
 .mbox .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
 .tabs button{font:inherit;font-size:.68rem;border:0;background:none;color:var(--muted);border-radius:7px;padding:4px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.2}
 .tabs button:hover{color:var(--accent)}
 .tabs button[aria-selected="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
@@ -91,6 +91,7 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 .wsum span{font-size:.7rem;border-radius:10px;padding:0 7px;background:var(--bg);border:1px solid var(--line)}
 .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .credit{text-align:center;font-size:.72rem;color:var(--muted);padding:6px 0 0}
+.splab.gt2{font-size:.84rem;font-weight:600;color:var(--ink)}
 </style><style>.ib.lang{color:#5d6878;font-weight:600;font-size:.8rem}header h1{margin-right:4px}</style></head><body>
 <div class="wrap">
   <header dir="rtl">
@@ -108,7 +109,6 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 
   <nav class="tabs" id="tabs" role="tablist">
     <button type="button" role="tab" data-tab="obj" aria-selected="true"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 3l11 6-5 1.5L8 16z"/></svg><span data-en="Format">تنسيق</span></button>
-    <button type="button" role="tab" data-tab="spc" aria-selected="false"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 3v14M7 5.5 10 2.8l3 2.7M7 14.5l3 2.7 3-2.7M3 10h3M14 10h3"/></svg><span data-en="Spacing">تنسيق المسافات</span></button>
     <button type="button" role="tab" data-tab="ins" aria-selected="false"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="14" height="5" rx="1.2"/><rect x="3" y="10" width="6" height="7" rx="1.2"/><rect x="11" y="10" width="6" height="7" rx="1.2"/></svg><span data-en="Insert">إدراج</span></button>
     <button type="button" role="tab" data-tab="set" aria-selected="false"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2.2M10 15.3v2.2M2.5 10h2.2M15.3 10h2.2M4.7 4.7l1.6 1.6M13.7 13.7l1.6 1.6M4.7 15.3l1.6-1.6M13.7 6.3l1.6-1.6"/></svg><span data-en="Options">الخيارات</span></button>
   </nav>
@@ -120,24 +120,15 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 
 
   <section class="panel" data-pane="obj">
+    <div class="seg scopeSeg">
+      <button type="button" data-v="cur" aria-pressed="true" data-en="Current slide">الشريحة الحالية</button>
+      <button type="button" data-v="all" aria-pressed="false" data-en="All slides">كل الشرائح</button>
+    </div>
     <span class="gt2" data-en="Convert the font">تحويل الخط</span>
     <span class="note" data-en="Converts the font to the UULA font and the required size.">تحويل الخط إلى خط علا وإلى الحجم المطلوب.</span>
-    <div class="seg scopeSeg">
-      <button type="button" data-v="cur" aria-pressed="true" data-en="Current slide">الشريحة الحالية</button>
-      <button type="button" data-v="all" aria-pressed="false" data-en="All slides">كل الشرائح</button>
-    </div>
     <button type="button" class="big" id="goBtn" data-en="Convert">تحويل</button>
     <div class="sep"></div>
-    <span class="note" data-en="Select a box on the slide, then pick what it is.">حدّد مربعًا في الشريحة، ثم اختر نوعه.</span>
-    <div id="roles" style="display:grid;gap:4px"></div>
-  </section>
-
-  <section class="panel" data-pane="spc" hidden>
-    <div class="seg scopeSeg">
-      <button type="button" data-v="cur" aria-pressed="true" data-en="Current slide">الشريحة الحالية</button>
-      <button type="button" data-v="all" aria-pressed="false" data-en="All slides">كل الشرائح</button>
-    </div>
-    <div class="sprow"><span class="splab" data-en="Spacing">تنسيق المسافات</span>
+    <div class="sprow"><span class="splab gt2" data-en="Spacing">تنسيق المسافات</span>
       <button type="button" class="sec" id="spV" data-ar-title="ضبط المسافات بين الكائنات من الأعلى والأسفل" data-en-title="Fix the vertical gaps between objects"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 2v12M5 4.5 8 1.8l3 2.7M5 11.5 8 14.2l3-2.7"/></svg><span data-en="Vertical">رأسي</span></button>
       <button type="button" class="sec" id="spH" data-ar-title="محاذاة الكائنات إلى اليمين أو اليسار" data-en-title="Align objects to the right or left"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 8h12M4.5 5 1.8 8l2.7 3M11.5 5l2.7 3-2.7 3"/></svg><span data-en="Horizontal">أفقي</span></button>
     </div>
@@ -146,7 +137,11 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
       <button type="button" data-v="right" aria-pressed="false" data-en="Right">يمين</button>
       <button type="button" data-v="left" aria-pressed="false" data-en="Left">يسار</button>
     </div></div>
+    <div class="sep"></div>
+    <span class="note" data-en="Select a box on the slide, then pick what it is.">حدّد مربعًا في الشريحة، ثم اختر نوعه.</span>
+    <div id="roles" style="display:grid;gap:4px"></div>
   </section>
+
 
   <section class="panel" data-pane="ins" hidden>
     <button type="button" class="sec" id="docxBtn" data-ar-title="كل جزء مميز في ملف الوورد يصبح مربعًا مستقلًا بستايل علا" data-en-title="Every tagged part of the Word file becomes its own UULA box"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 1.5h6l3 3v10h-9z"/><path d="M5.5 7.5l1 4 1.5-3 1.5 3 1-4" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-en="Insert a Word file…">إدراج ملف وورد…</span></button>
@@ -4021,7 +4016,7 @@ function setTab(t) {
 }
 $('tabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) setTab(b.dataset.tab); });
 $('wtabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) setTab(b.dataset.tab); });
-setTab((t => t === 'conv' ? 'obj' : t)(load('ur-tab', 'obj')));  // the old تحويل tab is now inside تنسيق
+setTab((t => t === 'conv' || t === 'spc' ? 'obj' : t)(load('ur-tab', 'obj')));  // the old تحويل and تنسيق المسافات tabs are now inside تنسيق
 // language
 function applyLang() {
   document.documentElement.lang = lang; document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
