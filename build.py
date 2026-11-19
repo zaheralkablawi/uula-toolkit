@@ -10,6 +10,13 @@ MATH_LOGO = ('<circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stro
 GRAPH_LOGO = ('<circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/>'
               '<path d="M9 16h14M16 9v14" stroke="#9aa3b0" stroke-width="1.4"/>'
               '<path d="M10.5 9.5c2 9 9 9 11 0" fill="none" stroke="#1f71de" stroke-width="2.4" stroke-linecap="round"/>')
+THEME = (SRC / 'theme.css').read_text(encoding='utf8')
+THEME_TOOL = {
+    'dark': '.dbtn{height:30px!important;font-size:13.5px!important;border-radius:8px!important}.sbody b{font-size:13.5px}',
+    'cover': '#tPos button,#iPos button{font-weight:600!important}',
+    'math': 'body{font-size:14px}',
+    'graph': ':root{--bg:#f3f5f8;--line:#d9dfe7;--fg:#18212e;--muted:#5d6878;--accent:#1f71de}body>footer,#app>footer,footer{font-size:11.5px!important;color:#5d6878!important;text-align:center}',
+}
 TIPS = (SRC / 'tips.js').read_text(encoding='utf8').replace('</script', '<\\/script')
 BAR = '<script>' + (SRC / 'menu-icons.js').read_text(encoding='utf8') + (SRC / 'home-bar.js').read_text(encoding='utf8') + '</script>\n'
 
@@ -61,6 +68,7 @@ def out(name, html):
     d = ROOT / 'tools' / name
     d.mkdir(parents=True, exist_ok=True)
     bar = BAR + '<script>window.TK_TOOL = ' + repr(name) + ';\n' + TIPS + '</script>\n'
+    bar += '<style>' + THEME + THEME_TOOL.get(name, '') + '</style>\n'
     i = html.rfind('</body>')
     html = html[:i] + bar + html[i:] if i >= 0 else html + '\n' + bar
     (d / 'app.html').write_text(html, encoding='utf8')
