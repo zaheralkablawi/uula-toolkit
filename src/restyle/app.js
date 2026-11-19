@@ -996,7 +996,7 @@ function setTab(t) {
 }
 $('tabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) setTab(b.dataset.tab); });
 $('wtabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) setTab(b.dataset.tab); });
-setTab(load('ur-tab', 'conv'));
+setTab((t => t === 'conv' ? 'obj' : t)(load('ur-tab', 'obj')));  // the old تحويل tab is now inside تنسيق
 // language
 function applyLang() {
   document.documentElement.lang = lang; document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
