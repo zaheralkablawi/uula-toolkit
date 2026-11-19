@@ -1020,7 +1020,7 @@ $('aboutBtn').addEventListener('click', () => {
   menu(false);
   modal(L('حول الأداة', 'About'), (lang === 'en'
     ? '<p>Restyles A4 slides into the UULA study-guide style with one click, and inserts the ready study-guide objects.</p><ul><li>UULA Sans font, 11pt text on the page grid</li><li>Headings, questions and answers in UULA colors</li><li>Full-width containers, tables and pictures in one style</li><li>Hide / show the solutions</li><li>In Word: tag the parts (question, solution, definition…), then insert the Word file into PowerPoint</li></ul><p>No content is deleted; only old decoration is removed.</p>'
-    : '<p>تحوّل شرائح A4 إلى ستايل مذكرات علا بضغطة زر، وتضيف قوالب المذكرة الجاهزة.</p><ul><li>خط UULA Sans، والنص 11 على شبكة الصفحة</li><li>العناوين والأسئلة والإجابات بألوان علا</li><li>حاويات بعرض الصفحة، وجداول وصور بالشكل الموحّد</li><li>إخفاء الحلول وإظهارها</li><li>في الوورد: تمييز الأجزاء (سؤال، حل، تعريف…) ثم إدراج ملف الوورد في الباوربوينت</li></ul><p>لا يُحذف أي محتوى؛ تُحذف الزخارف القديمة فقط.</p>')
+    : '<p>تحوّل شرائح A4 إلى ستايل مذكرات علا بضغطة زر، وتضيف قوالب المذكرة الجاهزة.</p><ul><li>خط UULA Sans، والنص 11 على شبكة الصفحة</li><li>العناوين والأسئلة والإجابات بألوان علا</li><li>إطارات بعرض الصفحة، وجداول وصور بالشكل الموحّد</li><li>إخفاء الحلول وإظهارها</li><li>في الوورد: تمييز الأجزاء (سؤال، حل، تعريف…) ثم إدراج ملف الوورد في الباوربوينت</li></ul><p>لا يُحذف أي محتوى؛ تُحذف الزخارف القديمة فقط.</p>')
     + '<p class="foot" dir="ltr">Developed by <b>Zaher Alkablawi</b> · Version ' + VER + '<br>© 2026 UULA. All rights reserved.</p>');
 });
 
