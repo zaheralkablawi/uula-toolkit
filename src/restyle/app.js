@@ -237,6 +237,39 @@ async function renumber() {
     await ctx.sync();
   });
 }
+// delete the page numbers that are on the slides now: the tool's own, PowerPoint's slide-number boxes,
+// and small boxes at the bottom of the page holding only a number
+async function deleteNumbers() {
+  const { H } = await getSize();
+  let n = 0;
+  await run(async ctx => {
+    const slides = ctx.presentation.slides; slides.load('items/id'); await ctx.sync();
+    const cols = slides.items.map(s => { const sh = s.shapes; sh.load('items/name,items/type,items/top,items/height,items/width'); return sh; });
+    await ctx.sync();
+    const ask = [];
+    cols.forEach(c => c.items.forEach(x => {
+      const nm = x.name || '';
+      if (/^CustomPageNumber_/.test(nm) || /^(Slide Number|رقم الشريحة)/i.test(nm)) { x.delete(); n++; return; }
+      if (x.top >= H - 60 && x.width < 120 && x.height < 50 && /TextBox|Placeholder|GeometricShape/i.test(x.type || '')) { const tr = x.textFrame.textRange; tr.load('text'); ask.push([x, tr]); }
+    }));
+    await ctx.sync().catch(() => {});
+    for (const [x, tr] of ask) { let t = ''; try { t = tr.text || ''; } catch (e) { continue; } if (/^\s*[0-9٠-٩]{1,4}\s*$/.test(t)) { x.delete(); n++; } }
+    await ctx.sync();
+  });
+  return n;
+}
+$('numDel').addEventListener('click', async () => {
+  if (busy || !supported) return;
+  busy = true; lock(); res.innerHTML = '';
+  try {
+    say(L('حذف أرقام الصفحات…', 'Deleting page numbers…'));
+    const n = await deleteNumbers();
+    // numbering is turned off, so the next conversion does not put the numbers back
+    $('numChk').checked = false; saveNum();
+    say(n ? L('حُذف ', 'Deleted ') + n + L(' رقم صفحة، وأُوقف الترقيم التلقائي.', ' page numbers; automatic numbering is off.') : L('لا توجد أرقام صفحات.', 'No page numbers found.'));
+  } catch (e) { say(L('تعذّر الحذف: ', 'Could not delete: ') + errText(e)); }
+  finally { busy = false; lock(); }
+});
 $('numHere').addEventListener('click', async () => {
   if (!supported) return;
   try { const id = await currentId(); const all = await allIds(); const i = all.indexOf(id); if (i >= 0) { $('numStart').value = i + 1; saveNum(); } } catch (e) {}
@@ -980,7 +1013,7 @@ function lock() {
   $('solBtn').disabled = busy || !supported;
   $('spV').disabled = busy || !supported; $('spH').disabled = busy || !supported;
   document.querySelectorAll('.tbtn').forEach(b => { b.disabled = busy || !supported; });
-  ['docxBtn', 'wAuto', 'wUntag', 'wClear', 'wMark', 'wUnmark'].forEach(k => { if ($(k)) $(k).disabled = busy || !supported; });
+  ['docxBtn', 'numDel', 'wAuto', 'wUntag', 'wClear', 'wMark', 'wUnmark'].forEach(k => { if ($(k)) $(k).disabled = busy || !supported; });
 }
 $('goBtn').addEventListener('click', async () => {
   if (busy || !supported) return;

@@ -81,6 +81,7 @@
       ['#numStart', E('رقم الشريحة التي يبدأ منها الترقيم.', 'The slide where numbering starts.', 'بداية الترقيم', 'Numbering start')],
       ['#numHere', E('يجعل الترقيم يبدأ من الشريحة المحددة الآن.', 'Makes numbering start at the slide selected now.', 'الحالية', 'Current')],
       ['#numAll', E('يعيد ترقيم كل الصفحات الآن.', 'Renumbers all pages now.', 'تحديث أرقام الصفحات', 'Update page numbers')],
+      ['#numDel', E('يحذف أرقام الصفحات الموجودة الآن في كل الشرائح (أرقام الأداة وأرقام الباوربوينت والأرقام المكتوبة أسفل الصفحة)، ويوقف الترقيم التلقائي.', 'Deletes the page numbers now on every slide (the tool\'s, PowerPoint\'s and numbers typed at the bottom of the page) and turns automatic numbering off.', 'حذف أرقام الصفحات', 'Delete page numbers')],
       ['#wroles .tbtn', function (el) { var n = el.textContent.trim(); return E('حدّد المحتوى في الوورد أو ضع المؤشر داخله، ثم اضغط ليُميَّز «' + n + '» بإطار ملوّن.', 'Select content in Word or put the cursor in it, then click to tag it as "' + n + '" with a coloured frame.', n); }],
       ['#wAuto', E('يميّز كل المحتوى غير المميز تلقائيًا حسب كلماته وألوانه. راجع النتيجة بعده.', 'Tags all untagged content automatically by its words and colours. Review the result afterwards.', 'تمييز تلقائي', 'Auto-tag')],
       ['#wUntag', E('يزيل التمييز عن المحتوى المحدد، ويبقى النص كما هو.', 'Removes the tag from the selected content; the text stays.', 'إزالة التمييز', 'Remove tag')],

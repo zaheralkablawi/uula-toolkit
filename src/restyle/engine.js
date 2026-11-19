@@ -1759,14 +1759,24 @@ function writingLines(doc, g, ys) {
 }
 let MEASURE = null;
 function paraLines(p, boxW) {
-  const txt = paraText(p).trim(); if (!txt) return 1;
   const sz = (runSz(p) || 1100) / 100;                      // pt
-  let wd = txt.length * sz * 0.5;
-  try {
-    if (!MEASURE) MEASURE = document.createElement('canvas').getContext('2d');
-    MEASURE.font = sz + 'px "UULA Sans", Arial, sans-serif'; wd = MEASURE.measureText(txt).width;
-  } catch (e) {}
-  return Math.max(1, Math.ceil(wd / Math.max(20, boxW / PT - 14.4)));
+  const room = Math.max(20, boxW / PT - 14.4);
+  // the paragraph's lines: a line break (Shift+Enter) starts a new one, long text wraps
+  const segs = [''];
+  for (const c of p.children) {
+    if (c.localName === 'br') segs.push('');
+    else if (c.localName !== 'pPr' && c.localName !== 'endParaRPr') segs[segs.length - 1] += [...c.getElementsByTagNameNS(NS.a, 't'), ...c.getElementsByTagNameNS(NS.m, 't')].map(t => t.textContent).join('');
+  }
+  let n = 0;
+  for (const txt of segs) {
+    let wd = txt.trim().length * sz * 0.5;
+    try {
+      if (!MEASURE) MEASURE = document.createElement('canvas').getContext('2d');
+      MEASURE.font = sz + 'px "UULA Sans", Arial, sans-serif'; wd = MEASURE.measureText(txt.trim()).width;
+    } catch (e) {}
+    n += Math.max(1, Math.ceil(wd / room));
+  }
+  return Math.max(1, n);
 }
 function hideSolutions(pkg, grids, opts) {
   grids = grids || {}; opts = opts || {};
@@ -1822,7 +1832,7 @@ function hideSolutions(pkg, grids, opts) {
           if (r.text && r.role === 'answer') for (let k = 1; k <= nl; k++) ys.push(top + (at + k) * ROW);
           at += nl;
         }
-        const lg = ys.length && writingLines(doc, t.g, ys.filter(y => y <= t.g.y + t.g.h + ROW));
+        const lg = ys.length && writingLines(doc, t.g, ys);
         if (lg) t.el.parentNode.insertBefore(lg, t.el.nextSibling);
       }
     } else if (t.kind === 'table') {
