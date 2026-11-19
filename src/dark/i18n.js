@@ -23,9 +23,10 @@ const I18N = (() => {
       imgChk: 'تلوين الصور الكبيرة بالأبيض', fontNote: 'الخط: UULA Sans Medium', reset: 'استعادة الافتراضي',
       tExplain: 'الشرح', tBetter: 'الزبدة', tBank: 'بنك الأسئلة', tPractice: 'التدريبات',
       tTitlePh: 'عنوان الفيديو', tSubPh: 'العنوان الثانوي (اختياري)', style: k => 'نمط ' + k,
-      posLabel: 'مكان الإدراج', posStart: 'بداية الملف', posBefore: 'قبل المحددة', posAfter: 'بعد المحددة',
-      tInsert: 'إدراج شريحة العنوان', tNeedSel: 'حدّد شريحة لتفعيل «قبل» و«بعد».',
-      inserting: 'جارٍ الإدراج…', inserted: '✓ تم إدراج شريحة العنوان.', insertFail: 'تعذّر الإدراج: ', tplFail: 'تعذّر تحميل القالب',
+      posLabel: 'مكان الإدراج', posStart: 'بداية الملف', posEnd: 'نهاية الملف',
+      coverHead: 'شريحة الغلاف', innerHead: 'الشرائح الداخلية', iHead: 'مع رأس أعلى الشريحة', iInsert: 'إدراج شريحة داخلية', iInserted: '✓ تم إدراج الشريحة الداخلية.', posBefore: 'قبل المحددة', posAfter: 'بعد المحددة',
+      tInsert: 'إدراج شريحة الغلاف', tNeedSel: 'حدّد شريحة لتفعيل «قبل» و«بعد».',
+      inserting: 'جارٍ الإدراج…', inserted: '✓ تم إدراج شريحة الغلاف.', insertFail: 'تعذّر الإدراج: ', tplFail: 'تعذّر تحميل القالب',
       cnt: cntAr, sep: '، ',
       converting: (k, n) => 'تحويل الشريحة ' + k + ' من ' + n + '…',
       stRead: 'قراءة الشريحة', stInsert: 'إدراج الشريحة', stLayout: 'ترتيب المحتوى', stDelete: 'حذف الأصل',
@@ -41,7 +42,7 @@ const I18N = (() => {
       latest: 'لديك آخر إصدار.', noConn: 'تعذّر الاتصال.', hasUpd: 'يوجد تحديث.',
       onlyPpt: 'هذه الأداة تعمل داخل PowerPoint فقط.', needNew: 'حدّث برنامج PowerPoint لاستخدام الأداة.',
       aboutDark: '<p>تحوّل أوراق العمل إلى شرائح داكنة للعرض على الطلاب: شريحة لكل جزء بين فاصلين.</p><p>قبل التحويل: أضف الفواصل بنفسك، وحوّل مقاس الشرائح إلى 16:9.</p>',
-      aboutCover: '<p>تُدرج شريحة الغلاف من قالب فيديو علا: اختر نوع الفيديو والشكل، واكتب العنوان، ثم حدد مكان الإدراج.</p>',
+      aboutCover: '<p>تُدرج شرائح قالب فيديو علا: شريحة الغلاف (اختر نوع الفيديو والشكل واكتب العنوان)، والشرائح الداخلية بأنماطها الثلاثة، في المكان الذي تختاره.</p>',
       aboutHtml: '<p>تحوّل أوراق العمل إلى شرائح داكنة للعرض على الطلاب: شريحة لكل جزء بين فاصلين، وتُدرج شريحة العنوان من قالب فيديو علا.</p><p>قبل التحويل: أضف الفواصل بنفسك، وحوّل مقاس الشرائح إلى 16:9.</p>'
         + '<ul><li>خلفية داكنة ونص أبيض، والأزرق يصير أصفر</li><li>خط UULA Sans Medium بحجم 36 والعناوين 48</li><li>حذف رقم الصفحة ورمز QR والبطاقات الفاتحة</li><li>تصغير الخط تلقائيًا عند الامتلاء</li></ul>'
     },
@@ -65,8 +66,9 @@ const I18N = (() => {
       imgChk: 'Turn large pictures white', fontNote: 'Font: UULA Sans Medium', reset: 'Restore defaults',
       tExplain: 'Lessons', tBetter: 'Better', tBank: 'Question bank', tPractice: 'Practice',
       tTitlePh: 'Video title', tSubPh: 'Subtitle (optional)', style: k => 'Style ' + k,
-      posLabel: 'Insert at', posStart: 'Start of file', posBefore: 'Before selected', posAfter: 'After selected',
-      tInsert: 'Insert title slide', tNeedSel: 'Select a slide to enable “Before” and “After”.',
+      posLabel: 'Insert at', posStart: 'Start of file', posEnd: 'End of file',
+      coverHead: 'Cover slide', innerHead: 'Inner slides', iHead: 'With a header at the top', iInsert: 'Insert inner slide', iInserted: '✓ Inner slide inserted.', posBefore: 'Before selected', posAfter: 'After selected',
+      tInsert: 'Insert cover slide', tNeedSel: 'Select a slide to enable “Before” and “After”.',
       inserting: 'Inserting…', inserted: '✓ Title slide inserted.', insertFail: 'Could not insert: ', tplFail: 'Could not load the template',
       cnt: cntEn, sep: ', ',
       converting: (k, n) => 'Converting slide ' + k + ' of ' + n + '…',
@@ -83,7 +85,7 @@ const I18N = (() => {
       latest: 'You have the latest version.', noConn: 'Could not connect.', hasUpd: 'An update is available.',
       onlyPpt: 'This tool works inside PowerPoint only.', needNew: 'Update PowerPoint to use this tool.',
       aboutDark: '<p>Turns worksheets into dark slides for students: one slide per part between separators.</p><p>Before converting: add the separators yourself and change the slide size to 16:9.</p>',
-      aboutCover: '<p>Inserts a title slide from the UULA video template: pick the video type and design, type the title, then choose where to insert it.</p>',
+      aboutCover: '<p>Inserts slides from the UULA video template: the cover slide (pick the video type and design, type the title) and the inner slides in their three styles, where you choose.</p>',
       aboutHtml: '<p>Turns worksheets into dark slides for students: one slide per part between separators, and inserts a title slide from the UULA video template.</p><p>Before converting: add the separators yourself and change the slide size to 16:9.</p>'
         + '<ul><li>Dark background, white text, blue becomes yellow</li><li>UULA Sans Medium, 36 pt text and 48 pt headings</li><li>Removes page numbers, QR codes and light cards</li><li>Shrinks the font automatically when a slide is too full</li></ul>'
     }

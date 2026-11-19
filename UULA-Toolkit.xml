@@ -9,7 +9,7 @@
   <ProviderName>Zaher Alkablawi</ProviderName>
   <DefaultLocale>ar-SA</DefaultLocale>
   <DisplayName DefaultValue="UULA Toolkit"/>
-  <Description DefaultValue="كل أدوات علا للباوربوينت والوورد في إضافة واحدة: Restyle وArabic Math وGraph وDark وCover."/>
+  <Description DefaultValue="كل أدوات علا للباوربوينت والوورد في إضافة واحدة: Restyle وArabic Math وGraph وDark وPPT Video Template."/>
   <IconUrl DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icon-32.png"/>
   <HighResolutionIconUrl DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icon-64.png"/>
   <SupportUrl DefaultValue="https://github.com/zaheralkablawi/uula-toolkit"/>

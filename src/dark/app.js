@@ -390,9 +390,66 @@ async function refreshSel() {
   } catch (e) { hasSel = false; }
   selBusy = false;
   if (!hasSel && tPos !== 'start') tPos = 'start';
-  paintPos();
+  if (!hasSel && iPos !== 'end') iPos = 'end';
+  paintPos(); if (typeof paintInner === 'function') paintInner();
 }
 paintPos();
+// ---------- inner slides (UULA video template: three styles, with or without a header) ----------
+let iVar = load('ud-ivar', 1), iPos = load('ud-ipos', 'end');
+function paintInner() {
+  const box = $('iThumbs'); box.innerHTML = '';
+  for (let k = 1; k <= 3; k++) {
+    const b = document.createElement('button'); b.type = 'button'; b.title = T('style', k);
+    b.setAttribute('aria-pressed', String(k === iVar));
+    const im = document.createElement('img'); im.src = 'templates/inner-' + k + '.jpg'; im.alt = '';
+    b.appendChild(im); b.addEventListener('click', () => { iVar = k; save('ud-ivar', k); paintInner(); });
+    box.appendChild(b);
+  }
+  $('iPos').querySelectorAll('button').forEach(b => {
+    b.disabled = b.dataset.v !== 'end' && !hasSel;
+    b.setAttribute('aria-pressed', String(b.dataset.v === iPos));
+  });
+  $('iSelNote').hidden = hasSel;
+}
+$('iPos').addEventListener('click', e => { const b = e.target.closest('button'); if (b && !b.disabled) { iPos = b.dataset.v; save('ud-ipos', iPos); paintInner(); } });
+$('iHead').checked = !!load('ud-ihead', false);
+$('iHead').addEventListener('change', () => save('ud-ihead', $('iHead').checked));
+$('iInsert').addEventListener('click', async () => {
+  if (!supported || busy) return;
+  const say2 = m => { $('iStatus').textContent = m || ''; };
+  busy = true; refreshLock(); $('iInsert').disabled = true; say2(T('inserting'));
+  try {
+    const r = await fetch('templates/inner-' + iVar + '-' + ($('iHead').checked ? 2 : 1) + '.pptx', { cache: 'no-cache' });
+    if (!r.ok) throw new Error(T('tplFail'));
+    const pkg = await UD.openPackage(b64of(await r.arrayBuffer()));
+    const doc = UD.parseXml(pkg.files.slide);
+    const scheme = UD.readTheme(pkg.files);
+    // empty placeholders: only the layout's place and text style are copied, the teacher writes the content
+    fillPlaceholder(doc, 11, '', pkg.layouts[0], scheme); fillPlaceholder(doc, 12, '', pkg.layouts[0], scheme);
+    const b64 = await UD.buildPackage(pkg, UD.serialize(doc));
+    await run(async ctx => {
+      const sel = ctx.presentation.getSelectedSlides(); sel.load('items/id');
+      const all = ctx.presentation.slides; all.load('items/id'); await ctx.sync();
+      const opts = { formatting: 'KeepSourceFormatting' };
+      const ids = all.items.map(x => x.id), selIds = sel.items.map(x => x.id);
+      if (iPos === 'end' && ids.length) opts.targetSlideId = ids[ids.length - 1];
+      if (iPos === 'after' && selIds.length) opts.targetSlideId = selIds[selIds.length - 1];
+      if (iPos === 'before' && selIds.length) {
+        const first = Math.min(...selIds.map(i => ids.indexOf(i)));
+        if (first > 0) opts.targetSlideId = ids[first - 1];
+      }
+      if ((iPos === 'before' || iPos === 'after') && !selIds.length) throw new Error(T('selFirst'));
+      ctx.presentation.insertSlidesFromBase64(b64, opts); await ctx.sync();
+      const after = ctx.presentation.slides; after.load('items/id'); await ctx.sync();
+      const before = new Set(ids);
+      const added = after.items.find(x => !before.has(x.id));
+      if (added) { try { ctx.presentation.setSelectedSlides([added.id]); await ctx.sync(); } catch (e) {} }
+    });
+    say2(T('iInserted'));
+  } catch (e) { say2(T('insertFail') + errText(e)); }
+  finally { busy = false; $('iInsert').disabled = false; refreshLock(); }
+});
+paintInner();
 $('tInsert').addEventListener('click', async () => {
   if (!supported || busy) return;
   busy = true; refreshLock(); $('tInsert').disabled = true; tSay(T('inserting'));
@@ -445,7 +502,7 @@ $('tInsert').addEventListener('click', async () => {
 
 // ---------- language ----------
 function setLang(l) {
-  I18N.set(l); paintTitle(); paintPos(); refreshLock(); closeColors();
+  I18N.set(l); paintTitle(); paintPos(); paintInner(); refreshLock(); closeColors();
   if (!busy) { say(''); tSay(''); s1Say(''); res.innerHTML = ''; }
 }
 $('langBtn').addEventListener('click', () => setLang(I18N.lang === 'ar' ? 'en' : 'ar'));

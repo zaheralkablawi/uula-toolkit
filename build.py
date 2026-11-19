@@ -70,7 +70,7 @@ def out(name, html):
 dark_parts = [('I18N', 'i18n.js'), ('JSZIP', 'jszip.min.js'), ('ENGINE', 'engine.js'), ('APP', 'app.js')]
 # UULA Dark and UULA Cover share one source (src/dark); MODE decides which part is shown
 out('dark', inline(SRC / 'dark', dark_parts, {'MODE': 'dark', 'TITLE': 'UULA Dark', 'SUB': 'Dark'}))
-out('cover', inline(SRC / 'dark', dark_parts, {'MODE': 'cover', 'TITLE': 'UULA Cover', 'SUB': 'Cover'}))
+out('cover', inline(SRC / 'dark', dark_parts, {'MODE': 'cover', 'TITLE': 'PPT Video Template', 'SUB': 'PPT Video Template'}))
 tpl = ROOT / 'tools' / 'cover' / 'templates'
 shutil.rmtree(tpl, ignore_errors=True)
 shutil.copytree(SRC / 'cover-templates', tpl)
