@@ -1262,7 +1262,7 @@ function compileFn(src){
 const PLOTCOL=['#1f71de','#e0322b','#1f9d55','#b58cff','#f08a24'];
 function niceStep(span, gap){ for (const s of [.5,1,2,5,10,20,50,100,200,500,1000]) if (span/s<=12 && (!gap || s>=gap)) return s; return Math.ceil(span/12); } // gap: the smallest step that leaves room for the numbers
 function arrows2Box(n, sz){ // arrows from the elements of the first set (right) to the second set (left)
-  const t=lw(sz), es=sz*.9, rowH=sz*1.2, ah=sz*.22;
+  const t=lw(sz), es=sz*.9, rowH=sz*1.2, ah=sz*.3;
   const col=S=>{ const B=S.els.map(e=>rowBox(e, es)); const w=Math.max(sz*.6, ...B.map(b=>b.w)); return {B, w, h:Math.max(1,B.length)*rowH, nm:rowBox(S.name, sz)}; };
   const A=col(n.A), Bc=col(n.B), padX=sz*.55, padY=sz*.45;
   const sh=c=>n.rect ? {rx:c.w/2+padX, ry:c.h/2+padY} : {rx:c.w/2+padX*1.1, ry:c.h/2+padY*1.6};
@@ -1284,7 +1284,7 @@ function arrows2Box(n, sz){ // arrows from the elements of the first set (right)
       stroke(g,t,()=>{ g.moveTo(qx-ux*ah+uy*ah*.6, qy-uy*ah-ux*ah*.6); g.lineTo(qx,qy); g.lineTo(qx-ux*ah-uy*ah*.6, qy-uy*ah+ux*ah*.6); }); } } };
 }
 function arrowsBox(n, sz){ // arrow diagram: points on a circle, a curved arrow for each pair, a loop for (أ، أ)
-  const t=lw(sz), N=n.pts.length, Rc=N<2?0:Math.max(sz*1.7, sz*1.7/(2*Math.sin(Math.PI/N))), ah=sz*.2;
+  const t=lw(sz), N=n.pts.length, Rc=N<2?0:Math.max(sz*1.7, sz*1.7/(2*Math.sin(Math.PI/N))), ah=sz*.34;
   const P_=n.pts.map((_,i)=>{ const th=-Math.PI/2+i*2*Math.PI/Math.max(1,N); return {x:Rc*Math.cos(th), y:Rc*Math.sin(th), th}; });
   const has=new Set(n.rel.map(([a,b])=>a+','+b)), loops=new Set(n.rel.filter(([a,b])=>a===b).map(([a])=>a));
   const L=sz*1.55, dir=a=>[Math.cos(a),Math.sin(a)];
