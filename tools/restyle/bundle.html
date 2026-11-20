@@ -141,6 +141,7 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
     <div class="sprow"><span class="splab gt2" data-en="Spacing">تنسيق المسافات</span>
       <button type="button" class="sec" id="spV" data-ar-title="ضبط المسافات بين الكائنات من الأعلى والأسفل" data-en-title="Fix the vertical gaps between objects"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 2v12M5 4.5 8 1.8l3 2.7M5 11.5 8 14.2l3-2.7"/></svg><span data-en="Vertical">رأسي</span></button>
       <button type="button" class="sec" id="spH" data-ar-title="محاذاة الكائنات إلى اليمين أو اليسار" data-en-title="Align objects to the right or left"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 8h12M4.5 5 1.8 8l2.7 3M11.5 5l2.7 3-2.7 3"/></svg><span data-en="Horizontal">أفقي</span></button>
+      <button type="button" class="sec" id="spD" data-ar-title="توزيع الكائنات على الشريحة كاملة: المساحة الفارغة تُقسم تحت الأسئلة ليكتب الطالب (إن وُجدت مساحة)" data-en-title="Spread the objects over the whole slide: the free space is shared under the questions for the student to write (if there is room)"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 2h10M3 14h10"/><rect x="5" y="5" width="6" height="2" rx=".5"/><rect x="5" y="9" width="6" height="2" rx=".5"/></svg><span data-en="Distribute">توزيع</span></button>
     </div>
     <div class="sprow2"><span class="splab" data-en="Alignment">المحاذاة الأفقية</span><div class="seg seg3" id="hAlign">
       <button type="button" data-v="auto" aria-pressed="true" data-en="Auto">تلقائي</button>
@@ -1712,6 +1713,19 @@ function reflow(rects, group, opts) {
 // rects: [{ key, x, y, w, h, fixed, box }] in EMU. Nothing moves sideways: each object keeps its x,
 // rows of objects side by side keep their arrangement, and between rows there are two grid steps
 // (objects that were touching stay touching). Containers keep one line above and two below their content.
+// for "distribute": which top-level objects start a question (the Q bullet, a "UULA:question" name, or question words)
+function questionFlags(pkg) {
+  const doc = parseXml(pkg.files.slide);
+  return topItems(doc).map(el => {
+    const c = core(el), n = cnvOf(c), name = n ? n.getAttribute('name') || '' : '';
+    if (/^UULA:question/.test(name)) return true;
+    if (desc(c, 'a', 'buChar').some(b => b.getAttribute('char') === 'Q')) return true;
+    const p = desc(c, 'a', 'p')[0];
+    const tx = p ? desc(p, 'a', 't').map(x => x.textContent).join('') : '';
+    return !!tx && Q_START.test(tx) && /[؟?:]\s*$|المطلوب/.test(tx);
+  });
+}
+
 function spacing(rects, W, H) {
   const free = rects.filter(r => !r.fixed);
   const inside = (o, b) => { const cx = o.x + o.w / 2, cy = o.y + o.h / 2; return cx >= b.x && cx <= b.x + b.w && cy >= b.y && cy <= b.y + b.h; };
@@ -1838,9 +1852,25 @@ function wrapBox(pkg, type) {
   NEXT = maxId(doc) + 1;
   const spTree = spTreeOf(doc);
   const all = topItems(doc).map((el, i) => { const c = core(el), n = cnvOf(c); return { i, el, c, name: n ? n.getAttribute('name') || '' : '', g: geomOf(el, pkg) || { x: 0, y: 0, w: 0, h: 0 } }; });
-  const sel = all.filter(t => / #ursel$/.test(t.name));
+  let sel = all.filter(t => / #ursel$/.test(t.name));
   if (!sel.length) throw new Error('nosel');
   for (const t of sel) for (const c of allCores(t.el)) { const n = cnvOf(c); if (n) n.setAttribute('name', (n.getAttribute('name') || '').replace(/ #ursel$/, '')); }
+  // the old frames of what is selected go: a frame (with its icon and line) whose content is all in the selection
+  const deco = t => /^UULA .*(Container|Icon|Container Line)( #ur\d+)?( #ursel)?$/.test(t.name);
+  const inside = (a, b) => { const cx = a.g.x + a.g.w / 2, cy = a.g.y + a.g.h / 2; return cx >= b.g.x && cx <= b.g.x + b.g.w && cy >= b.g.y && cy <= b.g.y + b.g.h; };
+  const content = sel.filter(t => !deco(t));
+  if (content.length) {
+    const gone = new Set(sel.filter(deco));
+    for (const card of all.filter(t => / Container( #ur\d+)?$/.test(t.name.replace(/ #ursel$/, '')))) {
+      const held = all.filter(o => o !== card && !deco(o) && inside(o, card));
+      if (held.length && held.every(o => content.includes(o))) {
+        gone.add(card);
+        for (const d of all) if (d !== card && deco(d) && !/ Container( #ur\d+)?$/.test(d.name) && inside(d, card)) gone.add(d);
+      }
+    }
+    for (const t of gone) if (t.el.parentNode) t.el.parentNode.removeChild(t.el);
+    sel = content;
+  }
   const B = type === 'cancelled' ? { name: 'Cancelled', frame: 'FFC000' } : type === 'practice' ? { name: 'Practice', grad: true } : BOX[type];
   let x0 = Math.min(...sel.map(t => t.g.x)), x1 = Math.max(...sel.map(t => t.g.x + t.g.w));
   const y0 = Math.min(...sel.map(t => t.g.y)), y1 = Math.max(...sel.map(t => t.g.y + t.g.h));
@@ -2165,6 +2195,7 @@ function splitPoint(plan, lay) {
 }
 
 return {
+  questionFlags,
   NS, PT, ROW, M, FOOT, C, STY, BOX, openPackage, buildPackage, parseXml, serialize, restyle, layout, applyLayout, splitParts, splitPoint, markNames, MARK, applyRole, wrapBox, WRAP, reflow, spacing, align, findSolutions, hideSolutions, showSolutions, hasSolutions, TEXT_ROLES, BOX_ROLES, G, Y0, snapUp, snapX,
   // used by the templates module
   util: { pX, txX, boxX, gradBoxX, picX, pillX, pillW, lineX, tableX, makeRels, frag, topItems, core, cnvOf, maxId, spTreeOf, kid, kids, desc, xfrmOf, geomOf, setNext: n => { NEXT = n; }, yearText, pageNumX, estimateText, iconW, iconH }
@@ -3410,7 +3441,7 @@ async function wrapSelected(id, tid) {
   if (!n) return false;
   const pkg = await UR.openPackage(await exportSlide(id));
   let r;
-  try { r = UR.wrapBox(pkg, UR.WRAP[tid]); }
+  try { r = UR.wrapBox(pkg, UR.WRAP[tid] || tid); }
   catch (e) { await clearSel(id); throw e; }
   const newId = await insertAfter(await UR.buildPackage(pkg, r.xml, r.rels), id);
   await deleteSlide(id);
@@ -3489,6 +3520,7 @@ const ROLES = [
   { g: 'للحلول', ge: 'For solutions', items: [['answer', 'حل', '1F71DE'], ['correct', 'الخيار الصحيح', '2070DF'], ['given', 'شكل من السؤال', 'A6A6A6']] },
   { g: 'إطارات', ge: 'Frames', items: [['note', 'ملاحظة', 'FBEBD3'], ['quote', 'نص مقتطف', 'E2F0D9'], ['def', 'تعريف', 'E2F0D9'], ['formula', 'قوانين', 'D3E4F5'], ['other', 'صيغة أخرى', 'FBEBD3'], ['activity', 'نشاط', 'F1F1F1'], ['mars', 'من المريخ', 'F1F1F1']] }
 ];
+const FRAME_ROLES = ['note', 'quote', 'def', 'formula', 'other', 'activity', 'mars'];
 const ROLE_EN = { chapter: 'Unit', lesson: 'Lesson', topic: 'Topic', body: 'Paragraph', bullets: 'Bullets', qhead: 'Q head', question: 'Question', answer: 'Solution', choice: 'Choices',
   correct: 'Correct choice', given: 'Part of question', note: 'Note', quote: 'Quote', def: 'Definition', formula: 'Formulas', other: 'Other form', activity: 'Activity', mars: 'Challenge' };
 function buildRoleList() {
@@ -3530,6 +3562,11 @@ async function pinRole(role) {
       return { id: slides.items[0].id, n: shapes.items.length };
     });
     if (!got) { rsay(L('حدّد مربعًا في الشريحة أولًا.', 'Select a box on the slide first.')); return; }
+    // several objects selected and a frame chosen: one frame around all of them
+    if (got.n > 1 && FRAME_ROLES.includes(role)) {
+      if (await wrapSelected(got.id, role)) rsay(L('وُضع إطار واحد حول العناصر المحددة.', 'One frame was put around the selected objects.'));
+      return;
+    }
     slideId = got.id;
     const pkg = await UR.openPackage(await exportSlide(slideId));
     let r;
@@ -3612,6 +3649,42 @@ async function spaceSlide(id) {
     return { moved, over: low > (H - 54) * PT + PT };
   });
 }
+// distribute: after the gaps are fixed, the free space at the bottom of the page is shared out under the questions
+// (room for the student to write), as long as there is room; the first question keeps its place
+async function distributeSlide(id) {
+  await spaceSlide(id);
+  const { W, H } = await getSize();
+  const flags = UR.questionFlags(await UR.openPackage(await exportSlide(id)));
+  return run(async ctx => {
+    const sh = ctx.presentation.slides.getItem(id).shapes;
+    sh.load('items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
+    const lim = H - 54, G2 = 13.39;
+    const free = sh.items.map((s, k) => ({ s, k, q: !!flags[k],
+      fixed: /^UULA (Footer|Watermark)|^CustomPageNumber_/.test(s.name || '') || s.top >= lim || s.left + s.width <= 0 || s.left >= W || s.top + s.height <= 0 || (s.width > W * 0.85 && s.height > H * 0.6) })).filter(o => !o.fixed);
+    if (!free.length) return { status: 'none' };
+    const bottom = Math.max(...free.map(o => o.s.top + o.s.height));
+    // the question starts (one per row)
+    const tops = [];
+    for (const o of free.filter(o => o.q).sort((a, b) => a.s.top - b.s.top)) {
+      // the row of the question starts with whatever sits beside it (its figure can begin a little higher)
+      const q0 = o.s.top, q1 = o.s.top + o.s.height;
+      const row = free.filter(x => x.s.top < q1 && x.s.top + x.s.height > q0 && x.s.top >= q0 - 3 * G2 && x.s.height < (lim - 30));
+      const t = Math.min(q0, ...row.map(x => x.s.top));
+      if (!tops.length || t - tops[tops.length - 1] > G2) tops.push(t);
+    }
+    if (tops.length < 2) return { status: tops.length ? 'one' : 'noq' };
+    const room = lim - bottom - G2;
+    // each question gets the same extra room under it, in whole lines; the last one's share stays at the bottom of the page
+    const share = Math.floor(room / tops.length / G2) * G2;
+    if (share < G2) return { status: 'full' };
+    for (const o of free) {
+      const n = tops.slice(1).filter(t => o.s.top >= t - 0.5).length;
+      if (n) o.s.top = o.s.top + n * share;
+    }
+    await ctx.sync();
+    return { status: 'ok', lines: Math.round(share / G2) };
+  });
+}
 // horizontal: to the right / left margin (selected objects only, if any are selected on the current slide)
 let hMode = load('ur-halign', 'auto');
 function setH(v) { hMode = v; save('ur-halign', v); $('hAlign').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v))); }
@@ -3646,22 +3719,30 @@ async function spacingRun(kind) {
   try {
     const ids = await targetIds();
     if (!ids.length) { say(L('حدّد شريحة أولًا.', 'Select a slide first.')); return; }
-    const over = [];
+    const over = [], skipped = [], spread = [];
     for (let k = 0; k < ids.length; k++) {
       prog(k / ids.length); say(L('تنسيق المسافات ', 'Spacing ') + (k + 1) + L(' من ', ' of ') + ids.length + '…');
       try {
         if (kind === 'v') { const r = await spaceSlide(ids[k]); if (r.over) over.push(ids[k]); }
+        else if (kind === 'd') { const r = await distributeSlide(ids[k]); if (r.status !== 'ok') skipped.push({ id: ids[k], why: r.status }); else spread.push(r.lines); }
         else await alignSlide(ids[k], hMode, scope === 'cur');
       } catch (e) { line('err', '✗ ' + esc(errText(e))); }
     }
     prog(null);
     if (over.length) { const all = await allIds(); line('warn', L('• المحتوى أطول من الصفحة: ', '• Longer than the page: ') + slideLinks(over, i => all.indexOf(i) + 1)); }
+    if (kind === 'd') {
+      const all = await allIds(), num = i => all.indexOf(i) + 1;
+      if (spread.length) line('ok', L('✓ وُزّعت المساحة تحت الأسئلة (' + Math.min(...spread) + (Math.max(...spread) !== Math.min(...spread) ? '–' + Math.max(...spread) : '') + ' سطر إضافي لكل سؤال).', '✓ The free space was shared under the questions (' + Math.min(...spread) + '+ extra lines each).'));
+      const why = { full: L('لا توجد مساحة كافية', 'no room left'), one: L('سؤال واحد فقط، والمساحة تحته أصلًا', 'only one question, the space is already under it'), noq: L('لا توجد أسئلة', 'no questions'), none: L('فارغة', 'empty') };
+      for (const w of ['full', 'one', 'noq', 'none']) { const list = skipped.filter(x => x.why === w).map(x => x.id); if (list.length) line('', '• ' + why[w] + ': ' + slideLinks(list, num)); }
+    }
     say(L('تم تنسيق المسافات.', 'Spacing done.'));
   } catch (e) { prog(null); say(L('حدث خطأ: ', 'Error: ') + errText(e)); }
   finally { busy = false; lock(); }
 }
 $('spV').addEventListener('click', () => spacingRun('v'));
 $('spH').addEventListener('click', () => spacingRun('h'));
+$('spD').addEventListener('click', () => spacingRun('d'));
 
 // ---------- hide / show the solutions ----------
 // an empty grid from a graph picture: the coloured drawing is removed and the grid lines / axes it covered are drawn again
