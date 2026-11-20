@@ -1,101 +1,121 @@
-# UULA Toolkit — builds every tool into tools/<name>/app.html (one self-contained file per tool,
-# so each tool's own update check covers it) and adds the "كل الأدوات" bar on top of each tool.
+# UULA Toolkit — build.
 #   python3 build.py
-import pathlib, re, shutil
+#
+# Each tool opens LIVE from its own repository: tools/<id>/app.html is a small loader that fetches the newest
+# app.html of the tool (e.g. https://zaheralkablawi.github.io/uula-math/app.html), adds the Toolkit parts
+# (the "كل الأدوات" bar, one look, tooltips, logos — all in tk-runtime.js) and shows it.
+# So a change pushed to a tool's own repository reaches the Toolkit at once, with no Toolkit build.
+#
+# tools/<id>/bundle.html is the copy saved with the Toolkit, used only when the repository can't be reached.
+# Bundles come from the sibling clones (../uula-math etc.) when they exist, else from src/.
+# PDF has no repository of its own: it is built from src/pdf and always opens from its bundle.
+import json, pathlib, re, shutil
 
 ROOT = pathlib.Path(__file__).parent
 SRC = ROOT / 'src'
+PAGES = 'https://zaheralkablawi.github.io/'
+
+# ---------- the tools: id → its live page ('bundle.html' = no repository of its own) ----------
+TOOLS = {
+    'restyle': PAGES + 'uula-restyle/app.html',
+    'math': PAGES + 'uula-math/app.html',
+    'graph': PAGES + 'uula-graph/app.html',
+    'dark': PAGES + 'uula-dark/app.html',
+    'cover': PAGES + 'uula-dark/app.html',      # PPT Video Template = UULA Dark's page in "cover" mode
+    'pdf': 'bundle.html',
+}
+
+# ---------- Toolkit parts added to every tool ----------
 MATH_LOGO = ('<circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/>'
              '<path d="M8.5 16.5l2.4 4.6 4.2-11.1h8.4" fill="none" stroke="#1f71de" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>')
 GRAPH_LOGO = ('<circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/>'
               '<path d="M9 16h14M16 9v14" stroke="#9aa3b0" stroke-width="1.4"/>'
               '<path d="M10.5 9.5c2 9 9 9 11 0" fill="none" stroke="#1f71de" stroke-width="2.4" stroke-linecap="round"/>')
-THEME = (SRC / 'theme.css').read_text(encoding='utf8')
-THEME_TOOL = {
+COVER_LOGO = ('<rect x="8.6" y="11" width="14.8" height="10" rx="1.6" fill="#1f71de"/>'
+              '<path d="M12 15h8M13.5 18h5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>')
+DARK_HALF = '<path d="M16 3.5a12.5 12.5 0 0 1 0 25z" fill="#1f71de"/>'
+RESTYLE_OLD = '<path fill="#1f71de" d="M16 7.2l2.1 5.6 5.7 2.2-5.7 2.2L16 22.8l-2.1-5.6-5.7-2.2 5.7-2.2z"/><circle cx="22.3" cy="22.3" r="1.9" fill="#1f71de"/>'
+RESTYLE_LOGO = '<rect x="10.5" y="9" width="11" height="14" rx="1.6" fill="#1f71de"/><path d="M13 12.5h6M13 15.5h6M13 18.5h3.5" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/>'
+# per-tool look fixes (headers line up, one blue, same sizes) — on top of src/theme.css
+TOOL_CSS = {
     'dark': '.dbtn{height:30px!important;font-size:13.5px!important;border-radius:8px!important}.sbody b{font-size:13.5px}',
     'cover': '#tPos button,#iPos button{font-weight:600!important}',
-    'math': 'body{font-size:14px}',
-    'graph': ':root{--bg:#f3f5f8;--line:#d9dfe7;--fg:#18212e;--muted:#5d6878;--accent:#1f71de}body>footer,#app>footer,footer{font-size:11.5px!important;color:#5d6878!important;text-align:center}',
+    'math': 'body{font-size:14px}h1{margin-right:0!important;position:relative;left:2px}',
+    'graph': ':root{--bg:#f3f5f8;--line:#d9dfe7;--fg:#18212e;--muted:#5d6878;--accent:#1f71de}'
+             'body>footer,#app>footer,footer{font-size:11.5px!important;color:#5d6878!important;text-align:center}.brand{position:relative;right:4px}',
+    'restyle': '.ib.lang{color:#5d6878;font-weight:600;font-size:.8rem}header h1{margin-right:4px}',
 }
-TIPS = (SRC / 'tips.js').read_text(encoding='utf8').replace('</script', '<\\/script')
-BAR = '<script>' + (SRC / 'menu-icons.js').read_text(encoding='utf8') + (SRC / 'home-bar.js').read_text(encoding='utf8') + '</script>\n'
+read = lambda p: p.read_text(encoding='utf8')
+TIPS = read(SRC / 'tips.js')
+SCRIPTS = (read(SRC / 'menu-icons.js') + read(SRC / 'home-bar.js') + TIPS).replace('</script', '<\\/script')
+PARTS = {'THEME': read(SRC / 'theme.css'), 'TOOL_CSS': TOOL_CSS, 'SCRIPTS': SCRIPTS,
+         'MATH_LOGO': MATH_LOGO, 'GRAPH_LOGO': GRAPH_LOGO, 'COVER_LOGO': COVER_LOGO, 'DARK_HALF': DARK_HALF,
+         'RESTYLE_OLD': RESTYLE_OLD, 'RESTYLE_LOGO': RESTYLE_LOGO}
+runtime = read(SRC / 'runtime.js').replace('/*TK_PARTS*/', 'var P = ' + json.dumps(PARTS, ensure_ascii=False) + ';')
+(ROOT / 'tk-runtime.js').write_text(runtime, encoding='utf8')
+print('tk-runtime.js', len(runtime))
 
 
+# ---------- bundles (the saved copies) ----------
 def inline(folder, parts, extra=None):
-    t = (folder / 'app.template.html').read_text(encoding='utf8')
+    t = read(folder / 'app.template.html')
     for key, val in (extra or {}).items():
         t = t.replace('/*' + key + '*/', val)
     for key, f in parts:
-        code = (folder / f).read_text(encoding='utf8').replace('</script', '<\\/script')
-        t = t.replace('/*' + key + '*/', code)
+        t = t.replace('/*' + key + '*/', read(folder / f).replace('</script', '<\\/script'))
     return t
 
 
-# small per-tool fixes so all tool headers look the same inside the toolkit
-FIX_CSS = {
-    'math': 'h1{margin-right:0!important;position:relative;left:2px}',
-    'graph': '.brand{position:relative;right:4px}',
-    'restyle': '.ib.lang{color:#5d6878;font-weight:600;font-size:.8rem}header h1{margin-right:4px}',
+def sibling(repo):
+    p = ROOT.parent / repo / 'app.html'
+    return read(p) if p.exists() else None
+
+
+dark = sibling('uula-dark') or inline(SRC / 'dark', [('I18N', 'i18n.js'), ('JSZIP', 'jszip.min.js'), ('ENGINE', 'engine.js'), ('APP', 'app.js')],
+                                      {'MODE': '', 'TITLE': 'UULA Dark', 'SUB': 'Dark'})
+BUNDLES = {
+    'restyle': sibling('uula-restyle') or inline(SRC / 'restyle', [('JSZIP', 'jszip.min.js'), ('ASSETS', 'assets.js'), ('ENGINE', 'engine.js'),
+                                                                   ('TEMPLATES', 'templates.js'), ('WORD', 'word.js'), ('APP', 'app.js')]),
+    'math': sibling('uula-math') or read(SRC / 'math' / 'app.html'),
+    'graph': sibling('uula-graph') or read(SRC / 'graph' / 'app.html'),
+    'dark': dark,
+    'cover': dark,
+    'pdf': inline(SRC / 'pdf', [('PDFLIB', 'pdf-lib.min.js'), ('CORE', 'pptcore.js'), ('OPT', 'pdfopt.js'), ('APP', 'app.js')]),
 }
-COVER_LOGO = ('<rect x="8.6" y="11" width="14.8" height="10" rx="1.6" fill="#1f71de"/>'
-              '<path d="M12 15h8M13.5 18h5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>')
+# keep src/math and src/graph in step with the bundles
+for k, f in [('math', SRC / 'math' / 'app.html'), ('graph', SRC / 'graph' / 'app.html')]:
+    if BUNDLES[k] != read(f): f.write_text(BUNDLES[k], encoding='utf8')
 
-RESTYLE_OLD = '<path fill="#1f71de" d="M16 7.2l2.1 5.6 5.7 2.2-5.7 2.2L16 22.8l-2.1-5.6-5.7-2.2 5.7-2.2z"/><circle cx="22.3" cy="22.3" r="1.9" fill="#1f71de"/>'
-RESTYLE_LOGO = '<rect x="10.5" y="9" width="11" height="14" rx="1.6" fill="#1f71de"/><path d="M13 12.5h6M13 15.5h6M13 18.5h3.5" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/>'
-
-
-def out(name, html):
-    if name in FIX_CSS:
-        tag = '<style>' + FIX_CSS[name] + '</style>'
-        html = html.replace('</head>', tag + '</head>', 1) if '</head>' in html else html.replace('</style>', '</style>' + tag, 1)
-    if name == 'math':  # let the shared tooltips read Arabic Math's typed forms and shortcuts
-        anchor = "document.addEventListener('pointerdown', ()=>{ tip.hidden=true; tipEl=null; });"
-        assert anchor in html
-        html = html.replace(anchor, anchor + "\nwindow.TK_MATH = { get TIPEX(){ return TIPEX; }, get SB(){ return typeof SHORT_BY_INS !== 'undefined' ? SHORT_BY_INS : null; }, get K(){ return K; } };", 1)
-    if name == 'restyle':  # Restyle: booklet-page logo
-        html = html.replace(RESTYLE_OLD, RESTYLE_LOGO, 1)
-    if name == 'cover':  # Cover gets its own logo (the slide), not Dark's half circle
-        html = html.replace('<path d="M16 3.5a12.5 12.5 0 0 1 0 25z" fill="#1f71de"/></svg><span class="bt">', COVER_LOGO + '</svg><span class="bt">', 1)
-    # inside the toolkit the tools show their own name only (no "UULA" above it)
-    html = re.sub(r'<span class="root">UULA</span><span class="sub">([^<]*)</span>', r'<span class="root">\1</span>', html, count=1)
-    html = html.replace('<b>UULA</b><i>Graph</i>', '<b>Graph</b>', 1)
-    # Arabic Math: same logo style as the other tools (blue ring + symbol), instead of the UULA picture
-    html = re.sub(r'<h1 dir="ltr"><img class="logo" alt="" src="data:image/png;base64,[A-Za-z0-9+/=]*"[^>]*>',
-                  '<h1 dir="ltr"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true">' + MATH_LOGO + '</svg>', html, count=1)
-    # Graph: same logo style as the other tools (blue ring + parabola), instead of the filled square
-    html = re.sub(r'<svg class="lg" width="30" height="30" viewBox="0 0 512 512" aria-hidden="true".*?</svg>',
-                  '<svg class="lg" width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">' + GRAPH_LOGO + '</svg>', html, count=1, flags=re.S)
-    d = ROOT / 'tools' / name
+LOADER = '''<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache"><title>UULA Toolkit</title>
+<style>body{{margin:0;height:100vh;display:grid;place-items:center;background:#f3f5f8;color:#9aa3b0;font:13px -apple-system,"Segoe UI",sans-serif}}</style>
+</head><body>…
+<script>
+// UULA Toolkit — opens {tool} from its own repository (newest version), see tk-runtime.js
+window.TK_TOOL = {tool_js}; window.TK_SRC = {src_js};
+(function () {{ var s = document.createElement('script'); s.src = '../../tk-runtime.js?v=' + Date.now(); document.head.appendChild(s); }})();
+</script>
+</body></html>
+'''
+for tool, src in TOOLS.items():
+    d = ROOT / 'tools' / tool
     d.mkdir(parents=True, exist_ok=True)
-    bar = BAR + '<script>window.TK_TOOL = ' + repr(name) + ';\n' + TIPS + '</script>\n'
-    bar += '<style>' + THEME + THEME_TOOL.get(name, '') + '</style>\n'
-    i = html.rfind('</body>')
-    html = html[:i] + bar + html[i:] if i >= 0 else html + '\n' + bar
-    (d / 'app.html').write_text(html, encoding='utf8')
-    print(f'tools/{name}/app.html', len(html))
+    (d / 'bundle.html').write_text(BUNDLES[tool], encoding='utf8')
+    (d / 'app.html').write_text(LOADER.format(tool=tool, tool_js=json.dumps(tool), src_js=json.dumps(src)), encoding='utf8')
+    print(f'tools/{tool}: loader -> {src}  (bundle {len(BUNDLES[tool])})')
 
-
-dark_parts = [('I18N', 'i18n.js'), ('JSZIP', 'jszip.min.js'), ('ENGINE', 'engine.js'), ('APP', 'app.js')]
-# UULA Dark and UULA Cover share one source (src/dark); MODE decides which part is shown
-out('dark', inline(SRC / 'dark', dark_parts, {'MODE': 'dark', 'TITLE': 'UULA Dark', 'SUB': 'Dark'}))
-out('cover', inline(SRC / 'dark', dark_parts, {'MODE': 'cover', 'TITLE': 'PPT Video Template', 'SUB': 'PPT Video Template'}))
+# PPT Video Template opens UULA Dark's page from this folder: its slide templates live here
 tpl = ROOT / 'tools' / 'cover' / 'templates'
 shutil.rmtree(tpl, ignore_errors=True)
 shutil.copytree(SRC / 'cover-templates', tpl)
 
-out('restyle', inline(SRC / 'restyle', [('JSZIP', 'jszip.min.js'), ('ASSETS', 'assets.js'), ('ENGINE', 'engine.js'),
-                                         ('TEMPLATES', 'templates.js'), ('WORD', 'word.js'), ('APP', 'app.js')]))
-out('math', (SRC / 'math' / 'app.html').read_text(encoding='utf8'))
-out('graph', (SRC / 'graph' / 'app.html').read_text(encoding='utf8'))
-out('pdf', inline(SRC / 'pdf', [('PDFLIB', 'pdf-lib.min.js'), ('CORE', 'pptcore.js'), ('OPT', 'pdfopt.js'), ('APP', 'app.js')]))
-
-# home page: put the shared menu icons into index.html (between the markers)
-import re as _re
+# ---------- home page: shared menu icons and tooltips (between the markers) ----------
 idx = ROOT / 'index.html'
-h = idx.read_text(encoding='utf8')
-mi = '/*MI*/\n' + (SRC / 'menu-icons.js').read_text(encoding='utf8') + '/*MI-END*/\n'
-h = _re.sub(r'/\*MI\*/\n(?:.*?/\*MI-END\*/\n)?', lambda m: mi, h, count=1, flags=_re.S)
-tips = "/*TIPS*/\nwindow.TK_TOOL = 'home';\n" + TIPS + '/*TIPS-END*/\n'
-h = _re.sub(r'/\*TIPS\*/\n(?:.*?/\*TIPS-END\*/\n)?', lambda m: tips, h, count=1, flags=_re.S)
+h = read(idx)
+mi = '/*MI*/\n' + read(SRC / 'menu-icons.js') + '/*MI-END*/\n'
+h = re.sub(r'/\*MI\*/\n(?:.*?/\*MI-END\*/\n)?', lambda m: mi, h, count=1, flags=re.S)
+tips = "/*TIPS*/\nwindow.TK_TOOL = 'home';\n" + TIPS.replace('</script', '<\\/script') + '/*TIPS-END*/\n'
+h = re.sub(r'/\*TIPS\*/\n(?:.*?/\*TIPS-END\*/\n)?', lambda m: tips, h, count=1, flags=re.S)
 idx.write_text(h, encoding='utf8')
-print('index.html: menu icons updated')
+print('index.html: menu icons and tooltips updated')
