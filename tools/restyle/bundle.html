@@ -3554,17 +3554,20 @@ async function pinRole(role) {
   try {
     const got = await run(async ctx => {
       const slides = ctx.presentation.getSelectedSlides(); slides.load('items/id');
-      const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/name');
+      const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/name,items/type');
       await ctx.sync();
       if (!slides.items.length || !shapes.items.length) return null;
       shapes.items.forEach(s => { s.name = (s.name || '').replace(/ #ursel$/, '') + ' #ursel'; });
       await ctx.sync();
-      return { id: slides.items[0].id, n: shapes.items.length };
+      // pictures (an equation from UULA Arabic Math, a graph …), groups and other objects are not text boxes
+      const other = shapes.items.some(s => !['TextBox', 'GeometricShape'].includes(s.type));
+      return { id: slides.items[0].id, n: shapes.items.length, other };
     });
     if (!got) { rsay(L('حدّد مربعًا في الشريحة أولًا.', 'Select a box on the slide first.')); return; }
     // several objects selected and a frame chosen: one frame around all of them
-    if (got.n > 1 && FRAME_ROLES.includes(role)) {
-      if (await wrapSelected(got.id, role)) rsay(L('وُضع إطار واحد حول العناصر المحددة.', 'One frame was put around the selected objects.'));
+    // a picture or other object in the selection: the frame goes around it (as for several objects)
+    if ((got.n > 1 || got.other) && FRAME_ROLES.includes(role)) {
+      if (await wrapSelected(got.id, role)) rsay(got.n > 1 ? L('وُضع إطار واحد حول العناصر المحددة.', 'One frame was put around the selected objects.') : L('وُضع الإطار حول العنصر المحدد.', 'The frame was put around the selected object.'));
       return;
     }
     slideId = got.id;
