@@ -741,6 +741,9 @@ function styleTable(it, ctx, W) {
   it.tableRows = rows.length; it.sol = sol;
 }
 
+// container icons: their own proportions (the pictures are cropped to the drawing), about 14×16pt as in the skill
+const ICON_WH = {"book": [13.6, 15.9], "bulb": [10.9, 15.4], "star": [16.0, 15.2], "palette": [16.0, 15.2], "target": [15.9, 15.9]};
+const iconW = k => (ICON_WH[k] || [14.1, 15.9])[0] * PT, iconH = k => (ICON_WH[k] || [14.1, 15.9])[1] * PT;
 // ---------- pictures ----------
 function stylePic(it, inBox) {
   const doc = it.c.ownerDocument;
@@ -1006,7 +1009,7 @@ function restyle(pkg, opts) {
       spTree.insertBefore(k.el, kid(spTree, 'grpSpPr', 'p').nextSibling);
     }
     if (B.icon) {
-      const ic = frag(doc, picX('UULA ' + B.name + ' Icon', rels.image(B.icon), 0, 0, (B.icon === 'bulb' ? 11.1 : 14.1) * PT, (B.icon === 'bulb' ? 15.4 : 15.9) * PT));
+      const ic = frag(doc, picX('UULA ' + B.name + ' Icon', rels.image(B.icon), 0, 0, iconW(B.icon), iconH(B.icon)));
       spTree.appendChild(ic);
       k.iconEl = ic;
       if (B.line) { const ln = frag(doc, lineX(0, 0, ROW, B.line)); spTree.appendChild(ln); k.lineEl = ln; }
@@ -1426,7 +1429,7 @@ function applyRole(pkg, role) {
       rec.box = true; rec.boxType = role; rec.top = top; rec.x = tx; rec.w = tw; rec.boxX = bx; rec.boxW = bw;
       if (B.icon) {
         const bulb = B.icon === 'bulb';
-        const ic = frag(doc, picX('UULA ' + B.name + ' Icon', rels.image(B.icon), role === 'other' ? bx + bw - 18 * PT : Math.max(tx + tw + 2 * PT, W - 47 * PT), role === 'other' ? top + 2 * PT : top + ROW - 2 * PT, (bulb ? 11.1 : 14.1) * PT, (bulb ? 15.4 : 15.9) * PT));
+        const ic = frag(doc, picX('UULA ' + B.name + ' Icon', rels.image(B.icon), role === 'other' ? bx + bw - 18 * PT : Math.max(tx + tw + 2 * PT, W - 47 * PT), role === 'other' ? top + 2 * PT : top + ROW - 2 * PT, iconW(B.icon), iconH(B.icon)));
         spTree.insertBefore(ic, t.el.nextSibling); rec.iconEl = ic;
       }
       if (B.line) { const ln = frag(doc, lineX(W - 40 * PT, top + ROW + 17 * PT, Math.max(ROW, est - 17 * PT), B.line)); spTree.insertBefore(ln, t.el.nextSibling); rec.lineEl = ln; }
@@ -1647,7 +1650,7 @@ function wrapBox(pkg, type) {
   let icon = null, line = null;
   if (B.icon) {
     const bulb = B.icon === 'bulb';
-    icon = frag(doc, picX('UULA ' + B.name + ' Icon', rels.image(B.icon), small ? x1 + 6 * PT : besideR ? x1 - 16 * PT : W - 47 * PT, small ? top + 2 * PT : top + ROW - 2 * PT, (bulb ? 11.1 : 14.1) * PT, (bulb ? 15.4 : 15.9) * PT));
+    icon = frag(doc, picX('UULA ' + B.name + ' Icon', rels.image(B.icon), small ? x1 + 6 * PT : besideR ? x1 - 16 * PT : W - 47 * PT, small ? top + 2 * PT : top + ROW - 2 * PT, iconW(B.icon), iconH(B.icon)));
     spTree.appendChild(icon);
   }
   if (B.line) { line = frag(doc, lineX(W - 40 * PT, top + ROW + 17 * PT, Math.max(ROW, (y1 - y0) - 17 * PT), B.line)); spTree.appendChild(line); }
@@ -1941,7 +1944,7 @@ function splitPoint(plan, lay) {
 return {
   NS, PT, ROW, M, FOOT, C, STY, BOX, openPackage, buildPackage, parseXml, serialize, restyle, layout, applyLayout, splitParts, splitPoint, markNames, MARK, applyRole, wrapBox, WRAP, reflow, spacing, align, findSolutions, hideSolutions, showSolutions, hasSolutions, TEXT_ROLES, BOX_ROLES, G, Y0, snapUp, snapX,
   // used by the templates module
-  util: { pX, txX, boxX, gradBoxX, picX, pillX, pillW, lineX, tableX, makeRels, frag, topItems, core, cnvOf, maxId, spTreeOf, kid, kids, desc, xfrmOf, geomOf, setNext: n => { NEXT = n; }, yearText, pageNumX, estimateText }
+  util: { pX, txX, boxX, gradBoxX, picX, pillX, pillW, lineX, tableX, makeRels, frag, topItems, core, cnvOf, maxId, spTreeOf, kid, kids, desc, xfrmOf, geomOf, setNext: n => { NEXT = n; }, yearText, pageNumX, estimateText, iconW, iconH }
 };
 })();
 if (typeof module !== 'undefined') module.exports = UR;

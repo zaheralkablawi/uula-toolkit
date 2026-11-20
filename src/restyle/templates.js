@@ -150,7 +150,7 @@ function build(id, W, top, rels) {
     else add(U.boxX(b.name, top, ROW * 4, b.fill, W), { role: 'box' });
     if (b.icon) {
       const bulb = b.icon === 'bulb';
-      add(U.picX('UULA ' + b.name + ' Icon', rels.image(b.icon), 0, 0, (bulb ? 11.1 : 14.1) * PT, (bulb ? 15.4 : 15.9) * PT), { role: 'icon' });
+      add(U.picX('UULA ' + b.name + ' Icon', rels.image(b.icon), 0, 0, U.iconW(b.icon), U.iconH(b.icon)), { role: 'icon' });
     }
     if (b.line) add(U.lineX(0, 0, ROW, b.line), { role: 'line' });
   }
