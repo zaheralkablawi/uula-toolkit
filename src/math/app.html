@@ -310,6 +310,8 @@ input[type=color]{ width:var(--ctl-h); padding:3px; cursor:pointer }
           <button type="button" class="ico" data-ins="شجرة.احتمالات{|}" title="شجرة الاحتمالات" aria-label="شجرة الاحتمالات"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><circle cx="19.5" cy="9" r="1.3" fill="currentColor"/><path d="M19 9L11 4M19 9L11 14M9 4L3 2M9 4L3 6.5M9 14L3 11.5M9 14L3 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
           <button type="button" class="ico" data-ins="فن{|}" title="شكل فِن" aria-label="شكل فِن"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><circle cx="8" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="14" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
           <button type="button" class="ico" data-ins="فن.ثلاثي{|}" title="شكل فِن بثلاث مجموعات" aria-label="شكل فِن بثلاث مجموعات"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><circle cx="8.5" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="13.5" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="11" cy="11.5" r="4.6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+          <button type="button" class="ico" data-ins="مخطط.سهمي{|}" title="مخطط سهمي" aria-label="مخطط سهمي"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><circle cx="4" cy="13" r="1.5" fill="currentColor"/><circle cx="17" cy="13" r="1.5" fill="currentColor"/><path d="M4 13Q10.5 5 17 13" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M11.8 9.1l-1.9-1.2.1 2.2z" fill="currentColor"/><path d="M17 13C21.5 9 21.5 4.5 17 4.5S12.5 9 17 13" fill="none" stroke="currentColor" stroke-width="1.3"/></svg></button>
+          <button type="button" class="ico" data-ins="مخطط.سهمي.مجموعتين{|}" title="مخطط سهمي بين مجموعتين" aria-label="مخطط سهمي بين مجموعتين"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><ellipse cx="4.5" cy="9" rx="3.3" ry="7" fill="none" stroke="currentColor" stroke-width="1.2"/><ellipse cx="17.5" cy="9" rx="3.3" ry="7" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M16 6.5H6M8.3 4.8L6 6.5l2.3 1.7M16 11.5H6M8.3 9.8L6 11.5l2.3 1.7" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <button type="button" class="ico" data-ins="'" title="شرطة (أ')" aria-label="شرطة (أ')"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><rect x="8" y="5" width="11" height="11" rx="1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.4"/><path d="M3.5 2.5L5.5 7.5M6.8 2.5L8.8 7.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <button type="button" class="ico" data-ins="سهم{|}" title="سهم فوقه كتابة" aria-label="سهم فوقه كتابة"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><rect x="5" y="2" width="12" height="5.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.4"/><path d="M20 12.5H2M5 10l-3 2.5 3 2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <button type="button" class="ico" data-ins="سهم.يمين{|}" title="سهم لليمين فوقه كتابة" aria-label="سهم لليمين فوقه كتابة"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><rect x="5" y="2" width="12" height="5.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.4"/><path d="M2 12.5H20M17 10l3 2.5-3 2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -362,6 +364,8 @@ input[type=color]{ width:var(--ctl-h); padding:3px; cursor:pointer }
           <tr><td>شجرة الاحتمالات</td><td><code>شجرة.احتمالات{</code> ثم كل فرع في سطر: <code>ح : ١/٢ (ح : ١/٢ * ت : ١/٢)</code>، ثم <code>}</code>. الحدث ثم : ثم الاحتمال، والفرع الأول في الأعلى</td></tr>
           <tr><td>شكل فِن</td><td><code>فن{</code> ثم المجموعة الشاملة <code>ش : ١، ٢، ٣، ٤، ٥، ٦</code>، ثم عناصر كل مجموعة كاملة: <code>س : ٢، ٤، ٥</code> ، <code>ص : ١، ٣، ٥</code> (ولثلاث مجموعات <code>ع : …</code>)، ثم <code>}</code>. التقاطعات وما خارج المجموعات تُحسب تلقائيًا، والمجموعتان بلا عناصر مشتركة تتباعدان، والجزئية تُرسم داخل الأخرى. لكتابة المناطق يدويًا اكتب سطر التقاطع <code>س ∩ ص : …</code> فتصير «س» تعني «س فقط»</td></tr>
           <tr><td>تظليل في شكل فِن</td><td>أضف سطرًا في <code>فن{…}</code>: <code>ظلل : س ∩ ع</code> ، <code>ظلل : س ∪ ص</code> ، <code>ظلل : س − ع</code> (في س وليس في ع) ، <code>ظلل : س'</code> (المتممة) ، ومع الأقواس <code>ظلل : (س ∪ ص) ∩ ع</code>. اللون بعد &amp;: <code>ظلل : س ∩ ص &amp; أحمر</code> (شفافية ٤٠٪)، ولأكثر من تظليل أكثر من سطر</td></tr>
+          <tr><td>مخطط سهمي</td><td><code>مخطط.سهمي{</code> ثم <code>النقاط : ١، ٢، ٣، ٥</code> ثم <code>العلاقة : (١، ٣)، (٣، ٥)، (٥، ٣)، (٣، ٣)</code> ثم <code>}</code>. كل زوج سهم من الأول إلى الثاني، والزوج (أ، أ) حلقة، والزوجان المتعاكسان قوسان متقابلان</td></tr>
+          <tr><td>مخطط سهمي بين مجموعتين</td><td><code>مخطط.سهمي{</code> ثم <code>س : ٣، ٤، ٥</code> ثم <code>ص : ٠، ١، ٢، ٣</code> ثم <code>العلاقة : (٣، ٠)، (٤، ١)</code> ثم <code>}</code>. الأولى يمينًا والثانية يسارًا، والسهم من الأولى إلى الثانية. للمستطيلات بدل البيضاوي: <code>مخطط.سهمي.مستطيل{…}</code></td></tr>
           <tr><td>شرطة</td><td><code>أ'</code> ، <code>أ''</code></td></tr>
           <tr><td>زاوية</td><td><code>زاوية{أ ب جـ}</code></td></tr>
           <tr><td>نهاية، مجموع، تكامل</td><td><code>نها{س ← ٣}</code> ، <code>مجموع{ر = ١}{ن}</code> ، <code>تكامل{١}{٢}</code></td></tr>
@@ -527,6 +531,23 @@ class P {
   atom(end){ const i0=this.i; const r=this.atom0(end); if (r && typeof r==='object' && this.map){ r.o0=this.at(i0); r.o1=this.at(this.i); } return r; }
   atom0(end){
     const s=this.s; const c=this.peek(); if(c===undefined) return null;
+    if (s.startsWith('مخطط.سهمي', this.i) && /^مخطط\.سهمي(\.مستطيل)?\{/.test(s.slice(this.i, this.i+20))){ const isRect=s.startsWith('مخطط.سهمي.مستطيل', this.i); this.i+=isRect?16:9; const body=this.raw();
+      // arrow diagram: one set (النقاط : …) or two sets (س : … / ص : …), then العلاقة : (أ، ب)، …
+      const lab=t=>{ t=t.trim(); try { return new P(normalizeMap(t).s).seq(null); } catch(e){ return [{t:'txt',s:t,k:'word'}]; } };
+      const key=t=>toLatinDigits(t).replace(/\s+/g,'').replace(/[−–]/g,'-');
+      const untail=w=>w.replace(/[\u{1EE4E}]/gu,'س').replace(/[\u{1EE54}]/gu,'ش').replace(/[\u{1EE51}]/gu,'ص').replace(/[\u{1EE47}]/gu,'ح').replace(/\u{1EE4F}/gu,'ع');
+      const mk=()=>({els:[], idx:new Map(), add(e,hintOk){ e=e.trim(); if (!e) return -1; if (HINTW.has(e)){ if (!hintOk) return -1; this.els.push(lab(e)); return this.els.length-1; } const k=key(e); if (!this.idx.has(k)){ this.idx.set(k, this.els.length); this.els.push(lab(e)); } return this.idx.get(k); }});
+      const one=mk(), sets=[], pairs=[];
+      for (const ln of body.split(/[;؛]/).map(x=>x.trim()).filter(Boolean)){ const ci=ln.search(/[:：]/); const nm=untail(ci<0?'':ln.slice(0,ci)).replace(/\s+/g,''), el=ci<0?ln:ln.slice(ci+1);
+        if (/^(ال)?(نقاط|عناصر|مجموعة)$/.test(nm)){ el.split(/[،,]/).forEach(x=>one.add(x,true)); continue; }
+        if (/^(ال)?علاقة$/.test(nm) || !nm){ const re=/\(\s*([^()،,]+?)\s*[،,]\s*([^()،,]+?)\s*\)/g; let m; while ((m=re.exec(el))) pairs.push([m[1],m[2]]); continue; }
+        const S=mk(); S.name=nm; el.split(/[،,]/).forEach(x=>S.add(x,true)); sets.push(S); }
+      const TAIL={'س':'','ش':'','ص':'','ح':'','ع':'\u{1EE4F}'}, nameLab=q=>TAIL[q] ? [{t:'txt',s:TAIL[q],k:'word'}] : lab(q);
+      if (sets.length>=2){ const [A,B]=sets, rel=[]; for (const [a,b] of pairs){ const i=A.add(a), j=B.add(b); if (i>=0 && j>=0) rel.push([i,j]); }
+        return {t:'arrows2', A:{els:A.els, name:nameLab(A.name)}, B:{els:B.els, name:nameLab(B.name)}, rel, rect:isRect}; }
+      const rel=[]; for (const [a,b] of pairs){ const i=one.add(a), j=one.add(b); if (i>=0 && j>=0) rel.push([i,j]); }
+      if (!one.els.length) this.err('اكتب النقاط: النقاط : ١، ٢، ٣');
+      return {t:'arrows', pts:one.els, rel}; }
     if (s.startsWith('فن{', this.i) || s.startsWith('فن.ثلاثي{', this.i)){ this.i+=s.startsWith('فن{', this.i)?2:8; const body=this.raw(); // Venn: one line per region  أ : ١، ٢ / أ ∩ ب : ٣ / ش : ٧
       const lab=t=>{ t=t.trim(); try { return new P(normalizeMap(t).s).seq(null); } catch(e){ return [{t:'txt',s:t,k:'word'}]; } };
       const sets=[], reg={}, raw={}, inter=[]; let U=null, uRaw=[];
@@ -1240,6 +1261,58 @@ function compileFn(src){
 }
 const PLOTCOL=['#1f71de','#e0322b','#1f9d55','#b58cff','#f08a24'];
 function niceStep(span, gap){ for (const s of [.5,1,2,5,10,20,50,100,200,500,1000]) if (span/s<=12 && (!gap || s>=gap)) return s; return Math.ceil(span/12); } // gap: the smallest step that leaves room for the numbers
+function arrows2Box(n, sz){ // arrows from the elements of the first set (right) to the second set (left)
+  const t=lw(sz), es=sz*.9, rowH=sz*1.2, ah=sz*.22;
+  const col=S=>{ const B=S.els.map(e=>rowBox(e, es)); const w=Math.max(sz*.6, ...B.map(b=>b.w)); return {B, w, h:Math.max(1,B.length)*rowH, nm:rowBox(S.name, sz)}; };
+  const A=col(n.A), Bc=col(n.B), padX=sz*.55, padY=sz*.45;
+  const sh=c=>n.rect ? {rx:c.w/2+padX, ry:c.h/2+padY} : {rx:c.w/2+padX*1.1, ry:c.h/2+padY*1.6};
+  const sa=sh(A), sb=sh(Bc), gap=Math.max(sz*3.2, sz*2.2+(A.w+Bc.w)*.3), H0=Math.max(sa.ry, sb.ry)*2;
+  const nmH=Math.max(A.nm.a+A.nm.d, Bc.nm.a+Bc.nm.d)+sz*(n.rect?.45:.9); // the tailed letters reach below their box
+  const W=sa.rx*2+sb.rx*2+gap+t*2, H=H0+nmH+t*2, ax=AXIS(sz);
+  return { w:W, a:ax+H/2, d:H/2-ax, draw(g,x,y){
+    const top=y-ax-H/2+t+(n.rect?nmH:0), cy=top+H0/2, xa=x+W-t-sa.rx, xb=x+t+sb.rx;
+    const shape=(cx,s)=>{ g.beginPath(); if (n.rect){ g.rect(cx-s.rx, cy-s.ry, s.rx*2, s.ry*2); } else g.ellipse(cx, cy, s.rx, s.ry, 0, 0, Math.PI*2); g.save(); g.lineWidth=t*1.15; g.strokeStyle=g.fillStyle; g.stroke(); g.restore(); };
+    shape(xa, sa); shape(xb, sb);
+    const yOf=(c,i)=>cy-c.h/2+rowH*(i+.5);
+    A.B.forEach((b,i)=>b.draw(g, xa-b.w/2, yOf(A,i)+(b.a-b.d)/2)); Bc.B.forEach((b,i)=>b.draw(g, xb-b.w/2, yOf(Bc,i)+(b.a-b.d)/2));
+    const ny=n.rect ? top-sz*.12 : cy+H0/2+sz*.1+A.nm.a; // names above rectangles, under ovals
+    A.nm.draw(g, xa-A.nm.w/2, n.rect? ny-A.nm.d : ny); Bc.nm.draw(g, xb-Bc.nm.w/2, n.rect? ny-Bc.nm.d : ny);
+    for (const [i,j] of n.rel){ const ba=A.B[i], bb=Bc.B[j]; if (!ba || !bb) continue;
+      const x1=xa-ba.w/2-sz*.15, y1=yOf(A,i)-sz*.05, x2=xb+bb.w/2+sz*.15, y2=yOf(Bc,j)-sz*.05, mx=(x1+x2)/2, my=(y1+y2)/2-Math.abs(x1-x2)*.06;
+      stroke(g,t,()=>{ g.moveTo(x1,y1); g.quadraticCurveTo(mx,my,x2,y2); });
+      const u=.45, qx=(1-u)*(1-u)*x1+2*(1-u)*u*mx+u*u*x2, qy=(1-u)*(1-u)*y1+2*(1-u)*u*my+u*u*y2, tx=2*(1-u)*(mx-x1)+2*u*(x2-mx), ty=2*(1-u)*(my-y1)+2*u*(y2-my), tl=Math.hypot(tx,ty)||1, ux=tx/tl, uy=ty/tl;
+      stroke(g,t,()=>{ g.moveTo(qx-ux*ah+uy*ah*.6, qy-uy*ah-ux*ah*.6); g.lineTo(qx,qy); g.lineTo(qx-ux*ah-uy*ah*.6, qy-uy*ah+ux*ah*.6); }); } } };
+}
+function arrowsBox(n, sz){ // arrow diagram: points on a circle, a curved arrow for each pair, a loop for (أ، أ)
+  const t=lw(sz), N=n.pts.length, Rc=N<2?0:Math.max(sz*1.7, sz*1.7/(2*Math.sin(Math.PI/N))), ah=sz*.2;
+  const P_=n.pts.map((_,i)=>{ const th=-Math.PI/2+i*2*Math.PI/Math.max(1,N); return {x:Rc*Math.cos(th), y:Rc*Math.sin(th), th}; });
+  const has=new Set(n.rel.map(([a,b])=>a+','+b)), loops=new Set(n.rel.filter(([a,b])=>a===b).map(([a])=>a));
+  const L=sz*1.55, dir=a=>[Math.cos(a),Math.sin(a)];
+  const loopOf=i=>{ const p=P_[i], th=N<2?-Math.PI/2:p.th, d1=dir(th-.62), d2=dir(th+.62); return {p, c1:[p.x+L*d1[0], p.y+L*d1[1]], c2:[p.x+L*d2[0], p.y+L*d2[1]], th}; };
+  const bez=(p,c1,c2,q,u)=>{ const v=1-u; return [v*v*v*p[0]+3*v*v*u*c1[0]+3*v*u*u*c2[0]+u*u*u*q[0], v*v*v*p[1]+3*v*v*u*c1[1]+3*v*u*u*c2[1]+u*u*u*q[1]]; };
+  const edges=n.rel.filter(([a,b])=>a!==b).map(([a,b])=>{ const A=P_[a], B=P_[b], dx=B.x-A.x, dy=B.y-A.y, dd=Math.hypot(dx,dy)||1, d=[dx/dd,dy/dd], nn=[-d[1],d[0]], k=(has.has(b+','+a)?.24:.12)*dd;
+    return {A,B,d,nn, C:[(A.x+B.x)/2+nn[0]*k*2, (A.y+B.y)/2+nn[1]*k*2], Q:[(A.x+B.x)/2+nn[0]*k, (A.y+B.y)/2+nn[1]*k]}; });
+  const busy=n.pts.map(()=>[]); // directions already used at each point (edges leave towards their control point; loops point outwards)
+  for (const e of edges){ const ia=P_.indexOf(e.A), ib=P_.indexOf(e.B); busy[ia].push([Math.atan2(e.C[1]-e.A.y, e.C[0]-e.A.x), .35]); busy[ib].push([Math.atan2(e.C[1]-e.B.y, e.C[0]-e.B.x), .35]); }
+  for (const i of loops) busy[i].push([N<2?-Math.PI/2:P_[i].th, .95]);
+  const labs=n.pts.map((e,i)=>{ const b=rowBox(e, sz*.85), p=P_[i], th=N<2?-Math.PI/2:p.th; let best=th, bs=-1;
+    for (let k=0;k<48;k++){ const a=th+k*Math.PI/24; let cl=Math.PI; for (const [d,w] of busy[i]){ let df=Math.abs(((a-d)%(2*Math.PI)+3*Math.PI)%(2*Math.PI)-Math.PI); cl=Math.min(cl, df-w); }
+      const sc=cl - (k? .02*Math.min(k,48-k) : 0); if (sc>bs){ bs=sc; best=a; } } // the freest direction, outward when it is free
+    const r=sz*.22+Math.max(b.w,b.a+b.d)/2; return {b, cx:p.x+Math.cos(best)*r, cy:p.y+Math.sin(best)*r}; });
+  let x0=Infinity, x1=-Infinity, y0=Infinity, y1=-Infinity; const grow=(x,y)=>{ x0=Math.min(x0,x); x1=Math.max(x1,x); y0=Math.min(y0,y); y1=Math.max(y1,y); };
+  P_.forEach(p=>grow(p.x,p.y)); edges.forEach(e=>grow(e.Q[0],e.Q[1]));
+  for (const i of loops){ const o=loopOf(i); for (let u=0; u<=1; u+=.05){ const q=bez([o.p.x,o.p.y],o.c1,o.c2,[o.p.x,o.p.y],u); grow(q[0],q[1]); } }
+  labs.forEach(l=>{ grow(l.cx-l.b.w/2, l.cy-(l.b.a+l.b.d)/2); grow(l.cx+l.b.w/2, l.cy+(l.b.a+l.b.d)/2); });
+  const pad=sz*.25, W=x1-x0+2*pad, H=y1-y0+2*pad, ax=AXIS(sz);
+  const head=(g,x,y,ux,uy,ox,oy)=>{ g.beginPath(); g.moveTo(ox+x+ux*ah*.6, oy+y+uy*ah*.6); g.lineTo(ox+x-ux*ah*.6-uy*ah*.42, oy+y-uy*ah*.6+ux*ah*.42); g.lineTo(ox+x-ux*ah*.6+uy*ah*.42, oy+y-uy*ah*.6-ux*ah*.42); g.closePath(); g.fill(); };
+  return { w:W, a:ax+H/2, d:H/2-ax, draw(g,x,y){
+    const ox=x+pad-x0, oy=y-ax-H/2+pad-y0;
+    for (const e of edges){ stroke(g,t,()=>{ g.moveTo(ox+e.A.x, oy+e.A.y); g.quadraticCurveTo(ox+e.C[0], oy+e.C[1], ox+e.B.x, oy+e.B.y); }); head(g, e.Q[0], e.Q[1], e.d[0], e.d[1], ox, oy); }
+    for (const i of loops){ const o=loopOf(i), p0=[o.p.x,o.p.y]; stroke(g,t,()=>{ g.moveTo(ox+p0[0], oy+p0[1]); g.bezierCurveTo(ox+o.c1[0], oy+o.c1[1], ox+o.c2[0], oy+o.c2[1], ox+p0[0], oy+p0[1]); });
+      const m=bez(p0,o.c1,o.c2,p0,.5), m2=bez(p0,o.c1,o.c2,p0,.52), tl=Math.hypot(m2[0]-m[0], m2[1]-m[1])||1; head(g, m[0], m[1], (m2[0]-m[0])/tl, (m2[1]-m[1])/tl, ox, oy); }
+    for (const p of P_){ g.beginPath(); g.ellipse(ox+p.x, oy+p.y, sz*.08, sz*.08, 0, 0, Math.PI*2); g.fill(); }
+    for (const l of labs) l.b.draw(g, ox+l.cx-l.b.w/2, oy+l.cy+(l.b.a-l.b.d)/2); } };
+}
 function vennBox(n, sz){ // two or three overlapping circles; the elements are scattered at random (same input, same picture) inside their region
   const t=lw(sz), es=sz*.85;
   const three=n.n===3, keys=three?['0','1','2','01','02','12','012']:['0','1','01'];
@@ -1573,6 +1646,8 @@ function box0(n, sz){
     case 'ftree': return ftreeBox(n, sz);
     case 'ptree': return ptreeBox(n, sz);
     case 'venn': return vennBox(n, sz);
+    case 'arrows': return arrowsBox(n, sz);
+    case 'arrows2': return arrows2Box(n, sz);
     case 'nline': return nlineBox(n, sz);
     case 'xarr': return xarrBox(n, sz);
     case 'circ': return circBox(n, sz);
@@ -1759,6 +1834,7 @@ const CTXHINT=Object.fromEntries(Object.entries({
  'شبكة':['شبكة: احذفها لمحاور فقط','الحدود: −٥ ≤ س ≤ ٥ لحدود س واسمه، ومثلها لـ ص','أرقام: احذفها لإخفاء الأرقام','نقطة: نقطة أ(٢، ٣)'],
  'خط.أعداد':['المدى: −٥ &lt; س &lt; ٥ مع اسم المحور','أرقام وعلامات: احذف ما لا تريده','الحل: الحل −٢ &lt; س ≤ ٣، و&lt; مفتوحة و≤ مغلقة','أكثر من جزء: الحل س &lt; −١ أو س ≥ ٢'],
  'فن':['ش: المجموعة الشاملة التي تحتوي كل العناصر','س، ص، ع: عناصر كل مجموعة كاملة، والتقاطعات تُحسب وحدها','التظليل: ظلل : س ∩ ص &amp; أحمر','الرموز: ∩ تقاطع، ∪ اتحاد، − فرق، \' متممة، () للتجميع'],
+ 'مخطط.سهمي':['مجموعة واحدة: النقاط : ١، ٢، ٣','مجموعتان: س : ٣، ٤، ٥ ثم ص : ٠، ١، ٢','المستطيل: مخطط.سهمي.مستطيل{…} بدل البيضاوي','العلاقة: العلاقة : (١، ٢)، (٢، ١)، (٣، ٣)','السهم: من العنصر الأول إلى الثاني في كل زوج','الحلقة: الزوج (أ، أ) يرسم حلقة على النقطة'],
  'تحليل.رأسي':['الخطوات: كل خطوة في سطر بالشكل العدد | العامل','النهاية: السطر الأخير ١'],
  'تحليل.شجرة':['العدد: في السطر الأول','الفروع: كل فرع في سطر مثل ٩ (٣ * ٣)','التفريع: داخل القوس مثل ٨ (٢ * ٤ (٢ * ٢))','الترتيب: الفرع الأول يُرسم يمينًا'],
  'شجرة.احتمالات':['الفروع: كل فرع في سطر بالشكل الحدث : الاحتمال (فرع * فرع)','مثال: ح : ١/٢ (ح : ١/٢ * ت : ١/٢)','الترتيب: الفرع الأول في الأعلى'],
@@ -1823,7 +1899,7 @@ const HINT_TPL=new Proxy({ // a tool button inserts these: grey words to type ov
   'شطب{|}{}':'شطب{عدد}{عدد}', 'شطب.تحت{|}{}':'شطب.تحت{عدد}{عدد}', 'مربع{|}':'مربع{اكتب.هنا}', 'تسطير{|}':'تسطير{عدد}',
   'نها{|}':'نها{س ← عدد}', 'مجموع{|}{}':'مجموع{عدد}{عدد}', 'تكامل{|}{}':'تكامل{عدد}{عدد}',
   'توافيق{|}{}':'توافيق{عدد}{عدد}', 'تباديل{|}{}':'تباديل{عدد}{عدد}', 'توافيق.أقواس{|}{}':'توافيق.أقواس{عدد}{عدد}',
-  'دائرة{|}':'دائرة{عدد.أو.حرف & لون}', 'تحليل.شجرة{|}':'تحليل.شجرة{\nعدد\nعدد (عدد * عدد)\nعدد (عدد * عدد)\n}', 'خط.أعداد{|}':'خط.أعداد{\nعدد < س < عدد\nأرقام\nعلامات\n}', 'خط.أعداد.حل{|}':'خط.أعداد{\nعدد < س < عدد\nأرقام\nعلامات\nالحل عدد ≤ س < عدد\n}', 'شجرة.احتمالات{|}':'شجرة.احتمالات{\nالحدث : الاحتمال (الحدث : الاحتمال * الحدث : الاحتمال)\nالحدث : الاحتمال (الحدث : الاحتمال * الحدث : الاحتمال)\n}', 'فن{|}':'فن{\nش : العناصر\nس : العناصر\nص : العناصر\n}', 'فن.ثلاثي{|}':'فن{\nش : العناصر\nس : العناصر\nص : العناصر\nع : العناصر\n}', 'سهم{|}':'سهم{اكتب.هنا}', 'سهم.يمين{|}':'سهم.يمين{اكتب.هنا}', 'شبكة{|}':'شبكة{\nشبكة\nعدد ≤ س ≤ عدد\nعدد ≤ ص ≤ عدد\nأرقام\n}', 'شبكة.ربع.أول{|}':'شبكة.ربع.أول{\nشبكة\n٠ ≤ س ≤ عدد\n٠ ≤ ص ≤ عدد\nأرقام\n}', 'تمثيل.بياني{|}':'تمثيل.بياني{\nالدالة\nشبكة\nعدد ≤ س ≤ عدد\nعدد ≤ ص ≤ عدد\nأرقام\n}', 'تمثيل.بياني.ربع.أول{|}':'تمثيل.بياني.ربع.أول{\nالدالة\nشبكة\n٠ ≤ س ≤ عدد\n٠ ≤ ص ≤ عدد\nأرقام\n}', 'رسم{|}':'رسم{ص = اكتب.هنا}', 'رسم.فارغ{|}':'رسم.فارغ{ص = اكتب.هنا}', 'رسم.محاور{|}':'رسم.محاور{ص = اكتب.هنا}', 'رسم.محاور.فارغ{|}':'رسم.محاور.فارغ{ص = اكتب.هنا}', 'رسم.محاور.خالية{|}':'رسم.محاور.خالية{ص = اكتب.هنا}', 'رسم.محاور.خالية.فارغة{|}':'رسم.محاور.خالية.فارغة{ص = اكتب.هنا}', 'خط{|}':'خط{حروف}', 'مستقيم{|}':'مستقيم{حروف}', 'متجه{|}':'متجه{حروف}', 'قوس{|}':'قوس{حروف}', 'مثلث{|}':'مثلث{حروف}', 'زاوية{|}':'زاوية{حروف}'
+  'دائرة{|}':'دائرة{عدد.أو.حرف & لون}', 'تحليل.شجرة{|}':'تحليل.شجرة{\nعدد\nعدد (عدد * عدد)\nعدد (عدد * عدد)\n}', 'خط.أعداد{|}':'خط.أعداد{\nعدد < س < عدد\nأرقام\nعلامات\n}', 'خط.أعداد.حل{|}':'خط.أعداد{\nعدد < س < عدد\nأرقام\nعلامات\nالحل عدد ≤ س < عدد\n}', 'شجرة.احتمالات{|}':'شجرة.احتمالات{\nالحدث : الاحتمال (الحدث : الاحتمال * الحدث : الاحتمال)\nالحدث : الاحتمال (الحدث : الاحتمال * الحدث : الاحتمال)\n}', 'مخطط.سهمي.مجموعتين{|}':'مخطط.سهمي{\nس : العناصر\nص : العناصر\nالعلاقة : (عدد، عدد)، (عدد، عدد)\n}', 'مخطط.سهمي{|}':'مخطط.سهمي{\nالنقاط : عدد، عدد، عدد\nالعلاقة : (عدد، عدد)، (عدد، عدد)\n}', 'فن{|}':'فن{\nش : العناصر\nس : العناصر\nص : العناصر\n}', 'فن.ثلاثي{|}':'فن{\nش : العناصر\nس : العناصر\nص : العناصر\nع : العناصر\n}', 'سهم{|}':'سهم{اكتب.هنا}', 'سهم.يمين{|}':'سهم.يمين{اكتب.هنا}', 'شبكة{|}':'شبكة{\nشبكة\nعدد ≤ س ≤ عدد\nعدد ≤ ص ≤ عدد\nأرقام\n}', 'شبكة.ربع.أول{|}':'شبكة.ربع.أول{\nشبكة\n٠ ≤ س ≤ عدد\n٠ ≤ ص ≤ عدد\nأرقام\n}', 'تمثيل.بياني{|}':'تمثيل.بياني{\nالدالة\nشبكة\nعدد ≤ س ≤ عدد\nعدد ≤ ص ≤ عدد\nأرقام\n}', 'تمثيل.بياني.ربع.أول{|}':'تمثيل.بياني.ربع.أول{\nالدالة\nشبكة\n٠ ≤ س ≤ عدد\n٠ ≤ ص ≤ عدد\nأرقام\n}', 'رسم{|}':'رسم{ص = اكتب.هنا}', 'رسم.فارغ{|}':'رسم.فارغ{ص = اكتب.هنا}', 'رسم.محاور{|}':'رسم.محاور{ص = اكتب.هنا}', 'رسم.محاور.فارغ{|}':'رسم.محاور.فارغ{ص = اكتب.هنا}', 'رسم.محاور.خالية{|}':'رسم.محاور.خالية{ص = اكتب.هنا}', 'رسم.محاور.خالية.فارغة{|}':'رسم.محاور.خالية.فارغة{ص = اكتب.هنا}', 'خط{|}':'خط{حروف}', 'مستقيم{|}':'مستقيم{حروف}', 'متجه{|}':'متجه{حروف}', 'قوس{|}':'قوس{حروف}', 'مثلث{|}':'مثلث{حروف}', 'زاوية{|}':'زاوية{حروف}'
 }, { get:(o,k)=> o[k] || (typeof k==='string' && /^رسم[.\u0621-\u064A]*\{\|\}$/.test(k) ? k.replace('{|}','{ص = اكتب.هنا}') : undefined) });
 function insert(tpl){
   const s=src.selectionStart, e=src.selectionEnd, sel=src.value.slice(s,e);
@@ -1974,7 +2050,7 @@ const SHORT_BY_INS = Object.fromEntries(Object.entries(SHORT).map(([k,v])=>[v,(I
 // ---- autocomplete: suggest commands while typing, Tab accepts the first ----
 const CMDLIST=[['جذر','جذر{|}','جذر'],['جذر','جذر[٣]{|}','جذر تكعيبي'],['جذر','جذر[|]{}','جذر نوني'],['كسر','كسر{|}{}','كسر'],['مطلق','|‸|','قيمة مطلقة'],
  ['خط','خط{|}','قطعة'],['تسطير','تسطير{|}','خط سفلي'],['مستقيم','مستقيم{|}','مستقيم'],['متجه','متجه{|}','متجه'],['قوس','قوس{|}','قوس'],['مثلث','مثلث{|}','مثلث'],['شطب','شطب{|}{}','اختصار'],['شطب.تحت','شطب.تحت{|}{}','اختصار تحت'],
- ['دائرة','دائرة{|}','حرف أو عدد في دائرة'],['تمثيل.بياني','تمثيل.بياني{|}','تمثيل بياني'],['تمثيل.بياني.ربع.أول','تمثيل.بياني.ربع.أول{|}','تمثيل بياني: الربع الأول'],['قسمة','قسمة{|}{}{}{}','قسمة مطوّلة'],['تحليل.رأسي','تحليل.رأسي{|}','تحليل إلى عوامل أولية'],['تحليل.شجرة','تحليل.شجرة{|}','شجرة العوامل'],['سهم','سهم{|}','سهم فوقه كتابة'],['شجرة.احتمالات','شجرة.احتمالات{|}','شجرة الاحتمالات'],['فن','فن{|}','شكل فِن'],['فن.ثلاثي','فن.ثلاثي{|}','شكل فِن بثلاث مجموعات'],['سهم.يمين','سهم.يمين{|}','سهم لليمين فوقه كتابة'],['عمودي','عمودي{| ; ; }','جمع عمودي'],['عمودي','عمودي{| ; − ; }','طرح عمودي'],['ضرب.رأسي','ضرب.رأسي{| ; ; }','ضرب رأسي'],['فوق','{|}↑{}','عدد فوق عدد'],['نظام','نظام{| ; }','نظام معادلات'],['قواعد','قواعد{| & ; & }','متعددة القواعد'],
+ ['دائرة','دائرة{|}','حرف أو عدد في دائرة'],['تمثيل.بياني','تمثيل.بياني{|}','تمثيل بياني'],['تمثيل.بياني.ربع.أول','تمثيل.بياني.ربع.أول{|}','تمثيل بياني: الربع الأول'],['قسمة','قسمة{|}{}{}{}','قسمة مطوّلة'],['تحليل.رأسي','تحليل.رأسي{|}','تحليل إلى عوامل أولية'],['تحليل.شجرة','تحليل.شجرة{|}','شجرة العوامل'],['سهم','سهم{|}','سهم فوقه كتابة'],['شجرة.احتمالات','شجرة.احتمالات{|}','شجرة الاحتمالات'],['فن','فن{|}','شكل فِن'],['فن.ثلاثي','فن.ثلاثي{|}','شكل فِن بثلاث مجموعات'],['مخطط.سهمي','مخطط.سهمي{|}','مخطط سهمي'],['مخطط.سهمي','مخطط.سهمي.مجموعتين{|}','مخطط سهمي بين مجموعتين'],['سهم.يمين','سهم.يمين{|}','سهم لليمين فوقه كتابة'],['عمودي','عمودي{| ; ; }','جمع عمودي'],['عمودي','عمودي{| ; − ; }','طرح عمودي'],['ضرب.رأسي','ضرب.رأسي{| ; ; }','ضرب رأسي'],['فوق','{|}↑{}','عدد فوق عدد'],['نظام','نظام{| ; }','نظام معادلات'],['قواعد','قواعد{| & ; & }','متعددة القواعد'],
  ['ترتيب','ترتيب{| & & ; & & ; & & }','أعداد مرتبة'],['مصفوفة','مصفوفة{| & ; & }','مصفوفة'],['محدد','محدد{| & ; & }','محدد'],['زاوية','زاوية{|}','زاوية'],['نها','نها{|}','نهاية'],['مجموع','مجموع{|}{}','مجموع'],
  ['تكامل','تكامل{|}{}','تكامل'],['توافيق','توافيق{|}{}','توافيق'],['توافيق.أقواس','توافيق.أقواس{|}{}','توافيق بالأقواس'],['تباديل','تباديل{|}{}','تباديل'],['مربع','مربع{|}','مربع']];
 const sugg=$('sugg'); let suggList=[], suggFrom=0;
@@ -2104,7 +2180,7 @@ const TABS = [
   {id:'fav', icon:'html:<svg viewBox="0 0 20 20" width="19" height="19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="5.5" height="5.5" rx="1.3"/><rect x="11.5" y="3" width="5.5" height="5.5" rx="1.3"/><rect x="3" y="11.5" width="5.5" height="5.5" rx="1.3"/><rect x="11.5" y="11.5" width="5.5" height="5.5" rx="1.3"/></svg>', name:'كل الأدوات والرموز'},
   {id:'tpl', icon:'tool:كسر{|}{}', name:'كسور وجذور وقوالب', groups:[T('كسر{|}{}','جذر{|}','جذر[٣]{|}','جذر[|]{}'), T('^{|}','_{|}',"'"), T('|‸|','مربع{|}','تسطير{|}','شطب{|}{}','شطب.تحت{|}{}','{|}↑{}'), T('قسمة{|}{}{}{}','تحليل.رأسي{|}','تحليل.شجرة{|}','شجرة.احتمالات{|}','عمودي{| ; ; }','عمودي{| ; − ; }','ضرب.رأسي{| ; ; }')]},
   {id:'ops', icon:'±', name:'عمليات وعلاقات', groups:[catSyms('عمليات وعلاقات')]},
-  {id:'sets', icon:'∈', name:'مجموعات ومنطق', groups:[T('فن{|}','فن.ثلاثي{|}'), catSyms('مجموعات'), S('∴')]},
+  {id:'sets', icon:'∈', name:'مجموعات ومنطق', groups:[T('فن{|}','فن.ثلاثي{|}','مخطط.سهمي{|}','مخطط.سهمي.مجموعتين{|}'), catSyms('مجموعات'), S('∴')]},
   {id:'geo', icon:'∠', name:'هندسة', groups:[T('خط{|}','مستقيم{|}','متجه{|}','قوس{|}','مثلث{|}','زاوية{|}',"'"), catSyms('هندسة')]},
   {id:'arr', icon:'←', name:'أسهم', groups:[T('سهم{|}','سهم.يمين{|}'), catSyms('أسهم')]},
   {id:'let', icon:'αب', name:'حروف', groups:[T('دائرة{|}'), catSyms('حروف'), MLETS, catSyms('يونانية')]},
@@ -2407,6 +2483,8 @@ Syntax (write in logical reading order, first token = rightmost on the page):
 - probability tree: شجرة.احتمالات{⏎ح : ١/٢ (ح : ١/٢ * ت : ١/٢)⏎ت : ١/٢ (…)⏎} (event : probability, first branch on top)
 - Venn diagram: فن{⏎ش : ١، ٢، ٣، ٥، ٧⏎س : ١، ٢، ٣⏎ص : ٣، ٥⏎} — universal set ش first, then each set's full elements; name the sets س، ص، ع (keep the names in the picture if different); intersections, outside, disjoint and subset layouts are automatic
 - Venn shading: add a line ظلل : س ∩ ع (also ∪, − for difference, ' for complement, brackets), optional colour after & : ظلل : س ∪ ص & أحمر
+- arrow diagram of a relation: مخطط.سهمي{⏎النقاط : ١، ٢، ٣⏎العلاقة : (١، ٢)، (٢، ١)، (٣، ٣)⏎} (each pair is an arrow from the first to the second; (أ، أ) is a loop; isolated points just appear)
+- arrow diagram between two sets: مخطط.سهمي{⏎س : ٣، ٤، ٥⏎ص : ٠، ١، ٢، ٣⏎العلاقة : (٣، ٠)، (٤، ١)⏎} (first set drawn on the right in an oval, arrows go from it to the second set; rectangles instead of ovals: مخطط.سهمي.مستطيل{…})
 - arrow with writing above it (stretches with the text): سهم{...} (←) or سهم.يمين{...} (→)
 - limit: نها{س ← ٣}; sum with limits: مجموع{lower}{upper}; integral: تكامل{lower}{upper}; combinations ن ق ر: توافيق{ن}{ر} (or in parentheses, ن over ر: توافيق.أقواس{ن}{ر}); permutations: تباديل{ن}{ر}
 - several lines in the image: put each on its own line.
@@ -2456,7 +2534,8 @@ st.darkBg=0; $('darkBg').setAttribute('aria-pressed','false'); // opens in the n
 st.strokeMul=1;
 { const opts=[...$('size').options].map(o=>+o.value); if (!opts.includes(st.pt)) st.pt=opts.reduce((a,b)=>Math.abs(b-st.pt)<Math.abs(a-st.pt)?b:a); $('size').value=String(st.pt); } $('weight').value=st.weight;
 // ---- what's new: shown once after each update (change NEWS.id and the list with every release) ----
-const NEWS = { id:'2026-11-13c', items:[
+const NEWS = { id:'2026-11-20a', items:[
+  'مخطط سهمي للعلاقات: مخطط.سهمي{النقاط … العلاقة …}، وبين مجموعتين: س : … ص : …',
   'تظليل في شكل فِن: ظلل : س ∩ ع (أو ∪ أو − أو المتممة) & لون',
   'تكبير المعاينة وتصغيرها بالسحب من زاويتها',
   'شكل فِن: المجموعات باسم ش، س، ص، ع؛ والمتباعدة تتباعد والجزئية داخل الأخرى تلقائيًا',
