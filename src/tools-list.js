@@ -17,8 +17,5 @@ var TK_TOOLS = [
     icon: TK_C + '<path d="M16 3.5a12.5 12.5 0 0 1 0 25z" fill="#1f71de"/>' },
   { id: 'cover', name: 'PPT Video Template', hosts: ['ppt'],
     desc: { ppt: 'شريحة الغلاف والشرائح الداخلية من قالب فيديو علا', ppt_en: 'Cover and inner slides from the UULA video template' },
-    icon: TK_C + '<rect x="8.6" y="11" width="14.8" height="10" rx="1.6" fill="#1f71de"/><path d="M12 15h8M13.5 18h5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>' },
-  { id: 'pdf', name: 'PDF', hosts: ['ppt'],
-    desc: { ppt: 'تصدير PDF بدقة عالية وحجم صغير وأرقام هندية أو إنجليزية', ppt_en: 'Export a small, high-quality PDF with Arabic or English digits' },
-    icon: TK_C + '<path d="M12.3 9.4h5.2l3.2 3.2v9.2a.8.8 0 0 1-.8.8h-7.6a.8.8 0 0 1-.8-.8V10.2a.8.8 0 0 1 .8-.8z" fill="#1f71de"/><path d="M13.9 16.6l2.1 2.1 2.1-2.1M16 13.4v5.2" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' }
+    icon: TK_C + '<rect x="8.6" y="11" width="14.8" height="10" rx="1.6" fill="#1f71de"/><path d="M12 15h8M13.5 18h5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>' }
 ];

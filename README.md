@@ -1,13 +1,12 @@
 # UULA Toolkit
 
-كل إضافات علا للباوربوينت والوورد في إضافة واحدة: Restyle وArabic Math وGraph وDark وPPT Video Template وPDF.
+كل إضافات علا للباوربوينت والوورد في إضافة واحدة: Restyle وArabic Math وGraph وDark وPPT Video Template.
 
 - `taskpane.html` يفتح دائمًا أحدث نسخة من `index.html` (قائمة الأدوات).
 - كل أداة صفحتها في `tools/<id>/app.html`، وتنفتح فقط عند اختيارها (لا بطء).
 - في أعلى كل أداة شريط «كل الأدوات» للرجوع للقائمة.
 - `python3 build.py` يبني صفحات الأدوات من `src/`. (Dark وPPT Video Template (مجلد cover) مصدرهما واحد: `src/dark`.)
 - رموز القوائم في `src/menu-icons.js` (و`build.py` ينسخها داخل `index.html`).
-- PDF: تصدير بدقة عالية وحجم صغير، أرقام هندية أو إنجليزية (ثم يرجع العرض كما كان)، وروابط الصور قابلة للضغط. مكتبة pdf-lib (MIT) داخل `src/pdf`.
 - ملف التنصيب الوحيد: `UULA-Toolkit.xml` — لا يتغير عند إضافة أداة جديدة.
 
 ## الأدوات تُفتح مباشرة من مستودعاتها
@@ -15,7 +14,7 @@
   (uula-restyle, uula-math, uula-graph, uula-dark)، ثم تضيف عليها أجزاء Toolkit من `tk-runtime.js`
   (شريط «كل الأدوات»، والتنسيق الموحد، والتلميحات، والشعارات).
 - لذلك **التعديل على أداة يكون في مستودعها هي**؛ يصل إلى Toolkit تلقائيًا بدون بناء جديد.
-  (PPT Video Template = صفحة UULA Dark في وضع cover. وPDF ليس لها مستودع: تُبنى من `src/pdf`.)
+  (PPT Video Template = صفحة UULA Dark في وضع cover.)
 - `tools/<id>/bundle.html` نسخة احتياطية تُستخدم فقط إذا تعذّر الوصول إلى المستودع.
 - تعديل أجزاء Toolkit نفسها: `src/runtime.js` و`src/theme.css` و`src/tips.js` و`src/home-bar.js` و`src/menu-icons.js`، ثم `python3 build.py`.
 

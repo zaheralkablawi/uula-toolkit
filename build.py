@@ -8,7 +8,6 @@
 #
 # tools/<id>/bundle.html is the copy saved with the Toolkit, used only when the repository can't be reached.
 # Bundles come from the sibling clones (../uula-math etc.) when they exist, else from src/.
-# PDF lives in its own repository too (uula-pdf); src/pdf is only used when ../uula-pdf is not cloned.
 import json, pathlib, re, shutil
 
 ROOT = pathlib.Path(__file__).parent
@@ -22,7 +21,6 @@ TOOLS = {
     'graph': PAGES + 'uula-graph/app.html',
     'dark': PAGES + 'uula-dark/app.html',
     'cover': PAGES + 'uula-dark/app.html',      # PPT Video Template = UULA Dark's page in "cover" mode
-    'pdf': PAGES + 'uula-pdf/app.html',
 }
 
 # ---------- Toolkit parts added to every tool ----------
@@ -80,7 +78,6 @@ BUNDLES = {
     'graph': sibling('uula-graph') or read(SRC / 'graph' / 'app.html'),
     'dark': dark,
     'cover': dark,
-    'pdf': sibling('uula-pdf') or inline(SRC / 'pdf', [('PDFLIB', 'pdf-lib.min.js'), ('CORE', 'pptcore.js'), ('OPT', 'pdfopt.js'), ('APP', 'app.js')]),
 }
 # keep src/math and src/graph in step with the bundles
 for k, f in [('math', SRC / 'math' / 'app.html'), ('graph', SRC / 'graph' / 'app.html')]:
