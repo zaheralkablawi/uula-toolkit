@@ -8,7 +8,7 @@ from xml.sax.saxutils import escape
 ROOT = pathlib.Path(__file__).parent
 U = 'https://zaheralkablawi.github.io/uula-toolkit/'
 ID = '36f5f959-c945-487a-b5d3-c33d6c76f199'
-VERSION = '1.2.0.0'
+VERSION = '1.3.0.0'
 # the tool buttons, in ribbon order: id, label, Arabic tip, hosts (from src/tools-list.js)
 tools = json.loads(subprocess.check_output(['node', '-e', '''
 global.window = {}; eval(require('fs').readFileSync('src/tools-list.js', 'utf8').replace(/var /g, 'global.'));
@@ -26,21 +26,28 @@ def button(host_key, bid, label_res, tip_res, icon, pane, url_res):
 '''
 
 
+def group(k, gid, label_res, icon, ctl):
+    return f'''              <Group id="UULATK.G{gid}{k}">
+                <Label resid="{label_res}"/>
+                <Icon><bt:Image size="16" resid="{icon}16"/><bt:Image size="32" resid="{icon}32"/><bt:Image size="80" resid="{icon}80"/></Icon>
+{ctl}              </Group>
+'''
+
+
 def host(name):
+    # one group per button: Office keeps a one-button group at full size, so all buttons look the same
     k = name[0]
-    ctl = button(k, 'Open', 'TK.Button', 'TK.Tip', 'TK.Icon', 'UULAToolkitPane', 'TK.Url')
+    groups = group(k, 'Main', 'TK.Button', 'TK.Icon', button(k, 'Open', 'TK.Button', 'TK.Tip', 'TK.Icon', 'UULAToolkitPane', 'TK.Url'))
     for t in tools:
         if HOSTS[name] in t['hosts']:
-            ctl += button(k, 'T_' + t['id'], 'T.' + t['id'], 'T.' + t['id'] + '.tip', 'T.' + t['id'] + '.i', 'UULA_' + t['id'], 'T.' + t['id'] + '.u')
+            i = t['id']
+            groups += group(k, '_' + i, 'T.' + i, 'T.' + i + '.i',
+                            button(k, 'T_' + i, 'T.' + i, 'T.' + i + '.tip', 'T.' + i + '.i', 'UULA_' + i, 'T.' + i + '.u'))
     return f'''      <Host xsi:type="{name}">
         <DesktopFormFactor>
           <ExtensionPoint xsi:type="PrimaryCommandSurface">
             <CustomTab id="UULATK.Tab{k}">
-              <Group id="UULATK.Group{k}">
-                <Label resid="TK.Group"/>
-                <Icon><bt:Image size="16" resid="TK.Icon16"/><bt:Image size="32" resid="TK.Icon32"/><bt:Image size="80" resid="TK.Icon80"/></Icon>
-{ctl}              </Group>
-              <Label resid="TK.Tab"/>
+{groups}              <Label resid="TK.Tab"/>
             </CustomTab>
           </ExtensionPoint>
         </DesktopFormFactor>

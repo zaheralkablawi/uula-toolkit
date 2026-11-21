@@ -5,7 +5,7 @@
   xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
   xsi:type="TaskPaneApp">
   <Id>36f5f959-c945-487a-b5d3-c33d6c76f199</Id>
-  <Version>1.2.0.0</Version>
+  <Version>1.3.0.0</Version>
   <ProviderName>Zaher Alkablawi</ProviderName>
   <DefaultLocale>ar-SA</DefaultLocale>
   <DisplayName DefaultValue="UULA Toolkit"/>
@@ -30,8 +30,8 @@
         <DesktopFormFactor>
           <ExtensionPoint xsi:type="PrimaryCommandSurface">
             <CustomTab id="UULATK.TabP">
-              <Group id="UULATK.GroupP">
-                <Label resid="TK.Group"/>
+              <Group id="UULATK.GMainP">
+                <Label resid="TK.Button"/>
                 <Icon><bt:Image size="16" resid="TK.Icon16"/><bt:Image size="32" resid="TK.Icon32"/><bt:Image size="80" resid="TK.Icon80"/></Icon>
                 <Control xsi:type="Button" id="UULATK.OpenP">
                   <Label resid="TK.Button"/>
@@ -39,30 +39,50 @@
                   <Icon><bt:Image size="16" resid="TK.Icon16"/><bt:Image size="32" resid="TK.Icon32"/><bt:Image size="80" resid="TK.Icon80"/></Icon>
                   <Action xsi:type="ShowTaskpane"><TaskpaneId>UULAToolkitPane</TaskpaneId><SourceLocation resid="TK.Url"/></Action>
                 </Control>
+              </Group>
+              <Group id="UULATK.G_restyleP">
+                <Label resid="T.restyle"/>
+                <Icon><bt:Image size="16" resid="T.restyle.i16"/><bt:Image size="32" resid="T.restyle.i32"/><bt:Image size="80" resid="T.restyle.i80"/></Icon>
                 <Control xsi:type="Button" id="UULATK.T_restyleP">
                   <Label resid="T.restyle"/>
                   <Supertip><Title resid="T.restyle"/><Description resid="T.restyle.tip"/></Supertip>
                   <Icon><bt:Image size="16" resid="T.restyle.i16"/><bt:Image size="32" resid="T.restyle.i32"/><bt:Image size="80" resid="T.restyle.i80"/></Icon>
                   <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_restyle</TaskpaneId><SourceLocation resid="T.restyle.u"/></Action>
                 </Control>
+              </Group>
+              <Group id="UULATK.G_mathP">
+                <Label resid="T.math"/>
+                <Icon><bt:Image size="16" resid="T.math.i16"/><bt:Image size="32" resid="T.math.i32"/><bt:Image size="80" resid="T.math.i80"/></Icon>
                 <Control xsi:type="Button" id="UULATK.T_mathP">
                   <Label resid="T.math"/>
                   <Supertip><Title resid="T.math"/><Description resid="T.math.tip"/></Supertip>
                   <Icon><bt:Image size="16" resid="T.math.i16"/><bt:Image size="32" resid="T.math.i32"/><bt:Image size="80" resid="T.math.i80"/></Icon>
                   <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_math</TaskpaneId><SourceLocation resid="T.math.u"/></Action>
                 </Control>
+              </Group>
+              <Group id="UULATK.G_graphP">
+                <Label resid="T.graph"/>
+                <Icon><bt:Image size="16" resid="T.graph.i16"/><bt:Image size="32" resid="T.graph.i32"/><bt:Image size="80" resid="T.graph.i80"/></Icon>
                 <Control xsi:type="Button" id="UULATK.T_graphP">
                   <Label resid="T.graph"/>
                   <Supertip><Title resid="T.graph"/><Description resid="T.graph.tip"/></Supertip>
                   <Icon><bt:Image size="16" resid="T.graph.i16"/><bt:Image size="32" resid="T.graph.i32"/><bt:Image size="80" resid="T.graph.i80"/></Icon>
                   <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_graph</TaskpaneId><SourceLocation resid="T.graph.u"/></Action>
                 </Control>
+              </Group>
+              <Group id="UULATK.G_darkP">
+                <Label resid="T.dark"/>
+                <Icon><bt:Image size="16" resid="T.dark.i16"/><bt:Image size="32" resid="T.dark.i32"/><bt:Image size="80" resid="T.dark.i80"/></Icon>
                 <Control xsi:type="Button" id="UULATK.T_darkP">
                   <Label resid="T.dark"/>
                   <Supertip><Title resid="T.dark"/><Description resid="T.dark.tip"/></Supertip>
                   <Icon><bt:Image size="16" resid="T.dark.i16"/><bt:Image size="32" resid="T.dark.i32"/><bt:Image size="80" resid="T.dark.i80"/></Icon>
                   <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_dark</TaskpaneId><SourceLocation resid="T.dark.u"/></Action>
                 </Control>
+              </Group>
+              <Group id="UULATK.G_coverP">
+                <Label resid="T.cover"/>
+                <Icon><bt:Image size="16" resid="T.cover.i16"/><bt:Image size="32" resid="T.cover.i32"/><bt:Image size="80" resid="T.cover.i80"/></Icon>
                 <Control xsi:type="Button" id="UULATK.T_coverP">
                   <Label resid="T.cover"/>
                   <Supertip><Title resid="T.cover"/><Description resid="T.cover.tip"/></Supertip>
@@ -79,8 +99,8 @@
         <DesktopFormFactor>
           <ExtensionPoint xsi:type="PrimaryCommandSurface">
             <CustomTab id="UULATK.TabD">
-              <Group id="UULATK.GroupD">
-                <Label resid="TK.Group"/>
+              <Group id="UULATK.GMainD">
+                <Label resid="TK.Button"/>
                 <Icon><bt:Image size="16" resid="TK.Icon16"/><bt:Image size="32" resid="TK.Icon32"/><bt:Image size="80" resid="TK.Icon80"/></Icon>
                 <Control xsi:type="Button" id="UULATK.OpenD">
                   <Label resid="TK.Button"/>
@@ -88,18 +108,30 @@
                   <Icon><bt:Image size="16" resid="TK.Icon16"/><bt:Image size="32" resid="TK.Icon32"/><bt:Image size="80" resid="TK.Icon80"/></Icon>
                   <Action xsi:type="ShowTaskpane"><TaskpaneId>UULAToolkitPane</TaskpaneId><SourceLocation resid="TK.Url"/></Action>
                 </Control>
+              </Group>
+              <Group id="UULATK.G_restyleD">
+                <Label resid="T.restyle"/>
+                <Icon><bt:Image size="16" resid="T.restyle.i16"/><bt:Image size="32" resid="T.restyle.i32"/><bt:Image size="80" resid="T.restyle.i80"/></Icon>
                 <Control xsi:type="Button" id="UULATK.T_restyleD">
                   <Label resid="T.restyle"/>
                   <Supertip><Title resid="T.restyle"/><Description resid="T.restyle.tip"/></Supertip>
                   <Icon><bt:Image size="16" resid="T.restyle.i16"/><bt:Image size="32" resid="T.restyle.i32"/><bt:Image size="80" resid="T.restyle.i80"/></Icon>
                   <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_restyle</TaskpaneId><SourceLocation resid="T.restyle.u"/></Action>
                 </Control>
+              </Group>
+              <Group id="UULATK.G_mathD">
+                <Label resid="T.math"/>
+                <Icon><bt:Image size="16" resid="T.math.i16"/><bt:Image size="32" resid="T.math.i32"/><bt:Image size="80" resid="T.math.i80"/></Icon>
                 <Control xsi:type="Button" id="UULATK.T_mathD">
                   <Label resid="T.math"/>
                   <Supertip><Title resid="T.math"/><Description resid="T.math.tip"/></Supertip>
                   <Icon><bt:Image size="16" resid="T.math.i16"/><bt:Image size="32" resid="T.math.i32"/><bt:Image size="80" resid="T.math.i80"/></Icon>
                   <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_math</TaskpaneId><SourceLocation resid="T.math.u"/></Action>
                 </Control>
+              </Group>
+              <Group id="UULATK.G_graphD">
+                <Label resid="T.graph"/>
+                <Icon><bt:Image size="16" resid="T.graph.i16"/><bt:Image size="32" resid="T.graph.i32"/><bt:Image size="80" resid="T.graph.i80"/></Icon>
                 <Control xsi:type="Button" id="UULATK.T_graphD">
                   <Label resid="T.graph"/>
                   <Supertip><Title resid="T.graph"/><Description resid="T.graph.tip"/></Supertip>
