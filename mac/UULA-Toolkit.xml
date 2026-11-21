@@ -5,11 +5,11 @@
   xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
   xsi:type="TaskPaneApp">
   <Id>36f5f959-c945-487a-b5d3-c33d6c76f199</Id>
-  <Version>1.1.0.0</Version>
+  <Version>1.2.0.0</Version>
   <ProviderName>Zaher Alkablawi</ProviderName>
   <DefaultLocale>ar-SA</DefaultLocale>
   <DisplayName DefaultValue="UULA Toolkit"/>
-  <Description DefaultValue="كل أدوات علا للباوربوينت والوورد في إضافة واحدة: Restyle وArabic Math وGraph وDark وPPT Video Template."/>
+  <Description DefaultValue="كل أدوات علا للباوربوينت والوورد في إضافة واحدة: Design وArabic Math وGraph وDark وPPT Video Template."/>
   <IconUrl DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icon-32.png"/>
   <HighResolutionIconUrl DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icon-64.png"/>
   <SupportUrl DefaultValue="https://github.com/zaheralkablawi/uula-toolkit"/>
@@ -32,58 +32,42 @@
             <CustomTab id="UULATK.TabP">
               <Group id="UULATK.GroupP">
                 <Label resid="TK.Group"/>
-                <Icon>
-                  <bt:Image size="16" resid="TK.Icon16"/>
-                  <bt:Image size="32" resid="TK.Icon32"/>
-                  <bt:Image size="80" resid="TK.Icon80"/>
-                </Icon>
+                <Icon><bt:Image size="16" resid="TK.Icon16"/><bt:Image size="32" resid="TK.Icon32"/><bt:Image size="80" resid="TK.Icon80"/></Icon>
                 <Control xsi:type="Button" id="UULATK.OpenP">
                   <Label resid="TK.Button"/>
-                  <Supertip>
-                    <Title resid="TK.Button"/>
-                    <Description resid="TK.Tip"/>
-                  </Supertip>
-                  <Icon>
-                    <bt:Image size="16" resid="TK.Icon16"/>
-                    <bt:Image size="32" resid="TK.Icon32"/>
-                    <bt:Image size="80" resid="TK.Icon80"/>
-                  </Icon>
-                  <Action xsi:type="ShowTaskpane">
-                    <TaskpaneId>UULAToolkitPane</TaskpaneId>
-                    <SourceLocation resid="TK.Url"/>
-                  </Action>
+                  <Supertip><Title resid="TK.Button"/><Description resid="TK.Tip"/></Supertip>
+                  <Icon><bt:Image size="16" resid="TK.Icon16"/><bt:Image size="32" resid="TK.Icon32"/><bt:Image size="80" resid="TK.Icon80"/></Icon>
+                  <Action xsi:type="ShowTaskpane"><TaskpaneId>UULAToolkitPane</TaskpaneId><SourceLocation resid="TK.Url"/></Action>
                 </Control>
-                <Control xsi:type="Button" id="UULATK.OpenP2">
-                  <Label resid="TK.Button2"/>
-                  <Supertip>
-                    <Title resid="TK.Button2"/>
-                    <Description resid="TK.Tip2"/>
-                  </Supertip>
-                  <Icon>
-                    <bt:Image size="16" resid="TK.Icon16"/>
-                    <bt:Image size="32" resid="TK.Icon32"/>
-                    <bt:Image size="80" resid="TK.Icon80"/>
-                  </Icon>
-                  <Action xsi:type="ShowTaskpane">
-                    <TaskpaneId>UULAToolkitPane2</TaskpaneId>
-                    <SourceLocation resid="TK.Url2"/>
-                  </Action>
+                <Control xsi:type="Button" id="UULATK.T_restyleP">
+                  <Label resid="T.restyle"/>
+                  <Supertip><Title resid="T.restyle"/><Description resid="T.restyle.tip"/></Supertip>
+                  <Icon><bt:Image size="16" resid="T.restyle.i16"/><bt:Image size="32" resid="T.restyle.i32"/><bt:Image size="80" resid="T.restyle.i80"/></Icon>
+                  <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_restyle</TaskpaneId><SourceLocation resid="T.restyle.u"/></Action>
                 </Control>
-                <Control xsi:type="Button" id="UULATK.OpenP3">
-                  <Label resid="TK.Button3"/>
-                  <Supertip>
-                    <Title resid="TK.Button3"/>
-                    <Description resid="TK.Tip2"/>
-                  </Supertip>
-                  <Icon>
-                    <bt:Image size="16" resid="TK.Icon16"/>
-                    <bt:Image size="32" resid="TK.Icon32"/>
-                    <bt:Image size="80" resid="TK.Icon80"/>
-                  </Icon>
-                  <Action xsi:type="ShowTaskpane">
-                    <TaskpaneId>UULAToolkitPane3</TaskpaneId>
-                    <SourceLocation resid="TK.Url3"/>
-                  </Action>
+                <Control xsi:type="Button" id="UULATK.T_mathP">
+                  <Label resid="T.math"/>
+                  <Supertip><Title resid="T.math"/><Description resid="T.math.tip"/></Supertip>
+                  <Icon><bt:Image size="16" resid="T.math.i16"/><bt:Image size="32" resid="T.math.i32"/><bt:Image size="80" resid="T.math.i80"/></Icon>
+                  <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_math</TaskpaneId><SourceLocation resid="T.math.u"/></Action>
+                </Control>
+                <Control xsi:type="Button" id="UULATK.T_graphP">
+                  <Label resid="T.graph"/>
+                  <Supertip><Title resid="T.graph"/><Description resid="T.graph.tip"/></Supertip>
+                  <Icon><bt:Image size="16" resid="T.graph.i16"/><bt:Image size="32" resid="T.graph.i32"/><bt:Image size="80" resid="T.graph.i80"/></Icon>
+                  <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_graph</TaskpaneId><SourceLocation resid="T.graph.u"/></Action>
+                </Control>
+                <Control xsi:type="Button" id="UULATK.T_darkP">
+                  <Label resid="T.dark"/>
+                  <Supertip><Title resid="T.dark"/><Description resid="T.dark.tip"/></Supertip>
+                  <Icon><bt:Image size="16" resid="T.dark.i16"/><bt:Image size="32" resid="T.dark.i32"/><bt:Image size="80" resid="T.dark.i80"/></Icon>
+                  <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_dark</TaskpaneId><SourceLocation resid="T.dark.u"/></Action>
+                </Control>
+                <Control xsi:type="Button" id="UULATK.T_coverP">
+                  <Label resid="T.cover"/>
+                  <Supertip><Title resid="T.cover"/><Description resid="T.cover.tip"/></Supertip>
+                  <Icon><bt:Image size="16" resid="T.cover.i16"/><bt:Image size="32" resid="T.cover.i32"/><bt:Image size="80" resid="T.cover.i80"/></Icon>
+                  <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_cover</TaskpaneId><SourceLocation resid="T.cover.u"/></Action>
                 </Control>
               </Group>
               <Label resid="TK.Tab"/>
@@ -94,61 +78,33 @@
       <Host xsi:type="Document">
         <DesktopFormFactor>
           <ExtensionPoint xsi:type="PrimaryCommandSurface">
-            <CustomTab id="UULATK.TabW">
-              <Group id="UULATK.GroupW">
+            <CustomTab id="UULATK.TabD">
+              <Group id="UULATK.GroupD">
                 <Label resid="TK.Group"/>
-                <Icon>
-                  <bt:Image size="16" resid="TK.Icon16"/>
-                  <bt:Image size="32" resid="TK.Icon32"/>
-                  <bt:Image size="80" resid="TK.Icon80"/>
-                </Icon>
-                <Control xsi:type="Button" id="UULATK.OpenW">
+                <Icon><bt:Image size="16" resid="TK.Icon16"/><bt:Image size="32" resid="TK.Icon32"/><bt:Image size="80" resid="TK.Icon80"/></Icon>
+                <Control xsi:type="Button" id="UULATK.OpenD">
                   <Label resid="TK.Button"/>
-                  <Supertip>
-                    <Title resid="TK.Button"/>
-                    <Description resid="TK.Tip"/>
-                  </Supertip>
-                  <Icon>
-                    <bt:Image size="16" resid="TK.Icon16"/>
-                    <bt:Image size="32" resid="TK.Icon32"/>
-                    <bt:Image size="80" resid="TK.Icon80"/>
-                  </Icon>
-                  <Action xsi:type="ShowTaskpane">
-                    <TaskpaneId>UULAToolkitPane</TaskpaneId>
-                    <SourceLocation resid="TK.Url"/>
-                  </Action>
+                  <Supertip><Title resid="TK.Button"/><Description resid="TK.Tip"/></Supertip>
+                  <Icon><bt:Image size="16" resid="TK.Icon16"/><bt:Image size="32" resid="TK.Icon32"/><bt:Image size="80" resid="TK.Icon80"/></Icon>
+                  <Action xsi:type="ShowTaskpane"><TaskpaneId>UULAToolkitPane</TaskpaneId><SourceLocation resid="TK.Url"/></Action>
                 </Control>
-                <Control xsi:type="Button" id="UULATK.OpenW2">
-                  <Label resid="TK.Button2"/>
-                  <Supertip>
-                    <Title resid="TK.Button2"/>
-                    <Description resid="TK.Tip2"/>
-                  </Supertip>
-                  <Icon>
-                    <bt:Image size="16" resid="TK.Icon16"/>
-                    <bt:Image size="32" resid="TK.Icon32"/>
-                    <bt:Image size="80" resid="TK.Icon80"/>
-                  </Icon>
-                  <Action xsi:type="ShowTaskpane">
-                    <TaskpaneId>UULAToolkitPane2</TaskpaneId>
-                    <SourceLocation resid="TK.Url2"/>
-                  </Action>
+                <Control xsi:type="Button" id="UULATK.T_restyleD">
+                  <Label resid="T.restyle"/>
+                  <Supertip><Title resid="T.restyle"/><Description resid="T.restyle.tip"/></Supertip>
+                  <Icon><bt:Image size="16" resid="T.restyle.i16"/><bt:Image size="32" resid="T.restyle.i32"/><bt:Image size="80" resid="T.restyle.i80"/></Icon>
+                  <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_restyle</TaskpaneId><SourceLocation resid="T.restyle.u"/></Action>
                 </Control>
-                <Control xsi:type="Button" id="UULATK.OpenW3">
-                  <Label resid="TK.Button3"/>
-                  <Supertip>
-                    <Title resid="TK.Button3"/>
-                    <Description resid="TK.Tip2"/>
-                  </Supertip>
-                  <Icon>
-                    <bt:Image size="16" resid="TK.Icon16"/>
-                    <bt:Image size="32" resid="TK.Icon32"/>
-                    <bt:Image size="80" resid="TK.Icon80"/>
-                  </Icon>
-                  <Action xsi:type="ShowTaskpane">
-                    <TaskpaneId>UULAToolkitPane3</TaskpaneId>
-                    <SourceLocation resid="TK.Url3"/>
-                  </Action>
+                <Control xsi:type="Button" id="UULATK.T_mathD">
+                  <Label resid="T.math"/>
+                  <Supertip><Title resid="T.math"/><Description resid="T.math.tip"/></Supertip>
+                  <Icon><bt:Image size="16" resid="T.math.i16"/><bt:Image size="32" resid="T.math.i32"/><bt:Image size="80" resid="T.math.i80"/></Icon>
+                  <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_math</TaskpaneId><SourceLocation resid="T.math.u"/></Action>
+                </Control>
+                <Control xsi:type="Button" id="UULATK.T_graphD">
+                  <Label resid="T.graph"/>
+                  <Supertip><Title resid="T.graph"/><Description resid="T.graph.tip"/></Supertip>
+                  <Icon><bt:Image size="16" resid="T.graph.i16"/><bt:Image size="32" resid="T.graph.i32"/><bt:Image size="80" resid="T.graph.i80"/></Icon>
+                  <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_graph</TaskpaneId><SourceLocation resid="T.graph.u"/></Action>
                 </Control>
               </Group>
               <Label resid="TK.Tab"/>
@@ -162,22 +118,47 @@
         <bt:Image id="TK.Icon16" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icon-16.png"/>
         <bt:Image id="TK.Icon32" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icon-32.png"/>
         <bt:Image id="TK.Icon80" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icon-80.png"/>
+        <bt:Image id="T.restyle.i16" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/restyle-16.png"/>
+        <bt:Image id="T.restyle.i32" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/restyle-32.png"/>
+        <bt:Image id="T.restyle.i80" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/restyle-80.png"/>
+        <bt:Image id="T.math.i16" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/math-16.png"/>
+        <bt:Image id="T.math.i32" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/math-32.png"/>
+        <bt:Image id="T.math.i80" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/math-80.png"/>
+        <bt:Image id="T.graph.i16" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/graph-16.png"/>
+        <bt:Image id="T.graph.i32" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/graph-32.png"/>
+        <bt:Image id="T.graph.i80" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/graph-80.png"/>
+        <bt:Image id="T.dark.i16" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/dark-16.png"/>
+        <bt:Image id="T.dark.i32" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/dark-32.png"/>
+        <bt:Image id="T.dark.i80" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/dark-80.png"/>
+        <bt:Image id="T.cover.i16" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/cover-16.png"/>
+        <bt:Image id="T.cover.i32" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/cover-32.png"/>
+        <bt:Image id="T.cover.i80" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/cover-80.png"/>
       </bt:Images>
       <bt:Urls>
         <bt:Url id="TK.Url" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html"/>
-        <bt:Url id="TK.Url2" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?pane=2"/>
-        <bt:Url id="TK.Url3" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?pane=3"/>
+        <bt:Url id="T.restyle.u" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?tool=restyle"/>
+        <bt:Url id="T.math.u" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?tool=math"/>
+        <bt:Url id="T.graph.u" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?tool=graph"/>
+        <bt:Url id="T.dark.u" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?tool=dark"/>
+        <bt:Url id="T.cover.u" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?tool=cover"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="TK.Tab" DefaultValue="UULA"/>
         <bt:String id="TK.Group" DefaultValue="UULA"/>
         <bt:String id="TK.Button" DefaultValue="UULA Toolkit"/>
-        <bt:String id="TK.Button2" DefaultValue="نافذة 2"/>
-        <bt:String id="TK.Button3" DefaultValue="نافذة 3"/>
+        <bt:String id="T.restyle" DefaultValue="Design"/>
+        <bt:String id="T.math" DefaultValue="Arabic Math"/>
+        <bt:String id="T.graph" DefaultValue="Graph"/>
+        <bt:String id="T.dark" DefaultValue="Dark"/>
+        <bt:String id="T.cover" DefaultValue="PPT Video Template"/>
       </bt:ShortStrings>
       <bt:LongStrings>
         <bt:String id="TK.Tip" DefaultValue="كل أدوات علا في مكان واحد"/>
-        <bt:String id="TK.Tip2" DefaultValue="نافذة إضافية لفتح أداة ثانية مع الأداة المفتوحة"/>
+        <bt:String id="T.restyle.tip" DefaultValue="تحويل الشرائح لستايل علا وقوالب المذكرة. تفتح في نافذة خاصة بها."/>
+        <bt:String id="T.math.tip" DefaultValue="كتابة المعادلات العربية وإدراجها. تفتح في نافذة خاصة بها."/>
+        <bt:String id="T.graph.tip" DefaultValue="رسم الدوال وإدراجها صورةً. تفتح في نافذة خاصة بها."/>
+        <bt:String id="T.dark.tip" DefaultValue="تقسيم أوراق العمل وتحويلها إلى الوضع الداكن. تفتح في نافذة خاصة بها."/>
+        <bt:String id="T.cover.tip" DefaultValue="شريحة الغلاف والشرائح الداخلية من قالب فيديو علا. تفتح في نافذة خاصة بها."/>
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>

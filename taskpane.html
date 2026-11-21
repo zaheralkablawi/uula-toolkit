@@ -5,8 +5,10 @@
 <style>body{margin:0;font:14px -apple-system,'Segoe UI',sans-serif;color:#5d6878;display:grid;place-items:center;height:100vh}</style>
 </head><body>…
 <script>
-// always open the newest version of the tools list (no waiting for cached copies after an update)
-(function(){ var done=false, go=function(){ if(done) return; done=true; location.replace('index.html?v='+Date.now()); };
+// always open the newest version (no waiting for cached copies after an update):
+// a tool's own ribbon button (?tool=<id>) opens that tool, the UULA Toolkit button opens the tools list
+(function(){ var done=false, t=(location.search.match(/[?&]tool=([a-z0-9-]+)/)||[])[1];
+  var go=function(){ if(done) return; done=true; location.replace((t ? 'tools/'+t+'/app.html' : 'index.html')+'?v='+Date.now()); };
   try { if (window.Office && Office.onReady) Office.onReady(go); else go(); } catch(e){ go(); }
   setTimeout(go, 3000); })();
 </script></body></html>
