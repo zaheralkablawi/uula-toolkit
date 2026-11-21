@@ -47,7 +47,7 @@ TOOL_CSS = {
 }
 read = lambda p: p.read_text(encoding='utf8')
 TIPS = read(SRC / 'tips.js')
-SCRIPTS = (read(SRC / 'menu-icons.js') + read(SRC / 'home-bar.js') + TIPS).replace('</script', '<\\/script')
+SCRIPTS = (read(SRC / 'menu-icons.js') + read(SRC / 'home-bar.js') + read(SRC / 'tools-list.js') + read(SRC / 'side-rail.js') + TIPS).replace('</script', '<\\/script')
 PARTS = {'THEME': read(SRC / 'theme.css'), 'TOOL_CSS': TOOL_CSS, 'SCRIPTS': SCRIPTS,
          'MATH_LOGO': MATH_LOGO, 'GRAPH_LOGO': GRAPH_LOGO, 'COVER_LOGO': COVER_LOGO, 'DARK_HALF': DARK_HALF,
          'RESTYLE_OLD': RESTYLE_OLD, 'RESTYLE_LOGO': RESTYLE_LOGO}
@@ -115,6 +115,8 @@ idx = ROOT / 'index.html'
 h = read(idx)
 mi = '/*MI*/\n' + read(SRC / 'menu-icons.js') + '/*MI-END*/\n'
 h = re.sub(r'/\*MI\*/\n(?:.*?/\*MI-END\*/\n)?', lambda m: mi, h, count=1, flags=re.S)
+tl = '/*TL*/\n' + read(SRC / 'tools-list.js') + '/*TL-END*/\n'
+h = re.sub(r'/\*TL\*/\n(?:.*?/\*TL-END\*/\n)?', lambda m: tl, h, count=1, flags=re.S)
 tips = "/*TIPS*/\nwindow.TK_TOOL = 'home';\n" + TIPS.replace('</script', '<\\/script') + '/*TIPS-END*/\n'
 h = re.sub(r'/\*TIPS\*/\n(?:.*?/\*TIPS-END\*/\n)?', lambda m: tips, h, count=1, flags=re.S)
 idx.write_text(h, encoding='utf8')
