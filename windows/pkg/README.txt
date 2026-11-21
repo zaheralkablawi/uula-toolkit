@@ -7,7 +7,7 @@
 2) شغّل الملف UULA-Toolkit-Setup.exe (دبل كلك).
    إذا ظهرت رسالة Windows protected your PC: اضغط More info ثم Run anyway.
 3) أغلق PowerPoint وWord تمامًا ثم افتحهما من جديد.
-4) زر UULA Toolkit يظهر في تبويب UULA في البرنامجين.
+4) أزرار UULA Toolkit ونافذة 2 ونافذة 3 تظهر في تبويب UULA في البرنامجين (كل زر يفتح نافذة مستقلة، لتفتح أكثر من أداة معًا).
    إذا لم يظهر: Insert ← Add-ins ← My Add-ins ← Developer Add-ins.
 
 إذا منع الويندوز ملف exe: شغّل Install-UULA-Toolkit.cmd بدلًا منه.

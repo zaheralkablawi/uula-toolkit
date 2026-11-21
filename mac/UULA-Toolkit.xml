@@ -5,7 +5,7 @@
   xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
   xsi:type="TaskPaneApp">
   <Id>36f5f959-c945-487a-b5d3-c33d6c76f199</Id>
-  <Version>1.0.0.0</Version>
+  <Version>1.1.0.0</Version>
   <ProviderName>Zaher Alkablawi</ProviderName>
   <DefaultLocale>ar-SA</DefaultLocale>
   <DisplayName DefaultValue="UULA Toolkit"/>
@@ -53,6 +53,38 @@
                     <SourceLocation resid="TK.Url"/>
                   </Action>
                 </Control>
+                <Control xsi:type="Button" id="UULATK.OpenP2">
+                  <Label resid="TK.Button2"/>
+                  <Supertip>
+                    <Title resid="TK.Button2"/>
+                    <Description resid="TK.Tip2"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="TK.Icon16"/>
+                    <bt:Image size="32" resid="TK.Icon32"/>
+                    <bt:Image size="80" resid="TK.Icon80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>UULAToolkitPane2</TaskpaneId>
+                    <SourceLocation resid="TK.Url2"/>
+                  </Action>
+                </Control>
+                <Control xsi:type="Button" id="UULATK.OpenP3">
+                  <Label resid="TK.Button3"/>
+                  <Supertip>
+                    <Title resid="TK.Button3"/>
+                    <Description resid="TK.Tip2"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="TK.Icon16"/>
+                    <bt:Image size="32" resid="TK.Icon32"/>
+                    <bt:Image size="80" resid="TK.Icon80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>UULAToolkitPane3</TaskpaneId>
+                    <SourceLocation resid="TK.Url3"/>
+                  </Action>
+                </Control>
               </Group>
               <Label resid="TK.Tab"/>
             </CustomTab>
@@ -86,6 +118,38 @@
                     <SourceLocation resid="TK.Url"/>
                   </Action>
                 </Control>
+                <Control xsi:type="Button" id="UULATK.OpenW2">
+                  <Label resid="TK.Button2"/>
+                  <Supertip>
+                    <Title resid="TK.Button2"/>
+                    <Description resid="TK.Tip2"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="TK.Icon16"/>
+                    <bt:Image size="32" resid="TK.Icon32"/>
+                    <bt:Image size="80" resid="TK.Icon80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>UULAToolkitPane2</TaskpaneId>
+                    <SourceLocation resid="TK.Url2"/>
+                  </Action>
+                </Control>
+                <Control xsi:type="Button" id="UULATK.OpenW3">
+                  <Label resid="TK.Button3"/>
+                  <Supertip>
+                    <Title resid="TK.Button3"/>
+                    <Description resid="TK.Tip2"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="TK.Icon16"/>
+                    <bt:Image size="32" resid="TK.Icon32"/>
+                    <bt:Image size="80" resid="TK.Icon80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>UULAToolkitPane3</TaskpaneId>
+                    <SourceLocation resid="TK.Url3"/>
+                  </Action>
+                </Control>
               </Group>
               <Label resid="TK.Tab"/>
             </CustomTab>
@@ -101,14 +165,19 @@
       </bt:Images>
       <bt:Urls>
         <bt:Url id="TK.Url" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html"/>
+        <bt:Url id="TK.Url2" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?pane=2"/>
+        <bt:Url id="TK.Url3" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?pane=3"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="TK.Tab" DefaultValue="UULA"/>
         <bt:String id="TK.Group" DefaultValue="UULA"/>
         <bt:String id="TK.Button" DefaultValue="UULA Toolkit"/>
+        <bt:String id="TK.Button2" DefaultValue="نافذة 2"/>
+        <bt:String id="TK.Button3" DefaultValue="نافذة 3"/>
       </bt:ShortStrings>
       <bt:LongStrings>
         <bt:String id="TK.Tip" DefaultValue="كل أدوات علا في مكان واحد"/>
+        <bt:String id="TK.Tip2" DefaultValue="نافذة إضافية لفتح أداة ثانية مع الأداة المفتوحة"/>
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>
