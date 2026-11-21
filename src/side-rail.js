@@ -1,6 +1,6 @@
 // UULA Toolkit — side rail inside every tool: a very small arrow on the right edge; click it and every tool
 // shows in a slim column (the user's own order, hidden tools left out). A click opens that tool here; the rail
-// hides again by itself when the pointer leaves it.
+// hides again by itself when the pointer leaves it. The pin keeps it showing (the tool moves aside), saved on this device.
 (function () {
   if (typeof TK_TOOLS === 'undefined') return;
   var TOOL = window.TK_TOOL || '';
@@ -31,7 +31,14 @@
       '#tkRail button.cur{background:#e7effc;border-color:#9dbcf0}' +
       '#tkRail button svg{width:28px;height:28px}' +
       '#tkRail .home svg{width:20px;height:20px;color:#1f71de}' +
-      '#tkRail hr{width:30px;border:0;border-top:1px solid #d9dfe7;margin:2px 0}';
+      '#tkRail hr{width:30px;border:0;border-top:1px solid #d9dfe7;margin:2px 0}' +
+      '#tkRail .pin{margin-top:auto;width:32px;height:32px;color:#9aa3b0}#tkRail .pin svg{width:16px;height:16px}' +
+      '#tkRail .pin.on{color:#1f71de;background:#e7effc}' +
+      // pinned: a slimmer rail that always shows, and the tool moves aside so nothing is covered
+      'html.tk-pin #tkRail{width:40px;box-shadow:none;transition:none;gap:4px;padding:6px 0}' +
+      'html.tk-pin #tkRail button:not(.pin){width:32px;height:32px;border-radius:8px}html.tk-pin #tkRail button svg{width:22px;height:22px}' +
+      'html.tk-pin #tkRail .home svg{width:16px;height:16px}html.tk-pin #tkRail .pin svg{width:15px;height:15px}' +
+      'html.tk-pin body{margin-right:40px!important}html.tk-pin #tkTab{display:none}';
     document.head.appendChild(css);
     var tab = document.createElement('button');
     tab.type = 'button'; tab.id = 'tkTab'; tab.setAttribute('aria-label', en ? 'Tools' : 'الأدوات');
@@ -40,7 +47,13 @@
     rail.id = 'tkRail'; rail.setAttribute('aria-label', en ? 'Tools' : 'الأدوات');
     document.body.appendChild(tab); document.body.appendChild(rail);
 
-    var timer = 0;
+    var timer = 0, pinned = false;
+    try { pinned = localStorage.getItem('tk-rail-pin') === '1'; } catch (e) {}
+    function setPin(v) {
+      pinned = v; try { localStorage.setItem('tk-rail-pin', v ? '1' : '0'); } catch (e) {}
+      document.documentElement.classList.toggle('tk-pin', v);
+      if (v) open(); else close();
+    }
     function draw() {
       var h = '<button type="button" class="home" data-go="home" data-tkn="' + (en ? 'All tools' : 'كل الأدوات') + '">' +
         '<svg viewBox="0 0 20 20" fill="currentColor"><rect x="3" y="3" width="6" height="6" rx="1.3"/><rect x="11" y="3" width="6" height="6" rx="1.3"/><rect x="3" y="11" width="6" height="6" rx="1.3"/><rect x="11" y="11" width="6" height="6" rx="1.3"/></svg></button><hr>';
@@ -48,10 +61,12 @@
         h += '<button type="button" data-go="' + t.id + '" data-tkn="' + t.name + '"' + (t.id === TOOL ? ' class="cur" aria-current="page"' : '') +
           '><svg viewBox="0 0 32 32" aria-hidden="true">' + t.icon + '</svg></button>';
       });
+      h += '<button type="button" class="pin' + (pinned ? ' on' : '') + '" data-go="pin" aria-pressed="' + pinned + '" data-tkn="' + (pinned ? (en ? 'Unpin' : 'إلغاء التثبيت') : (en ? 'Pin' : 'تثبيت')) + '">' +
+        '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h6l-1 5 3 3H5l3-3z"/><path d="M10 11v6"/></svg></button>';
       rail.innerHTML = h;
     }
     function open() { clearTimeout(timer); draw(); rail.classList.add('open'); tab.style.visibility = 'hidden'; }
-    function close() { clearTimeout(timer); rail.classList.remove('open'); tab.style.visibility = ''; }
+    function close() { clearTimeout(timer); if (pinned) { draw(); return; } rail.classList.remove('open'); tab.style.visibility = ''; }
     tab.addEventListener('click', open);
     tab.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') timer = setTimeout(open, 350); });
     tab.addEventListener('pointerleave', function () { if (!rail.classList.contains('open')) clearTimeout(timer); });
@@ -59,9 +74,11 @@
     rail.addEventListener('pointerenter', function () { clearTimeout(timer); });
     document.addEventListener('pointerdown', function (e) { if (rail.classList.contains('open') && !rail.contains(e.target) && e.target !== tab) close(); }, true);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+    if (pinned) { document.documentElement.classList.add('tk-pin'); open(); }
     rail.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       var go = b.dataset.go;
+      if (go === 'pin') { setPin(!pinned); return; }
       if (go === TOOL) { close(); return; }
       location.href = go === 'home' ? '../../index.html?v=' + Date.now() : '../' + go + '/app.html?v=' + Date.now();
     });
