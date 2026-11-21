@@ -84,10 +84,10 @@ func main() {
 	}
 	msg := "تم تثبيت أداة UULA Toolkit ✓\n\n" +
 		"1) أغلق PowerPoint وWord تمامًا ثم افتحهما من جديد.\n" +
-		"2) ستجد زر UULA Toolkit في تبويب UULA في البرنامجين.\n" +
+		"2) ستجد زر UULA Toolkit في تبويب UULA Toolkit في البرنامجين.\n" +
 		"   إذا لم يظهر: Insert ← Add-ins ← My Add-ins ← Developer Add-ins.\n\n" +
 		"يلزم Microsoft 365 محدّث، وخط UULA Sans مثبّت على الجهاز.\n\n" +
-		"UULA Toolkit is installed in PowerPoint and Word. Restart them; the button is on the UULA tab."
+		"UULA Toolkit is installed in PowerPoint and Word. Restart them; the button is on the UULA Toolkit tab."
 	if running("POWERPNT.EXE") || running("WINWORD.EXE") {
 		msg += "\n\n⚠ PowerPoint أو Word مفتوح الآن: أغلقه وافتحه لتظهر الأداة."
 	}

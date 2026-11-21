@@ -5,7 +5,7 @@
   xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
   xsi:type="TaskPaneApp">
   <Id>36f5f959-c945-487a-b5d3-c33d6c76f199</Id>
-  <Version>1.3.0.0</Version>
+  <Version>1.4.0.0</Version>
   <ProviderName>Zaher Alkablawi</ProviderName>
   <DefaultLocale>ar-SA</DefaultLocale>
   <DisplayName DefaultValue="UULA Toolkit"/>
@@ -175,7 +175,7 @@
         <bt:Url id="T.cover.u" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?tool=cover"/>
       </bt:Urls>
       <bt:ShortStrings>
-        <bt:String id="TK.Tab" DefaultValue="UULA"/>
+        <bt:String id="TK.Tab" DefaultValue="UULA Toolkit"/>
         <bt:String id="TK.Group" DefaultValue="UULA"/>
         <bt:String id="TK.Button" DefaultValue="UULA Toolkit"/>
         <bt:String id="T.restyle" DefaultValue="Design"/>

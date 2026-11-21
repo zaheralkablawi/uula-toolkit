@@ -8,7 +8,7 @@ from xml.sax.saxutils import escape
 ROOT = pathlib.Path(__file__).parent
 U = 'https://zaheralkablawi.github.io/uula-toolkit/'
 ID = '36f5f959-c945-487a-b5d3-c33d6c76f199'
-VERSION = '1.3.0.0'
+VERSION = '1.4.0.0'
 # the tool buttons, in ribbon order: id, label, Arabic tip, hosts (from src/tools-list.js)
 tools = json.loads(subprocess.check_output(['node', '-e', '''
 global.window = {}; eval(require('fs').readFileSync('src/tools-list.js', 'utf8').replace(/var /g, 'global.'));
@@ -59,7 +59,7 @@ images = ''.join(f'        <bt:Image id="TK.Icon{s}" DefaultValue="{U}icon-{s}.p
 images += ''.join(f'        <bt:Image id="T.{t["id"]}.i{s}" DefaultValue="{U}icons/{t["id"]}-{s}.png"/>\n' for t in tools for s in (16, 32, 80))
 urls = f'        <bt:Url id="TK.Url" DefaultValue="{U}taskpane.html"/>\n'
 urls += ''.join(f'        <bt:Url id="T.{t["id"]}.u" DefaultValue="{U}taskpane.html?tool={t["id"]}"/>\n' for t in tools)
-short = '        <bt:String id="TK.Tab" DefaultValue="UULA"/>\n        <bt:String id="TK.Group" DefaultValue="UULA"/>\n        <bt:String id="TK.Button" DefaultValue="UULA Toolkit"/>\n'
+short = '        <bt:String id="TK.Tab" DefaultValue="UULA Toolkit"/>\n        <bt:String id="TK.Group" DefaultValue="UULA"/>\n        <bt:String id="TK.Button" DefaultValue="UULA Toolkit"/>\n'
 short += ''.join(f'        <bt:String id="T.{t["id"]}" DefaultValue="{escape(t["name"])}"/>\n' for t in tools)
 long_ = '        <bt:String id="TK.Tip" DefaultValue="كل أدوات علا في مكان واحد"/>\n'
 long_ += ''.join(f'        <bt:String id="T.{t["id"]}.tip" DefaultValue="{escape(t["tip"])}. تفتح في نافذة خاصة بها."/>\n' for t in tools)
