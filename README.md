@@ -1,6 +1,6 @@
 # UULA Toolkit
 
-كل إضافات علا للباوربوينت والوورد في إضافة واحدة: Restyle وArabic Math وGraph وDark وPPT Video Template.
+كل إضافات علا للباوربوينت والوورد في إضافة واحدة: Design (UULA Restyle) وArabic Math وGraph وDark وPPT Video Template.
 
 - `taskpane.html` يفتح دائمًا أحدث نسخة من `index.html` (قائمة الأدوات).
 - كل أداة صفحتها في `tools/<id>/app.html`، وتنفتح فقط عند اختيارها (لا بطء).

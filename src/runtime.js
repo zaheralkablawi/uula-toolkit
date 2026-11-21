@@ -19,6 +19,8 @@
           .replace(P.DARK_HALF + '</svg><span class="bt">', P.COVER_LOGO + '</svg><span class="bt">');
       }
     }
+    // Restyle is called "Design" inside the Toolkit (its own repository keeps the name UULA Restyle)
+    if (TOOL === 'restyle') html = html.replace('<title>UULA Restyle</title>', '<title>Design</title>').replace('<span class="sub">Restyle</span>', '<span class="sub">Design</span>');
     // inside the Toolkit a tool shows its own name only (no "UULA" above it)
     html = html.replace(/<span class="root">UULA<\/span><span class="sub">([^<]*)<\/span>/, '<span class="root">$1</span>');
     html = html.replace('<b>UULA</b><i>Graph</i>', '<b>Graph</b>');
