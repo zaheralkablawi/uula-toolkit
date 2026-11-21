@@ -19,9 +19,9 @@
     var en = false; try { en = localStorage.getItem('tk-lang') === 'en'; } catch (e) {}
     var css = document.createElement('style');
     css.textContent =
-      '#tkTab{position:fixed;right:0;top:50%;z-index:1001;width:11px;height:46px;margin-top:-23px;padding:0;border:1px solid #d9dfe7;border-right:0;' +
-      'border-radius:7px 0 0 7px;background:#fff;color:#1f71de;cursor:pointer;display:grid;place-items:center;box-shadow:-1px 1px 4px rgb(0 0 0 / .08);opacity:.85}' +
-      '#tkTab:hover{opacity:1;width:14px;background:#e7effc;border-color:#1f71de}' +
+      '#tkTab{position:fixed;right:0;top:50%;z-index:1001;width:12px;height:48px;margin-top:-24px;padding:0;border:0;' +
+      'border-radius:7px 0 0 7px;background:#1f71de;color:#fff;cursor:pointer;display:grid;place-items:center;box-shadow:-1px 1px 4px rgb(0 0 0 / .15);opacity:.75}' +
+      '#tkTab:hover{opacity:1;width:15px}' +
       '#tkTab svg{width:8px;height:8px}' +
       '#tkRail{position:fixed;right:0;top:0;bottom:0;z-index:1002;width:54px;background:#fff;border-left:1px solid #d9dfe7;box-shadow:-6px 0 18px rgb(0 0 0 / .14);' +
       'display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0;overflow-y:auto;transform:translateX(100%);transition:transform .16s ease;visibility:hidden}' +
