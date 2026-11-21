@@ -196,6 +196,24 @@ input[type=color]{ width:var(--ctl-h); padding:3px; cursor:pointer }
 
 /* ===== MathType-style ribbon: tabs on top, grouped palettes below ===== */
 .ribbon{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
+.pal2{display:grid;gap:8px}
+.p2search{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:0 9px;height:34px;color:var(--muted)}
+.p2search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.p2search input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-family:var(--f-body);font-size:.92rem;color:var(--ink);height:100%}
+.p2search input::-webkit-search-cancel-button{display:none}
+.p2clear{border:0;background:none;color:var(--muted);cursor:pointer;font-size:.8rem;padding:2px 4px}
+.p2found,.p2recent,.p2sec{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:8px}
+.p2recent{display:flex;gap:8px;align-items:center}.p2recent .p2row{display:flex;flex-wrap:wrap;gap:4px;flex:1;min-width:0}
+.p2lab{font-size:.75rem;color:var(--muted);white-space:nowrap}
+.p2none{font-size:.85rem;color:var(--muted)}
+.p2heads{display:flex;justify-content:space-between;gap:8px}
+.p2head{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--ink);font-family:var(--f-body);font-size:.92rem;font-weight:600;cursor:pointer}
+.p2head svg{transition:transform .15s}.p2head[aria-expanded="false"] svg{transform:rotate(90deg)}.p2head[aria-expanded="true"]{border-color:var(--accent);color:var(--accent)}
+.p2chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.p2chip{height:26px;padding:0 10px;border:1px solid var(--line);border-radius:999px;background:var(--code);color:var(--muted);font-family:var(--f-body);font-size:.8rem;cursor:pointer}
+.p2chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.p2items .grp,.p2found .grp,.p2row{display:flex;flex-wrap:wrap;gap:4px}
+
 .tabs{display:flex;flex-wrap:wrap;gap:2px;background:var(--code);padding:4px 4px 0;border-bottom:1px solid var(--line)}
 .tabs .tab{height:32px;min-width:42px;padding:0 9px;border:1px solid transparent;border-bottom:0;border-radius:7px 7px 0 0;background:transparent;color:var(--muted);font-family:var(--f-body);font-size:.95rem;cursor:pointer;display:inline-grid;place-items:center;margin-bottom:-1px}
 .tabs .tab:hover{color:var(--accent)}
@@ -315,7 +333,7 @@ input[type=color]{ width:var(--ctl-h); padding:3px; cursor:pointer }
           <button type="button" class="ico" data-ins="شبكة.علاقة{|}" title="مخطط بياني لعلاقة" aria-label="مخطط بياني لعلاقة"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><path d="M3 16.5H20M3 16.5V1.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M7 2v14M11 2v14M15 2v14M3 5h17M3 9h17M3 13h17" fill="none" stroke="currentColor" stroke-width=".5" stroke-dasharray="1 1"/><circle cx="7" cy="13" r="1.7" fill="currentColor"/><circle cx="11" cy="9" r="1.7" fill="currentColor"/><circle cx="15" cy="5" r="1.7" fill="currentColor"/></svg></button>
           <button type="button" class="ico" data-ins="'" title="شرطة (أ')" aria-label="شرطة (أ')"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><rect x="8" y="5" width="11" height="11" rx="1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.4"/><path d="M3.5 2.5L5.5 7.5M6.8 2.5L8.8 7.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <button type="button" class="ico" data-ins="سهم{|}" title="سهم فوقه كتابة" aria-label="سهم فوقه كتابة"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><rect x="5" y="2" width="12" height="5.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.4"/><path d="M20 12.5H2M5 10l-3 2.5 3 2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <button type="button" class="ico" data-ins="سهم.يمين{|}" title="سهم لليمين فوقه كتابة" aria-label="سهم لليمين فوقه كتابة"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><rect x="5" y="2" width="12" height="5.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.4"/><path d="M2 12.5H20M17 10l3 2.5-3 2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" class="ico" data-ins="سهم.يمين{|}" title="سهم لليمين فوقه كتابة" aria-label="سهم لليمين فوقه كتابة"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><rect x="5" y="2" width="12" height="5.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.4"/><path d="M2 12.5H20M17 10l3 2.5-3 2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="ico" type="button" data-ins="حاصرة.فوق{|}{}" title="قوس فوقه كتابة" aria-label="قوس فوقه كتابة"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><rect x="4" y="9" width="14" height="6.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.4"/><path d="M4 7.5Q4 5.5 6 5.5H9.5Q11 5.5 11 3.5Q11 5.5 12.5 5.5H16Q18 5.5 18 7.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="ico" type="button" data-ins="حاصرة.تحت{|}{}" title="قوس تحته كتابة" aria-label="قوس تحته كتابة"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><rect x="4" y="2.5" width="14" height="6.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.4"/><path d="M4 10.5Q4 12.5 6 12.5H9.5Q11 12.5 11 14.5Q11 12.5 12.5 12.5H16Q18 12.5 18 10.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="ico" type="button" data-ins="حاصرة.يمين{|}{}" title="قوس على اليمين بجانبه كتابة" aria-label="قوس على اليمين بجانبه كتابة"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><rect x="2" y="3" width="10" height="12" rx="1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.4"/><path d="M14 3Q16 3 16 5V7.5Q16 9 18 9Q16 9 16 10.5V13Q16 15 14 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="ico" type="button" data-ins="حاصرة.يسار{|}{}" title="قوس على اليسار بجانبه كتابة" aria-label="قوس على اليسار بجانبه كتابة"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><rect x="10" y="3" width="10" height="12" rx="1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.4"/><path d="M8 3Q6 3 6 5V7.5Q6 9 4 9Q6 9 6 10.5V13Q6 15 8 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="ico" type="button" data-ins="مسافة{١}" title="مسافة صغيرة" aria-label="مسافة صغيرة"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><path d="M8.0 9V12.5H14.0V9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="ico" type="button" data-ins="مسافة{٢}" title="مسافة متوسطة" aria-label="مسافة متوسطة"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><path d="M5.5 9V12.5H16.5V9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="ico" type="button" data-ins="مسافة{٤}" title="مسافة كبيرة" aria-label="مسافة كبيرة"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><path d="M2.5 9V12.5H19.5V9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <button type="button" class="ico" data-ins="زاوية{|}" title="زاوية" aria-label="زاوية"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><path d="M4 6L11 1.5L18 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="5" y="8.5" width="12" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.4"/></svg></button>
           <button type="button" class="ico" data-ins="نها{|}" title="نهاية" aria-label="نهاية"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><text x="11" y="9" font-size="9" font-family="UULA Sans" fill="currentColor" text-anchor="middle">نها</text><rect x="5" y="11" width="12" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.4"/></svg></button>
           <button type="button" class="ico" data-ins="مجموع{|}{}" title="مجموع بحدود" aria-label="مجموع بحدود"><svg class="ri" viewBox="0 0 22 18" width="22" height="18" aria-hidden="true"><path d="M7 3.5H15L10 9L15 14.5H7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="8" y="0.3" width="6" height="2.6" rx="1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.4"/><rect x="8" y="15.2" width="6" height="2.6" rx="1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.4"/></svg></button>
@@ -370,11 +388,14 @@ input[type=color]{ width:var(--ctl-h); padding:3px; cursor:pointer }
           <tr><td>مخطط بياني لعلاقة</td><td>في <code>شبكة{…}</code> أضف سطر <code>العلاقة : (١، ٠)، (٢، ٣)، (٣، ٦)</code>: نقطة لكل زوج (س، ص)، وإذا تركت الحدود «عدد» تُضبط الشبكة على النقاط وحدها</td></tr>
           <tr><td>حرف بذيل</td><td>اكتب الحرف مرتين: <code>سس</code> ، <code>شش</code> ، <code>صص</code> ، <code>حح</code></td></tr>
           <tr><td>كلمة تصير رمزًا</td><td>اكتب الكلمة ثم مسافة: باي π ، تقاطع ∩ ، اتحاد ∪ ، زائد + ، ناقص − ، ضرب × ، تقسيم ÷ ، أكبر &gt; ، أصغر &lt; ، ينتمي ∈ ، لا ينتمي ∉ ، يوازي // ، يعامد ⊥ ، درجة ° ، لا نهاية ∞ ، دلتا ∆ ، تربيع ² ، تكعيب ³. لإرجاعها كلمة: زر «أب ↔» أو ⌘Z</td></tr>
+          <tr><td>العدد الدوري</td><td><code>٠.خط{٣}</code> ، <code>٠٫١خط{٢٣}</code> : عدد واحد يُقرأ من اليسار، والخط فوق الأرقام المتكررة</td></tr>
+          <tr><td>مسافة</td><td><code>مسافة{١}</code> صغيرة ، <code>مسافة{٢}</code> متوسطة ، <code>مسافة{٤}</code> كبيرة ، أو أي عدد مثل <code>مسافة{٦}</code> (كل ١ = ربع حرف)</td></tr>
+          <tr><td>قوس حاصر بكتابة</td><td><code>حاصرة.فوق{أ × أ × … × أ}{ن مرة}</code> ، وكذلك <code>حاصرة.تحت</code> و<code>حاصرة.يمين</code> و<code>حاصرة.يسار</code>: القوس يطول مع العبارة والكتابة عند طرفه</td></tr>
           <tr><td>معادلة باوربوينت</td><td>في باوربوينت: حدّد مربع معادلة باوربوينت الأصلية (أو عدة مربعات بـ Shift) واضغط زر التعديل ✎ ، فتُكتب هنا بالترتيب العربي بلونها وحجمها. مع عدة مربعات تختار: صورة واحدة لها كلها، أو صورة لكل مربع في مكانه</td></tr>
           <tr><td>عكس الترتيب</td><td>إذا ظهر سطر معكوسًا (مثلًا بعد القراءة من صورة): ضع المؤشر في السطر واضغط زر ⇄ ، فيُعكس ترتيبه ومعه ما داخل الجذور والكسور والأقواس. أو حدّد جزءًا فيُعكس وحده</td></tr>
           <tr><td>محاذاة جزء</td><td>حدّد الأسطر ثم اختر المحاذاة، فتُطبَّق عليها وحدها. أو اكتب في أول السطر <code>محاذاة{يساوي}</code> (أو يمين، يسار، وسط) فتسري عليه وعلى ما بعده</td></tr>
           <tr><td>نوع خط الدالة</td><td>ضع المؤشر على سطر الدالة في <code>تمثيل.بياني{…}</code> واختر: متصل، متقطع، منقط. أو اكتب <code>ص = س^٢ &amp; متقطع</code> ، <code>ص = س &amp; منقط &amp; أحمر</code></td></tr>
-          <tr><td>رسم المتباينات</td><td>في <code>تمثيل.بياني{…}</code> اكتب المتباينة مكان الدالة: <code>ص &gt; س + ٣</code> ، <code>ص ≤ س − ١</code> ، <code>س ≥ ٢</code>. تُظلَّل منطقة الحل بشفافية ٤٠٪، والخط متقطع مع &lt; و&gt; ومتصل مع ≤ و≥. اللون: <code>ص &gt; س &amp; أحمر</code></td></tr>
+          <tr><td>رسم المتباينات</td><td>في <code>تمثيل.بياني{…}</code> اكتب المتباينة مكان الدالة: <code>ص &gt; س + ٣</code> ، <code>ص − س − ٢ ≥ ٠</code> ، <code>٢س + ٣ص &lt; ٦</code> ، <code>س ≥ ٢</code> (أي متباينة خطية بأي ترتيب). تُظلَّل منطقة الحل بشفافية ٤٠٪، والخط متقطع مع &lt; و&gt; ومتصل مع ≤ و≥. اللون: <code>ص &gt; س &amp; أحمر</code></td></tr>
           <tr><td>شرطة</td><td><code>أ'</code> ، <code>أ''</code></td></tr>
           <tr><td>زاوية</td><td><code>زاوية{أ ب جـ}</code></td></tr>
           <tr><td>نهاية، مجموع، تكامل</td><td><code>نها{س ← ٣}</code> ، <code>مجموع{ر = ١}{ن}</code> ، <code>تكامل{١}{٢}</code></td></tr>
@@ -438,7 +459,7 @@ const MAZ = {m1:0xE000, m2:0xE200};
 const MIRROR = {'<':'>','>':'<','≤':'≥','≥':'≤','∈':'∋','∋':'∈','∉':'∌','⊂':'⊃','⊃':'⊂','⊆':'⊇','⊇':'⊆','⊄':'⊅','⊅':'⊄','(':')',')':'(','[':']',']':'[','«':'»','»':'«'};
 const CMD_RENAME = [["شبكةموجبةخالية", "شبكة.موجبة.خالية"], ["شبكةموجبةفارغة", "شبكة.موجبة.فارغة"], ["خطأعدادفارغ", "خط.أعداد.فارغ"], ["توافيقأقواس", "توافيق.أقواس"], ["جدولداخلي", "جدول.داخلي"], ["جدولعنوان", "جدول.عنوان"], ["دائرةملونة", "دائرة.ملونة"], ["شبكةمرقمة", "شبكة.مرقمة"], ["شبكةموجبة", "شبكة.موجبة"], ["شبكةخالية", "شبكة.خالية"], ["جدولقيم", "جدول.قيم"], ["خطأعداد", "خط.أعداد"], ["شطبتحت", "شطب.تحت"]]; // old one-word names -> dotted names (old names still work)
 const renameCmds = s => typeof s==='string' ? CMD_RENAME.reduce((t,[a,b])=>t.split(a).join(b), s) : s;
-const CMDS = [['سهم.يمين','xarrr'],['سهم','xarr'],['ضرب.رأسي','vmul'],['محاور.موجبة.خالية','axespx'],['محاور.موجبة','axesp'],['محاور.خالية','axesx'],['محاور','axes'],['ترتيب','arr'],['فوق','over'],['تسطير','under'],['مربع','box'],['مصفوفة','mat'],['جدولداخلي','tbli'],['جدولعنوان','tblh'],['جدولقيم','tblv'],['جدول','tbl'],['دائرةملونة','circf'],['دائرة','circ'],['شبكةمرقمة','planen'],['شبكةموجبةخالية','planepx'],['شبكةخالية','planex'],['شبكةموجبةفارغة','planep0'],['شبكةموجبة','planep'],['خطأعدادفارغ','nline0'],['خطأعداد','nline'],['شبكة','plane'],['محدد','det'],['نظام','sys'],['قواعد','cases'],['قسمة','ldiv'],['عمودي','vert'],['شطب','strike'],['شطبتحت','strikeb'],['لون','color'],['رمز','mathify'],['نص','plain'],['حجم','size'],['سماكة','wt'],['زاوية','angle'],['نها','lim'],['مجموع','sum'],['تكامل','int'],['توافيقأقواس','binom'],['توافيق','comb'],['تباديل','perm'],['مثلث','triu'],['مستقيم','line'],['قوس','arc'],['متجه','vec'],['جذر','root'],['كسر','frac'],['مطلق','abs'],['خط','bar'],['\\sqrt','root'],['\\frac','frac'],['\\overline','bar'],['\\abs','abs']];
+const CMDS = [['مسافة','space'],['حاصرة.فوق','brt'],['حاصرة.تحت','brb'],['حاصرة.يمين','brr'],['حاصرة.يسار','brl'],['حاصرة','brt'],['سهم.يمين','xarrr'],['سهم','xarr'],['ضرب.رأسي','vmul'],['محاور.موجبة.خالية','axespx'],['محاور.موجبة','axesp'],['محاور.خالية','axesx'],['محاور','axes'],['ترتيب','arr'],['فوق','over'],['تسطير','under'],['مربع','box'],['مصفوفة','mat'],['جدولداخلي','tbli'],['جدولعنوان','tblh'],['جدولقيم','tblv'],['جدول','tbl'],['دائرةملونة','circf'],['دائرة','circ'],['شبكةمرقمة','planen'],['شبكةموجبةخالية','planepx'],['شبكةخالية','planex'],['شبكةموجبةفارغة','planep0'],['شبكةموجبة','planep'],['خطأعدادفارغ','nline0'],['خطأعداد','nline'],['شبكة','plane'],['محدد','det'],['نظام','sys'],['قواعد','cases'],['قسمة','ldiv'],['عمودي','vert'],['شطب','strike'],['شطبتحت','strikeb'],['لون','color'],['رمز','mathify'],['نص','plain'],['حجم','size'],['سماكة','wt'],['زاوية','angle'],['نها','lim'],['مجموع','sum'],['تكامل','int'],['توافيقأقواس','binom'],['توافيق','comb'],['تباديل','perm'],['مثلث','triu'],['مستقيم','line'],['قوس','arc'],['متجه','vec'],['جذر','root'],['كسر','frac'],['مطلق','abs'],['خط','bar'],['\\sqrt','root'],['\\frac','frac'],['\\overline','bar'],['\\abs','abs']];
 for (const [a,b] of CMD_RENAME){ const t=CMDS.find(x=>x[0]===a)[1]; CMDS.unshift([b,t]); }
 
 function normalize(s){
@@ -522,7 +543,7 @@ class P {
       else if (/^(ال)?علاقة\s*[:：]/.test(it)){ const re=/\(\s*([^()،,]+?)\s*[،,]\s*([^()]+?)\s*\)/g; let m; while ((m=re.exec(it))){ const x=num(m[1]), y=num(m[2]); if (x!=null && y!=null) pts.push({x,y,lab:'',rel:true}); } } // graph of a relation: a dot for each pair, no labels
       else if (/^نقط[ةه]/.test(it)){ const re=/([^\s()]*)\s*\(\s*([^()،,]+?)\s*[،,]\s*([^()]+?)\s*\)/g; let m; while ((m=re.exec(it.replace(/^نقط[ةه]\s*/,'')))){ const x=num(m[2]), y=num(m[3]); if (x!=null && y!=null) pts.push({x,y,lab:m[0].trim()}); } }
       else if (/^(خط\.?)?تقارب/.test(it)){ const m=/(س|ص)\s*=\s*(.+)$/.exec(it); if (m && num(m[2])!=null) asy.push({ax:m[1]==='س'?'x':'y', v:num(m[2])}); }
-      else if (/^(لون\s*\{[^{}]*\}\s*\{)?\s*(ص|س)\s*[<>≤≥⩽⩾]/.test(it) && (it.match(/[<>≤≥⩽⩾]/g)||[]).length===1) fns.push(it); // an inequality to shade
+      else if (/[سص]/.test(it) && (it.match(/[<>≤≥⩽⩾]/g)||[]).length===1) fns.push(it); // an inequality (any linear form) // an inequality to shade
       else if (REL.test(it)){ const ps=it.split(REL).map(x=>x.trim()); let lo=null, hi=null, nm='';
         if (ps.length>=3){ lo=num(ps[0]); nm=ps[1]; hi=num(ps[ps.length-1]); } else if (num(ps[0])!=null || ps[0]==='عدد'){ lo=num(ps[0]); nm=ps[1]; } else { nm=ps[0]; hi=num(ps[1]); }
         if (lo!=null && hi!=null && lo>hi) [lo,hi]=[hi,lo]; axes.push({lo,hi,nm:lab(nm)}); }
@@ -541,6 +562,18 @@ class P {
     const D0=F.pos?0:-5, D1=F.pos?10:5; let [x0=D0,x1=D1,y0,y1]=nums; if (!(x1>x0)){ x0=D0; x1=D1; } if (y0==null||isNaN(y0)) y0=x0; if (y1==null||isNaN(y1)||!(y1>y0)) y1=y0===x0?x1:y0+(x1-x0);
     if (F.range && !nums.length) [x0,x1,y0,y1]=F.range;
     const fns=[]; body.split(/[;؛]/).map(x=>x.trim()).filter(Boolean).forEach((e,k)=>{ let col=null; const lm=/^لون\s*\{([^{}]*)\}\s*\{(.*)\}$/s.exec(e); if (lm){ col=colorOf(lm[1]); e=lm[2]; }
+      // any linear inequality in س and ص (ص − س − ٢ ≥ ٠ ، ٢س + ٣ص < ٦): moved to one side, the edge solved for ص (or س)
+      const gq=/^([^<>≤≥⩽⩾]+?)\s*([<>≤≥⩽⩾])\s*([^<>≤≥⩽⩾]+)$/.exec(e.replace(/&[^&]*$/, m=>{ col=colorOf(m.slice(1))||col; return ''; }));
+      if (gq && !/^\s*(ص|y|س|x)\s*$/i.test(gq[1])){
+        const big=/[>≥⩾]/.test(gq[2]), strict=/[<>]/.test(gq[2]);
+        let g0, g1, g2; try { const sub=v=>('('+gq[1]+')-('+gq[3]+')').replace(/ص|(?<![a-z])y(?![a-z])/gi,'('+v+')'); g0=compileFn(sub(0)); g1=compileFn(sub(1)); g2=compileFn(sub(2)); } catch(er){ this.err('لم أفهم المتباينة: '+e.trim(), this.at(i0)); }
+        const A=x=>g1(x)-g0(x), xs=[-3,-1,0.5,2,4];
+        if (xs.some(x=>Math.abs(g2(x)-2*g1(x)+g0(x))>1e-6*(1+Math.abs(g0(x))))) this.err('المتباينة يجب أن تكون خطية في ص: '+e.trim(), this.at(i0));
+        if (xs.every(x=>Math.abs(A(x))<1e-12)){ // no ص: a vertical edge س = عدد
+          const c=g0(1)-g0(0); if (Math.abs(c)<1e-12) this.err('لم أفهم المتباينة: '+e.trim(), this.at(i0));
+          const xs0=-g0(0)/c; fns.push({f:()=>xs0, color: col || '#1f71de', ineq:{up: big===(c>0), strict, vert:true}}); return; }
+        const a0=A(xs.find(x=>Math.abs(A(x))>1e-12));
+        fns.push({f:x=>-g0(x)/A(x), color: col || '#1f71de', ineq:{up: big===(a0>0), strict, vert:false}}); return; }
       const iq=/^\s*(ص|y|س|x)\s*([<>≤≥⩽⩾])\s*(.+)$/i.exec(e); // inequality: shade above / below (or right / left), dashed edge for < >
       if (iq){ let rhs=iq[3]; const ai=rhs.lastIndexOf('&'); if (ai>=0){ col=colorOf(rhs.slice(ai+1))||col; rhs=rhs.slice(0,ai); } if (HINTW.has(rhs.trim())) return;
         const big=/[>≥⩾]/.test(iq[2]), strict=/[<>]/.test(iq[2]); let f; try { f=compileFn('ص = '+rhs); } catch(er){ this.err('لم أفهم المتباينة: '+e.trim(), this.at(i0)); }
@@ -699,6 +732,8 @@ class P {
             let lo, hi; if (b===null){ const m=Math.abs(a ?? 5) || 5; lo=-m; hi=m; } else { lo=Math.min(a??0,b); hi=Math.max(a??0,b); if (lo===hi) hi=lo+1; }
             return {t:'nline',lo,hi,num:t==='nline'}; }
           if (t==='xarr'||t==='xarrr') return {t:'xarr',right:t==='xarrr',c:this.group()};
+          if (t==='space'){ const v=parseFloat(toLatinDigits(this.raw()).replace(/[٫،,]/g,'.')); return {t:'space', n: isFinite(v) ? Math.max(0, Math.min(v, 40)) : 2}; } // an empty gap: ١ small … ٤ large
+          if (/^br[tblr]$/.test(t)){ const c=this.group(); this.ws&&this.ws(); const l=this.peek()==='{' ? this.group() : []; return {t:'brace', side:t[2], c, l}; } // a curly brace over/under/beside, with its writing
           if (t==='angle') return {t:'angle',c:this.group()};
           if (t==='box') return {t:'box',c:this.group()};
           if (t==='lim') return {t:'lim',c:this.group()};
@@ -719,6 +754,10 @@ class P {
     { const cp=s.codePointAt(this.i); if (cp>=0x1EE00 && cp<=0x1EEFF){ this.i+=2; return {t:'txt',s:String.fromCodePoint(cp),k:'word'}; } }
     if (isDigit(c)){
       let j=this.i; while(j<s.length && (isDigit(s[j]) || (/[.,،٫]/.test(s[j]) && isDigit(s[j+1]||'')))) j++;
+      // a repeating decimal: ٠.خط{٣} or ٠٫١خط{٢٣} — one number, read left to right, the bar over the repeating digits
+      { const m=/^([.,،٫]?)\s*خط\{\s*([0-9٠-٩]+)\s*\}/.exec(s.slice(j)); const head=s.slice(this.i,j)+(m?m[1]:'');
+        if (m && /[.,،٫]/.test(head)){ this.i=j+m[0].length; const D=x=>mathDigits(toAr(x).replace(/[.،٫]/g,','));
+          return {t:'repdec', a:D(head), b:D(m[2])}; } }
       let num=mathDigits(toAr(s.slice(this.i,j)).replace(/\./g,',')); this.i=j; return {t:'txt',s:num,k:'num'};
     }
     for (const h of HINTDOT) if (s.startsWith(h, this.i) && !isLetter(s[this.i+h.length]||'')){ this.i+=h.length; return {t:'txt',s:h,k:'word'}; }
@@ -828,7 +867,7 @@ function measure(s, sz, sym){
 }
 const lw = sz => Math.max(.6, sz*(0.034 + 0.000042*curW())*(st.strokeMul||1));
 
-const HINTW=new Set(['الحدث','الاحتمال','العناصر','الدالة','عدد.أو.حرف','لون','عدد','بسط','مقام','اكتب.هنا','حروف','الناتج','المقسوم','المقسوم.عليه']); // placeholder words: drawn grey until replaced
+const HINTW=new Set(['العبارة','الكتابة','الحدث','الاحتمال','العناصر','الدالة','عدد.أو.حرف','لون','عدد','بسط','مقام','اكتب.هنا','حروف','الناتج','المقسوم','المقسوم.عليه']); // placeholder words: drawn grey until replaced
 const HINTDOT=['عدد.أو.حرف','اكتب.هنا','المقسوم.عليه'];
 function txtBox(n, sz, ctx){
   if (n.k==='word' && !n.plain && HINTW.has(n.s)){ const b=txtBox({...n, s:n.s.replace(/\./g,' '), plain:true}, sz, ctx), d0=b.draw; b.draw=(g,x,y)=>{ g.save(); g.globalAlpha=.4; d0(g,x,y); g.restore(); }; return b; }
@@ -1315,13 +1354,13 @@ function arrows2Box(n, sz){ // arrows from the elements of the first set (right)
       stroke(g,t,()=>{ g.moveTo(qx-ux*ah+uy*ah*.6, qy-uy*ah-ux*ah*.6); g.lineTo(qx,qy); g.lineTo(qx-ux*ah-uy*ah*.6, qy-uy*ah+ux*ah*.6); }); } } };
 }
 function arrowsBox(n, sz){ // arrow diagram: points on a circle, a curved arrow for each pair, a loop for (أ، أ)
-  const t=lw(sz), N=n.pts.length, Rc=N<2?0:Math.max(sz*1.7, sz*1.7/(2*Math.sin(Math.PI/N))), ah=sz*.36;
+  const t=lw(sz), N=n.pts.length, Rc=N<2?0:Math.max(sz*2.1, sz*2.1/(2*Math.sin(Math.PI/N))), ah=sz*.36;
   const P_=n.pts.map((_,i)=>{ const th=-Math.PI/2+i*2*Math.PI/Math.max(1,N); return {x:Rc*Math.cos(th), y:Rc*Math.sin(th), th}; });
   const has=new Set(n.rel.map(([a,b])=>a+','+b)), loops=new Set(n.rel.filter(([a,b])=>a===b).map(([a])=>a));
   const L=sz*2.05, dir=a=>[Math.cos(a),Math.sin(a)];
   const loopOf=i=>{ const p=P_[i], th=N<2?-Math.PI/2:p.th, d1=dir(th-.78), d2=dir(th+.78); return {p, c1:[p.x+L*d1[0], p.y+L*d1[1]], c2:[p.x+L*d2[0], p.y+L*d2[1]], th}; };
   const bez=(p,c1,c2,q,u)=>{ const v=1-u; return [v*v*v*p[0]+3*v*v*u*c1[0]+3*v*u*u*c2[0]+u*u*u*q[0], v*v*v*p[1]+3*v*v*u*c1[1]+3*v*u*u*c2[1]+u*u*u*q[1]]; };
-  const edges=n.rel.filter(([a,b])=>a!==b).map(([a,b])=>{ const A=P_[a], B=P_[b], dx=B.x-A.x, dy=B.y-A.y, dd=Math.hypot(dx,dy)||1, d=[dx/dd,dy/dd], nn=[-d[1],d[0]], k=(has.has(b+','+a)?.24:.12)*dd;
+  const edges=n.rel.filter(([a,b])=>a!==b).map(([a,b])=>{ const A=P_[a], B=P_[b], dx=B.x-A.x, dy=B.y-A.y, dd=Math.hypot(dx,dy)||1, d=[dx/dd,dy/dd], nn=[-d[1],d[0]], k=(has.has(b+','+a)?.1:.06)*dd; /* gentle curves: two directions sit side by side, nothing runs over another */
     return {A,B,d,nn, C:[(A.x+B.x)/2+nn[0]*k*2, (A.y+B.y)/2+nn[1]*k*2], Q:[(A.x+B.x)/2+nn[0]*k, (A.y+B.y)/2+nn[1]*k]}; });
   const busy=n.pts.map(()=>[]); // directions already used at each point (edges leave towards their control point; loops point outwards)
   for (const e of edges){ const ia=P_.indexOf(e.A), ib=P_.indexOf(e.B); busy[ia].push([Math.atan2(e.C[1]-e.A.y, e.C[0]-e.A.x), .35]); busy[ib].push([Math.atan2(e.C[1]-e.B.y, e.C[0]-e.B.x), .35]); }
@@ -1519,6 +1558,26 @@ function circBox(n, sz){
 const SOLC='#1f71de';
 function dotAt(g,cx,cy,r,filled,t){ g.beginPath(); g.ellipse(cx,cy,r,r,0,0,Math.PI*2); if (filled) g.fill(); else { g.save(); g.fillStyle='#ffffff'; g.fill(); g.restore(); g.beginPath(); g.ellipse(cx,cy,r,r,0,0,Math.PI*2); g.save(); g.lineWidth=t*1.3; g.strokeStyle=g.fillStyle; g.stroke(); g.restore(); } }
 function dashLine(g,t,x1,y1,x2,y2,dl){ const L=Math.hypot(x2-x1,y2-y1), n=Math.max(1,Math.floor(L/(dl*2))), ux=(x2-x1)/L, uy=(y2-y1)/L; stroke(g,t,()=>{ for (let i=0;i<n;i++){ const a=i*2*dl, b=Math.min(L,a+dl); g.moveTo(x1+ux*a,y1+uy*a); g.lineTo(x1+ux*b,y1+uy*b); } }); }
+function braceBox(n, sz){ // حاصرة.فوق/تحت/يمين/يسار{…}{الكتابة}: a curly brace along the writing, its label at the tip
+  const c=rowBox(n.c, sz), lb=n.l&&n.l.length ? rowBox(n.l, sz*.75) : null, t=lw(sz), h=sz*.32, gap=sz*.1, ax=AXIS(sz);
+  const brace=(g, x0, y0, L, horiz, flip)=>{ // along L from (x0,y0); the tip points away from the writing (flip: the other way)
+    const r=Math.min(h*.9, L*.12), s_=flip?-1:1, P=(u,v)=>horiz?[x0+u, y0+s_*v]:[x0+s_*v, y0+u], m=L/2;
+    stroke(g, t*1.1, ()=>{ const q=(a,b)=>g.quadraticCurveTo(...P(...a), ...P(...b));
+      g.moveTo(...P(0,0)); q([0,-h/2],[r,-h/2]); g.lineTo(...P(m-r,-h/2)); q([m,-h/2],[m,-h]); q([m,-h/2],[m+r,-h/2]); g.lineTo(...P(L-r,-h/2)); q([L,-h/2],[L,0]); }); };
+  const lh=lb?lb.a+lb.d:0, lw_=lb?lb.w:0;
+  if (n.side==='t' || n.side==='b'){
+    const W=Math.max(c.w, lw_)+t*2, top=n.side==='t';
+    return { w:W, a: top ? c.a+gap+h+(lb?gap+lh:0) : c.a, d: top ? c.d : c.d+gap+h+(lb?gap+lh:0), draw(g,x,y){
+      const cx=x+(W-c.w)/2; c.draw(g, cx, y);
+      if (top){ const by=y-c.a-gap; brace(g, cx, by, c.w, true, false); if (lb) lb.draw(g, x+(W-lb.w)/2, by-h-gap-lb.d); }
+      else { const by=y+c.d+gap; brace(g, cx, by, c.w, true, true); if (lb) lb.draw(g, x+(W-lb.w)/2, by+h+gap+lb.a); } } };
+  }
+  const Hc=c.a+c.d, right=n.side==='r', W=c.w+gap+h+(lb?gap+lw_:0), A=Math.max(c.a, lh/2+ (c.a-c.d)/2), D=Math.max(c.d, lh/2-(c.a-c.d)/2);
+  return { w:W, a:Math.max(c.a, A), d:Math.max(c.d, D), draw(g,x,y){
+    const cx=right ? x : x+W-c.w; c.draw(g, cx, y); const top=y-c.a, mid=y-(c.a-c.d)/2;
+    if (right){ const bx=cx+c.w+gap; brace(g, bx, top, Hc, false, true); if (lb) lb.draw(g, bx+h+gap, mid+(lb.a-lb.d)/2); }
+    else { const bx=cx-gap; brace(g, bx, top, Hc, false, false); if (lb) lb.draw(g, bx-h-gap-lb.w, mid+(lb.a-lb.d)/2); } } };
+}
 function xarrBox(n, sz){ // سهم{…}: an arrow (← or →) that stretches under its writing
   const c=rowBox(n.c, sz*.8), t=lw(sz), ah=sz*.22, pad=sz*.25, W=Math.max(c.w+pad*2, sz*1.6), ax=AXIS(sz), gap=sz*.12;
   return { w:W+sz*.1, a:ax+gap+c.d+c.a+t, d:Math.max(0,ah*.6-ax+t), draw(g,x,y){
@@ -1703,6 +1762,10 @@ function box0(n, sz){
     case 'arrows2': return arrows2Box(n, sz);
     case 'nline': return nlineBox(n, sz);
     case 'xarr': return xarrBox(n, sz);
+    case 'brace': return braceBox(n, sz);
+    case 'space': return { w: n.n*sz*.25, a: 0, d: 0, draw(){} };
+    case 'repdec': { const A=txtBox({t:'txt',s:n.a,k:'num'}, sz), B=txtBox({t:'txt',s:n.b,k:'num'}, sz), t=lw(sz), gap=sz*.1;
+      return { w:A.w+B.w, a:Math.max(A.a, B.a+gap+t*1.5), d:Math.max(A.d,B.d), draw(g,x,y){ A.draw(g,x,y); B.draw(g,x+A.w,y); stroke(g,t,()=>{ const ly=y-B.a-gap; g.moveTo(x+A.w+sz*.03, ly); g.lineTo(x+A.w+B.w-sz*.03, ly); }); } }; }
     case 'circ': return circBox(n, sz);
     case 'prime': return primeBox(n, sz);
     case 'angle': return angleBox(n, sz);
@@ -1885,7 +1948,7 @@ function placeCaret(){
 // light grey help under the writing box while the caret is inside a tool: shown for 10 s, the i button shows it again until pressed off
 const HJ=['الخلايا: بينها &amp;','الصفوف: كل صف في سطر'];
 const CTXHINT=Object.fromEntries(Object.entries({
- 'تمثيل.بياني':['الدالة: في السطر الأول مثل ص = س^٢، وكل دالة إضافية في سطر','المتباينة: مكان الدالة مثل ص > س + ٣ (يُظلَّل الحل، والخط متقطع مع < و>)','نوع الخط: ضع المؤشر على الدالة واختر متصل أو متقطع أو منقط، أو اكتب ص = س^٢ & متقطع','شبكة: احذفها لمحاور فقط','الحدود: −٥ ≤ س ≤ ٥ لحدود س واسمه، ومثلها لـ ص','أرقام: احذفها لإخفاء الأرقام','نقطة: نقطة أ(٢، ٣)','خط تقارب: تقارب س = ٢'],
+ 'تمثيل.بياني':['الدالة: في السطر الأول مثل ص = س^٢، وكل دالة إضافية في سطر','المتباينة: مكان الدالة مثل ص > س + ٣ أو ص − س − ٢ ≥ ٠ أو ٢س + ٣ص < ٦ (يُظلَّل الحل، والخط متقطع مع < و>)','نوع الخط: ضع المؤشر على الدالة واختر متصل أو متقطع أو منقط، أو اكتب ص = س^٢ & متقطع','شبكة: احذفها لمحاور فقط','الحدود: −٥ ≤ س ≤ ٥ لحدود س واسمه، ومثلها لـ ص','أرقام: احذفها لإخفاء الأرقام','نقطة: نقطة أ(٢، ٣)','خط تقارب: تقارب س = ٢'],
  'شبكة':['العلاقة: العلاقة : (١، ٠)، (٢، ٣) نقطة لكل زوج، والحدود «عدد» تُضبط وحدها','شبكة: احذفها لمحاور فقط','الحدود: −٥ ≤ س ≤ ٥ لحدود س واسمه، ومثلها لـ ص','أرقام: احذفها لإخفاء الأرقام','نقطة: نقطة أ(٢، ٣)'],
  'خط.أعداد':['المدى: −٥ &lt; س &lt; ٥ مع اسم المحور','أرقام وعلامات: احذف ما لا تريده','الحل: الحل −٢ &lt; س ≤ ٣، و&lt; مفتوحة و≤ مغلقة','أكثر من جزء: الحل س &lt; −١ أو س ≥ ٢'],
  'فن':['ش: المجموعة الشاملة التي تحتوي كل العناصر','س، ص، ع: عناصر كل مجموعة كاملة، والتقاطعات تُحسب وحدها','التظليل: ظلل : س ∩ ص &amp; أحمر','الرموز: ∩ تقاطع، ∪ اتحاد، − فرق، \' متممة، () للتجميع'],
@@ -1964,7 +2027,7 @@ const HINT_TPL=new Proxy({ // a tool button inserts these: grey words to type ov
   'شطب{|}{}':'شطب{عدد}{عدد}', 'شطب.تحت{|}{}':'شطب.تحت{عدد}{عدد}', 'مربع{|}':'مربع{اكتب.هنا}', 'تسطير{|}':'تسطير{عدد}',
   'نها{|}':'نها{س ← عدد}', 'مجموع{|}{}':'مجموع{عدد}{عدد}', 'تكامل{|}{}':'تكامل{عدد}{عدد}',
   'توافيق{|}{}':'توافيق{عدد}{عدد}', 'تباديل{|}{}':'تباديل{عدد}{عدد}', 'توافيق.أقواس{|}{}':'توافيق.أقواس{عدد}{عدد}',
-  'دائرة{|}':'دائرة{عدد.أو.حرف & لون}', 'تحليل.شجرة{|}':'تحليل.شجرة{\nعدد\nعدد (عدد * عدد)\nعدد (عدد * عدد)\n}', 'خط.أعداد{|}':'خط.أعداد{\nعدد < س < عدد\nأرقام\nعلامات\n}', 'خط.أعداد.حل{|}':'خط.أعداد{\nعدد < س < عدد\nأرقام\nعلامات\nالحل عدد ≤ س < عدد\n}', 'شجرة.احتمالات{|}':'شجرة.احتمالات{\nالحدث : الاحتمال (الحدث : الاحتمال * الحدث : الاحتمال)\nالحدث : الاحتمال (الحدث : الاحتمال * الحدث : الاحتمال)\n}', 'شبكة.علاقة{|}':'شبكة{\nشبكة\nعدد ≤ س ≤ عدد\nعدد ≤ ص ≤ عدد\nأرقام\nالعلاقة : (عدد، عدد)، (عدد، عدد)، (عدد، عدد)\n}', 'مخطط.سهمي.مجموعتين{|}':'مخطط.سهمي{\nس : العناصر\nص : العناصر\nالعلاقة : (عدد، عدد)، (عدد، عدد)\n}', 'مخطط.سهمي{|}':'مخطط.سهمي{\nالنقاط : عدد، عدد، عدد\nالعلاقة : (عدد، عدد)، (عدد، عدد)\n}', 'فن{|}':'فن{\nش : العناصر\nس : العناصر\nص : العناصر\n}', 'فن.ثلاثي{|}':'فن{\nش : العناصر\nس : العناصر\nص : العناصر\nع : العناصر\n}', 'سهم{|}':'سهم{اكتب.هنا}', 'سهم.يمين{|}':'سهم.يمين{اكتب.هنا}', 'شبكة{|}':'شبكة{\nشبكة\nعدد ≤ س ≤ عدد\nعدد ≤ ص ≤ عدد\nأرقام\n}', 'شبكة.ربع.أول{|}':'شبكة.ربع.أول{\nشبكة\n٠ ≤ س ≤ عدد\n٠ ≤ ص ≤ عدد\nأرقام\n}', 'تمثيل.بياني{|}':'تمثيل.بياني{\nالدالة\nشبكة\nعدد ≤ س ≤ عدد\nعدد ≤ ص ≤ عدد\nأرقام\n}', 'تمثيل.بياني.ربع.أول{|}':'تمثيل.بياني.ربع.أول{\nالدالة\nشبكة\n٠ ≤ س ≤ عدد\n٠ ≤ ص ≤ عدد\nأرقام\n}', 'رسم{|}':'رسم{ص = اكتب.هنا}', 'رسم.فارغ{|}':'رسم.فارغ{ص = اكتب.هنا}', 'رسم.محاور{|}':'رسم.محاور{ص = اكتب.هنا}', 'رسم.محاور.فارغ{|}':'رسم.محاور.فارغ{ص = اكتب.هنا}', 'رسم.محاور.خالية{|}':'رسم.محاور.خالية{ص = اكتب.هنا}', 'رسم.محاور.خالية.فارغة{|}':'رسم.محاور.خالية.فارغة{ص = اكتب.هنا}', 'خط{|}':'خط{حروف}', 'مستقيم{|}':'مستقيم{حروف}', 'متجه{|}':'متجه{حروف}', 'قوس{|}':'قوس{حروف}', 'مثلث{|}':'مثلث{حروف}', 'زاوية{|}':'زاوية{حروف}'
+  'دائرة{|}':'دائرة{عدد.أو.حرف & لون}', 'تحليل.شجرة{|}':'تحليل.شجرة{\nعدد\nعدد (عدد * عدد)\nعدد (عدد * عدد)\n}', 'خط.أعداد{|}':'خط.أعداد{\nعدد < س < عدد\nأرقام\nعلامات\n}', 'خط.أعداد.حل{|}':'خط.أعداد{\nعدد < س < عدد\nأرقام\nعلامات\nالحل عدد ≤ س < عدد\n}', 'شجرة.احتمالات{|}':'شجرة.احتمالات{\nالحدث : الاحتمال (الحدث : الاحتمال * الحدث : الاحتمال)\nالحدث : الاحتمال (الحدث : الاحتمال * الحدث : الاحتمال)\n}', 'شبكة.علاقة{|}':'شبكة{\nشبكة\nعدد ≤ س ≤ عدد\nعدد ≤ ص ≤ عدد\nأرقام\nالعلاقة : (عدد، عدد)، (عدد، عدد)، (عدد، عدد)\n}', 'مخطط.سهمي.مجموعتين{|}':'مخطط.سهمي{\nس : العناصر\nص : العناصر\nالعلاقة : (عدد، عدد)، (عدد، عدد)\n}', 'مخطط.سهمي{|}':'مخطط.سهمي{\nالنقاط : عدد، عدد، عدد\nالعلاقة : (عدد، عدد)، (عدد، عدد)\n}', 'فن{|}':'فن{\nش : العناصر\nس : العناصر\nص : العناصر\n}', 'فن.ثلاثي{|}':'فن{\nش : العناصر\nس : العناصر\nص : العناصر\nع : العناصر\n}', 'سهم{|}':'سهم{اكتب.هنا}', 'سهم.يمين{|}':'سهم.يمين{اكتب.هنا}', 'حاصرة.فوق{|}{}':'حاصرة.فوق{العبارة}{الكتابة}', 'حاصرة.تحت{|}{}':'حاصرة.تحت{العبارة}{الكتابة}', 'حاصرة.يمين{|}{}':'حاصرة.يمين{العبارة}{الكتابة}', 'حاصرة.يسار{|}{}':'حاصرة.يسار{العبارة}{الكتابة}', 'شبكة{|}':'شبكة{\nشبكة\nعدد ≤ س ≤ عدد\nعدد ≤ ص ≤ عدد\nأرقام\n}', 'شبكة.ربع.أول{|}':'شبكة.ربع.أول{\nشبكة\n٠ ≤ س ≤ عدد\n٠ ≤ ص ≤ عدد\nأرقام\n}', 'تمثيل.بياني{|}':'تمثيل.بياني{\nالدالة\nشبكة\nعدد ≤ س ≤ عدد\nعدد ≤ ص ≤ عدد\nأرقام\n}', 'تمثيل.بياني.ربع.أول{|}':'تمثيل.بياني.ربع.أول{\nالدالة\nشبكة\n٠ ≤ س ≤ عدد\n٠ ≤ ص ≤ عدد\nأرقام\n}', 'رسم{|}':'رسم{ص = اكتب.هنا}', 'رسم.فارغ{|}':'رسم.فارغ{ص = اكتب.هنا}', 'رسم.محاور{|}':'رسم.محاور{ص = اكتب.هنا}', 'رسم.محاور.فارغ{|}':'رسم.محاور.فارغ{ص = اكتب.هنا}', 'رسم.محاور.خالية{|}':'رسم.محاور.خالية{ص = اكتب.هنا}', 'رسم.محاور.خالية.فارغة{|}':'رسم.محاور.خالية.فارغة{ص = اكتب.هنا}', 'خط{|}':'خط{حروف}', 'مستقيم{|}':'مستقيم{حروف}', 'متجه{|}':'متجه{حروف}', 'قوس{|}':'قوس{حروف}', 'مثلث{|}':'مثلث{حروف}', 'زاوية{|}':'زاوية{حروف}'
 }, { get:(o,k)=> o[k] || (typeof k==='string' && /^رسم[.\u0621-\u064A]*\{\|\}$/.test(k) ? k.replace('{|}','{ص = اكتب.هنا}') : undefined) });
 function insert(tpl){
   const s=src.selectionStart, e=src.selectionEnd, sel=src.value.slice(s,e);
@@ -2188,7 +2251,7 @@ const SHORT_BY_INS = Object.fromEntries(Object.entries(SHORT).map(([k,v])=>[v,(I
 // ---- autocomplete: suggest commands while typing, Tab accepts the first ----
 const CMDLIST=[['جذر','جذر{|}','جذر'],['جذر','جذر[٣]{|}','جذر تكعيبي'],['جذر','جذر[|]{}','جذر نوني'],['كسر','كسر{|}{}','كسر'],['مطلق','|‸|','قيمة مطلقة'],
  ['خط','خط{|}','قطعة'],['تسطير','تسطير{|}','خط سفلي'],['مستقيم','مستقيم{|}','مستقيم'],['متجه','متجه{|}','متجه'],['قوس','قوس{|}','قوس'],['مثلث','مثلث{|}','مثلث'],['شطب','شطب{|}{}','اختصار'],['شطب.تحت','شطب.تحت{|}{}','اختصار تحت'],
- ['دائرة','دائرة{|}','حرف أو عدد في دائرة'],['تمثيل.بياني','تمثيل.بياني{|}','تمثيل بياني'],['تمثيل.بياني.ربع.أول','تمثيل.بياني.ربع.أول{|}','تمثيل بياني: الربع الأول'],['قسمة','قسمة{|}{}{}{}','قسمة مطوّلة'],['تحليل.رأسي','تحليل.رأسي{|}','تحليل إلى عوامل أولية'],['تحليل.شجرة','تحليل.شجرة{|}','شجرة العوامل'],['سهم','سهم{|}','سهم فوقه كتابة'],['شجرة.احتمالات','شجرة.احتمالات{|}','شجرة الاحتمالات'],['فن','فن{|}','شكل فِن'],['فن.ثلاثي','فن.ثلاثي{|}','شكل فِن بثلاث مجموعات'],['مخطط.سهمي','مخطط.سهمي{|}','مخطط سهمي'],['مخطط.سهمي','مخطط.سهمي.مجموعتين{|}','مخطط سهمي بين مجموعتين'],['شبكة','شبكة.علاقة{|}','مخطط بياني لعلاقة'],['سهم.يمين','سهم.يمين{|}','سهم لليمين فوقه كتابة'],['عمودي','عمودي{| ; ; }','جمع عمودي'],['عمودي','عمودي{| ; − ; }','طرح عمودي'],['ضرب.رأسي','ضرب.رأسي{| ; ; }','ضرب رأسي'],['فوق','{|}↑{}','عدد فوق عدد'],['نظام','نظام{| ; }','نظام معادلات'],['قواعد','قواعد{| & ; & }','متعددة القواعد'],
+ ['دائرة','دائرة{|}','حرف أو عدد في دائرة'],['تمثيل.بياني','تمثيل.بياني{|}','تمثيل بياني'],['تمثيل.بياني.ربع.أول','تمثيل.بياني.ربع.أول{|}','تمثيل بياني: الربع الأول'],['قسمة','قسمة{|}{}{}{}','قسمة مطوّلة'],['تحليل.رأسي','تحليل.رأسي{|}','تحليل إلى عوامل أولية'],['تحليل.شجرة','تحليل.شجرة{|}','شجرة العوامل'],['سهم','سهم{|}','سهم فوقه كتابة'],['شجرة.احتمالات','شجرة.احتمالات{|}','شجرة الاحتمالات'],['فن','فن{|}','شكل فِن'],['فن.ثلاثي','فن.ثلاثي{|}','شكل فِن بثلاث مجموعات'],['مخطط.سهمي','مخطط.سهمي{|}','مخطط سهمي'],['مخطط.سهمي','مخطط.سهمي.مجموعتين{|}','مخطط سهمي بين مجموعتين'],['شبكة','شبكة.علاقة{|}','مخطط بياني لعلاقة'],['سهم.يمين','سهم.يمين{|}','سهم لليمين فوقه كتابة'],['مسافة','مسافة{٢}','مسافة (١ صغيرة … ٤ كبيرة)'],['حاصرة.فوق','حاصرة.فوق{|}{}','قوس فوقه كتابة'],['حاصرة.تحت','حاصرة.تحت{|}{}','قوس تحته كتابة'],['حاصرة.يمين','حاصرة.يمين{|}{}','قوس على اليمين'],['حاصرة.يسار','حاصرة.يسار{|}{}','قوس على اليسار'],['عمودي','عمودي{| ; ; }','جمع عمودي'],['عمودي','عمودي{| ; − ; }','طرح عمودي'],['ضرب.رأسي','ضرب.رأسي{| ; ; }','ضرب رأسي'],['فوق','{|}↑{}','عدد فوق عدد'],['نظام','نظام{| ; }','نظام معادلات'],['قواعد','قواعد{| & ; & }','متعددة القواعد'],
  ['ترتيب','ترتيب{| & & ; & & ; & & }','أعداد مرتبة'],['مصفوفة','مصفوفة{| & ; & }','مصفوفة'],['محدد','محدد{| & ; & }','محدد'],['زاوية','زاوية{|}','زاوية'],['نها','نها{|}','نهاية'],['مجموع','مجموع{|}{}','مجموع'],
  ['تكامل','تكامل{|}{}','تكامل'],['توافيق','توافيق{|}{}','توافيق'],['توافيق.أقواس','توافيق.أقواس{|}{}','توافيق بالأقواس'],['تباديل','تباديل{|}{}','تباديل'],['مربع','مربع{|}','مربع']];
 const sugg=$('sugg'); let suggList=[], suggFrom=0;
@@ -2322,7 +2385,7 @@ const TABS = [
   {id:'ops', icon:'±', name:'عمليات وعلاقات', groups:[catSyms('عمليات وعلاقات')]},
   {id:'sets', icon:'∈', name:'مجموعات ومنطق', groups:[T('فن{|}','فن.ثلاثي{|}','مخطط.سهمي{|}','مخطط.سهمي.مجموعتين{|}','شبكة.علاقة{|}'), catSyms('مجموعات'), S('∴')]},
   {id:'geo', icon:'∠', name:'هندسة', groups:[T('خط{|}','مستقيم{|}','متجه{|}','قوس{|}','مثلث{|}','زاوية{|}',"'"), catSyms('هندسة')]},
-  {id:'arr', icon:'←', name:'أسهم', groups:[T('سهم{|}','سهم.يمين{|}'), catSyms('أسهم')]},
+  {id:'arr', icon:'←', name:'أسهم', groups:[T('سهم{|}','سهم.يمين{|}','حاصرة.فوق{|}{}','حاصرة.تحت{|}{}','حاصرة.يمين{|}{}','حاصرة.يسار{|}{}','مسافة{١}','مسافة{٢}','مسافة{٤}'), catSyms('أسهم')]},
   {id:'let', icon:'αب', name:'حروف', groups:[T('دائرة{|}'), catSyms('حروف'), MLETS, catSyms('يونانية')]},
   {id:'mat', icon:'tool:مصفوفة{| & ; & }', name:'مصفوفات وجداول', groups:[T('نظام{| ; }','قواعد{| & ; & }','مصفوفة{| & ; & }','محدد{| & ; & }','ترتيب{| & & ; & & ; & & }'),T('جدول{| & & ; & & }','جدول.عنوان{| & & ; & & ; & & }','جدول.قيم{س & | & & ; ص & & & }','جدول.داخلي{| & & ; & & }')]},
   {id:'graph', icon:'tool:تمثيل.بياني{|}', name:'شبكات ومحاور ودوال', groups:[T('تمثيل.بياني{|}','تمثيل.بياني.ربع.أول{|}'),T('شبكة{|}','شبكة.ربع.أول{|}','شبكة.علاقة{|}'),T('خط.أعداد{|}','خط.أعداد.حل{|}')]},
@@ -2379,6 +2442,66 @@ toolCfg={vis:[...TOOLDEF], hid:[]}; renderTools();
 { const all=[...DEFAULT_VISIBLE]; const have=new Set(all); for (const t of TABS) for (const g of t.groups||[]) for (const it of g) if (it.t==='sym' && !have.has(it.ch) && it.ch.length===1 || (it.t==='sym' && it.ch.length>1 && !have.has(it.ch) && validSym.has(it.ch))){ have.add(it.ch); all.push(it.ch); }
   visOrder=all; renderSyms(); }
 showTab(load('aeq-tab','fav'));
+// ---- new palette: search · recently used · «الأدوات» and «الرموز», each folding, each with its own sub-tabs ----
+(() => {
+  const ribbon=document.querySelector('.ribbon'); if (!ribbon) return;
+  const TOOLCATS=[['tpl','كسور وجذور'],['geo','هندسة'],['sets','مجموعات'],['graph','تمثيل بياني'],['mat','مصفوفات وجداول'],['arr','أسهم وأقواس'],['calc','تفاضل وتكامل']];
+  const SYMCATS=[['ops','عمليات وعلاقات'],['sets','مجموعات'],['geo','هندسة'],['arr','أسهم'],['let','حروف'],['calc','دوال وتكامل'],['oth','أرقام وعلامات']];
+  const tabItems=(id, kind)=>{ const t=TABS.find(x=>x.id===id); const out=[], seen=new Set(); if (!t) return out;
+    for (const g of t.groups||[]) for (const it of g){ const isT=it.t==='tool'; if ((kind==='tool')!==isT) continue; if (isT && !TOOLEL[it.ins]) continue;
+      const k=isT?'t:'+it.ins:'s:'+(it.ch||it.s)+(it.fill?'*':''); if (seen.has(k)) continue; seen.add(k); out.push(it); } return out; };
+  const allTools=()=>{ const seen=new Set(), out=[]; for (const [id] of TOOLCATS) for (const it of tabItems(id,'tool')) if (!seen.has(it.ins)){ seen.add(it.ins); out.push(it); }
+    for (const k of Object.keys(TOOLEL)) if (!seen.has(k)){ seen.add(k); out.push({t:'tool',ins:k}); } return out; };
+  const allSyms=()=>{ const seen=new Set(), out=[]; const add=it=>{ const k=(it.ch||it.s)+(it.fill?'*':'')+it.t; if (seen.has(k)) return; seen.add(k); out.push(it); };
+    for (const ch of visOrder){ const x=ALLSYM.find(a=>a.ch===ch); add({t:'sym',ch,name:x&&x.name}); }
+    for (const [id] of SYMCATS) tabItems(id,'sym').forEach(add); return out; };
+  const nameOf=it=>it.t==='tool' ? ((TOOLEL[it.ins]||{}).title||'')+' '+it.ins : it.t==='circ' ? 'دائرة '+it.ch : (it.name||'')+' '+(it.ch||it.s||'')+' '+((typeof SYMWORD!=='undefined'&&SYMWORD[it.ch])||'');
+  const norm=t=>String(t).replace(/[ً-ٰٟـ]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/\./g,' ').toLowerCase();
+  // recently used (tools and symbols)
+  const RK='aeq-recent-all'; let rec=[]; try { rec=JSON.parse(load(RK,'[]'))||[]; } catch(e){ rec=[]; }
+  const keyOf=it=>JSON.stringify(it.t==='tool'?{t:'tool',ins:it.ins}:it.t==='circ'?{t:'circ',ch:it.ch,fill:!!it.fill}:it.t==='text'?{t:'text',s:it.s}:{t:'sym',ch:it.ch,name:it.name||''});
+  const note=it=>{ const k=keyOf(it); rec=[k,...rec.filter(x=>x!==k)].slice(0,16); save(RK, JSON.stringify(rec)); drawRecent(); };
+  const btn=it=>{ const b=itemButton(it); b.addEventListener('click',()=>note(it)); return b; };
+  // the frame
+  const box=document.createElement('div'); box.className='pal2';
+  box.innerHTML='<div class="p2search"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4"/></svg><input id="palSearch" type="search" placeholder="ابحث عن أداة أو رمز: جذر، ينتمي، زاوية…" autocomplete="off" spellcheck="false"><button type="button" class="p2clear" hidden aria-label="مسح البحث">✕</button></div>'
+    +'<div class="p2found" hidden></div>'
+    +'<div class="p2recent" hidden><span class="p2lab">الأخيرة</span><div class="p2row"></div></div>'
+    +'<div class="p2heads"><button type="button" class="p2head" data-sec="tools"><span>الأدوات</span><svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M2.5 4.5L6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
+    +'<button type="button" class="p2head" data-sec="syms"><span>الرموز</span><svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M2.5 4.5L6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>'
+    +'<div class="p2sec" data-sec="tools" hidden><div class="p2chips"></div><div class="p2items"></div></div>'
+    +'<div class="p2sec" data-sec="syms" hidden><div class="p2chips"></div><div class="p2items"></div></div>';
+  ribbon.parentNode.insertBefore(box, ribbon); ribbon.hidden=true; ribbon.style.display='none';
+  const q=box.querySelector('#palSearch'), found=box.querySelector('.p2found'), clr=box.querySelector('.p2clear');
+  const recBox=box.querySelector('.p2recent'), recRow=recBox.querySelector('.p2row');
+  function drawRecent(){ recRow.innerHTML=''; const its=rec.map(k=>{ try { return JSON.parse(k); } catch(e){ return null; } }).filter(it=>it && (it.t!=='tool' || TOOLEL[it.ins]));
+    its.forEach(it=>recRow.appendChild(btn(it))); recBox.hidden=!its.length; }
+  const SECS={ tools:{cats:TOOLCATS, all:allTools, kind:'tool'}, syms:{cats:SYMCATS, all:allSyms, kind:'sym'} };
+  function drawSec(sec){ const S=SECS[sec], el=box.querySelector('.p2sec[data-sec="'+sec+'"]'), chips=el.querySelector('.p2chips'), items=el.querySelector('.p2items');
+    const cur=load('aeq-p2-'+sec,'all'); chips.innerHTML='';
+    for (const [id,name] of [['all','الكل'], ...S.cats]){ if (id!=='all' && !tabItems(id,S.kind).length) continue;
+      const c=document.createElement('button'); c.type='button'; c.className='p2chip'; c.textContent=name; c.setAttribute('aria-pressed', String(id===cur));
+      c.addEventListener('click',()=>{ save('aeq-p2-'+sec,id); drawSec(sec); }); chips.appendChild(c); }
+    items.innerHTML=''; const list=cur==='all' ? S.all() : tabItems(cur,S.kind);
+    const g=document.createElement('div'); g.className='grp toolbar'; list.forEach(it=>g.appendChild(btn(it))); items.appendChild(g); }
+  function setOpen(sec, open){ save('aeq-p2open-'+sec, open?'1':'0'); box.querySelector('.p2sec[data-sec="'+sec+'"]').hidden=!open;
+    const h=box.querySelector('.p2head[data-sec="'+sec+'"]'); h.setAttribute('aria-expanded', String(open)); if (open) drawSec(sec); }
+  box.querySelectorAll('.p2head').forEach(h=>h.addEventListener('click',()=>setOpen(h.dataset.sec, h.getAttribute('aria-expanded')!=='true')));
+  // search
+  let everything=null;
+  function search(){ const t=norm(q.value.trim()); clr.hidden=!q.value; found.innerHTML='';
+    if (!t){ found.hidden=true; return; }
+    everything=everything||[...allTools(), ...allSyms()];
+    const words=t.split(/\s+/).filter(Boolean);
+    const hits=everything.filter(it=>{ const n=norm(nameOf(it)); return words.every(w=>n.includes(w)); });
+    if (!hits.length){ found.innerHTML='<span class="p2none">لا نتائج</span>'; found.hidden=false; return; }
+    const g=document.createElement('div'); g.className='grp toolbar'; hits.slice(0,60).forEach(it=>g.appendChild(btn(it))); found.appendChild(g); found.hidden=false; }
+  q.addEventListener('input', search);
+  q.addEventListener('keydown', e=>{ if (e.key==='Escape'){ q.value=''; search(); } else if (e.key==='Enter'){ const b=found.querySelector('button'); if (b){ e.preventDefault(); b.click(); } } });
+  clr.addEventListener('click',()=>{ q.value=''; search(); q.focus(); });
+  drawRecent();
+  setOpen('tools', load('aeq-p2open-tools','1')==='1'); setOpen('syms', load('aeq-p2open-syms','1')==='1');
+})();
 
 const HIST_KEY='aeq-history', HIST_MAX=20;
 function histThumb(){

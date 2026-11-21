@@ -17,5 +17,7 @@ button,input,select,textarea{font-family:inherit}
 .tin{font-size:13px!important;height:30px!important}
 /* checkboxes, menus and settings rows */
 .chk{font-size:13px!important}
-.menu button{font-size:12.5px!important}
+/* every menu (☰ and Graph's menus): 12px */
+.menu button{font-size:12px!important}
+#mnu .mi,#mnu .mrow,.mi{font-size:12px!important}
 #setBody .row{font-size:13px}
