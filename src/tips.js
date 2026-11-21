@@ -12,13 +12,7 @@
     ['#chkUpd', E('يفحص إن كان هناك إصدار أحدث من الأداة.', 'Checks whether a newer version of the tool is available.')],
     ['#langItem', E('يبدّل لغة الأداة بين العربية والإنجليزية.', 'Switches the tool between Arabic and English.')],
     ['#aboutBtn', E('معلومات عن الأداة وما تفعله.', 'What the tool does.')],
-    ['#modalX', E('يغلق هذه النافذة.', 'Closes this window.')],
-    ['#tkTab', E('يُظهر كل الأدوات في شريط جانبي، لتنتقل إلى أداة أخرى بضغطة.', 'Shows every tool in a side rail, to switch to another tool in one click.', 'الأدوات', 'Tools')],
-    ['#tkRail [data-go="home"]', E('يرجع إلى قائمة كل الأدوات.', 'Goes back to the list of all tools.', 'كل الأدوات', 'All tools')],
-    ['#tkRail .pin.on', E('يرجع الشريط ليختفي تلقائيًا، وتأخذ الأداة عرض النافذة كله.', 'The rail hides by itself again and the tool gets the full width.', 'إلغاء التثبيت', 'Unpin')],
-    ['#tkRail .pin', E('يثبّت الشريط ظاهرًا دائمًا بجانب الأداة. يُحفظ اختيارك على هذا الجهاز.', 'Keeps the rail always showing beside the tool. Saved on this device.', 'تثبيت', 'Pin')],
-    ['#tkRail button.cur', function (el) { return E('الأداة المفتوحة الآن.', 'The tool open now.', el.dataset.tkn); }],
-    ['#tkRail button', function (el) { return E('يفتح الأداة مكان الأداة الحالية.', 'Opens this tool in place of the current one.', el.dataset.tkn); }]
+    ['#modalX', E('يغلق هذه النافذة.', 'Closes this window.')]
   ];
 
   var RULES = {

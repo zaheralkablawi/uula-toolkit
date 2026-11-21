@@ -45,7 +45,7 @@ TOOL_CSS = {
 }
 read = lambda p: p.read_text(encoding='utf8')
 TIPS = read(SRC / 'tips.js')
-SCRIPTS = (read(SRC / 'menu-icons.js') + read(SRC / 'home-bar.js') + read(SRC / 'tools-list.js') + read(SRC / 'side-rail.js') + TIPS).replace('</script', '<\\/script')
+SCRIPTS = (read(SRC / 'menu-icons.js') + read(SRC / 'home-bar.js') + TIPS).replace('</script', '<\\/script')
 PARTS = {'THEME': read(SRC / 'theme.css'), 'TOOL_CSS': TOOL_CSS, 'SCRIPTS': SCRIPTS,
          'MATH_LOGO': MATH_LOGO, 'GRAPH_LOGO': GRAPH_LOGO, 'COVER_LOGO': COVER_LOGO, 'DARK_HALF': DARK_HALF,
          'RESTYLE_OLD': RESTYLE_OLD, 'RESTYLE_LOGO': RESTYLE_LOGO}
