@@ -25,7 +25,8 @@ TOOLS = {
 
 # ---------- Toolkit parts added to every tool ----------
 MATH_LOGO = ('<circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/>'
-             '<path d="M8.5 16.5l2.4 4.6 4.2-11.1h8.4" fill="none" stroke="#1f71de" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>')
+             '<path d="M8.5 16.5l2.4 4.6 4.2-11.1h8.4" fill="none" stroke="#1f71de" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
+             '<path d=\"M21.8 13.2c-1-.9-3-.6-3 .8 0 1.2 1.5 1.7 2.9 1.3-2.2.4-3.8 1.6-3.5 3.2.3 1.4 2 1.9 3.8 1.4\" fill=\"none\" stroke=\"#1f71de\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>')
 GRAPH_LOGO = ('<circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/>'
               '<path d="M9 16h14M16 9v14" stroke="#9aa3b0" stroke-width="1.4"/>'
               '<path d="M10.5 9.5c2 9 9 9 11 0" fill="none" stroke="#1f71de" stroke-width="2.4" stroke-linecap="round"/>')
