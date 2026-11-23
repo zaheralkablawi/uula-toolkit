@@ -173,6 +173,7 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
     </div></div>
     <span class="note" data-en="Before hiding, mark what the tool should treat differently: select it on the slide, then press its type.">قبل الإخفاء، ميّز ما تريد أن تعامله الأداة بشكل خاص: حدّده في الشريحة ثم اضغط نوعه.</span>
     <div class="tgrid" id="solRoles"></div>
+    <button type="button" class="mini" id="undoBtn" style="justify-self:start;margin-top:6px" data-en="↶ Undo the last mark">↶ تراجع عن آخر تمييز</button>
     <div class="sep"></div>
     <label class="chk"><input type="checkbox" id="numChk" checked> <span data-en="Page numbers">ترقيم الصفحات</span></label>
     <div class="row" id="numRow"><span style="font-size:.82rem" data-en="Numbering starts at slide">يبدأ الترقيم من الشريحة</span><span style="display:flex;gap:6px;align-items:center"><input type="number" min="1" class="num" id="numStart" value="1"><button type="button" class="mini" id="numHere" data-en="Current">الحالية</button></span></div>
@@ -3718,6 +3719,13 @@ function buildSolRoles() {
     host.appendChild(b);
   }
 }
+$('undoBtn').addEventListener('click', async () => {
+  if (busy || !supported || !undoStack.length) return;
+  busy = true; lock();
+  try { const n = await undoMark(); say(n ? L('تم التراجع عن آخر تمييز.', 'The last mark was undone.') : L('لم أجد العنصر للتراجع عنه.', 'The object to undo was not found.')); }
+  catch (e) { say(L('تعذّر التراجع: ', 'Could not undo: ') + errText(e)); }
+  finally { busy = false; lock(); }
+});
 $('solRoles').addEventListener('click', e => { const b = e.target.closest('.tbtn'); if (b) pinRole(b.dataset.role); });
 const rsay = m => say(m);
 async function clearSel(slideId) {
@@ -3729,6 +3737,22 @@ async function clearSel(slideId) {
 }
 // solution marks change only the selected objects, in place: no slide is rebuilt, nothing moves
 const QUIET = { answer: '1F71DE', correct: '2070DF', given: null };
+// «Undo»: the last marks given with the solution buttons go back (name, text colour, place), in place
+const undoStack = [];
+function undoPaint() { const b = $('undoBtn'); if (b) b.disabled = busy || !supported || !undoStack.length; }
+async function undoMark() {
+  const u = undoStack.pop(); undoPaint(); if (!u) return 0;
+  return run(async ctx => {
+    const sh = ctx.presentation.slides.getItem(u.slide).shapes; sh.load('items/id'); await ctx.sync();
+    let n = 0;
+    for (const it of u.items) {
+      const s = sh.items.find(x => x.id === it.id); if (!s) continue;
+      s.name = it.name; s.left = it.left; n++;
+      if (it.color || it.bold != null) { try { const f = s.textFrame.textRange.font; if (it.color) f.color = it.color; if (it.bold != null) f.bold = it.bold; } catch (e) {} }
+    }
+    await ctx.sync(); return n;
+  });
+}
 async function quietMark(role) {
   const id = await currentId();
   const hiddenNow = role === 'answer' && await slideSolHidden(id);
@@ -3737,6 +3761,12 @@ async function quietMark(role) {
     const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/name,items/type,items/left'); await ctx.sync();
     const sel = shapes.items;
     if (!sel.length) return 0;
+    // what they were, for «Undo»
+    const fonts = sel.map(x => { if (!['TextBox', 'GeometricShape'].includes(x.type)) return null; try { const f = x.textFrame.textRange.font; f.load('color,bold'); return f; } catch (e) { return null; } });
+    sel.forEach(x => x.load('id')); await ctx.sync();
+    undoStack.push({ slide: id, items: sel.map((x, k) => ({ id: x.id, name: x.name, left: x.left, color: fonts[k] ? fonts[k].color : null, bold: fonts[k] ? fonts[k].bold : null })) });
+    if (undoStack.length > 30) undoStack.shift();
+    undoPaint();
     let all = null;
     if (hiddenNow) { all = ctx.presentation.slides.getItem(id).shapes; all.load('items/name,items/left'); await ctx.sync(); }
     const base = n => (n || '').replace(/ #ursel$/, '').replace(/^UULA Sol(Hidden|View) /, '').replace(/^UULA:[a-z]+\s*/, '');
@@ -4061,8 +4091,47 @@ function solWatch() {
   } catch (e) {}
   window.addEventListener('focus', () => { if (!busy && !isWord) solLabel(); });
 }
+// hide / show without rebuilding the slide (nothing moves on screen) when only whole objects go aside or come back;
+// returns null when the slide needs the full way (copies, empty grids, writing lines, or objects PowerPoint keeps hidden)
+async function solInPlace(id, mode, pkg) {
+  const U = UR.util, W = pkg.slideW / PT;
+  const doc = UR.parseXml(pkg.files.slide);
+  const tops = U.topItems(doc).map(el => { const c = U.core(el), n = U.cnvOf(c); return { el, n, name: n ? n.getAttribute('name') || '' : '', g: U.geomOf(el, pkg) }; });
+  if (mode === 'show') {
+    if (tops.some(t => /^UULA SolHidden /.test(t.name) && [...t.el.getElementsByTagNameNS(UR.NS.p, 'cNvPr')].some(n => n.getAttribute('hidden') === '1'))) return null;
+    return run(async ctx => {
+      const sh = ctx.presentation.slides.getItem(id).shapes; sh.load('items/name,items/left'); await ctx.sync();
+      let n = 0;
+      for (const s of sh.items) {
+        if (/^UULA SolView /.test(s.name || '')) s.delete();
+        else if (/^UULA SolHidden /.test(s.name || '')) { s.name = s.name.replace(/^UULA SolHidden /, ''); if (s.left >= 2.5 * W) s.left = s.left - 3 * W; n++; }
+      }
+      await ctx.sync(); return n;
+    });
+  }
+  if (solLines) return null;
+  const found = UR.findSolutions(pkg);
+  if (!found.length || found.some(f => f.how !== 'hide')) return null;
+  const want = found.map(f => tops[f.i]).filter(Boolean);
+  if (want.length !== found.length || want.some(t => !t.g)) return null;
+  return run(async ctx => {
+    const sh = ctx.presentation.slides.getItem(id).shapes; sh.load('items/name,items/left,items/top'); await ctx.sync();
+    const used = new Set(), match = [];
+    for (const t of want) {
+      const s = sh.items.find(x => !used.has(x) && (x.name || '') === t.name && Math.abs(x.left - t.g.x / PT) < 1.5 && Math.abs(x.top - t.g.y / PT) < 1.5);
+      if (!s) return null;                                  // not sure which object it is: the full way
+      used.add(s); match.push(s);
+    }
+    match.forEach(s => { s.name = 'UULA SolHidden ' + s.name; s.left = s.left + 3 * W; });
+    await ctx.sync(); return match.length;
+  });
+}
 async function solSlide(id, mode) {
   const pkg = await UR.openPackage(await exportSlide(id));
+  if (mode === 'show' ? UR.hasSolutions(pkg.files.slide) : !UR.hasSolutions(pkg.files.slide)) {
+    const quick = await solInPlace(id, mode, pkg).catch(() => null);
+    if (quick != null) return quick;
+  }
   let r;
   if (mode === 'show') { if (!UR.hasSolutions(pkg.files.slide)) return 0; r = UR.showSolutions(pkg); r.rels = null; }
   else {
@@ -4461,6 +4530,7 @@ function lock() {
   $('solBtn').disabled = busy || !supported;
   $('spV').disabled = busy || !supported; $('spH').disabled = busy || !supported;
   document.querySelectorAll('.tbtn').forEach(b => { b.disabled = busy || !supported; });
+  undoPaint();
   ['docxBtn', 'numDel', 'wAuto', 'wUntag', 'wClear', 'wMark', 'wUnmark'].forEach(k => { if ($(k)) $(k).disabled = busy || !supported; });
 }
 $('goBtn').addEventListener('click', async () => {
