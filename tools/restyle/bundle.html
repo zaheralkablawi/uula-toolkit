@@ -1925,6 +1925,21 @@ const NEG = c => { const p = c.codePointAt(0);
   return c; };
 const hasSolutions = xml => /name="UULA SolHidden /.test(xml);
 // what would be hidden on this slide; pics that need an empty-grid image are listed with their media path
+// blue text inside a table (a filled-in answer): its cells, but not the header row / the labels column
+function tableBlueRuns(tbl) {
+  const out = [];
+  for (const tc of desc(tbl, 'a', 'tc')) {
+    const pr = kid(tc, 'tcPr', 'a'), f = pr && desc(pr, 'a', 'srgbClr')[0];
+    const fill = f ? (f.getAttribute('val') || '').toUpperCase() : '';
+    if (fill === C.head || fill === C.mainCol) continue;
+    for (const r of desc(tc, 'a', 'rPr')) {
+      const c = desc(r, 'a', 'srgbClr')[0], v = c ? (c.getAttribute('val') || '') : '';
+      if (/^[0-9A-F]{6}$/i.test(v) && isBlue(rgb(v.toUpperCase()))) out.push(r);
+    }
+  }
+  return out;
+}
+
 function findSolutions(pkg) {
   const W = pkg.slideW, H = pkg.slideH;
   const doc = parseXml(pkg.files.slide);
@@ -1960,7 +1975,8 @@ function findSolutions(pkg) {
     }
     if (t.kind === 'table') {
       if (desc(t.c, 'a', 'tc').some(tc => /^(الحل|الإجابة|الاجابة)$/.test(textOf(tc).trim()))
-        || desc(t.c, 'a', 'rPr').some(pr => /^UULA:(answer|correct)$/.test(pr.getAttribute('bmk') || ''))) found.push({ i: t.i, how: 'copy' });
+        || desc(t.c, 'a', 'rPr').some(pr => /^UULA:(answer|correct)$/.test(pr.getAttribute('bmk') || ''))
+        || tableBlueRuns(t.c).length) found.push({ i: t.i, how: 'copy' });
       continue;
     }
     if (t.kind === 'shape' && /ellipse|flowChartConnector/.test((desc(t.c, 'a', 'prstGeom')[0] || { getAttribute: () => '' }).getAttribute('prst')) && t.g.w < 34 * PT && t.g.h < 34 * PT && t.fill && lum(t.fill) < 250) { found.push({ i: t.i, how: 'copy' }); continue; }
@@ -2106,6 +2122,8 @@ function hideSolutions(pkg, grids, opts) {
         if (!tcs.some(tc => /^(الحل|الإجابة|الاجابة)$/.test(textOf(tc).trim()))) continue;
         for (const tc of tcs) { if (/^(الحل|الإجابة|الاجابة)$/.test(textOf(tc).trim())) continue; for (const pr of [...desc(tc, 'a', 'rPr'), ...desc(tc, 'a', 'endParaRPr')]) { removeKids(pr, FILLS); placeChild(pr, frag(doc, '<a:solidFill><a:srgbClr val="FFFFFF"><a:alpha val="0"/></a:srgbClr></a:solidFill>'), RPR_ORDER); } }
       }
+      // blue text in the cells is the filled-in answer: it disappears (black text and the header stay)
+      for (const pr of tableBlueRuns(view)) { removeKids(pr, FILLS); placeChild(pr, frag(doc, '<a:solidFill><a:srgbClr val="FFFFFF"><a:alpha val="0"/></a:srgbClr></a:solidFill>'), RPR_ORDER); }
       // answers marked inside cells (from Word): blank to fill / the correct choice turns black
       for (const pr of desc(view, 'a', 'rPr')) {
         const m = /^UULA:(answer|correct)$/.exec(pr.getAttribute('bmk') || ''); if (!m) continue;
