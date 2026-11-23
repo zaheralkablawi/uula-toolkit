@@ -69,7 +69,7 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 .tbtn span{overflow:hidden;text-overflow:ellipsis}
 .tbtn i{flex:none;width:10px;height:10px;border-radius:2px;border:1px solid rgb(0 0 0 / .12)}
 #roles .tbtn,#solRoles .tbtn,#tpls .tbtn{white-space:normal}
-.mk{display:inline-block;width:12px;height:9px;border:1.5px dashed;border-radius:2px;vertical-align:middle;margin-inline-end:3px}
+.mk{display:inline-block;width:12px;height:9px;border-radius:2px;vertical-align:middle;margin-inline-end:3px;opacity:.35}
 #roles .tbtn span,#solRoles .tbtn span,#tpls .tbtn span{text-overflow:clip}
 .modal{position:fixed;inset:0;z-index:60;background:rgb(0 0 0 / .35);display:grid;place-items:center;padding:16px}
 .mbox{background:var(--panel);border-radius:12px;max-width:420px;width:100%;max-height:80vh;overflow:auto;padding:14px 16px;box-shadow:0 16px 40px rgb(0 0 0 / .3)}
@@ -174,8 +174,8 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
     </div></div>
     <span class="note" data-en="Before hiding, mark what the tool should treat differently: select it on the slide, then press its type.">قبل الإخفاء، ميّز ما تريد أن تعامله الأداة بشكل خاص: حدّده في الشريحة ثم اضغط نوعه.</span>
     <div class="tgrid" id="solRoles"></div>
-    <div class="sprow2" style="margin-top:6px"><button type="button" class="mini" id="markBtn" data-en="Show marks">إظهار العلامات</button><span class="note" style="margin:0" data-en="Draws on the slide what will be hidden and what stays.">يرسم على الشريحة ما سيُخفى وما سيبقى.</span></div>
-    <div class="note" id="markKey" style="display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:4px"><span><i class="mk" style="border-color:#00B050"></i><span data-en="Question / stays">سؤال أو يبقى ظاهرًا</span></span><span><i class="mk" style="border-color:#1F71DE"></i><span data-en="Solution">حل</span></span><span><i class="mk" style="border-color:#7030A0"></i><span data-en="Question with a solution inside">سؤال بداخله حل</span></span><span><i class="mk" style="border-color:#808080"></i><span data-en="Part of question">جزء من السؤال</span></span></div>
+    <div class="sprow2" style="margin-top:6px"><button type="button" class="mini" id="markBtn" data-en="Show marks">إظهار العلامات</button><span class="note" style="margin:0" data-en="Shades on the slide what will be hidden and what stays.">يظلّل على الشريحة ما سيُخفى وما سيبقى.</span></div>
+    <div class="note" id="markKey" style="display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:4px"><span><i class="mk" style="background:#00B050"></i><span data-en="Question / stays">سؤال أو يبقى ظاهرًا</span></span><span><i class="mk" style="background:#1F71DE"></i><span data-en="Solution">حل</span></span><span><i class="mk" style="background:#7030A0"></i><span data-en="Question with a solution inside">سؤال بداخله حل</span></span><span><i class="mk" style="background:#808080"></i><span data-en="Part of question">جزء من السؤال</span></span></div>
     <div class="sep"></div>
     <label class="chk"><input type="checkbox" id="numChk" checked> <span data-en="Page numbers">ترقيم الصفحات</span></label>
     <div class="row" id="numRow"><span style="font-size:.82rem" data-en="Numbering starts at slide">يبدأ الترقيم من الشريحة</span><span style="display:flex;gap:6px;align-items:center"><input type="number" min="1" class="num" id="numStart" value="1"><button type="button" class="mini" id="numHere" data-en="Current">الحالية</button></span></div>
@@ -1773,9 +1773,12 @@ function solutionMarks(pkg) {
     else if (/^UULA:given/.test(name)) kind = 'given';
     else if (flags[i] || /^UULA:(question|choice)/.test(name)) kind = 'question';
     else if (c.localName !== 'sp' || /\S/.test(textOf(c))) kind = 'stay';          // any other content: it stays
-    if (kind) out.push({ x: g.x, y: g.y, w: g.w, h: g.h, kind });
+    if (g.y >= pkg.slideH - FOOT) kind = kind === 'stay' ? null : kind;      // the page number / year at the bottom
+    if (kind) out.push({ x: g.x, y: g.y, w: g.w, h: g.h, kind, bare: c.localName === 'sp' && !/\S/.test(textOf(c)) });
   });
-  return out;
+  // a frame or shape that only holds other marked things is not shaded itself (no double shading)
+  const holds = (b, o) => { const cx = o.x + o.w / 2, cy = o.y + o.h / 2; return o !== b && cx >= b.x && cx <= b.x + b.w && cy >= b.y && cy <= b.y + b.h; };
+  return out.filter(b => !(b.kind === 'stay' && (b.bare || b.w * b.h > 0) && out.some(o => holds(b, o) && o.w * o.h < b.w * b.h)));
 }
 function spacing(rects, W, H) {
   const free = rects.filter(r => !r.fixed);
@@ -3775,27 +3778,13 @@ async function drawMarks(id) {
   if (!list) return -1;                                   // the solutions are hidden now
   await run(async ctx => {
     const sh = ctx.presentation.slides.getItem(id).shapes;
-    const labels = [];
     for (const m of list) {
-      const [col, ar, en] = MARK_LOOK[m.kind];
-      const x = m.x / PT, y = m.y / PT, w = m.w / PT, h = m.h / PT;
-      const r = sh.addGeometricShape('Rectangle', { left: x - 2, top: y - 2, width: w + 4, height: h + 4 });
-      r.name = 'UULA Mark Box';
-      try { r.fill.clear(); r.lineFormat.color = '#' + col; r.lineFormat.weight = 1.25; r.lineFormat.dashStyle = 'Dash'; } catch (e) {}
-      const t = sh.addTextBox(L(ar, en), { left: x + w - 60, top: Math.max(0, y - 13), width: 60, height: 12 });
-      t.name = 'UULA Mark Label';
-      try {
-        t.fill.setSolidColor('#' + col); t.lineFormat.visible = false;
-        const tf = t.textFrame; tf.wordWrap = false; tf.autoSizeSetting = 'AutoSizeShapeToFitText';
-        tf.leftMargin = 3; tf.rightMargin = 3; tf.topMargin = 0; tf.bottomMargin = 0;
-        tf.textRange.font.color = '#FFFFFF'; tf.textRange.font.size = 8; tf.textRange.font.bold = true;
-      } catch (e) {}
-      labels.push({ t, right: x + w + 2 });
+      const col = MARK_LOOK[m.kind][0];
+      // a light shade over the object: what will be hidden, what stays
+      const r = sh.addGeometricShape('Rectangle', { left: m.x / PT - 2, top: m.y / PT - 2, width: m.w / PT + 4, height: m.h / PT + 4 });
+      r.name = 'UULA Mark';
+      try { r.fill.setSolidColor('#' + col); r.fill.transparency = 0.82; r.lineFormat.visible = false; } catch (e) {}
     }
-    await ctx.sync();
-    // labels at the top-right corner of their object (RTL), once their width is known
-    labels.forEach(l => l.t.load('width')); await ctx.sync();
-    labels.forEach(l => { if (l.t.width) l.t.left = l.right - l.t.width; });
     await ctx.sync();
   });
   return list.length;
