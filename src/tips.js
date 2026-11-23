@@ -66,7 +66,7 @@
       ['.scopeSeg [data-v="cur"]', E('تُطبَّق الأوامر على الشريحة الحالية فقط.', 'Commands apply to the current slide only.')],
       ['.scopeSeg [data-v="all"]', E('تُطبَّق الأوامر على كل شرائح الملف.', 'Commands apply to every slide in the file.')],
       ['#goBtn', E('يحوّل الشريحة إلى ستايل مذكرة علا: خط UULA Sans والأحجام والألوان، وترتيب المربعات على شبكة الصفحة. إذا طالت الشريحة يسألك قبل تقسيمها.', 'Restyles the slide to the UULA booklet: UULA Sans font, sizes, colours and boxes placed on the page grid. A slide that gets too long is split only if you agree.', 'تحويل', 'Convert')],
-      ['#roles .tbtn', function (el) { var n = el.textContent.trim(); return E('حدّد مربعًا في الشريحة ثم اضغط ليأخذ ستايل «' + n + '» من المذكرة.', 'Select a box on the slide, then click to give it the "' + n + '" booklet style.', n); }],
+      ['#roles .tbtn', function (el) { var n = el.textContent.trim(), own = el.getAttribute('title') || el.dataset.tip; if (own && own !== n) return E(own, own); return E('حدّد مربعًا في الشريحة ثم اضغط ليأخذ ستايل «' + n + '» من المذكرة.', 'Select a box on the slide, then click to give it the "' + n + '" booklet style.', n); }],
       ['#spV', E('يضبط المسافات بين المربعات من الأعلى والأسفل حسب شبكة الصفحة، بدون تداخل أو فراغات زائدة.', 'Fixes the gaps between boxes from top to bottom on the page grid, with no overlaps or extra space.', 'رأسي', 'Vertical')],
       ['#spH', E('يحاذي المربعات أفقيًا حسب الاختيار تحته: تلقائي أو يمين أو يسار.', 'Aligns the boxes horizontally as chosen below: auto, right or left.', 'أفقي', 'Horizontal')],
       ['#hAlign [data-v="auto"]', E('تختار الأداة المحاذاة المناسبة لكل مربع.', 'The tool picks the right alignment for each box.')],
