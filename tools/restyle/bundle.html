@@ -68,6 +68,8 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 .tbtn:disabled{opacity:.5;cursor:default}
 .tbtn span{overflow:hidden;text-overflow:ellipsis}
 .tbtn i{flex:none;width:10px;height:10px;border-radius:2px;border:1px solid rgb(0 0 0 / .12)}
+#roles .tbtn{white-space:normal}
+#roles .tbtn span{text-overflow:clip}
 .modal{position:fixed;inset:0;z-index:60;background:rgb(0 0 0 / .35);display:grid;place-items:center;padding:16px}
 .mbox{background:var(--panel);border-radius:12px;max-width:420px;width:100%;max-height:80vh;overflow:auto;padding:14px 16px;box-shadow:0 16px 40px rgb(0 0 0 / .3)}
 .mbox h3{margin:0 0 8px;font-size:1rem}.mbox p{margin:6px 0}.mbox ul{margin:6px 0;padding-inline-start:1.2em}
@@ -135,7 +137,7 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
     <span class="note" data-en="Converts the font to the UULA font">تحويل الخط إلى خط علا</span>
     <button type="button" class="big" id="goBtn" data-en="Convert">تحويل</button>
     <div class="sep"></div>
-    <span class="note" data-en="Select a box on the slide, then pick what it is.">حدّد مربعًا في الشريحة، ثم اختر نوعه.</span>
+    <span class="note" data-en="Select one or more objects on the slide, then press what they are. Rest the pointer on a button to see what it does.">حدّد مربعًا أو أكثر في الشريحة، ثم اضغط على نوعه. ضع المؤشر على أي زر لترى ماذا يفعل.</span>
     <div id="roles" style="display:grid;gap:4px"></div>
     <div class="sep"></div>
     <div class="sprow"><span class="splab gt2" data-en="Spacing">تنسيق المسافات</span>
@@ -916,10 +918,12 @@ function styleTable(it, ctx, W) {
   const cellText = tc => textOf(tc).trim();
   // the answer table at the end of the objective exercises: a cell reading exactly "الحل"
   const sol = rows.some(r => kids(r, 'tc', 'a').some(tc => /^(الحل|الإجابة|الاجابة)$/.test(cellText(tc)))) && !/شرط الحل/.test(textOf(tbl));
-  const firstColHead = rows.length > 1 && rows.every(r => { const t = kids(r, 'tc', 'a')[0]; return t && cellText(t); }) && grid.length > 2 && !sol
-    ? false : false;
+  // chosen by hand (Format → Tables): with a main column (labels column DAE0E9) / without a header row
+  const opt = it.tableOpt || {};
+  const firstColHead = !!opt.mainCol && !sol;
   // a header row has short labels; a table of statements (true / false, sentences) has none
-  const headRow = rows.length > 1 && kids(rows[0], 'tc', 'a').every(tc => cellText(tc).length <= 25 && !/[.؟?]\s*$/.test(cellText(tc)));
+  const headRow = opt.head === false ? false : opt.head === true ? rows.length > 1
+    : rows.length > 1 && kids(rows[0], 'tc', 'a').every(tc => cellText(tc).length <= 25 && !/[.؟?]\s*$/.test(cellText(tc)));
   rows.forEach((tr, ri) => {
     tr.setAttribute('h', '254000');
     kids(tr, 'tc', 'a').forEach((tc, ci) => {
@@ -1622,8 +1626,21 @@ function applyRole(pkg, role) {
   let shift = 0;
   for (const t of sel.sort((a, b) => a.g.y - b.g.y)) {
     t.g = Object.assign({}, t.g, { y: t.g.y + shift });
-    if (t.kind === 'table') { t.fullW = false; styleTable(t, ctx, W); rename(t, 'table'); out.push({ idx: t.i, kind: 'table' }); continue; }
-    if (['given', 'correct'].includes(role)) { rename(t, role); continue; }       // marks only: no styling, no moving
+    if (t.kind === 'table') {
+      t.fullW = false;
+      t.tableOpt = role === 'tableMain' ? { head: true, mainCol: true } : role === 'tablePlain' ? { head: false } : role === 'table' ? { head: true } : {};
+      styleTable(t, ctx, W); rename(t, 'table'); out.push({ idx: t.i, kind: 'table' }); continue;
+    }
+    if (/^table/.test(role)) continue;                                        // a table style chosen for something that is not a table
+    if (role === 'given') { rename(t, role); continue; }                       // a mark only: never hidden as a solution, no styling, no moving
+    if (role === 'correct') {
+      // the correct choice: its text bold 2070DF (the skill), the box stays where it is
+      for (const c of allCores(t.el)) for (const pr of [...desc(c, 'a', 'rPr'), ...desc(c, 'a', 'endParaRPr')]) {
+        removeKids(pr, ['noFill', 'solidFill', 'gradFill', 'blipFill', 'pattFill', 'grpFill']);
+        placeChild(pr, solid(doc, C.answerOk), RPR_ORDER); pr.setAttribute('b', '1');
+      }
+      rename(t, role); continue;
+    }
     if (t.kind === 'pic' || t.kind === 'grpSp') { stylePic(t, false); rename(t, role === 'answer' ? 'answer' : 'pic'); out.push({ idx: t.i, kind: 'pic' }); continue; }
     if (t.kind !== 'text') { rename(t, role); continue; }
     const isBox = BOX_ROLES.includes(role);
@@ -1636,12 +1653,12 @@ function applyRole(pkg, role) {
     else if (role === 'lesson') setGeom(t.el, { x: M, y: 42.7 * PT, w: CW });
     else if (isBox) {
       const B = BOX[role];
-      const iconW = B.icon ? 15 * PT : 0;
+      const iconGap = B.icon ? 15 * PT : 0;
       // something beside the text (a graph …): the container covers only the text's side
       const beside = items.some(o => o !== t && o.g.w && !/^UULA (Footer|Watermark)|^CustomPageNumber_/.test(o.name)
         && Math.min(o.g.y + o.g.h, t.g.y + t.g.h) - Math.max(o.g.y, t.g.y) > 4 * PT && (o.g.x + o.g.w <= t.g.x + 2 * PT || o.g.x >= t.g.x + t.g.w - 2 * PT));
       const narrow = role === 'other' || beside;
-      const tx = narrow ? t.g.x : M, tw = role === 'other' ? t.g.w - 24 * PT : narrow ? Math.min(t.g.w, W - M - iconW - t.g.x) : CW - iconW;
+      const tx = narrow ? t.g.x : M, tw = role === 'other' ? t.g.w - 24 * PT : narrow ? Math.min(t.g.w, W - M - iconGap - t.g.x) : CW - iconGap;
       const est = estimateText(t.c, tw);
       const top = role === 'other' ? t.g.y - 4 * PT : t.g.y - ROW;
       const boxH = role === 'other' ? est + 8 * PT : est + 3 * ROW;
@@ -1845,6 +1862,32 @@ function align(rects, W, mode, only) {
 // the selected objects (" #ursel" at the end of their name) get the container behind them: full width, one line
 // above and two below the content, the icon on the right and the content kept clear of it. Their text keeps its roles.
 const WRAP = { note: 'note', quote: 'quote', formula: 'formula', activity: 'activity', mars: 'mars', other: 'other', cancelled: 'cancelled', practice: 'practice' };
+// the selected pictures (graphs …) give their place to the UULA empty grid, cut to each picture's size
+// (light lines D3D8E0 every two page-grid steps, running off the edges, the cut centred on the picture)
+function gridCutX(id, name, g) {
+  const w = Math.max(1, Math.round(g.w)), h = Math.max(1, Math.round(g.h)), step = ROW;
+  const ox = (w / 2) % step, oy = (h / 2) % step;
+  let path = '';
+  for (let x = ox; x <= w + 1; x += step) { const v = Math.min(w, Math.round(x)); path += '<a:moveTo><a:pt x="' + v + '" y="0"/></a:moveTo><a:lnTo><a:pt x="' + v + '" y="' + h + '"/></a:lnTo>'; }
+  for (let y = oy; y <= h + 1; y += step) { const v = Math.min(h, Math.round(y)); path += '<a:moveTo><a:pt x="0" y="' + v + '"/></a:moveTo><a:lnTo><a:pt x="' + w + '" y="' + v + '"/></a:lnTo>'; }
+  return '<p:sp><p:nvSpPr><p:cNvPr id="' + id + '" name="' + name + '"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="' + Math.round(g.x) + '" y="' + Math.round(g.y) + '"/><a:ext cx="' + w + '" cy="' + h + '"/></a:xfrm>'
+    + '<a:custGeom><a:avLst/><a:gdLst/><a:ahLst/><a:cxnLst/><a:rect l="0" t="0" r="r" b="b"/><a:pathLst><a:path w="' + w + '" h="' + h + '" fill="none">' + path + '</a:path></a:pathLst></a:custGeom>'
+    + '<a:noFill/><a:ln w="6350"><a:solidFill><a:srgbClr val="D3D8E0"/></a:solidFill></a:ln></p:spPr></p:sp>';
+}
+function gridOver(pkg) {
+  const doc = parseXml(pkg.files.slide);
+  NEXT = maxId(doc) + 1;
+  const all = topItems(doc).map(el => { const c = core(el), n = cnvOf(c); return { el, c, name: n ? n.getAttribute('name') || '' : '', g: geomOf(el, pkg) }; });
+  const sel = all.filter(t => / #ursel$/.test(t.name));
+  for (const t of sel) for (const c of allCores(t.el)) { const n = cnvOf(c); if (n) n.setAttribute('name', (n.getAttribute('name') || '').replace(/ #ursel$/, '')); }
+  // a picture, a group (a graph drawn from shapes) or a chart; not a text box or a table
+  const pics = sel.filter(t => t.g && t.g.w > 0 && t.g.h > 0 && (t.c.localName === 'pic' || t.el.localName === 'grpSp' || (t.c.localName === 'graphicFrame' && !desc(t.c, 'a', 'tbl').length)));
+  for (const t of pics) {
+    const sp = frag(doc, gridCutX(NEXT++, 'UULA Graph Grid #ursel', t.g));
+    t.el.parentNode.replaceChild(sp, t.el);
+  }
+  return { xml: serialize(doc), count: pics.length, sel: sel.length };
+}
 function wrapBox(pkg, type) {
   const W = pkg.slideW, H = pkg.slideH;
   const doc = parseXml(pkg.files.slide);
@@ -2244,7 +2287,7 @@ function splitPoint(plan, lay) {
 
 return {
   questionFlags,
-  NS, PT, ROW, M, FOOT, C, STY, BOX, openPackage, buildPackage, parseXml, serialize, restyle, layout, applyLayout, splitParts, splitPoint, markNames, MARK, applyRole, wrapBox, WRAP, reflow, spacing, align, findSolutions, hideSolutions, showSolutions, hasSolutions, TEXT_ROLES, BOX_ROLES, G, Y0, snapUp, snapX,
+  NS, PT, ROW, M, FOOT, C, STY, BOX, openPackage, buildPackage, parseXml, serialize, restyle, layout, applyLayout, splitParts, splitPoint, markNames, MARK, applyRole, wrapBox, gridOver, WRAP, reflow, spacing, align, findSolutions, hideSolutions, showSolutions, hasSolutions, TEXT_ROLES, BOX_ROLES, G, Y0, snapUp, snapX,
   // used by the templates module
   util: { pX, txX, boxX, gradBoxX, picX, pillX, pillW, lineX, tableX, makeRels, frag, topItems, core, cnvOf, maxId, spTreeOf, kid, kids, desc, xfrmOf, geomOf, setNext: n => { NEXT = n; }, yearText, pageNumX, estimateText, iconW, iconH }
 };
@@ -3495,6 +3538,32 @@ function buildTemplateList() {
   }
 }
 $('tpls').addEventListener('click', e => { const b = e.target.closest('.tbtn'); if (b) insertTemplate(b.dataset.id); });
+// the graph grid chosen while pictures are selected: the grid takes each picture's place and size
+async function gridSelected(id) {
+  const n = await run(async ctx => {
+    const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/name,items/type'); await ctx.sync();
+    const pics = shapes.items.filter(s => !['TextBox', 'GeometricShape', 'Table', 'Line'].includes(s.type));
+    if (!pics.length) return 0;
+    pics.forEach(s => { s.name = (s.name || '').replace(/ #ursel$/, '') + ' #ursel'; });
+    await ctx.sync();
+    return pics.length;
+  }).catch(() => 0);
+  if (!n) return 0;
+  const pkg = await UR.openPackage(await exportSlide(id));
+  const r = UR.gridOver(pkg);
+  if (!r.count) { await clearSel(id); return 0; }
+  const newId = await insertAfter(await UR.buildPackage(pkg, r.xml, null), id);
+  await deleteSlide(id);
+  await run(async ctx => {
+    ctx.presentation.setSelectedSlides([newId]); await ctx.sync();
+    const sh = ctx.presentation.slides.getItem(newId).shapes; sh.load('items/id,items/name'); await ctx.sync();
+    const sel = sh.items.filter(s => / #ursel$/.test(s.name || ''));
+    sel.forEach(s => { s.name = s.name.replace(/ #ursel$/, ''); });
+    await ctx.sync();
+    try { ctx.presentation.slides.getItem(newId).setSelectedShapes(sel.map(s => s.id)); await ctx.sync(); } catch (e) {}
+  }).catch(() => {});
+  return r.count;
+}
 // a container chosen while objects are selected: it goes around them (without the template's own text)
 async function wrapSelected(id, tid) {
   const n = await run(async ctx => {
@@ -3544,6 +3613,7 @@ async function insertTemplate(tid) {
   try {
     const id = await currentId();
     if (!id) { tsay(L('حدّد شريحة أولًا.', 'Select a slide first.')); return; }
+    if (tid === 'grid') { const n = await gridSelected(id); if (n) { tsay(n > 1 ? L('وُضعت الشبكة البيانية مكان ' + n + ' صور، كلٌّ بمقاسها.', 'The graph grid replaced ' + n + ' pictures, each at its size.') : L('وُضعت الشبكة البيانية مكان الصورة وبمقاسها.', 'The graph grid replaced the picture, at its size.')); return; } }
     if (UR.WRAP[tid] && await wrapSelected(id, tid)) { tsay(L('وُضعت الحاوية حول العناصر المحددة.', 'The container was put around the selected objects.')); return; }
     const pkg = await UR.openPackage(await exportSlide(id));
     const r = URT.apply(pkg, tid);
@@ -3582,13 +3652,38 @@ async function insertTemplate(tid) {
 
 // ---------- one object at a time ----------
 const ROLES = [
-  { g: 'نصوص', ge: 'Text', items: [['chapter', 'اسم الوحدة', 'A6A6A6'], ['lesson', 'اسم الدرس', '1F71DD'], ['topic', 'موضوع', '000000'], ['body', 'فقرة', 'FFFFFF'], ['bullets', 'نقاط', 'FFFFFF'], ['qhead', 'عنوان أسئلة', 'FF0000'], ['question', 'سؤال', 'FF0000'], ['choice', 'خيارات', 'FFFFFF']] },
-  { g: 'للحلول', ge: 'For solutions', items: [['answer', 'حل', '1F71DE'], ['correct', 'الخيار الصحيح', '2070DF'], ['given', 'شكل من السؤال', 'A6A6A6']] },
-  { g: 'إطارات', ge: 'Frames', items: [['note', 'ملاحظة', 'FBEBD3'], ['quote', 'نص مقتطف', 'E2F0D9'], ['def', 'تعريف', 'E2F0D9'], ['formula', 'قوانين', 'D3E4F5'], ['other', 'صيغة أخرى', 'FBEBD3'], ['activity', 'نشاط', 'F1F1F1'], ['mars', 'من المريخ', 'F1F1F1']] }
+  { g: 'نوع النص', ge: 'Text type', items: [['chapter', 'عنوان الوحدة', 'A6A6A6'], ['lesson', 'عنوان الدرس', '1F71DD'], ['topic', 'عنوان موضوع', '000000'], ['body', 'فقرة شرح', 'FFFFFF'], ['bullets', 'نقاط مرقّمة', 'FFFFFF'], ['qhead', 'عنوان الأسئلة', 'FF0000'], ['question', 'نص السؤال', 'FF0000'], ['choice', 'خيارات السؤال', 'FFFFFF']] },
+  { g: 'الحلول', ge: 'Solutions', items: [['answer', 'حل السؤال', '1F71DE'], ['correct', 'الخيار الصحيح', '2070DF'], ['given', 'جزء من السؤال', 'A6A6A6']] },
+  { g: 'إطارات حول المحدد', ge: 'Frames around the selection', items: [['note', 'ملاحظة', 'FBEBD3'], ['quote', 'نص مقتطف', 'E2F0D9'], ['def', 'تعريف', 'E2F0D9'], ['formula', 'قوانين', 'D3E4F5'], ['other', 'صيغة أخرى', 'FBEBD3'], ['activity', 'نشاط', 'F1F1F1'], ['mars', 'من المريخ', 'F1F1F1']] },
+  { g: 'تنسيق جدول محدد', ge: 'Selected table', items: [['table', 'جدول برأس', 'CAD0D8'], ['tableMain', 'رأس وعمود رئيسي', 'DAE0E9'], ['tablePlain', 'جدول بلا رأس', 'F1F1F1']] }
 ];
+// what each button does (shown when the pointer rests on it)
+const ROLE_TIP = {
+  chapter: ['اسم الوحدة أعلى الصفحة (رمادي صغير)', 'Unit name at the top (small gray)'],
+  lesson: ['اسم الدرس أعلى الصفحة (أزرق كبير)', 'Lesson name at the top (large blue)'],
+  topic: ['عنوان موضوع داخل الدرس (أسود عريض)', 'A topic heading inside the lesson (bold black)'],
+  body: ['فقرة شرح عادية بخط المذكرة', 'A normal paragraph in the booklet font'],
+  bullets: ['قائمة نقاط، كل سطر نقطة', 'A bullet list, one point per line'],
+  qhead: ['عنوان قسم الأسئلة (أحمر عريض)', 'Heading of a questions section (bold red)'],
+  question: ['نص السؤال مع علامة السؤال الحمراء', 'Question text with the red question mark'],
+  choice: ['خيارات سؤال الاختيار من متعدد', 'The choices of a multiple-choice question'],
+  answer: ['حل السؤال بالأزرق، ويُخفى عند «إخفاء الحلول»', 'The solution in blue, hidden by «Hide solutions»'],
+  correct: ['الخيار الصحيح بالأزرق العريض، ويتحول للأسود عند «إخفاء الحلول»', 'The correct choice in bold blue, turns black when solutions are hidden'],
+  given: ['شكل أو نص من السؤال نفسه: يبقى ظاهرًا عند «إخفاء الحلول» حتى لو كان أزرق', 'A shape or text that belongs to the question: it stays when solutions are hidden, even if blue'],
+  note: ['إطار ملاحظة حول ما حددته (مربع أو أكثر)', 'A note frame around the selection'],
+  quote: ['إطار نص مقتطف حول ما حددته', 'A quote frame around the selection'],
+  def: ['إطار تعريف حول ما حددته', 'A definition frame around the selection'],
+  formula: ['إطار قوانين حول ما حددته', 'A formulas frame around the selection'],
+  other: ['إطار صغير «صيغة أخرى» حول ما حددته', 'A small «other form» frame around the selection'],
+  activity: ['إطار نشاط حول ما حددته', 'An activity frame around the selection'],
+  mars: ['إطار «من المريخ» حول ما حددته', 'A «from Mars» frame around the selection'],
+  table: ['حدّد جدولًا: صف رأس رمادي وصفوف متبادلة', 'Select a table: gray header row, alternating rows'],
+  tableMain: ['حدّد جدولًا: صف رأس وعمود أول رئيسي', 'Select a table: header row and a main first column'],
+  tablePlain: ['حدّد جدولًا: بلا صف رأس، صفوف متبادلة', 'Select a table: no header row, alternating rows']
+};
 const FRAME_ROLES = ['note', 'quote', 'def', 'formula', 'other', 'activity', 'mars'];
-const ROLE_EN = { chapter: 'Unit', lesson: 'Lesson', topic: 'Topic', body: 'Paragraph', bullets: 'Bullets', qhead: 'Q head', question: 'Question', answer: 'Solution', choice: 'Choices',
-  correct: 'Correct choice', given: 'Part of question', note: 'Note', quote: 'Quote', def: 'Definition', formula: 'Formulas', other: 'Other form', activity: 'Activity', mars: 'Challenge' };
+const ROLE_EN = { chapter: 'Unit title', lesson: 'Lesson title', topic: 'Topic heading', body: 'Paragraph', bullets: 'Bullet list', qhead: 'Questions heading', question: 'Question text', answer: 'Solution', choice: 'Choices',
+  correct: 'Correct choice', given: 'Part of question', note: 'Note', quote: 'Quote', def: 'Definition', formula: 'Formulas', other: 'Other form', activity: 'Activity', mars: 'From Mars', table: 'With header', tableMain: 'Header + main column', tablePlain: 'No header' };
 function buildRoleList() {
   const host = $('roles'); host.innerHTML = '';
   for (const g of ROLES) {
@@ -3598,7 +3693,7 @@ function buildRoleList() {
     for (const [id, nameAr, col] of g.items) {
       const name = L(nameAr, ROLE_EN[id]);
       const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; b.dataset.role = id;
-      b.title = name === 'موضوع' ? 'عنوان موضوع' : name; b.innerHTML = '<i style="background:#' + col + '"></i><span>' + name + '</span>';
+      b.title = ROLE_TIP[id] ? L(ROLE_TIP[id][0], ROLE_TIP[id][1]) : name; b.innerHTML = '<i style="background:#' + col + '"></i><span>' + name + '</span>';
       grid.appendChild(b);
     }
     d.appendChild(grid); host.appendChild(d);
@@ -3682,7 +3777,8 @@ async function pinRole(role) {
       try { const ids = r.targets.map(t => map[t.idx]).filter(Boolean).map(s => s.id); ctx.presentation.slides.getItem(newId).setSelectedShapes(ids); await ctx.sync(); } catch (e) {}
     });
     await unmark(newId);
-    rsay(L('تم.', 'Done.'));
+    rsay(role === 'given' ? L('عُلِّم كشكل من السؤال: يبقى ظاهرًا عند إخفاء الحلول.', 'Marked as part of the question: it stays when solutions are hidden.')
+      : role === 'correct' ? L('عُلِّم كخيار صحيح (أزرق عريض): يتحول للأسود عند إخفاء الحلول.', 'Marked as the correct choice (bold blue): it turns black when solutions are hidden.') : L('تم.', 'Done.'));
   } catch (e) { if (slideId) await clearSel(slideId); rsay(L('تعذّر التحويل: ', 'Could not restyle: ') + errText(e)); }
   finally { busy = false; lock(); }
 }
