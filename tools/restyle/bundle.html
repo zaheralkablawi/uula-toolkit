@@ -3666,6 +3666,12 @@ const ROLES = [
   { g: 'إطارات حول المحدد', ge: 'Frames around the selection', items: [['note', 'ملاحظة', 'FBEBD3'], ['quote', 'نص مقتطف', 'E2F0D9'], ['def', 'تعريف', 'E2F0D9'], ['formula', 'قوانين', 'D3E4F5'], ['other', 'صيغة أخرى', 'FBEBD3'], ['activity', 'نشاط', 'F1F1F1'], ['mars', 'من المريخ', 'F1F1F1']] },
   { g: 'تنسيق جدول محدد', ge: 'Selected table', items: [['table', 'جدول برأس', 'CAD0D8'], ['tableMain', 'رأس وعمود رئيسي', 'DAE0E9'], ['tablePlain', 'جدول بلا رأس', 'F1F1F1']] }
 ];
+// the same buttons beside «Hide solutions» only mark: the colour stays as it is (colours are set in «Format»)
+const SOL_TIP = {
+  answer: ['يعلّم المحدد كحل فيُخفى عند «إخفاء الحلول». لا يغيّر اللون ولا يتحرك شيء.', 'Marks the selection as a solution, so «Hide solutions» hides it. The colour stays and nothing moves.'],
+  correct: ['يعلّم المحدد كخيار صحيح، فيتحول للأسود عند «إخفاء الحلول». لا يغيّر اللون.', 'Marks the selection as the correct choice; it turns black when solutions are hidden. The colour stays.'],
+  given: ['شكل أو نص من السؤال نفسه: يبقى ظاهرًا عند «إخفاء الحلول» حتى لو كان أزرق.', 'A shape or text that belongs to the question: it stays when solutions are hidden, even if blue.']
+};
 // what each button does (shown when the pointer rests on it)
 const ROLE_TIP = {
   chapter: ['اسم الوحدة أعلى الصفحة (رمادي صغير)', 'Unit name at the top (small gray)'],
@@ -3715,7 +3721,7 @@ function buildSolRoles() {
   for (const [id, nameAr, col] of ROLES.find(g => g.items.some(x => x[0] === 'given')).items) {
     const name = L(nameAr, ROLE_EN[id]);
     const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; b.dataset.role = id;
-    b.title = L(ROLE_TIP[id][0], ROLE_TIP[id][1]); b.innerHTML = '<i style="background:#' + col + '"></i><span>' + name + '</span>';
+    b.title = L(SOL_TIP[id][0], SOL_TIP[id][1]); b.innerHTML = '<i style="background:#' + col + '"></i><span>' + name + '</span>';
     host.appendChild(b);
   }
 }
@@ -3726,7 +3732,7 @@ $('undoBtn').addEventListener('click', async () => {
   catch (e) { say(L('تعذّر التراجع: ', 'Could not undo: ') + errText(e)); }
   finally { busy = false; lock(); }
 });
-$('solRoles').addEventListener('click', e => { const b = e.target.closest('.tbtn'); if (b) pinRole(b.dataset.role); });
+$('solRoles').addEventListener('click', e => { const b = e.target.closest('.tbtn'); if (b) pinRole(b.dataset.role, true); });
 const rsay = m => say(m);
 async function clearSel(slideId) {
   await run(async ctx => {
@@ -3753,7 +3759,7 @@ async function undoMark() {
     await ctx.sync(); return n;
   });
 }
-async function quietMark(role) {
+async function quietMark(role, keepColour) {
   const id = await currentId();
   const hiddenNow = role === 'answer' && await slideSolHidden(id);
   const W = hiddenNow ? (await getSize()).W : 0;
@@ -3778,7 +3784,7 @@ async function quietMark(role) {
         s.delete(); continue;
       }
       s.name = 'UULA:' + role + ' ' + base(s.name);
-      if (QUIET[role] && ['TextBox', 'GeometricShape'].includes(s.type)) {
+      if (QUIET[role] && !keepColour && ['TextBox', 'GeometricShape'].includes(s.type)) {
         try { const f = s.textFrame.textRange.font; f.color = '#' + QUIET[role]; if (role === 'correct') f.bold = true; } catch (e) {}
       }
       // the solutions of this slide are hidden now: this one goes aside too, and «Show solutions» brings it back
@@ -3788,17 +3794,17 @@ async function quietMark(role) {
     return hiddenNow ? -sel.length : sel.length;
   });
 }
-async function pinRole(role) {
+async function pinRole(role, keepColour) {
   if (busy || !supported) return;
   busy = true; lock(); rsay('');
   if (role in QUIET) {
     try {
-      const n = await quietMark(role);
+      const n = await quietMark(role, keepColour);
       if (n < 0) { rsay(L('عُلِّم كحل وأُخفي، لأن حلول الشريحة مخفية الآن. يظهر مع «إظهار الحلول».', 'Marked as a solution and hidden, since the slide\'s solutions are hidden now. «Show solutions» brings it back.')); return; }
       rsay(!n ? L('حدّد مربعًا في الشريحة أولًا.', 'Select a box on the slide first.')
         : role === 'given' ? L('عُلِّم كجزء من السؤال: يبقى ظاهرًا عند إخفاء الحلول.', 'Marked as part of the question: it stays when solutions are hidden.')
-        : role === 'correct' ? L('عُلِّم كخيار صحيح (أزرق عريض): يتحول للأسود عند إخفاء الحلول.', 'Marked as the correct choice (bold blue): it turns black when solutions are hidden.')
-        : L('عُلِّم كحل (أزرق): يُخفى عند إخفاء الحلول.', 'Marked as a solution (blue): it is hidden when solutions are hidden.'));
+        : role === 'correct' ? (keepColour ? L('عُلِّم كخيار صحيح: يتحول للأسود عند إخفاء الحلول.', 'Marked as the correct choice: it turns black when solutions are hidden.') : L('عُلِّم كخيار صحيح (أزرق عريض): يتحول للأسود عند إخفاء الحلول.', 'Marked as the correct choice (bold blue): it turns black when solutions are hidden.'))
+        : keepColour ? L('عُلِّم كحل: يُخفى عند إخفاء الحلول.', 'Marked as a solution: it is hidden when solutions are hidden.') : L('عُلِّم كحل (أزرق): يُخفى عند إخفاء الحلول.', 'Marked as a solution (blue): it is hidden when solutions are hidden.'));
     } catch (e) { rsay(L('تعذّر التمييز: ', 'Could not mark: ') + errText(e)); }
     finally { busy = false; lock(); }
     return;
