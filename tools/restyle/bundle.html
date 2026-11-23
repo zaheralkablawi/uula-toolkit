@@ -3669,7 +3669,7 @@ const ROLE_TIP = {
   qhead: ['عنوان قسم الأسئلة (أحمر عريض)', 'Heading of a questions section (bold red)'],
   question: ['نص السؤال مع علامة السؤال الحمراء', 'Question text with the red question mark'],
   choice: ['خيارات سؤال الاختيار من متعدد', 'The choices of a multiple-choice question'],
-  answer: ['حل السؤال بالأزرق، ويُخفى عند «إخفاء الحلول»', 'The solution in blue, hidden by «Hide solutions»'],
+  answer: ['يعلّم المحدد كحل ويلوّن نصه بالأزرق، فيُخفى عند «إخفاء الحلول». لا يتحرك شيء في الشريحة.', 'Marks the selection as a solution and colours its text blue, so «Hide solutions» hides it. Nothing on the slide moves.'],
   correct: ['الخيار الصحيح بالأزرق العريض، ويتحول للأسود عند «إخفاء الحلول»', 'The correct choice in bold blue, turns black when solutions are hidden'],
   given: ['شكل أو نص من السؤال نفسه: يبقى ظاهرًا عند «إخفاء الحلول» حتى لو كان أزرق', 'A shape or text that belongs to the question: it stays when solutions are hidden, even if blue'],
   note: ['إطار ملاحظة حول ما حددته (مربع أو أكثر)', 'A note frame around the selection'],
@@ -3721,9 +3721,36 @@ async function clearSel(slideId) {
     await ctx.sync();
   }).catch(() => {});
 }
+// solution marks change only the selected objects, in place: no slide is rebuilt, nothing moves
+const QUIET = { answer: '1F71DE', correct: '2070DF', given: null };
+async function quietMark(role) {
+  return run(async ctx => {
+    const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/name,items/type'); await ctx.sync();
+    if (!shapes.items.length) return 0;
+    for (const s of shapes.items) {
+      s.name = 'UULA:' + role + ' ' + (s.name || '').replace(/ #ursel$/, '').replace(/^UULA:[a-z]+\s*/, '');
+      if (QUIET[role] && ['TextBox', 'GeometricShape'].includes(s.type)) {
+        try { const f = s.textFrame.textRange.font; f.color = '#' + QUIET[role]; if (role === 'correct') f.bold = true; } catch (e) {}
+      }
+    }
+    await ctx.sync();
+    return shapes.items.length;
+  });
+}
 async function pinRole(role) {
   if (busy || !supported) return;
   busy = true; lock(); rsay('');
+  if (role in QUIET) {
+    try {
+      const n = await quietMark(role);
+      rsay(!n ? L('حدّد مربعًا في الشريحة أولًا.', 'Select a box on the slide first.')
+        : role === 'given' ? L('عُلِّم كجزء من السؤال: يبقى ظاهرًا عند إخفاء الحلول.', 'Marked as part of the question: it stays when solutions are hidden.')
+        : role === 'correct' ? L('عُلِّم كخيار صحيح (أزرق عريض): يتحول للأسود عند إخفاء الحلول.', 'Marked as the correct choice (bold blue): it turns black when solutions are hidden.')
+        : L('عُلِّم كحل (أزرق): يُخفى عند إخفاء الحلول.', 'Marked as a solution (blue): it is hidden when solutions are hidden.'));
+    } catch (e) { rsay(L('تعذّر التمييز: ', 'Could not mark: ') + errText(e)); }
+    finally { busy = false; lock(); }
+    return;
+  }
   let slideId = null;
   try {
     const got = await run(async ctx => {
