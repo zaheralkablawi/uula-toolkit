@@ -2068,6 +2068,8 @@ function hideSolutions(pkg, grids, opts) {
     n++;
     const view = f.how === 'hide' ? null : t.el.cloneNode(true);
     for (const c of allCores(t.el)) { const nv = cnvOf(c); if (nv) { nv.setAttribute('hidden', '1'); nv.setAttribute('name', 'UULA SolHidden ' + (nv.getAttribute('name') || '')); } }
+    // the original also waits off the slide (PowerPoint does not always keep "hidden" on shapes with equations)
+    setGeom(t.el, { x: t.g.x + PARK * W });
     if (!view && opts.lines && t.kind === 'text') {
       // one line under every text line: counted from the text itself (the box can be shorter than its text)
       const ps = kids(kid(t.c, 'txBody', 'p'), 'p', 'a');
@@ -2144,6 +2146,7 @@ function hideSolutions(pkg, grids, opts) {
   }
   return { xml: serialize(doc), rels, count: n };
 }
+const PARK = 3;   // hidden originals stand this many slide widths to the right
 function showSolutions(pkg) {
   const doc = parseXml(pkg.files.slide);
   let n = 0;
@@ -2153,6 +2156,8 @@ function showSolutions(pkg) {
     if (/^UULA SolView /.test(name)) { el.parentNode.removeChild(el); continue; }
     if (/^UULA SolHidden /.test(name)) {
       n++;
+      const g = geomOf(el, pkg);
+      if (g && g.x >= (PARK - 0.5) * pkg.slideW) setGeom(el, { x: g.x - PARK * pkg.slideW });
       for (const c of allCores(el)) { const v = cnvOf(c); if (v) { v.removeAttribute('hidden'); v.setAttribute('name', (v.getAttribute('name') || '').replace(/^UULA SolHidden /, '')); } }
     }
   }
