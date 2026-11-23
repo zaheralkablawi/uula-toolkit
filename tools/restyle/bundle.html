@@ -68,6 +68,9 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 .tbtn:disabled{opacity:.5;cursor:default}
 .tbtn span{overflow:hidden;text-overflow:ellipsis}
 .tbtn i{flex:none;width:10px;height:10px;border-radius:2px;border:1px solid rgb(0 0 0 / .12)}
+.tbtn i.ic{width:16px;height:14px;border:0;border-radius:0;display:inline-flex;align-items:center;justify-content:center;font:700 11px/1 "UULA Sans",-apple-system,sans-serif;font-style:normal}
+.tbtn i.ic img{max-width:14px;max-height:14px}
+.tbtn i.ic b{display:block;border-radius:3px}
 #roles .tbtn,#solRoles .tbtn,#tpls .tbtn{white-space:normal}
 #roles .tbtn span,#solRoles .tbtn span,#tpls .tbtn span{text-overflow:clip}
 .modal{position:fixed;inset:0;z-index:60;background:rgb(0 0 0 / .35);display:grid;place-items:center;padding:16px}
@@ -119,7 +122,7 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
   <nav class="tabs" id="tabs" role="tablist">
     <button type="button" role="tab" data-tab="obj" aria-selected="true"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 3l11 6-5 1.5L8 16z"/></svg><span data-en="Format">تنسيق</span></button>
     <button type="button" role="tab" data-tab="ins" aria-selected="false"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="14" height="5" rx="1.2"/><rect x="3" y="10" width="6" height="7" rx="1.2"/><rect x="11" y="10" width="6" height="7" rx="1.2"/></svg><span data-en="Insert">إدراج</span></button>
-    <button type="button" role="tab" data-tab="set" aria-selected="false"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2.2M10 15.3v2.2M2.5 10h2.2M15.3 10h2.2M4.7 4.7l1.6 1.6M13.7 13.7l1.6 1.6M4.7 15.3l1.6-1.6M13.7 6.3l1.6-1.6"/></svg><span data-en="Options">الخيارات</span></button>
+    <button type="button" role="tab" data-tab="set" aria-selected="false"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 10s3-5.5 8-5.5S18 10 18 10s-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.4"/></svg><span data-en="Solutions">الحلول</span></button>
   </nav>
   <nav class="tabs" id="wtabs" role="tablist" hidden style="grid-template-columns:1fr 1fr">
     <button type="button" role="tab" data-tab="wtag" aria-selected="true"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="14" height="12" rx="1.5" stroke-dasharray="3 2"/><path d="M6.5 8h7M6.5 11h5" stroke-linecap="round"/></svg><span data-en="Tag">تمييز</span></button>
@@ -159,6 +162,12 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
     <div class="sep"></div>
     <span class="note" data-en="Added under the last object on the current slide. Graph grid: select pictures first to put the grid in their place.">يُضاف تحت آخر عنصر في الشريحة الحالية. الشبكة البيانية: حدّد صورة أو أكثر أولًا لتوضع الشبكة مكانها.</span>
     <div id="tpls" style="display:grid;gap:4px"></div>
+    <div class="sep"></div>
+    <span class="gt2" data-en="Page numbers">أرقام الصفحات</span>
+    <label class="chk"><input type="checkbox" id="numChk" checked> <span data-en="Number the pages after each conversion">ترقيم الصفحات بعد كل تحويل</span></label>
+    <div class="row" id="numRow"><span style="font-size:.82rem" data-en="Numbering starts at slide">يبدأ الترقيم من الشريحة</span><span style="display:flex;gap:6px;align-items:center"><input type="number" min="1" class="num" id="numStart" value="1"><button type="button" class="mini" id="numHere" data-en="Current">الحالية</button></span></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="mini" id="numAll" data-en="Update page numbers now">تحديث أرقام الصفحات الآن</button><button type="button" class="mini" id="numDel" data-en="Delete page numbers">حذف أرقام الصفحات</button></div>
+    <span class="note" data-en="The background, watermark and footer come from the slide layout; the tool leaves them as they are.">الخلفية والعلامة المائية والتذييل تأتي من تخطيط الشريحة (Layout)، والأداة لا تغيّرها.</span>
   </section>
 
   <section class="panel" data-pane="set" hidden>
@@ -174,11 +183,6 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
     <span class="note" data-en="Before hiding, mark what the tool should treat differently: select it on the slide, then press its type.">قبل الإخفاء، ميّز ما تريد أن تعامله الأداة بشكل خاص: حدّده في الشريحة ثم اضغط نوعه.</span>
     <div class="tgrid" id="solRoles"></div>
     <button type="button" class="mini" id="undoBtn" style="justify-self:start;margin-top:6px" data-en="↶ Undo the last mark">↶ تراجع عن آخر تمييز</button>
-    <div class="sep"></div>
-    <label class="chk"><input type="checkbox" id="numChk" checked> <span data-en="Page numbers">ترقيم الصفحات</span></label>
-    <div class="row" id="numRow"><span style="font-size:.82rem" data-en="Numbering starts at slide">يبدأ الترقيم من الشريحة</span><span style="display:flex;gap:6px;align-items:center"><input type="number" min="1" class="num" id="numStart" value="1"><button type="button" class="mini" id="numHere" data-en="Current">الحالية</button></span></div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="mini" id="numAll" data-en="Update page numbers now">تحديث أرقام الصفحات الآن</button><button type="button" class="mini" id="numDel" data-en="Delete page numbers">حذف أرقام الصفحات</button></div>
-    <span class="note" data-en="The background, watermark and footer come from the slide layout; the tool leaves them as they are.">الخلفية والعلامة المائية والتذييل تأتي من تخطيط الشريحة (Layout)، والأداة لا تغيّرها.</span>
   </section>
 
   <section class="panel" data-pane="wtag" hidden>
@@ -2603,6 +2607,258 @@ return { LIST, GROUP_EN, spec, build, place, freeTop, apply };
 })();
 if (typeof module !== 'undefined') module.exports = URT;
 </script>
+<script>// UQ — apply a computed slide change to the objects in place (no new slide, nothing moves on screen).
+// The engine computes the new slide XML as before; here only the differences are applied with the PowerPoint API,
+// then the slide is read back and compared with what was computed. Any difference → the caller takes the full way.
+const UQ = (() => {
+let why = '';
+const no = r => { why = r; return null; };
+const NS = UR.NS, PT = UR.PT, U = UR.util;
+const A = NS.a, P = NS.p;
+const kid = (el, n, ns) => el ? [...el.children].find(c => c.localName === n && (!ns || c.namespaceURI === ns)) || null : null;
+const kids = (el, n) => el ? [...el.children].filter(c => c.localName === n) : [];
+const desc = (el, ns, n) => el ? [...el.getElementsByTagNameNS(ns, n)] : [];
+
+// ---------- a comparable picture of one object ----------
+function colorOf(fillParent) {
+  if (!fillParent) return 'inherit';
+  if (kid(fillParent, 'noFill', A)) return 'none';
+  const sf = kid(fillParent, 'solidFill', A);
+  if (sf) { const c = kid(sf, 'srgbClr', A); return c && !c.children.length ? c.getAttribute('val').toUpperCase() : 'other'; }
+  if ([...fillParent.children].some(c => /Fill$/.test(c.localName))) return 'other';
+  return 'inherit';
+}
+function lineOf(spPr) {
+  const ln = kid(spPr, 'ln', A); if (!ln) return 'inherit';
+  const f = colorOf(ln); if (f === 'none') return 'none';
+  return f + '/' + (ln.getAttribute('w') || '') + '/' + ((kid(ln, 'prstDash', A) || { getAttribute: () => 'solid' }).getAttribute('val') || 'solid');
+}
+const pct = (el, n, def) => { const x = kid(el, n, A); if (!x) return def; const p = kid(x, 'spcPct', A), s = kid(x, 'spcPts', A); return p ? 'p' + p.getAttribute('val') : s ? 's' + s.getAttribute('val') : def; };
+function paraSig(p, txBox) {
+  const pr = kid(p, 'pPr', A);
+  const g = (a, d) => (pr && pr.getAttribute(a)) || d;
+  const bu = pr ? (kid(pr, 'buNone', A) ? 'none' : kid(pr, 'buChar', A) ? 'char:' + kid(pr, 'buChar', A).getAttribute('char') : kid(pr, 'buAutoNum', A) ? 'num' : txBox ? 'none' : 'inherit') : (txBox ? 'none' : 'inherit');
+  return [g('algn', 'l'), g('rtl', '0'), g('marL', '0'), g('indent', '0'), g('lvl', '0'), pct(pr, 'lnSpc', 'p100000'), pct(pr, 'spcBef', 's0'), pct(pr, 'spcAft', 's0'), bu].join(',');
+}
+// the text of a paragraph, character by character with its look
+function runChars(p) {
+  const out = [];
+  for (const c of p.children) {
+    if (c.localName === 'r') {
+      const pr = kid(c, 'rPr', A), t = (kid(c, 't', A) || {}).textContent || '';
+      const look = pr ? [pr.getAttribute('sz') || '', pr.getAttribute('b') === '1' ? 'b' : '', pr.getAttribute('i') === '1' ? 'i' : '', colorOf(pr), (kid(pr, 'latin', A) || { getAttribute: () => '' }).getAttribute('typeface'), (kid(pr, 'cs', A) || { getAttribute: () => '' }).getAttribute('typeface')].join('|') : '||||';
+      for (const ch of t) out.push([ch, look]);
+    } else if (c.localName === 'br') out.push(['\v', '']);
+    else if (c.localName === 'fld' || c.localName === 'AlternateContent') return null;   // fields and equations: not here
+  }
+  return out;
+}
+function textSig(txBody, txBox) {
+  if (!txBody) return null;
+  const bp = kid(txBody, 'bodyPr', A);
+  const g = (a, d) => (bp && bp.getAttribute(a)) || d;
+  const fit = bp ? (kid(bp, 'spAutoFit', A) ? 'shape' : kid(bp, 'normAutofit', A) ? 'text' : 'none') : 'none';
+  const body = [g('lIns', '91440'), g('tIns', '45720'), g('rIns', '91440'), g('bIns', '45720'), g('wrap', 'square'), g('anchor', 't'), fit].join(',');
+  const paras = kids(txBody, 'p').map(p => ({ pr: paraSig(p, txBox), chars: runChars(p) }));
+  if (paras.some(p => !p.chars)) return null;
+  return { body, paras };
+}
+function geomOf(el) {
+  const c = U.core(el);
+  const x = c.localName === 'graphicFrame' ? kid(c, 'xfrm', P) : kid(kid(c, 'spPr', P) || kid(c, 'grpSpPr', P), 'xfrm', A);
+  const off = kid(x, 'off', A), ext = kid(x, 'ext', A);
+  return off && ext ? { x: +off.getAttribute('x'), y: +off.getAttribute('y'), w: +ext.getAttribute('cx'), h: +ext.getAttribute('cy'), rot: x.getAttribute('rot') || '0', flip: (x.getAttribute('flipH') || '') + (x.getAttribute('flipV') || '') } : null;
+}
+// everything of an object that matters for its look, without its name and id
+function sigOf(el) {
+  const c = U.core(el), kind = el.localName === 'AlternateContent' ? 'mc' : c.localName;
+  const s = { kind, g: geomOf(el) };
+  if (kind === 'sp') {
+    const spPr = kid(c, 'spPr', P), nv = kid(c, 'nvSpPr', P);
+    s.ph = !!desc(nv, P, 'ph').length;
+    s.geo = (kid(spPr, 'prstGeom', A) || { getAttribute: () => 'cust' }).getAttribute('prst');
+    s.fill = colorOf(spPr); s.line = lineOf(spPr);
+    // no theme style on the shape: an unset fill or line is no fill / no line
+    if (!kid(c, 'style', P)) { if (s.fill === 'inherit') s.fill = 'none'; if (s.line === 'inherit') s.line = 'none'; }
+    s.fx = !!kid(spPr, 'effectLst', A) && !!kid(spPr, 'effectLst', A).children.length;
+    const txBox = (kid(nv, 'cNvSpPr', P) || { getAttribute: () => '' }).getAttribute('txBox') === '1';
+    s.text = textSig(kid(c, 'txBody', P), txBox);
+    s.badText = !!kid(c, 'txBody', P) && !s.text;
+  } else if (kind === 'graphicFrame') {
+    const tbl = desc(c, A, 'tbl')[0];
+    if (tbl) {
+      s.style = (kid(kid(tbl, 'tblPr', A), 'tableStyleId', A) || {}).textContent || '';
+      s.cols = kids(kid(tbl, 'tblGrid', A), 'gridCol').map(x => x.getAttribute('w'));
+      s.rows = kids(tbl, 'tr').map(tr => ({ h: tr.getAttribute('h'), cells: kids(tr, 'tc').map(tc => {
+        const pr = kid(tc, 'tcPr', A);
+        const bd = ['lnL', 'lnR', 'lnT', 'lnB'].map(n => { const l = kid(pr, n, A); return l ? colorOf(l) + '/' + (l.getAttribute('w') || '') : 'inherit'; }).join(';');
+        return { fill: colorOf(pr), bd, text: textSig(kid(tc, 'txBody', A), true), span: (tc.getAttribute('gridSpan') || '') + (tc.getAttribute('rowSpan') || '') + (tc.getAttribute('hMerge') || '') + (tc.getAttribute('vMerge') || '') };
+      }) }));
+    } else s.other = true;
+  } else s.raw = new XMLSerializer().serializeToString(c).replace(/ (id|name)="[^"]*"/g, '');
+  return s;
+}
+const near = (a, b) => Math.abs(a - b) <= 1.2 * PT;
+function sameGeom(a, b, fitH) { return !!a && !!b && near(a.x, b.x) && near(a.y, b.y) && near(a.w, b.w) && (fitH || near(a.h, b.h)) && a.rot === b.rot && a.flip === b.flip; }
+function sameText(a, b) {
+  if (!a || !b) return a === b;
+  if (a.body !== b.body || a.paras.length !== b.paras.length) return false;
+  return a.paras.every((p, k) => p.pr === b.paras[k].pr && p.chars.length === b.paras[k].chars.length && p.chars.every((c, j) => c[0] === b.paras[k].chars[j][0] && c[1] === b.paras[k].chars[j][1]));
+}
+// looks the same (geometry with a little tolerance: points are rounded on the way)
+function sameLook(a, b, withGeom) {
+  if (a.kind !== b.kind) return false;
+  // a text that sizes its box to the text: PowerPoint sets the height itself
+  const fitH = a.kind === 'sp' && b.text && /,shape$/.test(b.text.body);
+  if (withGeom && !sameGeom(a.g, b.g, fitH)) return false;
+  if (a.kind === 'sp') return a.ph === b.ph && a.geo === b.geo && a.fill === b.fill && a.line === b.line && a.fx === b.fx && sameText(a.text, b.text);
+  if (a.kind === 'graphicFrame') {
+    if (a.other || b.other || a.style !== b.style || a.cols.join() !== b.cols.join() || a.rows.length !== b.rows.length) return false;
+    return a.rows.every((r, i) => near(+r.h, +b.rows[i].h) && r.cells.length === b.rows[i].cells.length && r.cells.every((c, j) => { const d = b.rows[i].cells[j]; return c.fill === d.fill && c.bd === d.bd && c.span === d.span && sameText(c.text, d.text); }));
+  }
+  return a.raw === b.raw;
+}
+
+// ---------- plan: what changes, and can it be done in place ----------
+function itemsOf(xml) {
+  const doc = UR.parseXml(xml);
+  return U.topItems(doc).map(el => { const n = U.cnvOf(U.core(el)); return { el, id: n ? n.getAttribute('id') : '', name: n ? n.getAttribute('name') || '' : '', sig: sigOf(el) }; });
+}
+const plainChars = t => t ? t.paras.map(p => p.chars.map(c => c[0]).join('')).join('\n') : '';
+function plan(beforeXml, afterXml) {
+  const B = itemsOf(beforeXml), Af = itemsOf(afterXml);
+  if (B.length !== Af.length || B.some((b, k) => b.id !== Af[k].id)) return no('plan: if B length Af length B some b k b id Af k id retu');    // something added, removed or reordered
+  const changes = [];
+  for (let k = 0; k < B.length; k++) {
+    const b = B[k], a = Af[k];
+    if (b.name === a.name && sameLook(b.sig, a.sig, true)) continue;
+    const s0 = b.sig, s1 = a.sig;
+    if (s0.kind !== s1.kind) return no('plan: if s0 kind s1 kind return null ');
+    if (s0.kind === 'sp') {
+      if (s0.ph || s0.badText || s1.badText || s0.geo !== s1.geo || s0.fx !== s1.fx) return no('plan: if s0 ph s0 badText s1 badText s0 geo s1 geo s0 fx');
+      if (/other/.test(s1.fill + s1.line)) return no('plan: if other test s1 fill s1 line return null ');
+      if (plainChars(s0.text) !== plainChars(s1.text)) return no('plan: if plainChars s0 text plainChars s1 text return nu');                    // the text itself changed
+      if (s1.text && s1.text.paras.some((p, i) => { const q = s0.text.paras[i]; return p.pr.split(',').slice(1, 8).join() !== q.pr.split(',').slice(1, 8).join() || (p.pr.split(',')[8] !== q.pr.split(',')[8] && !/^(none|char:.*)$/.test(p.pr.split(',')[8])); })) return no('plan: if s1 text s1 text paras some p i const q s0 text ');
+    } else if (s0.kind === 'graphicFrame') {
+      if (s0.other || s0.style || s1.style || s0.cols.join() !== s1.cols.join() || s0.rows.length !== s1.rows.length) return no('plan: if s0 other s0 style s1 style s0 cols join s1 cols');
+      if (s0.rows.some((r, i) => r.cells.length !== s1.rows[i].cells.length || r.cells.some((c, j) => c.span !== s1.rows[i].cells[j].span || plainChars(c.text) !== plainChars(s1.rows[i].cells[j].text) || /other/.test(s1.rows[i].cells[j].fill)))) return no('plan: if s0 rows some r i r cells length s1 rows i cells');
+    } else if (s0.kind === 'pic' || s0.kind === 'grpSp') {
+      if (s0.raw.replace(/<a:off[^>]*>|<a:ext [^>]*>/g, '') !== s1.raw.replace(/<a:off[^>]*>|<a:ext [^>]*>/g, '')) return no('plan: if s0 raw replace a off a ext g s1 raw replace a o');   // only moved or sized
+    } else return no('plan:  else return null ');
+    changes.push({ k, before: b, after: a });
+  }
+  return { changes, after: Af };
+}
+
+// ---------- applying ----------
+const ALIGN = { l: 'Left', r: 'Right', ctr: 'Center', just: 'Justify', dist: 'Distributed' };
+const ANCHOR = { t: 'Top', ctr: 'Middle', b: 'Bottom' };
+function applyFont(f, look) {
+  const [sz, b, i, col, latin] = look.split('|');
+  if (sz) f.size = +sz / 100;
+  f.bold = b === 'b'; f.italic = i === 'i';
+  if (/^[0-9A-F]{6}$/.test(col)) f.color = '#' + col;
+  if (latin) f.name = latin;
+}
+// text: runs of the same look get the look together
+function applyText(tf, tr, sig) {
+  const b = sig.body.split(',');
+  tf.leftMargin = +b[0] / PT; tf.topMargin = +b[1] / PT; tf.rightMargin = +b[2] / PT; tf.bottomMargin = +b[3] / PT;
+  tf.wordWrap = b[4] !== 'none';
+  if (ANCHOR[b[5]]) tf.verticalAlignment = ANCHOR[b[5]];
+  tf.autoSizeSetting = b[6] === 'shape' ? 'AutoSizeShapeToFitText' : b[6] === 'text' ? 'AutoSizeTextToFitShape' : 'AutoSizeNone';
+  let pos = 0;
+  sig.paras.forEach((p, pi) => {
+    const pr = p.pr.split(','), len = p.chars.length;
+    if (len) {
+      const pr0 = tr.getSubstring(pos, len).paragraphFormat;
+      if (ALIGN[pr[0]]) pr0.horizontalAlignment = ALIGN[pr[0]];
+      pr0.bulletFormat.visible = /^char:/.test(pr[8]);
+    }
+    let j = 0;
+    while (j < len) {
+      let e = j; while (e < len && p.chars[e][1] === p.chars[j][1]) e++;
+      if (p.chars[j][1]) applyFont(tr.getSubstring(pos + j, e - j).font, p.chars[j][1]);
+      j = e;
+    }
+    pos += len + (pi < sig.paras.length - 1 ? 1 : 0);
+  });
+}
+function applyFill(fill, col) { if (col === 'none') fill.clear(); else if (/^[0-9A-F]{6}$/.test(col)) fill.setSolidColor('#' + col); }
+function applyLine(lf, line) {
+  if (line === 'none') { lf.visible = false; return; }
+  const [col, w, dash] = line.split('/');
+  if (/^[0-9A-F]{6}$/.test(col)) { lf.visible = true; lf.color = '#' + col; }
+  if (w) lf.weight = +w / PT;
+  if (dash && dash !== 'solid') lf.dashStyle = { dash: 'Dash', sysDash: 'RoundDot', sysDot: 'RoundDot', lgDash: 'LongDash', dashDot: 'DashDot' }[dash] || 'Solid';
+}
+
+// returns true when done in place and checked; false = take the full way (nothing is left half-done that matters:
+// the full way starts again from the slide as it was computed)
+async function apply(slideId, beforeXml, afterXml, exportSlide) {
+  const pl = plan(beforeXml, afterXml);
+  if (!pl) return false;
+  why = '';
+  if (!pl.changes.length) return true;
+  const totalText = t => t.paras.reduce((n, p) => n + p.chars.length, 0) + Math.max(0, t.paras.length - 1);
+  const ok = await PowerPoint.run(async ctx => {
+    const sh = ctx.presentation.slides.getItem(slideId).shapes;
+    sh.load('items/name,items/left,items/top,items/width,items/height,items/type'); await ctx.sync();
+    const used = new Set(), jobs = [];
+    for (const ch of pl.changes) {
+      const g = ch.before.sig.g; if (!g) return false;
+      const s = sh.items.find(x => !used.has(x) && (x.name || '') === ch.before.name && Math.abs(x.left - g.x / PT) < 1.5 && Math.abs(x.top - g.y / PT) < 1.5);
+      if (!s) { why = 'no match ' + ch.before.name; return false; }
+      used.add(s); jobs.push({ s, ch });
+    }
+    // the text has to be the same as PowerPoint sees it (so the character positions are right)
+    const trs = jobs.map(j => j.ch.after.sig.kind === 'sp' && j.ch.after.sig.text ? j.s.textFrame.textRange : null);
+    trs.forEach(t => t && t.load('text')); await ctx.sync();
+    for (let k = 0; k < jobs.length; k++) if (trs[k] && trs[k].text.length !== totalText(jobs[k].ch.after.sig.text)) { why = 'text length ' + trs[k].text.length + ' vs ' + totalText(jobs[k].ch.after.sig.text); return false; }
+    for (let k = 0; k < jobs.length; k++) {
+      const { s, ch } = jobs[k], a = ch.after.sig;
+      s.name = ch.after.name;
+      if (a.kind === 'sp') {
+        if (a.fill !== ch.before.sig.fill && a.fill !== 'inherit') applyFill(s.fill, a.fill);
+        if (a.line !== ch.before.sig.line && a.line !== 'inherit') applyLine(s.lineFormat, a.line);
+        if (a.text) applyText(s.textFrame, trs[k], a.text);
+      }
+      if (a.g) { s.left = a.g.x / PT; s.top = a.g.y / PT; s.width = a.g.w / PT; if (!(a.kind === 'sp' && a.text && /,shape$/.test(a.text.body))) s.height = a.g.h / PT; } else if (a.kind === 'graphicFrame') {
+        const tbl = s.getTable();
+        a.rows.forEach((r, i) => r.cells.forEach((c, j) => {
+          const b0 = ch.before.sig.rows[i].cells[j];
+          const cell = tbl.getCellOrNullObject(i, j);
+          if (c.fill !== b0.fill) { if (c.fill === 'none') cell.fill.clear(); else if (/^[0-9A-F]{6}$/.test(c.fill)) cell.fill.setSolidColor('#' + c.fill); }
+          if (c.bd !== b0.bd) c.bd.split(';').forEach((v, q) => {
+            if (v === 'inherit') return;
+            const side = cell.borders[['left', 'right', 'top', 'bottom'][q]], [col, w] = v.split('/');
+            if (col === 'none') side.transparency = 1; else if (/^[0-9A-F]{6}$/.test(col)) { side.color = '#' + col; side.transparency = 0; if (w) side.weight = +w / PT; }
+          });
+          const chars = c.text ? c.text.paras.flatMap(p => p.chars) : [];
+          if (chars.length && chars.every(x => x[1] === chars[0][1])) applyFont(cell.font, chars[0][1]);
+          else if (chars.length) throw new Error('mixed');
+          const al = c.text && c.text.paras[0] && c.text.paras[0].pr.split(',')[0];
+          if (ALIGN[al]) cell.horizontalAlignment = ALIGN[al];
+        }));
+        a.rows.forEach((r, i) => { if (!near(+r.h, +ch.before.sig.rows[i].h)) tbl.rows.getItemAt(i).height = +r.h / PT; });
+      }
+    }
+    await ctx.sync();
+    return true;
+  }).catch(e => { why = 'api: ' + (e && e.message); return false; });
+  if (!ok) return false;
+  // read it back: it must look exactly as computed
+  const pkg = await UR.openPackage(await exportSlide(slideId));
+  const now = itemsOf(pkg.files.slide);
+  for (const ch of pl.changes) {
+    const it = now.find(x => x.id === ch.after.id) || now.find(x => x.name === ch.after.name);
+    if (!it || !sameLook(it.sig, ch.after.sig, true)) { why = 'check ' + ch.after.name + ' ' + JSON.stringify([it && it.sig, ch.after.sig]).slice(0, 3000); return false; }
+  }
+  return true;
+}
+return { apply, plan, get why() { return why; } };
+})();
+</script>
 <script>// UULA Restyle — Word side
 // 1) the types a Word user can tag (shared by the Word pane and the PowerPoint import)
 // 2) reading a .docx: every tagged part (content control "UULA:<type>") becomes one unit
@@ -3530,6 +3786,44 @@ $('numAll').addEventListener('click', async () => {
 // ---------- templates ----------
 const SW = { header: '1F71DD', topic: '000000', body: 'FFFFFF', bullets: 'FFFFFF', cols: 'FFFFFF', pill: '1F71DC', qhead: 'FF0000', question: 'FF0000', qa: '1F71DE', answer: '1F71DE', qqr: 'FF0000', mcq: 'FF0000', problem: '00B050', other: 'FBEBD3',
   note: 'FBEBD3', quote: 'E2F0D9', formula: 'D3E4F5', activity: 'F1F1F1', mars: 'F1F1F1', cancelled: 'FFC000', table: 'CAD0D8', tableMain: 'DAE0E9', solTable: 'CAD0D8', grid: 'D3D8E0', practice: 'EBE6FE' };
+// a small sign on every button, like the booklet's own: the red Q of a question, the bulb of a note …
+function iconHtml(id, col) {
+  const img = k => typeof UR_ASSETS !== 'undefined' && UR_ASSETS[k] ? '<i class="ic"><img alt="" src="data:image/png;base64,' + UR_ASSETS[k] + '"></i>' : null;
+  const g = (t, c, extra) => '<i class="ic" style="color:#' + c + (extra || '') + '">' + t + '</i>';
+  const box = (fill, line, t) => '<i class="ic"><b style="width:13px;height:11px;background:#' + fill + ';border:1px solid #' + line + ';font-size:8px;line-height:10px;color:#555">' + (t || '') + '</b></i>';
+  const tbl = (head, col1) => '<i class="ic"><svg viewBox="0 0 14 12" width="14" height="12"><rect x=".5" y=".5" width="13" height="11" fill="#fff" stroke="#9aa3ad"/>' + (head ? '<rect x=".5" y=".5" width="13" height="3.5" fill="#' + head + '"/>' : '') + (col1 ? '<rect x="9.5" y="4" width="4" height="7.5" fill="#' + col1 + '"/>' : '') + '<path d="M.5 4h13M.5 7.7h13M5 .5v11M9.5 .5v11" stroke="#9aa3ad" stroke-width=".6"/></svg></i>';
+  switch (id) {
+    case 'chapter': return g('Aa', 'A6A6A6', ';font-size:9px');
+    case 'lesson': case 'header': return g('Aa', '1F71DD', ';font-size:12px');
+    case 'topic': return g('Aa', '000000', ';font-size:11px');
+    case 'body': return g('≡', '8C8C8C', ';font-size:14px');
+    case 'bullets': return g('•≡', '595959', ';font-size:11px');
+    case 'cols': return g('••', '595959', ';font-size:11px;letter-spacing:2px');
+    case 'pill': return '<i class="ic"><b style="width:14px;height:8px;border-radius:5px;background:#1F71DC"></b></i>';
+    case 'qhead': return g('Q≡', 'FF0000', ';font-size:10px');
+    case 'question': case 'qqr': return g('Q', 'FF0000', ';font-size:13px');
+    case 'qa': return g('Q<span style="color:#1F71DE">✓</span>', 'FF0000', ';font-size:11px');
+    case 'mcq': case 'choice': return g('ⓐ', id === 'mcq' ? 'FF0000' : '595959', ';font-size:13px;font-weight:400');
+    case 'answer': return g('✓', '1F71DE', ';font-size:13px');
+    case 'correct': return '<i class="ic"><b style="width:11px;height:11px;border-radius:50%;background:#2070DF;color:#fff;font-size:8px;line-height:11px;text-align:center">a</b></i>';
+    case 'given': return '<i class="ic"><b style="width:12px;height:10px;border:1.5px dashed #808080"></b></i>';
+    case 'problem': return g('Q', '00B050', ';font-size:13px');
+    case 'note': return img('bulb') || box('FBEBD3', 'E69138');
+    case 'quote': case 'def': return img('book') || box('E2F0D9', '2AB672');
+    case 'other': return img('star') || box('FBEBD3', 'C45A11');
+    case 'activity': return img('palette') || box('F1F1F1', 'A6A6A6');
+    case 'mars': return img('target') || box('F1F1F1', '595959');
+    case 'formula': return box('D3E4F5', '5B9BD5', '∑');
+    case 'practice': return img('trophy') || box('EBE6FE', '7030A0');
+    case 'cancelled': return box('FFF2CC', 'FFC000', '⏸');
+    case 'table': return tbl('CAD0D8');
+    case 'tableMain': return tbl('CAD0D8', 'DAE0E9');
+    case 'tablePlain': return tbl(null);
+    case 'solTable': return tbl('CAD0D8', null);
+    case 'grid': return '<i class="ic"><svg viewBox="0 0 14 12" width="14" height="12"><path d="M1 0v12M4.5 0v12M8 0v12M11.5 0v12M0 1.5h14M0 5h14M0 8.5h14M0 11.5h14" stroke="#9aa3ad" stroke-width=".7"/><path d="M8 0v12M0 5h14" stroke="#333" stroke-width=".9"/></svg></i>';
+  }
+  return '<i style="background:#' + (col || 'FFFFFF') + '"></i>';
+}
 function buildTemplateList() {
   const host = $('tpls'); host.innerHTML = '';
   const groups = [];
@@ -3540,7 +3834,7 @@ function buildTemplateList() {
     const grid = document.createElement('div'); grid.className = 'tgrid';
     for (const t of g.items) {
       const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; b.dataset.id = t.id;
-      b.title = L(t.full || t.name, t.en); b.innerHTML = '<i style="background:#' + (SW[t.id] || 'FFFFFF') + '"></i><span>' + L(t.name, t.en) + '</span>';
+      b.title = L(t.full || t.name, t.en); b.innerHTML = iconHtml(t.id, SW[t.id]) + '<span>' + L(t.name, t.en) + '</span>';
       grid.appendChild(b);
     }
     d.appendChild(grid); host.appendChild(d);
@@ -3558,6 +3852,36 @@ async function gridSelected(id) {
     return pics.length;
   }).catch(() => 0);
   if (!n) return 0;
+  // in place: the grid drawn from lines and grouped, the picture removed (nothing moves on screen)
+  const quick = await run(async ctx => {
+    const sh = ctx.presentation.slides.getItem(id).shapes;
+    sh.load('items/id,items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
+    const pics = sh.items.filter(s => / #ursel$/.test(s.name || ''));
+    const made = [], groups = [];
+    try {
+      for (const p of pics) {
+        const x0 = p.left, y0 = p.top, w = p.width, h = p.height, step = 13.39;
+        const lines = [];
+        const add = (l, t, ww, hh) => { const ln = sh.addLine('Straight', { left: l, top: t, width: ww, height: hh }); ln.lineFormat.color = '#D3D8E0'; ln.lineFormat.weight = 0.5; ln.name = 'UULA Graph Grid Line'; lines.push(ln); made.push(ln); };
+        for (let x = (w / 2) % step; x <= w + 0.01; x += step) add(x0 + x, y0, 0, h);
+        for (let y = (h / 2) % step; y <= h + 0.01; y += step) add(x0, y0 + y, w, 0);
+        lines.forEach(l => l.load('id'));
+        groups.push({ p, lines });
+      }
+      await ctx.sync();
+      const sel = [];
+      for (const gr of groups) { const g = sh.addGroup(gr.lines.map(l => l.id)); g.name = 'UULA Graph Grid'; g.load('id'); sel.push(g); }
+      await ctx.sync();
+      groups.forEach(gr => gr.p.delete());
+      await ctx.sync();
+      try { ctx.presentation.slides.getItem(id).setSelectedShapes(sel.map(g => g.id)); await ctx.sync(); } catch (e) {}
+      return pics.length;
+    } catch (e) {
+      made.forEach(l => { try { l.delete(); } catch (x) {} }); await ctx.sync().catch(() => {});
+      return null;
+    }
+  }).catch(() => null);
+  if (quick) return quick;
   const pkg = await UR.openPackage(await exportSlide(id));
   const r = UR.gridOver(pkg);
   if (!r.count) { await clearSel(id); return 0; }
@@ -3708,7 +4032,7 @@ function buildRoleList() {
     for (const [id, nameAr, col] of g.items) {
       const name = L(nameAr, ROLE_EN[id]);
       const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; b.dataset.role = id;
-      b.title = ROLE_TIP[id] ? L(ROLE_TIP[id][0], ROLE_TIP[id][1]) : name; b.innerHTML = '<i style="background:#' + col + '"></i><span>' + name + '</span>';
+      b.title = ROLE_TIP[id] ? L(ROLE_TIP[id][0], ROLE_TIP[id][1]) : name; b.innerHTML = iconHtml(id, col) + '<span>' + name + '</span>';
       grid.appendChild(b);
     }
     d.appendChild(grid); host.appendChild(d);
@@ -3721,7 +4045,7 @@ function buildSolRoles() {
   for (const [id, nameAr, col] of ROLES.find(g => g.items.some(x => x[0] === 'given')).items) {
     const name = L(nameAr, ROLE_EN[id]);
     const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; b.dataset.role = id;
-    b.title = L(SOL_TIP[id][0], SOL_TIP[id][1]); b.innerHTML = '<i style="background:#' + col + '"></i><span>' + name + '</span>';
+    b.title = L(SOL_TIP[id][0], SOL_TIP[id][1]); b.innerHTML = iconHtml(id, col) + '<span>' + name + '</span>';
     host.appendChild(b);
   }
 }
@@ -3834,8 +4158,13 @@ async function pinRole(role, keepColour) {
     let r;
     try { r = UR.applyRole(pkg, role); if (['given', 'correct'].includes(role)) r.targets = []; }
     catch (e) { await clearSel(slideId); rsay(e.message === 'nosel' ? L('حدّد مربعًا في الشريحة أولًا.', 'Select a box on the slide first.') : L('تعذّر التحويل: ', 'Could not restyle: ') + errText(e)); return; }
-    const newId = await insertAfter(await UR.buildPackage(pkg, r.xml, r.rels), slideId);
-    await deleteSlide(slideId); slideId = null;
+    // in place when it can be done exactly (nothing moves on screen); otherwise the slide is rebuilt
+    let newId = slideId;
+    if (!(await UQ.apply(slideId, pkg.files.slide, r.xml, exportSlide).catch(() => false))) {
+      newId = await insertAfter(await UR.buildPackage(pkg, r.xml, r.rels), slideId);
+      await deleteSlide(slideId);
+    }
+    slideId = null;
     // real text heights: fit the container around the text
     await run(async ctx => {
       const { map } = await shapesByMark(ctx, newId);
