@@ -3833,17 +3833,32 @@ async function refreshMarks() {
 // solution marks change only the selected objects, in place: no slide is rebuilt, nothing moves
 const QUIET = { answer: '1F71DE', correct: '2070DF', given: null };
 async function quietMark(role) {
+  const id = await currentId();
+  const hiddenNow = role === 'answer' && await slideSolHidden(id);
+  const W = hiddenNow ? (await getSize()).W : 0;
   return run(async ctx => {
-    const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/name,items/type'); await ctx.sync();
-    if (!shapes.items.length) return 0;
-    for (const s of shapes.items.filter(x => !/^UULA Mark/.test(x.name || ''))) {
-      s.name = 'UULA:' + role + ' ' + (s.name || '').replace(/ #ursel$/, '').replace(/^UULA:[a-z]+\s*/, '');
+    const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/name,items/type,items/left'); await ctx.sync();
+    const sel = shapes.items.filter(x => !/^UULA Mark/.test(x.name || ''));
+    if (!sel.length) return 0;
+    let all = null;
+    if (hiddenNow) { all = ctx.presentation.slides.getItem(id).shapes; all.load('items/name,items/left'); await ctx.sync(); }
+    const base = n => (n || '').replace(/ #ursel$/, '').replace(/^UULA Sol(Hidden|View) /, '').replace(/^UULA:[a-z]+\s*/, '');
+    for (const s of sel) {
+      if (hiddenNow && /^UULA SolView /.test(s.name || '')) {
+        // the student's copy of a question still showing part of a solution: the copy goes, its original (kept aside) is now a solution
+        const b = base(s.name), orig = all.items.find(x => /^UULA SolHidden /.test(x.name || '') && base(x.name) === b);
+        if (orig) orig.name = 'UULA SolHidden UULA:answer ' + b;
+        s.delete(); continue;
+      }
+      s.name = 'UULA:' + role + ' ' + base(s.name);
       if (QUIET[role] && ['TextBox', 'GeometricShape'].includes(s.type)) {
         try { const f = s.textFrame.textRange.font; f.color = '#' + QUIET[role]; if (role === 'correct') f.bold = true; } catch (e) {}
       }
+      // the solutions of this slide are hidden now: this one goes aside too, and «Show solutions» brings it back
+      if (hiddenNow) { s.name = 'UULA SolHidden ' + s.name; s.left = s.left + 3 * W; }
     }
     await ctx.sync();
-    return shapes.items.length;
+    return hiddenNow ? -sel.length : sel.length;
   });
 }
 async function pinRole(role) {
@@ -3852,6 +3867,7 @@ async function pinRole(role) {
   if (role in QUIET) {
     try {
       const n = await quietMark(role);
+      if (n < 0) { rsay(L('عُلِّم كحل وأُخفي، لأن حلول الشريحة مخفية الآن. يظهر مع «إظهار الحلول».', 'Marked as a solution and hidden, since the slide\'s solutions are hidden now. «Show solutions» brings it back.')); await refreshMarks().catch(() => {}); return; }
       rsay(!n ? L('حدّد مربعًا في الشريحة أولًا.', 'Select a box on the slide first.')
         : role === 'given' ? L('عُلِّم كجزء من السؤال: يبقى ظاهرًا عند إخفاء الحلول.', 'Marked as part of the question: it stays when solutions are hidden.')
         : role === 'correct' ? L('عُلِّم كخيار صحيح (أزرق عريض): يتحول للأسود عند إخفاء الحلول.', 'Marked as the correct choice (bold blue): it turns black when solutions are hidden.')
