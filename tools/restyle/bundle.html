@@ -1937,6 +1937,20 @@ function tableBlueRuns(tbl) {
   return out;
 }
 
+// small circles filled in blue (a chosen answer: ⓐ ⓑ … coloured in), on their own, with their letter, or inside a group
+function blueDots(el, ctx) {
+  const out = [];
+  for (const sp of [el, ...el.getElementsByTagName('*')].filter(n => n.localName === 'sp')) {
+    const pg = desc(sp, 'a', 'prstGeom')[0];
+    if (!pg || !/ellipse|flowChartConnector/.test(pg.getAttribute('prst') || '')) continue;
+    const spPr = kid(sp, 'spPr', 'p'), ext = spPr && desc(spPr, 'a', 'ext')[0];
+    if (!ext || +ext.getAttribute('cx') > 40 * PT || +ext.getAttribute('cy') > 40 * PT) continue;
+    const c = colorOf(kid(spPr, 'solidFill', 'a'), ctx);
+    if (c && isBlue(rgb(c))) out.push(sp);
+  }
+  return out;
+}
+
 function findSolutions(pkg) {
   const W = pkg.slideW, H = pkg.slideH;
   const doc = parseXml(pkg.files.slide);
@@ -1956,6 +1970,7 @@ function findSolutions(pkg) {
       if (t.kind === 'pic') { const blip = desc(t.c, 'a', 'blip')[0], rid = blip && blip.getAttributeNS(NS.r, 'embed'), target = rid && relT(rid); if (target) { found.push({ i: t.i, how: 'grid', pinned: true, media: 'ppt/media/' + target.split('/').pop(), w: t.g.w / PT, h: t.g.h / PT }); continue; } }
       found.push({ i: t.i, how: 'hide' }); continue;
     }
+    if (blueDots(t.el, ctx).length) { found.push({ i: t.i, how: 'copy', dots: true }); continue; }
     if (t.kind === 'text') {
       if (['lesson', 'chapter'].includes(t.role) || t.fill) continue;
       const roles = paraRoles(t, ctx, pkg).filter(r => r.text);
@@ -2083,6 +2098,12 @@ function hideSolutions(pkg, grids, opts) {
     if (!view) continue;
     for (const c of allCores(view)) { const nv = cnvOf(c); if (nv) { nv.setAttribute('id', String(NEXT++)); nv.setAttribute('name', 'UULA SolView ' + (nv.getAttribute('name') || '')); nv.removeAttribute('hidden'); } }
     const vt = { c: core(view), el: view, text: t.text, g: t.g, box: null, ph: null };
+    if (f.dots) {
+      // the coloured-in circles lose their colour (the circle, its outline and its letter stay)
+      for (const sp of blueDots(view, ctx)) { const spPr = kid(sp, 'spPr', 'p'); removeKids(spPr, FILLS); placeChild(spPr, mk(doc, 'a', 'noFill'), SPPR_ORDER); for (const pr of desc(sp, 'a', 'rPr')) { removeKids(pr, FILLS); placeChild(pr, solid(doc, '000000'), RPR_ORDER); } }
+      t.el.parentNode.insertBefore(view, t.el.nextSibling);
+      continue;
+    }
     if (f.how === 'grid') {
       const id = rels.image('grid' + f.i + '_' + Date.now().toString(36), grids[f.i]);
       for (const b of desc(view, 'a', 'blip')) { b.setAttributeNS(NS.r, 'r:embed', id); for (const e of [...b.children]) b.removeChild(e); }
@@ -2278,6 +2299,7 @@ const LIST = [
   { g: 'جداول', id: 'table', name: 'جدول', en: 'Table' },
   { g: 'جداول', id: 'tableMain', name: 'جدول رئيسي', en: 'Main table', full: 'جدول بعمود رئيسي' },
   { g: 'جداول', id: 'solTable', name: 'جدول الحل', en: 'Answers', full: 'جدول حل التمارين الموضوعية' },
+  { g: 'جداول', id: 'grid', name: 'شبكة بيانية', en: 'Graph grid', full: 'شبكة بيانية فارغة' },
   { g: 'نهاية الدرس', id: 'practice', name: 'تدرب وتفوق', en: 'Practice' }
 ];
 
@@ -2355,6 +2377,8 @@ function spec(id, W) {
       const ans = Array.from({ length: n }, () => 'ⓐ'); ans.push('الحل');
       return { gap: 1, rows: [{ cells: [{ t: 'table', rows: [head, ans], o: { sol: true, name: 'UULA Solution Table', widths: [...Array(n).fill(0.8 / n), 0.2] } }] }] };
     }
+    // the UULA empty graph grid (the same as a hidden solution graph): cells of two page-grid steps, light lines D3D8E0
+    case 'grid': return { gap: 1, rows: [{ cells: [{ t: 'grid', cols: 14, rows: 12 }] }] };
     case 'practice': return { gap: 1, box: { grad: true, name: 'Practice', h: 68 * PT }, rows: [
       { side: true, cells: [
         { t: 'pic', key: 'trophy', w: 44.7 * PT, h: 44.7 * PT, x: W - M - 50 * PT, dy: 4 * PT, name: 'Trophy' },
@@ -2392,8 +2416,19 @@ function build(id, W, top, rels) {
     else if (c.t === 'pic') add(U.picX('UULA ' + (c.name || c.key), rels.image(c.key), c.x != null ? c.x : M, 0, c.w, c.h), meta);
     else if (c.t === 'pill') add(U.pillX(c.term, 0, 0, U.pillW(c.term)), meta);
     else if (c.t === 'table') add(U.tableX(c.rows, W, c.o), meta);
+    else if (c.t === 'grid') add(gridX(c.cols, c.rows), meta);
   }));
   return { xml, shapes, spec: s };
+}
+// one shape drawing all the lines; they run half a cell past the outer lines, as a grid cut from a sheet
+function gridX(cols, rows) {
+  const w = (cols + 1) * ROW, h = (rows + 1) * ROW, half = ROW / 2;
+  let path = '';
+  for (let k = 0; k <= cols; k++) { const x = Math.round(half + k * ROW); path += '<a:moveTo><a:pt x="' + x + '" y="0"/></a:moveTo><a:lnTo><a:pt x="' + x + '" y="' + h + '"/></a:lnTo>'; }
+  for (let k = 0; k <= rows; k++) { const y = Math.round(half + k * ROW); path += '<a:moveTo><a:pt x="0" y="' + y + '"/></a:moveTo><a:lnTo><a:pt x="' + w + '" y="' + y + '"/></a:lnTo>'; }
+  return '<p:sp><p:nvSpPr><p:cNvPr id="' + nid() + '" name="UULA Graph Grid"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + w + '" cy="' + h + '"/></a:xfrm>'
+    + '<a:custGeom><a:avLst/><a:gdLst/><a:ahLst/><a:cxnLst/><a:rect l="0" t="0" r="r" b="b"/><a:pathLst><a:path w="' + w + '" h="' + h + '" fill="none">' + path + '</a:path></a:pathLst></a:custGeom>'
+    + '<a:noFill/><a:ln w="6350"><a:solidFill><a:srgbClr val="D3D8E0"/></a:solidFill></a:ln></p:spPr></p:sp>';
 }
 let NID = 5000;
 function nid() { return String(NID++); }
@@ -2430,6 +2465,10 @@ function place(id, W, top, built, heights) {
       } else if (c.t === 'pic') {
         out[k] = { x: c.x != null ? c.x : M, y: yy, w: c.w, h: c.h };
         rb = Math.max(rb, yy + c.h);
+      } else if (c.t === 'grid') {
+        const gw = (c.cols + 1) * ROW, gh = (c.rows + 1) * ROW;
+        out[k] = { x: Math.round((W - gw) / 2), y: yy, w: gw, h: gh };
+        rb = Math.max(rb, yy + gh);
       } else if (c.t === 'table') {
         out[k] = { x: M, y: yy };
         rb = Math.max(rb, yy + c.rows.length * 254000);
@@ -3438,7 +3477,7 @@ $('numAll').addEventListener('click', async () => {
 
 // ---------- templates ----------
 const SW = { header: '1F71DD', topic: '000000', body: 'FFFFFF', bullets: 'FFFFFF', cols: 'FFFFFF', pill: '1F71DC', qhead: 'FF0000', question: 'FF0000', qa: '1F71DE', answer: '1F71DE', qqr: 'FF0000', mcq: 'FF0000', problem: '00B050', other: 'FBEBD3',
-  note: 'FBEBD3', quote: 'E2F0D9', formula: 'D3E4F5', activity: 'F1F1F1', mars: 'F1F1F1', cancelled: 'FFC000', table: 'CAD0D8', tableMain: 'DAE0E9', solTable: 'CAD0D8', practice: 'EBE6FE' };
+  note: 'FBEBD3', quote: 'E2F0D9', formula: 'D3E4F5', activity: 'F1F1F1', mars: 'F1F1F1', cancelled: 'FFC000', table: 'CAD0D8', tableMain: 'DAE0E9', solTable: 'CAD0D8', grid: 'D3D8E0', practice: 'EBE6FE' };
 function buildTemplateList() {
   const host = $('tpls'); host.innerHTML = '';
   const groups = [];
