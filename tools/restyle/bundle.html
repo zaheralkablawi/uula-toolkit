@@ -1966,6 +1966,11 @@ function findSolutions(pkg) {
       const neg = /[❶-❿⓫-⓴]|\uD83C[\uDD50-\uDD69]/.test(t.text);
       // answers written inside the question's line (marked from Word: bmk="UULA:answer" / "UULA:correct")
       if (desc(t.c, 'a', 'rPr').some(pr => /^UULA:(answer|correct)$/.test(pr.getAttribute('bmk') || ''))) { found.push({ i: t.i, how: 'copy' }); continue; }
+      // a box written all in blue (text and equations) is a solution, wherever it stands
+      const runs = [...desc(t.c, 'a', 'r'), ...desc(t.c, 'm', 'r')].filter(r => /\S/.test(desc(r, 'a', 't').concat(desc(r, 'm', 't')).map(x => x.textContent).join('')));
+      const blueRun = r => { const pr = kid(r, 'rPr', 'a'); const c = pr && colorOf(kid(pr, 'solidFill', 'a'), ctx); return !!c && isBlue(rgb(c)); };
+      const realChoice = roles.some(r => r.role === 'choice' || /[①-⓿❶-➓]/.test(bulletChar(r.p) || '')) || (roles.length === 1 && roles[0].text.length < 25);
+      if (runs.length && runs.every(blueRun) && !realChoice) { found.push({ i: t.i, how: 'hide' }); continue; }
       if (ans.length === roles.length && !blueChoice.length) found.push({ i: t.i, how: 'hide' });
       else if (ans.length || blueChoice.length || neg) found.push({ i: t.i, how: 'copy' });
       continue;
