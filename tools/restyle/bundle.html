@@ -4008,7 +4008,7 @@ const ROLES = [
   { g: 'عناوين', ge: 'Headings', items: [['chapter', 'عنوان الوحدة', 'A6A6A6'], ['lesson', 'عنوان الدرس', '1F71DD'], ['topic', 'عنوان موضوع', '000000']] },
   { g: 'نصوص', ge: 'Text', items: [['body', 'فقرة شرح', 'FFFFFF'], ['bullets', 'نقاط مرقّمة', 'FFFFFF']] },
   { g: 'أسئلة', ge: 'Questions', items: [['qhead', 'عنوان الأسئلة', 'FF0000'], ['question', 'نص السؤال', 'FF0000'], ['choice', 'خيارات السؤال', 'FFFFFF']] },
-  { g: 'الحلول', ge: 'Solutions', items: [['answer', 'حل السؤال', '1F71DE'], ['correct', 'الخيار الصحيح', '2070DF'], ['given', 'جزء من السؤال', 'A6A6A6']] },
+  { g: 'الحلول', ge: 'Solutions', items: [['answer', 'حل السؤال', '1F71DE'], ['correct', 'الخيار الصحيح', '2070DF']] },
   { g: 'إطارات حول المحدد', ge: 'Frames around the selection', items: [['note', 'ملاحظة', 'FBEBD3'], ['quote', 'نص مقتطف', 'E2F0D9'], ['def', 'تعريف', 'E2F0D9'], ['formula', 'قوانين', 'D3E4F5'], ['other', 'صيغة أخرى', 'FBEBD3'], ['activity', 'نشاط', 'F1F1F1'], ['mars', 'من المريخ', 'F1F1F1']] },
   { g: 'تنسيق جدول محدد', ge: 'Selected table', items: [['table', 'جدول برأس', 'CAD0D8'], ['tableMain', 'رأس وعمود رئيسي', 'DAE0E9'], ['tablePlain', 'جدول بلا رأس', 'F1F1F1']] }
 ];
@@ -4062,7 +4062,7 @@ $('roles').addEventListener('click', e => { const b = e.target.closest('.tbtn');
 // the same solution buttons beside «Hide solutions»
 function buildSolRoles() {
   const host = $('solRoles'); if (!host) return; host.innerHTML = '';
-  for (const [id, nameAr, col] of ROLES.find(g => g.items.some(x => x[0] === 'given')).items) {
+  for (const [id, nameAr, col] of [['answer', 'حل السؤال', '1F71DE'], ['correct', 'الخيار الصحيح', '2070DF'], ['given', 'جزء من السؤال', 'A6A6A6']]) {
     const name = L(nameAr, ROLE_EN[id]);
     const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; b.dataset.role = id;
     b.title = L(SOL_TIP[id][0], SOL_TIP[id][1]); b.innerHTML = iconHtml(id, col) + '<span>' + name + '</span>';
