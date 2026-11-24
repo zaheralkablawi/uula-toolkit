@@ -67,7 +67,9 @@ header .bt .root:only-child{color:var(--fg);font-size:15px;letter-spacing:0}
 #msg{unicode-bidi:plaintext;font-size:12.8px;color:var(--muted);text-align:center;min-height:0}
 #msg:empty{display:none}
 #msg.bad{color:var(--danger)}#msg.good{color:var(--ok)}
-.pop{position:absolute;z-index:20;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.18);padding:6px;display:flex;flex-direction:column;gap:5px;font-size:12px;width:150px}
+.pop{position:relative;background:#fff;border:1px solid #bcd3f5;border-radius:10px;box-shadow:0 2px 8px rgba(31,113,222,.12);padding:8px;display:flex;flex-direction:column;gap:6px;font-size:12px;width:auto!important}
+.pop .r input{max-width:150px!important}
+.pop .angico{display:inline-flex;align-items:center;gap:3px}
 .pop .ph{font-weight:600;color:var(--muted);font-size:11.5px;display:flex;justify-content:space-between;align-items:center}
 .pop .ph button{border:0;background:none;cursor:pointer;color:var(--muted);font-size:13px;padding:0 2px}
 .pop .r{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
@@ -146,7 +148,6 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
 
   <div class="pv" id="pv">
     <svg id="fig" viewBox="0 0 320 250" xmlns="http://www.w3.org/2000/svg"></svg>
-    <div class="pop" id="pop" hidden></div>
     <div class="pvt">
       <button type="button" class="ib" id="picBtn" data-ti="fromPic" title="تحويل الصورة المحددة إلى شكل"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><rect x="3" y="4" width="10" height="9" rx="1.5"/><path d="M3 11l3-3 3 3"/><path d="M15 9h3l-1.5-1.5M18 9l-1.5 1.5"/><path d="M14 20l3.5-6 3.5 6z"/></svg></button>
       <button type="button" class="ib" id="undoBtn" data-ti="undo" title="تراجع"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
@@ -157,6 +158,7 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
     </div>
     <button type="button" class="ins" id="insert" data-ti="insert" title="إدراج"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg><span id="insTxt" data-i="insert">إدراج</span></button>
   </div>
+  <div class="pop" id="pop" hidden></div>
   <div id="msg" role="status"></div>
 
   <div class="sec">
@@ -658,7 +660,7 @@ function openPop(k,i,cx,cy){
       <div class="r">${qb('p1',ICO.p1,sd.par===1,L('par'))}${qb('p2',ICO.p2,sd.par===2,L('par'))}<span class="sep" style="width:1px;height:18px;background:var(--line)"></span>${qb('ar1',ICO.ae,(sd.arr||0)&1,L('arrEnd'))}${qb('ar2',ICO.as,(sd.arr||0)&2,L('arrStart'))}</div>`;
   } else if(G.kind==='free'){ const V=G.verts[i];
     const rows=freeAngles(G,i).map(([a,b])=>{ const key=angKey(i,a,b), A=G.angs[key]||{};
-      return `<div class="r" style="border-top:1px solid var(--line);padding-top:4px"><span class="note" style="flex:1;font-size:11.5px;unicode-bidi:plaintext">∠ ${esc(G.verts[a].name)}${esc(V.name)}${esc(G.verts[b].name)}</span><input class="pNumF" data-key="${key}" value="${esc(A.num||'')}" placeholder="${L('angNum')}" title="${L('angNumT')}" style="max-width:46px;flex:none"></div>
+      return `<div class="r" style="border-top:1px solid var(--line);padding-top:4px"><span class="note angico" style="flex:1;font-size:12px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 20H4L16 5"/></svg><bdi>${esc(G.verts[a].name)}${esc(V.name)}${esc(G.verts[b].name)}</bdi></span><input class="pNumF" data-key="${key}" value="${esc(A.num||'')}" placeholder="${L('angNum')}" title="${L('angNumT')}" style="max-width:46px;flex:none"></div>
         <div class="r">${qb('fa|'+key+'|arc',ICO.a1,A.arc,L('arcOnly'))}${qb('fa|'+key+'|a1',ICO.a1e,A.arcs===1,L('arcs'))}${qb('fa|'+key+'|rt',ICO.rt,A.right,L('rightM'))}${qb('fa|'+key+'|st',ICO.star,A.sym==='*',L('symStar'))}${qb('fa|'+key+'|dt',ICO.dotI,A.sym==='•',L('symDot'))}${qb('fa|'+key+'|dcw',ICO.cw,A.dir==='cw',L('dirCw'))}${qb('fa|'+key+'|dccw',ICO.ccw,A.dir==='ccw',L('dirCcw'))}${qb('fa|'+key+'|sa',ICO.ang,A.showAng,L('showAng'))}</div>`; }).join('');
     h=`<div class="ph"><span>${L('vertex')} ${esc(V.name)}</span><button type="button" data-a="x">✕</button></div>
       <div class="r"><input id="pName" value="${esc(V.name)}" title="${L('vname')}" style="max-width:44px">${qb('nm','<b>أ</b>',V.showName,L('vname'))}</div>${rows}`;
@@ -679,6 +681,10 @@ function openPop(k,i,cx,cy){
 // بعد النقر على نقطة: أي حرف يُكتب يصبح اسمها مباشرة
 function nameReady(){ const inp=$('pName')||$('pPt'); if(!inp) return; inp.focus({preventScroll:true}); inp.select(); }
 function placePop(pop,cx,cy){
+  // اللوحة تحت الرسم مباشرة فلا تغطي الشكل
+  try{ pop.scrollIntoView({block:'nearest'}); }catch(e){}
+  const inp0=pop.querySelector('input'); if(inp0) inp0.addEventListener('keydown',ev=>{ if(ev.key==='Enter') closePop(); });
+  return;
   const pr=$('pv').getBoundingClientRect(), pw=pop.offsetWidth, ph=pop.offsetHeight;
   let x=cx-pr.left+12, y=cy-pr.top-ph/2; if(x+pw>pr.width-4) x=cx-pr.left-pw-12; x=Math.max(4,Math.min(pr.width-pw-4,x)); y=Math.max(4,Math.min(pr.height-ph-38,y));
   pop.style.left=x+'px'; pop.style.top=y+'px';
@@ -706,7 +712,7 @@ $('pop').addEventListener('click',e=>{ const b=e.target.closest('[data-a]'); if(
     if(a==='nm') V.showName=!V.showName; else if(a==='sa') V.showAng=!V.showAng; else if(a==='arc') V.arc=!V.arc; else if(a==='dcw') V.dir=V.dir==='cw'?'':'cw'; else if(a==='dccw') V.dir=V.dir==='ccw'?'':'ccw'; else if(a==='st') V.sym=V.sym==='*'?'':'*'; else if(a==='dt') V.sym=V.sym==='•'?'':'•'; else if(a==='rt') V.right=!V.right;
     else if(a[0]==='a'&&a.length===2){ const v=+a[1]; V.arcs=V.arcs===v?0:v; } else if(a==='alt'||a==='med'||a==='bis') V[a]=!V[a]; }
   const keep=SEL; draw(); save(); syncChips();
-  const pr=$('pop').getBoundingClientRect(); openPop(keep.k,keep.i,pr.left-12,pr.top+pr.height/2); $('pop').style.left=(pr.left-$('pv').getBoundingClientRect().left)+'px'; $('pop').style.top=(pr.top-$('pv').getBoundingClientRect().top)+'px';
+  openPop(keep.k,keep.i,0,0);
 });
 document.addEventListener('pointerdown',e=>{ if(!$('pop').hidden&&!e.target.closest('#pop')&&!e.target.closest('#fig')) closePop(); });
 
