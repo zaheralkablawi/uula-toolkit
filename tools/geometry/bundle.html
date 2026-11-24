@@ -16,7 +16,7 @@
 html,body{margin:0;background:var(--bg);color:var(--fg)}
 body{font:14px "UULA Sans",-apple-system,"Segoe UI",Tahoma,sans-serif;line-height:1.45}
 button,input,select{font-family:inherit;color:inherit}
-.wrap{max-width:520px;margin:0 auto;padding:8px 10px 12px;display:flex;flex-direction:column;gap:8px}
+.wrap{max-width:520px;margin:0 auto;padding:6px 8px 8px;display:flex;flex-direction:column;gap:6px}
 header{display:flex;align-items:center;gap:6px;position:relative}
 header h1{margin:0;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600}
 header h1 svg.logo{width:30px;height:30px;flex:none}
@@ -39,7 +39,14 @@ header .bt .root:only-child{color:var(--fg);font-size:15px;letter-spacing:0}
 .seg button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:600}
 .gal{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
 #galP{grid-template-columns:repeat(9,1fr)}
-.gal button{height:34px;border:1px solid var(--line);border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
+.tabi{flex:none}
+.tabi button{width:34px;flex:none;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+.opt>.label{display:none}
+.opt .seg button svg{display:block;margin:auto}
+.sec .sty+.sty,.sec .chips+.sty{border-top:1px solid var(--line);padding-top:6px}
+.chips .q{width:28px;height:28px}
+#fig{max-height:min(48vh,290px)}
+.gal button{height:30px;border:1px solid var(--line);border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
 .gal button:hover{border-color:var(--accent)}
 .gal button[aria-pressed="true"]{border-color:var(--accent);background:var(--soft);color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .opt{display:flex;align-items:center;gap:6px}
@@ -69,6 +76,8 @@ header .bt .root:only-child{color:var(--fg);font-size:15px;letter-spacing:0}
 .edbar button{border:1px solid var(--line);background:#fff;border-radius:6px;font-size:12px;height:24px;padding:0 8px;cursor:pointer}
 #msg{unicode-bidi:plaintext;font-size:12.8px;color:var(--muted);text-align:center;min-height:0}
 #msg:empty{display:none}
+#hint{text-align:center}
+#hint:empty{display:none}
 #msg.bad{color:var(--danger)}#msg.good{color:var(--ok)}
 .pop{position:relative;background:#fff;border:1px solid #bcd3f5;border-radius:10px;box-shadow:0 2px 8px rgba(31,113,222,.12);padding:8px;display:flex;flex-direction:column;gap:6px;font-size:12px;width:auto!important}
 .pop .r input{max-width:150px!important}
@@ -84,7 +93,7 @@ header .bt .root:only-child{color:var(--fg);font-size:15px;letter-spacing:0}
 .q .cbar{position:absolute;left:5px;right:5px;bottom:3px;height:3px;border-radius:2px;border:1px solid rgba(0,0,0,.12)}
 .q.none .cbar{background:linear-gradient(135deg,#fff 40%,#e05a4f 40%,#e05a4f 60%,#fff 60%)!important}
 .q b{font-size:12px;font-weight:600}
-.sec{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:7px}
+.sec{background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:6px}
 .sec>.label{font-size:12px;font-weight:600;color:var(--muted)}
 .note{font-size:11.8px;color:var(--muted);unicode-bidi:plaintext}
 .sel{direction:ltr}
@@ -122,6 +131,8 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
     <h1 dir="ltr"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/><path d="M16 8.6L23.4 21.6H8.6z" fill="none" stroke="#1f71de" stroke-width="2.3" stroke-linejoin="round"/></svg><span class="bt"><span class="root">UULA</span><span class="sub">Geometry</span></span></h1>
     
     <span class="hsp"></span>
+    <div class="seg tabi" id="tabs" role="tablist"><button type="button" data-tab="p" data-ti="tabP" title="مستوية"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4L3 20h18z"/></svg></button><button type="button" data-tab="c" data-ti="tabC" title="الدائرة"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/></svg></button><button type="button" data-tab="s" data-ti="tabS" title="مجسمات"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v8"/></svg></button></div>
+    <span class="hsp"></span>
     <button type="button" class="ib updbtn" id="updBtn" hidden data-ti="upd" title="تحديث جديد" aria-label="تحديث جديد"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10a6 6 0 1 1-1.8-4.3"/><path d="M16.2 3.2v3.5h-3.5"/></svg><span class="dot"></span></button>
     <div class="appmenu" id="menuWrap">
       <button type="button" class="ib" id="menuBtn" aria-haspopup="true" aria-expanded="false" data-ti="menu" title="القائمة" aria-label="القائمة"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h12M4 10h12M4 14h12"/></svg></button>
@@ -135,9 +146,6 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
     </div>
   </header>
 
-  <div class="seg" id="tabs" role="tablist">
-    <button type="button" data-tab="p" data-i="tabP">مستوية</button><button type="button" data-tab="c" data-i="tabC">الدائرة</button><button type="button" data-tab="s" data-i="tabS">مجسمات</button>
-  </div>
 
   <div class="gal" id="galP"></div>
   <div class="gal" id="galS"></div>
@@ -164,15 +172,10 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
   <div class="pop" id="pop" hidden></div>
   <div id="msg" role="status"></div>
 
+  <div class="note" id="hint"></div>
   <div class="sec">
-    <div class="label" id="onLab" data-i="onShape">على الشكل</div>
     <div class="chips" id="chips"></div>
     <div class="dims" id="dims"></div>
-    <div class="note" id="hint"></div>
-  </div>
-
-  <div class="sec">
-    <div class="label" data-i="style">التنسيق</div>
     <div class="sty">
       <button type="button" class="q cbtn" id="cLine" data-k="line" data-ti="cLine" title="لون الخط"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20L20 4"/></svg><span class="cbar"></span></button>
       <select class="sel" id="wSel" data-ti="width" title="سماكة الخط"></select>
@@ -190,11 +193,10 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
       <span class="sep"></span>
       <button type="button" class="q" id="nmText" data-ti="nmText" title="الأسماء حروف عادية"><b>أ</b></button>
       <button type="button" class="q" id="nmSym" data-ti="nmSym" title="الأسماء رموزًا"><b style="font-family:'Mazeri Arabic Math symbol';font-weight:400;font-size:17px">A</b></button>
-    </div>
-    <div class="sty">
+      <span class="sep"></span>
       <button type="button" class="q" id="ptShow" data-ti="ptShow" title="النقاط على الرؤوس"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 19L12 5l7 14"/><circle cx="12" cy="5" r="2.6" fill="currentColor"/><circle cx="5" cy="19" r="2.6" fill="currentColor"/><circle cx="19" cy="19" r="2.6" fill="currentColor"/></svg></button>
       <button type="button" class="q cbtn" id="cPt" data-k="pt" data-ti="cPt" title="لون النقاط"><svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="11" r="5" fill="currentColor"/></svg><span class="cbar"></span></button>
-      <select class="sel" id="ptSel" style="max-width:80px" data-ti="ptR" title="حجم النقطة"></select>
+      <select class="sel" id="ptSel" style="width:46px" data-ti="ptR" title="حجم النقطة"></select>
       <button type="button" class="q" id="ptFull" data-ti="ptFull" title="نقطة مغلقة"><svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="currentColor"/></svg></button>
       <button type="button" class="q" id="ptHollow" data-ti="ptHollow" title="نقطة مفرغة"><svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
     </div>
@@ -743,11 +745,39 @@ const GAL_S=[['cube','<path d="M4 8h11v11H4zM4 8l5-4h11l-5 4M20 4v11l-5 4"/>'],[
 const gIco=d=>`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">${d}</svg>`;
 $('galP').innerHTML=GAL_P.map(([k,d])=>`<button type="button" data-k="${k}" data-ti="${k}" title="${L(k)}">${gIco(d)}</button>`).join('');
 $('galS').innerHTML=GAL_S.map(([k,d])=>`<button type="button" data-k="${k}" data-ti="${k}" title="${L(k)}">${gIco(d)}</button>`).join('');
-$('segTri').innerHTML=['sca','iso','equ','rt'].map(k=>`<button type="button" data-k="${k}" data-i="${k}">${L(k)}</button>`).join('');
+/* أيقونات الأزرار بدل الكلمات (الاسم في التلميح) */
+const SVI=d=>`<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const CI={
+  sca:SVI('<path d="M8 5L3 19h18z"/>'), iso:SVI('<path d="M12 4L4 20h16z"/><path d="M6.6 11.6l2.2 1.2M17.4 11.6l-2.2 1.2"/>'),
+  equ:SVI('<path d="M12 4L4 20h16z"/><path d="M6.6 11.6l2.2 1.2M17.4 11.6l-2.2 1.2M12 18v4"/>'), rt:SVI('<path d="M5 4v16h15z"/><path d="M5 15h5v5"/>'),
+  move:SVI('<path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/>'),
+  link:SVI('<path d="M6 18L18 6"/><circle cx="5" cy="19" r="2.3" fill="currentColor"/><circle cx="19" cy="5" r="2.3" fill="currentColor"/>'),
+  addpt:SVI('<path d="M3 17h18"/><circle cx="12" cy="17" r="2.6" fill="currentColor"/><path d="M12 4v7M8.5 7.5h7"/>'),
+  del:SVI('<path d="M3 17h18"/><circle cx="12" cy="17" r="2.6"/><path d="M8.5 4.5l7 7M15.5 4.5l-7 7"/>'),
+  dash:SVI('<path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v8" stroke-dasharray="2.2 2.2"/>'),
+  hide:SVI('<path d="M4 8l8-4 8 4v8l-8 4-8-4z"/>'),
+  solid:SVI('<path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v8"/>'),
+  names:'<b style="font-size:13px">أ</b>', pnames:'<b style="font-size:13px">أ</b>',
+  lens:SVI('<path d="M3 12h18M3 8v8M21 8v8"/>'), arcsAll:SVI('<path d="M4 20h16M4 20L15 5"/><path d="M12 20a8 8 0 0 0-3-6"/>'),
+  angs:SVI('<path d="M4 20h16M4 20L15 5"/><path d="M12 20a8 8 0 0 0-3-6"/><circle cx="18" cy="10" r="1.8"/>'),
+  alt:SVI('<path d="M12 4L3 20h18z"/><path d="M12 4v16" stroke-dasharray="2.5 2"/>'), med:SVI('<path d="M8 4L3 20h18z"/><path d="M8 4l4 16" stroke-dasharray="2.5 2"/>'),
+  bis:SVI('<path d="M12 4L3 20h18z"/><path d="M12 4l-1 16" stroke-dasharray="2.5 2"/><path d="M10 9a3 3 0 0 0 4 0"/>'),
+  diag:SVI('<rect x="4" y="5" width="16" height="14"/><path d="M4 5l16 14M20 5L4 19"/>'),
+  center:SVI('<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/>'),
+  centers:SVI('<ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v12M19 6v12"/><path d="M5 18a7 2.5 0 0 0 14 0"/><circle cx="12" cy="18" r="1.4" fill="currentColor"/>'),
+  radius:SVI('<circle cx="12" cy="12" r="8.5"/><path d="M12 12l6-6"/>'), diam:SVI('<circle cx="12" cy="12" r="8.5"/><path d="M6 18L18 6"/>'),
+  chord:SVI('<circle cx="12" cy="12" r="8.5"/><path d="M4.5 9h15"/>'), tangent:SVI('<circle cx="11" cy="13" r="7"/><path d="M2 5h20"/>'),
+  arc:SVI('<circle cx="12" cy="12" r="8.5" stroke-width="1"/><path d="M3.5 12a8.5 8.5 0 0 1 8.5-8.5" stroke-width="3"/>'),
+  sector:SVI('<circle cx="12" cy="12" r="8.5"/><path d="M12 12V3.5A8.5 8.5 0 0 1 20.5 12z" fill="currentColor" fill-opacity=".3"/>'),
+  central:SVI('<circle cx="12" cy="12" r="8.5"/><path d="M5 9l7 3 7-3"/>'), inscribed:SVI('<circle cx="12" cy="12" r="8.5"/><path d="M5 9l7 11 7-11"/>'),
+  meas:SVI('<path d="M4 20h16M4 20L15 5"/><path d="M11 20a7 7 0 0 0-2-5"/><path d="M17 7.5a1.6 1.6 0 1 0 0.01 0"/>'),
+  dimsC:SVI('<path d="M3 12h18M6 9l-3 3 3 3M18 9l3 3-3 3"/>')
+};
+$('segTri').innerHTML=['sca','iso','equ','rt'].map(k=>`<button type="button" data-k="${k}" data-ti="${k}" title="${L(k)}">${CI[k]}</button>`).join('');
 $('segN').innerHTML=[5,6,7,8,9,10].map(n=>`<button type="button" data-k="${n}">${arNum(n)}</button>`).join('');
-$('segFree').innerHTML=[['move','ftMove'],['link','ftLink'],['addpt','ftAdd'],['del','ftDel']].map(([k,t2])=>`<button type="button" data-k="${k}" data-i="${t2}">${L(t2)}</button>`).join('');
+$('segFree').innerHTML=[['move','ftMove'],['link','ftLink'],['addpt','ftAdd'],['del','ftDel']].map(([k,t2])=>`<button type="button" data-k="${k}" data-ti="${t2}" title="${L(t2)}">${CI[k]}</button>`).join('');
 $('segFree').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; FT=b.dataset.k; LINK=null; closePop(); syncUI(); draw(); });
-$('segHid').innerHTML=[['dash','hdash'],['hide','hhide'],['solid','hsolid']].map(([k,t])=>`<button type="button" data-k="${k}" data-i="${t}">${L(t)}</button>`).join('');
+$('segHid').innerHTML=[['dash','hdash'],['hide','hhide'],['solid','hsolid']].map(([k,t])=>`<button type="button" data-k="${k}" data-ti="${t}" title="${L(t)}">${CI[k]}</button>`).join('');
 
 $('tabs').addEventListener('click',e=>{ const b=e.target.closest('[data-tab]'); if(!b) return; push(); S.tab=b.dataset.tab; S.empty=false; closePop(); syncUI(); draw(); save(); });
 $('galP').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; push(); const k=b.dataset.k; closePop(); S.empty=false;
@@ -769,7 +799,7 @@ function chipList(){
   if(S.tab==='c'){ const sh=S.c.show; return ['center','radius','diam','chord','tangent','arc','sector','central','inscribed','pnames','meas'].map(k=>[k,k==='pnames'?sh.names:sh[k]]); }
   const Z=S.s, poly=['cube','box','prism','pyr'].includes(Z.kind); const c=[]; if(poly) c.push(['names',Z.names]); c.push(['dimsC',Z.dims]); if(!poly) c.push(['centers',Z.centers]); return c;
 }
-function syncChips(){ $('chips').innerHTML=chipList().map(([k,on])=>`<button type="button" class="chip" data-k="${k}" aria-pressed="${!!on}">${L(k)}</button>`).join(''); }
+function syncChips(){ $('chips').innerHTML=chipList().map(([k,on])=>`<button type="button" class="q" data-k="${k}" aria-pressed="${!!on}" title="${esc(L(k))}" aria-label="${esc(L(k))}">${CI[k]||esc(L(k))}</button>`).join(''); }
 $('chips').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; push(); const k=b.dataset.k, on=b.getAttribute('aria-pressed')!=='true';
   if(S.tab==='p'){ const G=S.p;
     if(k==='names') G.verts.forEach(v=>v.showName=on); else if(k==='lens') G.sides.forEach(s=>s.show=on); else if(k==='angs') G.verts.forEach(v=>v.showAng=on); else if(k==='arcsAll') G.verts.forEach(v=>v.arc=on);
@@ -786,7 +816,7 @@ $('dims').addEventListener('input',e=>{ const t=e.target; if(!t.dataset.k) retur
 /* ---------- التنسيق ---------- */
 [1,1.5,2,2.5,3,4,6].forEach(w=>{ const o=document.createElement('option'); o.value=w; o.textContent=w+' pt'; $('wSel').appendChild(o); });
 [10,12,14,16,18,20,24,28,32].forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; $('fsSel').appendChild(o); });
-[[2,'ptS'],[3,'ptM'],[4.5,'ptL']].forEach(([r,k])=>{ const o=document.createElement('option'); o.value=r; o.dataset.i=k; o.textContent=L(k); $('ptSel').appendChild(o); });
+[[2,'ptS','•'],[3,'ptM','●'],[4.5,'ptL','⬤']].forEach(([r,k,g])=>{ const o=document.createElement('option'); o.value=r; o.textContent=g; o.title=L(k); $('ptSel').appendChild(o); });   // أحجام النقطة رموزًا
 $('ptSel').onchange=()=>{ push(); S.look.ptR=+$('ptSel').value; draw(); save(); };
 $('ptShow').onclick=()=>{ push(); S.look.ptShow=!S.look.ptShow; syncUI(); draw(); save(); };
 $('dgAr').onclick=()=>{ push(); S.look.digits='ar'; syncUI(); draw(); save(); };
@@ -844,9 +874,8 @@ function syncUI(){
   $('optFree').hidden=!(tab==='p'&&S.p.kind==='free'); document.querySelectorAll('#segFree button').forEach(b=>setP(b,b.dataset.k===FT)); document.querySelectorAll('#segN button').forEach(b=>setP(b,+b.dataset.k===S.p.pts.length));
   $('optHid').hidden=tab!=='s'; document.querySelectorAll('#segHid button').forEach(b=>setP(b,b.dataset.k===S.s.hidden));
   $('rotBtn').disabled=$('flipBtn').disabled=tab!=='p'||!!S.empty; $('clearBtn').disabled=!!S.empty;
-  $('onLab').textContent=L(tab==='p'?'onShape':tab==='c'?'onCircle':'onSolid');
-  $('hint').textContent=L(tab==='p'?'hintP':tab==='c'?'hintC':'hintS');
-  if(tab==='p'&&S.p.kind==='free') $('hint').textContent=L(FT==='link'?'hintLink':FT==='addpt'?'hintAdd':FT==='del'?'hintDel':'hintFree');
+  // الشرح يظهر فقط حين يغيّر طريقة النقر (أدوات الشكل المركب)، والباقي في التلميحات
+  $('hint').textContent=(tab==='p'&&S.p.kind==='free'&&FT!=='move')?L(FT==='link'?'hintLink':FT==='addpt'?'hintAdd':'hintDel'):'';
   $('wSel').value=S.look.w; $('fsSel').value=S.look.fs; setP($('dSolid'),!S.look.dash); setP($('dDash'),S.look.dash);
   $('ptSel').value=S.look.ptR; setP($('ptShow'),S.look.ptShow); setP($('ptFull'),S.look.ptFill); setP($('ptHollow'),!S.look.ptFill); setP($('nmText'),S.look.names!=='sym'); setP($('dgAr'),S.look.digits!=='en'); setP($('dgEn'),S.look.digits==='en'); setP($('nmSym'),S.look.names==='sym');
   paintColors(); syncChips(); syncDims();
