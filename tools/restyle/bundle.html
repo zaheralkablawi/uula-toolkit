@@ -4150,6 +4150,12 @@ async function selCheck() {
 async function mergedPress(id) {
   const it = ITEM[id]; if (!it || busy || !supported) return;
   await selCheck();
+  if (id === 'cancelled') {
+    if (busy) return; busy = true; lock();
+    try { say(suspendSay(await suspendSelected())); } catch (e) { say(L('تعذّر: ', 'Could not: ') + errText(e)); }
+    finally { busy = false; lock(); }
+    return;
+  }
   if (it.tpl === 'grid' || it.tpl === 'practice' || !it.role) {
     if (it.tpl) return insertTemplate(it.tpl);
   }
@@ -4260,19 +4266,28 @@ async function quietMark(role, keepColour) {
 // «Suspended»: a yellow frame over the selection, the content faded under it, and «مـعـلـق» with the warning
 // triangle in the middle — drawn in place and grouped (the content itself stays as it is, under it)
 function suspendSay(r) {
-  if (!r.n) return L('حدّد في الشريحة ما تريد تعليقه أولًا.', 'Select what to suspend on the slide first.');
-  return L('وُضع إطار «معلّق» حول المحدد.', 'The «suspended» frame was put around the selection.') + (r.failed && r.failed.length ? L(' لم يقبل الباوربوينت: ', ' PowerPoint refused: ') + r.failed.join('، ') : '');
+  if (!r.n) return L('تعذّر رسم إطار «معلّق».', 'Could not draw the «suspended» frame.');
+  return (r.n < 0 ? L('تمت إضافة «معلّق» في الأسفل.', '«Suspended» was added at the bottom.') : L('وُضع إطار «معلّق» حول المحدد.', 'The «suspended» frame was put around the selection.')) + (r.failed && r.failed.length ? L(' لم يقبل الباوربوينت: ', ' PowerPoint refused: ') + r.failed.join('، ') : '');
 }
 async function suspendSelected() {
   return run(async ctx => {
     const slides = ctx.presentation.getSelectedSlides(); slides.load('items/id');
     const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/left,items/top,items/width,items/height');
     await ctx.sync();
-    if (!slides.items.length || !shapes.items.length) return { n: 0 };
-    const sh = ctx.presentation.slides.getItem(slides.items[0].id).shapes;
-    const x0 = Math.min(...shapes.items.map(s => s.left)), y0 = Math.min(...shapes.items.map(s => s.top));
-    const x1 = Math.max(...shapes.items.map(s => s.left + s.width)), y1 = Math.max(...shapes.items.map(s => s.top + s.height));
-    const pad = 6, X = x0 - pad, Y = y0 - pad, Wd = x1 - x0 + 2 * pad, Ht = y1 - y0 + 2 * pad;
+    if (!slides.items.length) return { n: 0 };
+    const sid = slides.items[0].id;
+    const sh = ctx.presentation.slides.getItem(sid).shapes;
+    let X, Y, Wd, Ht, n = shapes.items.length;
+    if (n) {
+      const x0 = Math.min(...shapes.items.map(s => s.left)), y0 = Math.min(...shapes.items.map(s => s.top));
+      const x1 = Math.max(...shapes.items.map(s => s.left + s.width)), y1 = Math.max(...shapes.items.map(s => s.top + s.height));
+      const pad = 6; X = x0 - pad; Y = y0 - pad; Wd = x1 - x0 + 2 * pad; Ht = y1 - y0 + 2 * pad;
+    } else {
+      // nothing selected: the same box on its own, under the last object of the slide (content width, 4 rows high)
+      const pkg = await UR.openPackage(await exportSlide(sid));
+      const ft = URT.freeTop(pkg, 1);
+      X = UR.M / PT; Wd = (pkg.slideW - 2 * UR.M) / PT; Y = ft.top / PT; Ht = 4 * UR.ROW / PT; n = -1;
+    }
     const failed = [];
     // each step on its own: one refusal does not stop the rest
     const step = async (what, fn) => { try { fn(); await ctx.sync(); return true; } catch (e) { failed.push(what); return false; } };
@@ -4293,7 +4308,7 @@ async function suspendSelected() {
       const f = tf.textRange.font; f.name = 'UULA Sans'; f.size = 20; f.bold = true; f.color = '#F5C242';
       tf.textRange.paragraphFormat.horizontalAlignment = 'Center';
     });
-    return { n: shapes.items.length, failed: failed.filter(f => f !== 'frame' && f !== 'corners') };
+    return { n, failed: failed.filter(f => f !== 'frame' && f !== 'corners') };
   });
 }
 async function pinRole(role, keepColour) {
