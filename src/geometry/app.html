@@ -54,6 +54,7 @@ header .bt .root:only-child{color:var(--fg);font-size:15px;letter-spacing:0}
 #fig .hb{fill:transparent;cursor:move}
 #fig .hv{fill:transparent;pointer-events:all;stroke:#1f71de;stroke-width:1.6;cursor:grab}
 #fig .hv.sel{stroke-width:3}
+#fig .hp{stroke-dasharray:2 2;cursor:pointer}
 #fig .hc{fill:none;stroke:transparent;stroke-width:12;cursor:ew-resize}
 .ins{position:absolute;left:6px;bottom:6px;height:28px;padding:0 10px;border-radius:7px;border:1px solid var(--accent);background:var(--accent);color:#fff;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;cursor:pointer}
 .ins:hover{filter:brightness(1.08)}
@@ -220,11 +221,11 @@ const T={
   hdash:['متقطعة','Dashed'], hhide:['مخفية','Hidden'], hsolid:['متصلة','Solid'],
   tri:['مثلث','Triangle'], sq:['مربع','Square'], rect:['مستطيل','Rectangle'], para:['متوازي أضلاع','Parallelogram'], rho:['معين','Rhombus'], trap:['شبه منحرف','Trapezoid'], poly:['مضلع منتظم','Regular polygon'], circ:['دائرة','Circle'],
   cube:['مكعب','Cube'], box:['متوازي مستطيلات','Cuboid'], prism:['منشور','Prism'], pyr:['هرم','Pyramid'], cyl:['أسطوانة','Cylinder'], cone:['مخروط','Cone'], sph:['كرة','Sphere'],
-  names:['أسماء الرؤوس','Vertex names'], lens:['الأطوال','Lengths'], angs:['الزوايا','Angles'], alt:['الارتفاع','Altitude'], med:['المتوسط','Median'], bis:['منصف الزاوية','Bisector'], diag:['القطران','Diagonals'],
+  names:['أسماء الرؤوس','Vertex names'], arcsAll:['رموز الزوايا','Angle marks'], arcOnly:['رمز الزاوية (بدون قياس)','Angle mark (no measure)'], arcsShort:['التساوي','Equal'], point:['النقطة','Point'], showName:['إظهار الاسم','Show name'], lens:['الأطوال','Lengths'], angs:['الزوايا','Angles'], alt:['الارتفاع','Altitude'], med:['المتوسط','Median'], bis:['منصف الزاوية','Bisector'], diag:['القطران','Diagonals'],
   pnames:['أسماء النقاط','Point names'], center:['المركز','Center'], radius:['نصف القطر','Radius'], diam:['القطر','Diameter'], chord:['الوتر','Chord'], tangent:['المماس','Tangent'], arc:['القوس','Arc'], sector:['القطاع','Sector'], central:['الزاوية المركزية','Central angle'], inscribed:['الزاوية المحيطية','Inscribed angle'], meas:['القياسات','Measures'],
   dimsC:['الأبعاد','Dimensions'], centers:['المركزان','Centers'],
-  hintP:['انقر ضلعًا أو رأسًا على الرسم لتمييزه، واسحب الرؤوس لتغيير الشكل.','Click a side or vertex to mark it; drag vertices to reshape.'],
-  hintC:['اسحب النقاط على الدائرة لتحريكها، واسحب الدائرة لتغيير نصف قطرها.','Drag points along the circle; drag the circle to resize.'],
+  hintP:['انقر ضلعًا أو رأسًا أو نقطة على الرسم لتمييزها أو إخفاء اسمها، واسحب الرؤوس لتغيير الشكل.','Click a side, vertex or point to mark it or hide its name; drag vertices to reshape.'],
+  hintC:['اسحب النقاط على الدائرة لتحريكها، وانقر نقطة لإخفاء اسمها أو تغييره، واسحب الدائرة لتغيير نصف قطرها.','Drag points along the circle, click a point to hide or change its name, drag the circle to resize.'],
   hintS:['اسحب المقابض الزرقاء لتغيير أبعاد المجسم.','Drag the blue handles to change the size.'],
   side:['الضلع','Side'], vertex:['الرأس','Vertex'], showLen:['إظهار الطول','Show length'], showAng:['إظهار القياس','Show measure'], ticks:['شرطات التساوي','Equal marks'], par:['رمز التوازي //','Parallel //'], dashed:['متقطع','Dashed'],
   vname:['اسم الرأس','Vertex name'], rightM:['علامة الزاوية القائمة','Right-angle mark'], arcs:['أقواس تساوي الزوايا','Equal-angle arcs'], fromV:['من هذا الرأس','From this vertex'],
@@ -268,11 +269,11 @@ function shapePts(kind,sub,n){ if(kind==='tri') return clone(TRI[sub]); if(kind=
 function mkPlane(kind,sub,n){ const P=shapePts(kind,sub,n);
   return { kind, sub, n, pts:P,
     sides:P.map(()=>({len:'',show:false,ticks:0,par:0,dash:false})),
-    verts:P.map((_,i)=>({name:NAMES[i],showName:true,ang:'',showAng:false,arcs:0,right:false,alt:false,med:false,bis:false})),
+    verts:P.map((_,i)=>({name:NAMES[i],showName:true,ang:'',showAng:false,arc:false,arcs:0,right:false,alt:false,med:false,bis:false})),
     diag:false };
 }
 function defaults(){
-  return { v:1, tab:'p',
+  return { v:1, tab:'p', hide:{}, nm:{},
     p:mkPlane('tri','iso',6),
     c:{ c:[160,125], r:85, a:{A:-35,B:195,C:15,D:-130,E:-55,F:90,G:150,H:30,I:-95},
         show:{center:true,radius:true,diam:false,chord:false,tangent:false,arc:false,sector:false,central:false,inscribed:false,names:true,meas:false} },
@@ -282,7 +283,7 @@ function defaults(){
     look:{ line:'#000000', w:2, dash:false, fill:null, text:'#000000', mark:'#000000', fs:16, pt:'#000000', ptShow:false, ptR:3, ptFill:true, names:'text' } };
 }
 let S=defaults();
-try{ const t=localStorage.getItem('uula-geometry-state-v1'); if(t){ const o=JSON.parse(t); if(o&&o.v===1){ const d=defaults(); S=Object.assign(d,o); S.look=Object.assign(defaults().look,o.look||{}); } } }catch(e){}
+try{ const t=localStorage.getItem('uula-geometry-state-v1'); if(t){ const o=JSON.parse(t); if(o&&o.v===1){ const d=defaults(); S=Object.assign(d,o); S.look=Object.assign(defaults().look,o.look||{}); S.hide=o.hide||{}; S.nm=o.nm||{}; } } }catch(e){}
 function save(){ try{ localStorage.setItem('uula-geometry-state-v1',JSON.stringify(S)); }catch(e){} }
 let HIST=[]; const push=()=>{ HIST.push(JSON.stringify(S)); if(HIST.length>60) HIST.shift(); };
 function undo(){ if(!HIST.length) return; S=JSON.parse(HIST.pop()); closePop(); syncUI(); draw(); save(); }
@@ -317,7 +318,7 @@ function buildPlane(){
   const newName=()=>NAMES[nextName++]||'';
   if(LK().fill) PR.push({t:'poly',pts:P.map(p=>p.slice()),fill:LK().fill});
   for(let i=0;i<n;i++){ const sd=G.sides[i]; seg(P[i],P[(i+1)%n],{dash:sd.dash||LK().dash}); }
-  if(G.diag&&n===4){ aux(P[0],P[2]); aux(P[1],P[3]); const X=lineX(P[0],sub(P[2],P[0]),P[1],P[3]); if(X&&G.verts[0].showName) nm(add(X,[0,fs*.95]),newName()); }
+  if(G.diag&&n===4){ aux(P[0],P[2]); aux(P[1],P[3]); const X=lineX(P[0],sub(P[2],P[0]),P[1],P[3]); if(X&&G.verts[0].showName) lab2(X,add(X,[0,fs*.95]),'p:x',newName()); }
   const FEET=feetList(G);
   // علامات الأضلاع
   for(let i=0;i<n;i++){ const sd=G.sides[i], a=P[i], b=P[(i+1)%n];
@@ -328,7 +329,7 @@ function buildPlane(){
   FEET.forEach(f=>ptP(f));
   for(let i=0;i<n;i++){ const V=G.verts[i], p=P[i], a=P[(i-1+n)%n], b=P[(i+1)%n]; ptP(p);
     if(V.right) rightMark(p,a,b);
-    let r0=18; if(V.arcs){ angleArcs(p,a,b,V.arcs,18); r0=18+V.arcs*4.5; } else if(V.showAng&&!V.right){ angleArcs(p,a,b,1,16); r0=20; }
+    let r0=18; if(V.arcs){ angleArcs(p,a,b,V.arcs,18); r0=18+V.arcs*4.5; } else if((V.showAng||V.arc)&&!V.right){ angleArcs(p,a,b,1,16); r0=20; }
     if(V.showAng){ const s=angSpan(p,a,b), bi=rad((s.a0+s.a1)/2); const rr=r0+fs*.95+(s.sw<45?10:0); txt(add(p,[Math.cos(bi)*rr,Math.sin(bi)*rr]),V.ang||fmtAng(s.sw),{fs:fs*.85}); }
     if(V.showName) nm(add(p,mul(outward(P,i),fs*.95)),V.name);
   }
@@ -339,12 +340,12 @@ function buildPlane(){
     if(V.alt){ const F=proj(p,A,B); aux(p,F); const t=dot(sub(F,A),sub(B,A))/dot(sub(B,A),sub(B,A));
       if(t<0) aux(A,F); if(t>1) aux(B,F);
       const ref=len(sub(B,F))>len(sub(A,F))?B:A; rightMark(F,p,ref,9);
-      if(len(sub(F,A))>8&&len(sub(F,B))>8&&V.showName){ let d=nrm(sub(F,p)); nm(add(F,mul(d,fs*.95)),newName()); } }
-    if(V.med&&n===3){ const M=mid(A,B); aux(p,M); if(!G.sides[(i+1)%3].ticks){ sideTicks(A,M,1); sideTicks(M,B,1); } if(V.showName){ const d=nrm(sub(M,p)); nm(add(M,mul(d,fs*.95)),newName()); } }
+      if(len(sub(F,A))>8&&len(sub(F,B))>8&&V.showName){ let d=nrm(sub(F,p)); lab2(F,add(F,mul(d,fs*.95)),'p:alt'+i,newName()); } }
+    if(V.med&&n===3){ const M=mid(A,B); aux(p,M); if(!G.sides[(i+1)%3].ticks){ sideTicks(A,M,1); sideTicks(M,B,1); } if(V.showName){ const d=nrm(sub(M,p)); lab2(M,add(M,mul(d,fs*.95)),'p:med'+i,newName()); } }
     if(V.bis&&n===3){ const s=angSpan(p,A,B), bi=rad((s.a0+s.a1)/2), d=[Math.cos(bi),Math.sin(bi)], D=lineX(p,d,A,B);
       if(D){ aux(p,D); const h=s.sw/2; arcP(p,24,s.a0,s.a0+h); arcP(p,24,s.a0+h,s.a1);
         [s.a0+h/2,s.a0+h*1.5].forEach(a=>{ const u=[Math.cos(rad(a)),Math.sin(rad(a))]; mk(add(p,mul(u,20)),add(p,mul(u,28))); });
-        if(V.showName){ const dd=nrm(sub(D,p)); nm(add(D,mul(dd,fs*.95)),newName()); } } }
+        if(V.showName){ const dd=nrm(sub(D,p)); lab2(D,add(D,mul(dd,fs*.95)),'p:bis'+i,newName()); } } }
   }
 }
 
@@ -358,14 +359,14 @@ function feetList(G){ const P=G.pts, n=P.length, out=[];
 function buildCircle(){
   const K=S.c, c=K.c, r=K.r, sh=K.show, fs=LK().fs, A=K.a;
   const P=k=>[c[0]+r*Math.cos(rad(A[k])), c[1]+r*Math.sin(rad(A[k]))];
-  const lab=(k,name)=>{ ptP(P(k)); if(!sh.names) return; const d=[Math.cos(rad(A[k])),Math.sin(rad(A[k]))]; nm(add(c,mul(d,r+fs*.9)),name); };
+  const lab=(k,name)=>{ ptP(P(k)); if(!sh.names) return; const d=[Math.cos(rad(A[k])),Math.sin(rad(A[k]))]; lab2(P(k),add(c,mul(d,r+fs*.9)),'c:'+k,name); };
   const swGH=(((A.G-A.H)%360)+360)%360;
   if(sh.sector) PR.push({t:'pie',c,r,a0:A.H,a1:A.H+swGH,fill:LK().fill||'#cfe0f8'});
   PR.push({t:'ell',c,rx:r,ry:r,a0:0,a1:360,c2:LK().line,w:LK().w,dash:LK().dash,fill:sh.sector?null:LK().fill});
   if(sh.arc) PR.push({t:'ell',c,rx:r,ry:r,a0:A.H,a1:A.H+swGH,c2:LK().mark,w:LK().w*1.8,dash:false});
-  if(sh.center){ dotP(c); if(sh.names) nm(add(c,[fs*.7,fs*.75]),'م'); }
+  if(sh.center){ dotP(c); if(sh.names) lab2(c,add(c,[fs*.7,fs*.75]),'c:C','م'); }
   if(sh.radius){ seg(c,P('A')); if(sh.meas) txt(add(mid(c,P('A')),mul(perp(nrm(sub(P('A'),c))),-fs*.8)),'نق',{fs:fs*.85}); lab('A','أ'); }
-  if(sh.diam){ seg(P('B'),[2*c[0]-P('B')[0],2*c[1]-P('B')[1]]); const opp=A.B+180; lab('B','ب'); ptP([2*c[0]-P('B')[0],2*c[1]-P('B')[1]]); if(sh.names){ const d=[Math.cos(rad(opp)),Math.sin(rad(opp))]; nm(add(c,mul(d,r+fs*.9)),'ج'); } }
+  if(sh.diam){ seg(P('B'),[2*c[0]-P('B')[0],2*c[1]-P('B')[1]]); const opp=A.B+180; lab('B','ب'); ptP([2*c[0]-P('B')[0],2*c[1]-P('B')[1]]); if(sh.names){ const d=[Math.cos(rad(opp)),Math.sin(rad(opp))]; lab2(add(c,mul(d,r)),add(c,mul(d,r+fs*.9)),'c:B2','ج'); } }
   if(sh.chord){ seg(P('D'),P('E')); lab('D','د'); lab('E','هـ'); }
   if(sh.tangent){ const p=P('F'), d=perp([Math.cos(rad(A.F)),Math.sin(rad(A.F))]), L2=r*.85; seg(add(p,mul(d,L2)),sub(p,mul(d,L2))); rightMark(p,c,add(p,d),9); aux(c,p); if(!LK().ptShow) dotP(p); lab('F','و'); }
   const needGH=sh.arc||sh.sector||sh.central||sh.inscribed;
@@ -401,7 +402,7 @@ function buildSolid(){
     E.forEach((v,key)=>{ const [a,b]=key.split('-').map(Number); if(v) seg(P2[a],P2[b]); else if(hid!=='hide') seg(P2[a],P2[b],hidOpt()); });
     const C2=cen(P2);
     P2.forEach(p=>ptP(p));
-    if(Z.names) P2.forEach((p,i)=>{ const dd=nrm(sub(p,C2)); nm(add(p,mul(dd,fs*.95)),NAMES[i]); });
+    if(Z.names) P2.forEach((p,i)=>{ const dd=nrm(sub(p,C2)); lab2(p,add(p,mul(dd,fs*.95)),'s:'+k+':'+i,NAMES[i]); });
     if(Z.dims){
       if(k==='cube'||k==='box'){ const m=mid(P2[0],P2[1]); txt(add(m,[0,fs*1.05]),lb.w);
         if(k==='box'){ txt(add(mid(P2[1],P2[5]),[-fs*1.6,0]),lb.h); const md=mid(P2[1],P2[2]); txt(add(md,[fs*1.5,fs*.3]),lb.d); } }
@@ -437,9 +438,11 @@ function buildSolid(){
     if(Z.dims){ aux([cx,by],[cx+r,by]); txt([cx+r/2,by-fs*.75],lb.r); }
   }
 }
-let SOL=null;
+let SOL=null, REG=[];
+// نقطة لها اسم: يمكن إخفاء اسمها أو تغييره بالنقر عليها
+function lab2(p,pos,key,def){ REG.push({p,key,def}); if(!(S.hide&&S.hide[key])) nm(pos,(S.nm&&S.nm[key]!=null)?S.nm[key]:def); }
 function bboxPts(P){ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; P.forEach(p=>{ x0=Math.min(x0,p[0]); y0=Math.min(y0,p[1]); x1=Math.max(x1,p[0]); y1=Math.max(y1,p[1]); }); return {x:x0,y:y0,w:x1-x0,h:y1-y0}; }
-function build(){ PR=[]; if(S.tab==='p') buildPlane(); else if(S.tab==='c') buildCircle(); else buildSolid(); return PR; }
+function build(){ PR=[]; REG=[]; if(S.tab==='p') buildPlane(); else if(S.tab==='c') buildCircle(); else buildSolid(); return PR; }
 
 /* نقطة على قطع ناقص بزاوية مرئية (مثل أقواس باوربوينت) */
 function ellPt(c,rx,ry,a){ const t=rad(a), co=Math.cos(t), si=Math.sin(t), k=rx*ry/Math.sqrt((ry*co)**2+(rx*si)**2); return [c[0]+k*co,c[1]+k*si]; }
@@ -492,6 +495,9 @@ function draw(){
     } else { h+=`<circle class="hv" data-h="sz" data-i="r" cx="${f2(SOL.cx+SOL.r)}" cy="${f2(SOL.by)}" r="5"/>`;
       if(k!=='sph') h+=`<circle class="hv" data-h="sz" data-i="h" cx="${f2(SOL.cx)}" cy="${f2(SOL.ty)}" r="5"/>`; }
   }
+  const own=new Set(); if(S.tab==='c') ['A','B','D','E','F','G','H','I','C'].forEach(k=>own.add('c:'+k));
+  const hs=[...h.matchAll(/data-h="sz"[^>]*cx="([\d.-]+)" cy="([\d.-]+)"/g)].map(m=>[+m[1],+m[2]]);
+  REG.forEach(r=>{ if(own.has(r.key)||hs.some(q=>len(sub(q,r.p))<4)) return; h+=`<circle class="hv hp" data-h="pt" data-i="${esc(r.key)}" cx="${f2(r.p[0])}" cy="${f2(r.p[1])}" r="4.5"/>`; });
   $('fig').innerHTML=h+'</g>';
 }
 function svgPt(e){ const s=$('fig'), m=s.getScreenCTM().inverse(); return [e.clientX*m.a+e.clientY*m.c+m.e, e.clientX*m.b+e.clientY*m.d+m.f]; }
@@ -545,6 +551,10 @@ $('fig').addEventListener('pointermove',e=>{
 const endDrag=e=>{ if(!DRAG) return; const D=DRAG; DRAG=null;
   if(D.moved){ HIST.push(D.st); if(HIST.length>60) HIST.shift(); save(); return; }
   if(D.h==='vert'){ openPop('vert',+D.i,D.cx,D.cy); }
+  else if(D.h==='pt'){ openPop('pt',D.i,D.cx,D.cy); }
+  else if(D.h==='cp'){ openPop('pt','c:'+D.i,D.cx,D.cy); }
+  else if(D.h==='cen'){ openPop('pt','c:C',D.cx,D.cy); }
+  else if(D.h==='sz'){ const r=REG.find(x=>len(sub(x.p,D.p0))<8); if(r) openPop('pt',r.key,D.cx,D.cy); }
   else if(D.h==='side'){ openPop('side',+D.i,D.cx,D.cy); } };
 $('fig').addEventListener('pointerup',endDrag); $('fig').addEventListener('pointercancel',()=>{ DRAG=null; });
 
@@ -558,6 +568,7 @@ const ICO={ t1:'<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentC
   len:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M3 8v8M21 8v8"/></svg>',
   ang:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19h16M4 19L16 5"/><path d="M11 19a7 7 0 0 0-2-5"/></svg>',
   rt:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v16h16"/><path d="M4 13h7v7"/></svg>',
+  a1e:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16M4 20L15 5"/><path d="M12 20a8 8 0 0 0-3-6"/><path d="M9.6 15.6l2.6-1.4"/></svg>',
   a1:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16M4 20L15 5"/><path d="M12 20a8 8 0 0 0-3-6"/></svg>',
   a2:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16M4 20L15 5"/><path d="M10 20a6 6 0 0 0-2-4.5M14 20a10 10 0 0 0-3.6-7.6"/></svg>',
   a3:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16M4 20L15 5"/><path d="M9 20a5 5 0 0 0-1.6-3.7M12.5 20a8.5 8.5 0 0 0-3-6.4M16 20a12 12 0 0 0-4.3-9.2"/></svg>',
@@ -569,6 +580,10 @@ function openPop(k,i,cx,cy){
   const name=j=>G.verts[(j+n)%n].name;
   const qb=(act,ico,on,tip)=>`<button type="button" class="q" data-a="${act}" aria-pressed="${!!on}" title="${tip}">${ico}</button>`;
   let h;
+  if(k==='pt'){ const r=REG.find(x=>x.key===i), def=r?r.def:'', cur=(S.nm[i]!=null)?S.nm[i]:def;
+    pop.innerHTML=`<div class="ph"><span>${L('point')} ${esc(cur)}</span><button type="button" data-a="x">✕</button></div>
+      <div class="r"><input id="pPt" value="${esc(cur)}" title="${L('vname')}" style="max-width:52px">${qb('pnm','<b>أ</b>',!S.hide[i],L('showName'))}</div>`;
+    pop.hidden=false; placePop(pop,cx,cy); return; }
   if(k==='side'){ const sd=G.sides[i];
     h=`<div class="ph"><span>${L('side')} ${name(i)}${name(i+1)}</span><button type="button" data-a="x">✕</button></div>
       <div class="r"><input id="pLen" placeholder="${esc(fmtLen(len(sub(G.pts[(i+1)%n],G.pts[i]))/40))}" value="${esc(sd.len)}">${qb('show',ICO.len,sd.show,L('showLen'))}</div>
@@ -578,10 +593,13 @@ function openPop(k,i,cx,cy){
     h=`<div class="ph"><span>${L('vertex')} ${esc(V.name)}</span><button type="button" data-a="x">✕</button></div>
       <div class="r"><input id="pName" value="${esc(V.name)}" title="${L('vname')}" style="max-width:44px">${qb('nm','<b>أ</b>',V.showName,L('vname'))}</div>
       <div class="r"><input id="pAng" placeholder="${esc(fmtAng(s.sw))}" value="${esc(V.ang)}">${qb('sa',ICO.ang,V.showAng,L('showAng'))}</div>
-      <div class="r">${qb('rt',ICO.rt,V.right,L('rightM'))}${qb('a1',ICO.a1,V.arcs===1,L('arcs'))}${qb('a2',ICO.a2,V.arcs===2,L('arcs'))}${qb('a3',ICO.a3,V.arcs===3,L('arcs'))}</div>
+      <div class="r">${qb('arc',ICO.a1,V.arc,L('arcOnly'))}${qb('rt',ICO.rt,V.right,L('rightM'))}</div>
+      <div class="r"><span class="note" style="font-size:11px;flex:1">${L('arcsShort')}</span>${qb('a1',ICO.a1e,V.arcs===1,L('arcs'))}${qb('a2',ICO.a2,V.arcs===2,L('arcs'))}${qb('a3',ICO.a3,V.arcs===3,L('arcs'))}</div>
       ${n===3||(n===4&&i===0)?`<div class="r">${qb('alt',ICO.alt,V.alt,L('alt'))}${n===3?qb('med',ICO.med,V.med,L('med'))+qb('bis',ICO.bis,V.bis,L('bis')):''}</div>`:''}`;
   }
-  pop.innerHTML=h; pop.hidden=false;
+  pop.innerHTML=h; pop.hidden=false; placePop(pop,cx,cy);
+}
+function placePop(pop,cx,cy){
   const pr=$('pv').getBoundingClientRect(), pw=pop.offsetWidth, ph=pop.offsetHeight;
   let x=cx-pr.left+12, y=cy-pr.top-ph/2; if(x+pw>pr.width-4) x=cx-pr.left-pw-12; x=Math.max(4,Math.min(pr.width-pw-4,x)); y=Math.max(4,Math.min(pr.height-ph-38,y));
   pop.style.left=x+'px'; pop.style.top=y+'px';
@@ -592,15 +610,17 @@ $('pop').addEventListener('input',e=>{ if(!SEL) return; const G=S.p, t=e.target;
   if(t.id==='pLen'){ const sd=G.sides[SEL.i]; sd.len=t.value; if(t.value) sd.show=true; }
   if(t.id==='pName'){ G.verts[SEL.i].name=t.value; }
   if(t.id==='pAng'){ const V=G.verts[SEL.i]; V.ang=t.value; if(t.value) V.showAng=true; }
+  if(t.id==='pPt'){ S.nm[SEL.i]=t.value; }
   draw(); save(); syncChips(); });
 $('pop').addEventListener('focusin',e=>{ if(e.target.tagName==='INPUT'&&!e.target.dataset.h){ e.target.dataset.h=1; push(); } });
 $('pop').addEventListener('click',e=>{ const b=e.target.closest('[data-a]'); if(!b||!SEL) return; const a=b.dataset.a;
   if(a==='x'){ closePop(); return; }
   push(); const G=S.p;
-  if(SEL.k==='side'){ const sd=G.sides[SEL.i];
+  if(SEL.k==='pt'){ if(a==='pnm'){ if(S.hide[SEL.i]) delete S.hide[SEL.i]; else S.hide[SEL.i]=true; } }
+  else if(SEL.k==='side'){ const sd=G.sides[SEL.i];
     if(a==='show') sd.show=!sd.show; else if(a[0]==='t'){ const v=+a[1]; sd.ticks=sd.ticks===v?0:v; } else if(a[0]==='p'){ const v=+a[1]; sd.par=sd.par===v?0:v; } else if(a==='dash') sd.dash=!sd.dash; }
   else { const V=G.verts[SEL.i];
-    if(a==='nm') V.showName=!V.showName; else if(a==='sa') V.showAng=!V.showAng; else if(a==='rt') V.right=!V.right;
+    if(a==='nm') V.showName=!V.showName; else if(a==='sa') V.showAng=!V.showAng; else if(a==='arc') V.arc=!V.arc; else if(a==='rt') V.right=!V.right;
     else if(a[0]==='a'&&a.length===2){ const v=+a[1]; V.arcs=V.arcs===v?0:v; } else if(a==='alt'||a==='med'||a==='bis') V[a]=!V[a]; }
   const keep=SEL; draw(); save(); syncChips();
   const pr=$('pop').getBoundingClientRect(); openPop(keep.k,keep.i,pr.left-12,pr.top+pr.height/2); $('pop').style.left=(pr.left-$('pv').getBoundingClientRect().left)+'px'; $('pop').style.top=(pr.top-$('pv').getBoundingClientRect().top)+'px';
@@ -631,7 +651,7 @@ $('segHid').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); 
 /* ---------- عناصر «على الشكل» ---------- */
 function chipList(){
   if(S.tab==='p'){ const G=S.p, n=G.pts.length, V=G.verts, all=f=>V.every(f);
-    const c=[['names',all(v=>v.showName)],['lens',G.sides.every(s=>s.show)],['angs',all(v=>v.showAng)]];
+    const c=[['names',all(v=>v.showName)],['lens',G.sides.every(s=>s.show)],['arcsAll',all(v=>v.arc)],['angs',all(v=>v.showAng)]];
     if(n===3) c.push(['alt',V[0].alt],['med',V[0].med],['bis',V[0].bis]);
     if(n===4){ c.push(['diag',G.diag]); if(G.kind==='para'||G.kind==='trap'||G.kind==='rect'||G.kind==='sq') c.push(['alt',V[0].alt]); }
     return c; }
@@ -641,7 +661,7 @@ function chipList(){
 function syncChips(){ $('chips').innerHTML=chipList().map(([k,on])=>`<button type="button" class="chip" data-k="${k}" aria-pressed="${!!on}">${L(k)}</button>`).join(''); }
 $('chips').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; push(); const k=b.dataset.k, on=b.getAttribute('aria-pressed')!=='true';
   if(S.tab==='p'){ const G=S.p;
-    if(k==='names') G.verts.forEach(v=>v.showName=on); else if(k==='lens') G.sides.forEach(s=>s.show=on); else if(k==='angs') G.verts.forEach(v=>v.showAng=on);
+    if(k==='names') G.verts.forEach(v=>v.showName=on); else if(k==='lens') G.sides.forEach(s=>s.show=on); else if(k==='angs') G.verts.forEach(v=>v.showAng=on); else if(k==='arcsAll') G.verts.forEach(v=>v.arc=on);
     else if(k==='diag') G.diag=on; else G.verts[0][k]=on; }
   else if(S.tab==='c'){ if(k==='pnames') S.c.show.names=on; else S.c.show[k]=on; }
   else { if(k==='names') S.s.names=on; else if(k==='dimsC') S.s.dims=on; else S.s.centers=on; }
