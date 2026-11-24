@@ -1966,8 +1966,18 @@ function arrangeChoices(pkg, layout, dirOpt) {
   const rtl = dir === 'rtl';
   // the order
   const known = sel.every(t => letterOf(t) >= 0);
-  const order = known ? [...sel].sort((a, b) => letterOf(a) - letterOf(b))
-    : [...sel].sort((a, b) => Math.abs(a.g.y - b.g.y) > 6 * PT ? a.g.y - b.g.y : (rtl ? b.g.x - a.g.x : a.g.x - b.g.x));
+  // reading order: boxes that overlap in height are one line (a taller fraction starts a little higher than the
+  // options beside it), lines from top to bottom, and in a line from right to left (rtl) or left to right (ltr)
+  let order;
+  if (known) order = [...sel].sort((a, b) => letterOf(a) - letterOf(b));
+  else {
+    const lines = [];
+    for (const t of [...sel].sort((a, b) => (a.g.y + a.g.h / 2) - (b.g.y + b.g.h / 2))) {
+      const ln = lines.find(l => l.some(o => Math.min(o.g.y + o.g.h, t.g.y + t.g.h) - Math.max(o.g.y, t.g.y) > Math.min(o.g.h, t.g.h) * 0.3));
+      if (ln) ln.push(t); else lines.push([t]);
+    }
+    order = lines.flatMap(l => l.sort((a, b) => rtl ? b.g.x - a.g.x : a.g.x - b.g.x));
+  }
   // each gets its letter and the choice look
   order.forEach((t, k) => {
     // the letter: in front of the first text; a box with only an equation gets a small run before the equation
