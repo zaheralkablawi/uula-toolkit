@@ -1936,6 +1936,32 @@ function gridOver(pkg) {
   }
   return { xml: serialize(doc), count: pics.length, sel: sel.length };
 }
+// the selected multiple-choice options turned to the other direction: every paragraph right-to-left (algn r) or
+// left-to-right (algn l), and options standing side by side swap places so ⓐ is on the right (rtl) or the left (ltr)
+function flipChoices(pkg, dir) {
+  const doc = parseXml(pkg.files.slide);
+  const items = topItems(doc).map(el => { const c = core(el), n = cnvOf(c); return { el, c, n, name: n ? n.getAttribute('name') || '' : '', g: geomOf(el, pkg), text: textOf(c).trim() }; });
+  const sel = items.filter(t => / #ursel$/.test(t.name));
+  for (const t of items) if (t.n) t.n.setAttribute('name', t.name.replace(/ #ursel$/, ''));
+  const texts = sel.filter(t => t.c.localName === 'sp' && kid(t.c, 'txBody', 'p'));
+  const rtl = dir === 'rtl';
+  for (const t of texts) for (const p of kids(kid(t.c, 'txBody', 'p'), 'p', 'a')) {
+    let pPr = kid(p, 'pPr', 'a'); if (!pPr) { pPr = mk(doc, 'a', 'pPr'); p.insertBefore(pPr, p.firstChild); }
+    pPr.setAttribute('algn', rtl ? 'r' : 'l'); pPr.setAttribute('rtl', rtl ? '1' : '0');
+  }
+  // side by side (the same line): the places are kept, the order of the options turns
+  const letter = t => { const m = t.text.match(/[ⓐ-ⓩⒶ-Ⓩ]|^\(?([A-Da-dأبجد])[).]/); if (!m) return null; const ch = m[1] || m[0]; return 'ⓐⓑⓒⓓⒶⒷⒸⒹabcdABCDأبجد'.indexOf(ch) % 4; };
+  const rows = [];
+  for (const t of texts.filter(t => t.g)) { const r = rows.find(r => Math.abs(r[0].g.y - t.g.y) < 4 * PT); if (r) r.push(t); else rows.push([t]); }
+  let moved = 0;
+  for (const r of rows.filter(r => r.length > 1)) {
+    const slots = r.map(t => t.g.x).sort((a, b) => a - b);
+    const known = r.every(t => letter(t) != null);
+    const order = known ? [...r].sort((a, b) => letter(a) - letter(b)) : [...r].sort((a, b) => b.g.x - a.g.x);
+    (rtl ? [...slots].reverse() : slots).forEach((x, k) => { const t = order[k]; if (t.g.x !== x) { setGeom(t.el, { x }); moved++; } });
+  }
+  return { xml: serialize(doc), count: texts.length, moved };
+}
 function wrapBox(pkg, type) {
   const W = pkg.slideW, H = pkg.slideH;
   const doc = parseXml(pkg.files.slide);
@@ -2335,9 +2361,9 @@ function splitPoint(plan, lay) {
 
 return {
   questionFlags,
-  NS, PT, ROW, M, FOOT, C, STY, BOX, openPackage, buildPackage, parseXml, serialize, restyle, layout, applyLayout, splitParts, splitPoint, markNames, MARK, applyRole, wrapBox, gridOver, WRAP, reflow, spacing, align, findSolutions, hideSolutions, showSolutions, hasSolutions, TEXT_ROLES, BOX_ROLES, G, Y0, snapUp, snapX,
+  NS, PT, ROW, M, FOOT, C, STY, BOX, openPackage, buildPackage, parseXml, serialize, restyle, layout, applyLayout, splitParts, splitPoint, markNames, MARK, applyRole, wrapBox, gridOver, flipChoices, WRAP, reflow, spacing, align, findSolutions, hideSolutions, showSolutions, hasSolutions, TEXT_ROLES, BOX_ROLES, G, Y0, snapUp, snapX,
   // used by the templates module
-  util: { pX, txX, boxX, gradBoxX, picX, pillX, pillW, lineX, tableX, makeRels, frag, topItems, core, cnvOf, maxId, spTreeOf, kid, kids, desc, xfrmOf, geomOf, setNext: n => { NEXT = n; }, yearText, pageNumX, estimateText, iconW, iconH }
+  util: { pX, txX, boxX, gradBoxX, picX, pillX, pillW, lineX, tableX, makeRels, frag, topItems, core, cnvOf, maxId, spTreeOf, kid, kids, desc, xfrmOf, geomOf, setNext: n => { NEXT = n; }, snapUp, yearText, pageNumX, estimateText, iconW, iconH }
 };
 })();
 if (typeof module !== 'undefined') module.exports = UR;
@@ -2435,7 +2461,7 @@ function spec(id, W) {
     // the options one under the other: ⓐ on the first line … ⓓ on the fourth, each line its own text box
     case 'mcqV': {
       const L = ['ⓐ', 'ⓑ', 'ⓒ', 'ⓓ'], ltr = OPT.dirNow === 'ltr';
-      return { gap: 0, rows: L.map((l, k) => ({ gap: 0, cells: [txt(P.runs([T(l + ' '), T(ltr ? 'Option' : 'خيار')], { marL: 182880, ar: !ltr }))] })) };
+      return { gap: 0, snap: true, rows: L.map((l, k) => ({ gap: 0, cells: [txt(P.runs([T(l + ' '), T(ltr ? 'Option' : 'خيار')], { marL: 182880, ar: !ltr }))] })) };
     }
     case 'problem': return { gap: 1, rows: [
       { cells: [txt(P.q('اكتب نص المسألة هنا؟'))] },
@@ -2548,12 +2574,13 @@ function place(id, W, top, built, heights) {
   const box = s.box;
   const boxK = built.shapes.findIndex(x => x.role === 'box');
   let y = top + (box && !box.small && !box.exact ? ROW : 0);
+  if (s.snap) y = U.snapUp(y);
   if (box && box.small) y = top + 4 * PT;
   const x1 = box && box.icon && !box.small ? W - M - 15 * PT : W - M;
   let bottom = y;
   s.rows.forEach((r, ri) => {
     if (s.fixed) y = r.y;
-    else if (ri > 0) y = bottom + (r.gap != null ? r.gap : 1) * ROW;
+    else if (ri > 0) { y = bottom + (r.gap != null ? r.gap : 1) * ROW; if (s.snap) y = U.snapUp(y); }   // on the page grid, as the UULA spacing rules
     let rb = y;
     let pillW = 0;
     r.cells.forEach((c, ci) => {
@@ -4136,8 +4163,37 @@ function dirSeg() {
     const b = document.createElement('button'); b.type = 'button'; b.dataset.v = v; b.title = L(tip[v][0], tip[v][1]);
     b.setAttribute('aria-pressed', String(v === mcqDir)); b.innerHTML = ic[v]; d.appendChild(b);
   }
-  d.addEventListener('click', e => { e.stopPropagation(); const b = e.target.closest('button'); if (!b) return; setMcqDir(b.dataset.v, true); });
+  d.addEventListener('click', async e => {
+    e.stopPropagation(); const b = e.target.closest('button'); if (!b) return;
+    setMcqDir(b.dataset.v, true);
+    // options selected on the slide: they turn to this direction now (the same button for inserting and for formatting)
+    if (b.dataset.v !== 'auto') { await selCheck(); if (selNow) flipSelected(b.dataset.v); }
+  });
   return d;
+}
+async function flipSelected(dir) {
+  if (busy || !supported) return;
+  busy = true; lock();
+  let slideId = null;
+  try {
+    slideId = await run(async ctx => {
+      const slides = ctx.presentation.getSelectedSlides(); slides.load('items/id');
+      const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/name'); await ctx.sync();
+      if (!slides.items.length || !shapes.items.length) return null;
+      shapes.items.forEach(x => { x.name = (x.name || '').replace(/ #ursel$/, '') + ' #ursel'; });
+      await ctx.sync(); return slides.items[0].id;
+    });
+    if (!slideId) return;
+    const pkg = await UR.openPackage(await exportSlide(slideId));
+    const r = UR.flipChoices(pkg, dir);
+    if (!(await UQ.apply(slideId, pkg.files.slide, r.xml, exportSlide).catch(() => false))) {
+      await insertAfter(await UR.buildPackage(pkg, r.xml, null), slideId);
+      await deleteSlide(slideId);
+    }
+    await clearSel(slideId).catch(() => {});
+    say(dir === 'rtl' ? L('حُوِّلت الخيارات المحددة إلى الاتجاه من اليمين لليسار.', 'The selected options now run right-to-left.') : L('حُوِّلت الخيارات المحددة إلى الاتجاه من اليسار لليمين.', 'The selected options now run left-to-right.'));
+  } catch (e) { if (slideId) await clearSel(slideId); say(L('تعذّر تحويل الاتجاه: ', 'Could not change the direction: ') + errText(e)); }
+  finally { busy = false; lock(); }
 }
 function setMcqDir(v, store) {
   mcqDir = v; URT.setOpt({ mcqDir: v });
@@ -4186,7 +4242,7 @@ const MERGED = [
       { id: 'qqr', ar: 'سؤال مع QR', en: 'Question + QR', col: 'FF0000', tpl: 'qqr' },
       { id: 'answer', ar: 'حل السؤال', en: 'Solution', col: '1F71DE', role: 'answer', tpl: 'answer' }] },
     { label: 'اختياري', le: 'Choice', dir: true, items: [
-      { id: 'mcq', ar: 'اختيار متعدد', en: 'Multiple choice', col: 'FF0000', role: 'choice', tpl: 'mcq' },
+      { id: 'mcq', ar: 'خيارات أفقية', en: 'Options in a row', col: 'FF0000', role: 'choice', tpl: 'mcq' },
       { id: 'mcqV', ar: 'خيارات عمودية', en: 'Options in a column', col: 'FF0000', tpl: 'mcqV' },
       { id: 'correct', ar: 'الخيار الصحيح', en: 'Correct choice', col: '2070DF', role: 'correct' }] }] },
   { g: 'إطارات', ge: 'Frames', items: [
@@ -4503,7 +4559,7 @@ async function pinRole(role, keepColour) {
     await unmark(newId);
     rsay(role === 'given' ? L('عُلِّم كشكل من السؤال: يبقى ظاهرًا عند إخفاء الحلول.', 'Marked as part of the question: it stays when solutions are hidden.')
       : role === 'correct' ? L('عُلِّم كخيار صحيح (أزرق عريض): يتحول للأسود عند إخفاء الحلول.', 'Marked as the correct choice (bold blue): it turns black when solutions are hidden.')
-      : role === 'choice' ? L('حُوِّل إلى خيارات «اختيار متعدد».', 'Turned into multiple-choice options.')
+      : role === 'choice' ? L('حُوِّل إلى خيارات.', 'Turned into options.')
       : ITEM[role] ? L('حُوِّل إلى «' + ITEM[role].ar + '».', 'Turned into «' + ITEM[role].en + '».') : L('تم.', 'Done.'));
   } catch (e) { if (slideId) await clearSel(slideId); rsay(L('تعذّر التحويل: ', 'Could not restyle: ') + errText(e)); }
   finally { busy = false; lock(); }
