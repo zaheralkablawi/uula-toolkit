@@ -2481,7 +2481,7 @@ function build(id, W, top, rels) {
 }
 // one shape drawing all the lines; they run half a cell past the outer lines, as a grid cut from a sheet
 function gridX(cols, rows) {
-  const S = ROW * 1.75, w = (cols + 1) * S, h = (rows + 1) * S, half = S / 2;   // 75% wider than the page grid step: room to draw
+  const S = Math.round(ROW * 1.75), w = (cols + 1) * S, h = (rows + 1) * S, half = Math.round(S / 2);   // 75% wider than the page grid step: room to draw
   let path = '';
   for (let k = 0; k <= cols; k++) { const x = Math.round(half + k * S); path += '<a:moveTo><a:pt x="' + x + '" y="0"/></a:moveTo><a:lnTo><a:pt x="' + x + '" y="' + h + '"/></a:lnTo>'; }
   for (let k = 0; k <= rows; k++) { const y = Math.round(half + k * S); path += '<a:moveTo><a:pt x="0" y="' + y + '"/></a:moveTo><a:lnTo><a:pt x="' + w + '" y="' + y + '"/></a:lnTo>'; }
