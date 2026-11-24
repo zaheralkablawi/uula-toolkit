@@ -887,7 +887,7 @@ function styleText(it, ctx, pkg, forcedRole) {
   for (const pr of roles) {
     const st = STY[pr.role] || STY.body;
     let ar = pr.text ? AR.test(pr.text) : arAll;
-    if (pr.role === 'choice' && ctx.choiceDir) ar = ctx.choiceDir === 'rtl';
+    if (pr.role === 'choice' && ctx.choiceDir) { ar = ctx.choiceDir === 'rtl'; choiceLetterDir(pr.p, ar); }
     // an equation line inside an Arabic box stays on the right with the text around it
     if (!ar && arAll && pr.role !== 'question' && desc(pr.p, 'm', 'oMath').length && !desc(pr.p, 'a', 't').some(x => /[A-Za-z]{3,}/.test(x.textContent))) ar = true;
     let bullet = null, marL = 0, indent = 0;
@@ -1936,6 +1936,15 @@ function gridOver(pkg) {
   }
   return { xml: serialize(doc), count: pics.length, sel: sel.length };
 }
+// the letter of an option (ⓐ … or a) …) counts as left-to-right text: in a right-to-left line followed by English it would
+// stay on the left. An invisible right-to-left mark (U+200F) after the letter puts it on the right; left-to-right drops it.
+function choiceLetterDir(p, rtl) {
+  const t = desc(p, 'a', 't').find(x => x.textContent.trim());
+  if (!t) return;
+  const m = t.textContent.match(/^(\s*(?:[ⓐ-ⓩⒶ-Ⓩ]|\(?[A-Da-d][).]))‏?/);
+  if (!m) return;
+  t.textContent = m[1] + (rtl ? '‏' : '') + t.textContent.slice(m[0].length);
+}
 // the selected multiple-choice options turned to the other direction: every paragraph right-to-left (algn r) or
 // left-to-right (algn l), and options standing side by side swap places so ⓐ is on the right (rtl) or the left (ltr)
 function flipChoices(pkg, dir) {
@@ -1948,6 +1957,7 @@ function flipChoices(pkg, dir) {
   for (const t of texts) for (const p of kids(kid(t.c, 'txBody', 'p'), 'p', 'a')) {
     let pPr = kid(p, 'pPr', 'a'); if (!pPr) { pPr = mk(doc, 'a', 'pPr'); p.insertBefore(pPr, p.firstChild); }
     pPr.setAttribute('algn', rtl ? 'r' : 'l'); pPr.setAttribute('rtl', rtl ? '1' : '0');
+    choiceLetterDir(p, rtl);
   }
   // side by side (the same line): the places are kept, the order of the options turns
   const letter = t => { const m = t.text.match(/[ⓐ-ⓩⒶ-Ⓩ]|^\(?([A-Da-dأبجد])[).]/); if (!m) return null; const ch = m[1] || m[0]; return 'ⓐⓑⓒⓓⒶⒷⒸⒹabcdABCDأبجد'.indexOf(ch) % 4; };
