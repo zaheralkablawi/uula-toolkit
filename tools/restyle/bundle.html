@@ -3967,6 +3967,10 @@ async function insertTemplate(tid) {
   try {
     const id = await currentId();
     if (!id) { tsay(L('حدّد شريحة أولًا.', 'Select a slide first.')); return; }
+    if (tid === 'cancelled') {
+      const r = await suspendSelected().catch(() => ({ n: 0 }));
+      if (r.n) { tsay(suspendSay(r)); return; }
+    }
     if (tid === 'grid') { const n = await gridSelected(id); if (n) { tsay(n > 1 ? L('وُضعت الشبكة البيانية مكان ' + n + ' صور، كلٌّ بمقاسها.', 'The graph grid replaced ' + n + ' pictures, each at its size.') : L('وُضعت الشبكة البيانية مكان الصورة وبمقاسها.', 'The graph grid replaced the picture, at its size.')); return; } }
     if (UR.WRAP[tid] && await wrapSelected(id, tid)) { tsay(L('وُضعت الحاوية حول العناصر المحددة.', 'The container was put around the selected objects.')); return; }
     const pkg = await UR.openPackage(await exportSlide(id));
@@ -4162,46 +4166,59 @@ async function quietMark(role, keepColour) {
 }
 // «Suspended»: a yellow frame over the selection, the content faded under it, and «مـعـلـق» with the warning
 // triangle in the middle — drawn in place and grouped (the content itself stays as it is, under it)
+function suspendSay(r) {
+  if (!r.n) return L('حدّد في الشريحة ما تريد تعليقه أولًا.', 'Select what to suspend on the slide first.');
+  return L('وُضع إطار «معلّق» حول المحدد.', 'The «suspended» frame was put around the selection.') + (r.failed && r.failed.length ? L(' لم يقبل الباوربوينت: ', ' PowerPoint refused: ') + r.failed.join('، ') : '');
+}
 async function suspendSelected() {
   return run(async ctx => {
     const slides = ctx.presentation.getSelectedSlides(); slides.load('items/id');
     const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/left,items/top,items/width,items/height');
     await ctx.sync();
-    if (!slides.items.length || !shapes.items.length) return 0;
+    if (!slides.items.length || !shapes.items.length) return { n: 0 };
     const sh = ctx.presentation.slides.getItem(slides.items[0].id).shapes;
     const x0 = Math.min(...shapes.items.map(s => s.left)), y0 = Math.min(...shapes.items.map(s => s.top));
     const x1 = Math.max(...shapes.items.map(s => s.left + s.width)), y1 = Math.max(...shapes.items.map(s => s.top + s.height));
     const pad = 6, X = x0 - pad, Y = y0 - pad, Wd = x1 - x0 + 2 * pad, Ht = y1 - y0 + 2 * pad;
-    const box = sh.addGeometricShape('RoundRectangle', { left: X, top: Y, width: Wd, height: Ht });
-    box.name = 'UULA Suspended Frame';
-    box.fill.setSolidColor('#FFFFFF'); box.fill.transparency = 0.22;
-    box.lineFormat.color = '#F5C242'; box.lineFormat.weight = 1.5;
-    try { box.adjustments.set(0, Math.min(0.5, 5 / Math.min(Wd, Ht))); } catch (e) {}
+    const failed = [];
+    // each step on its own: one refusal does not stop the rest
+    const step = async (what, fn) => { try { fn(); await ctx.sync(); return true; } catch (e) { failed.push(what); return false; } };
+    let box = null;
+    if (!(await step('frame', () => { box = sh.addGeometricShape('RoundRectangle', { left: X, top: Y, width: Wd, height: Ht }); })))
+      await step('frame2', () => { box = sh.addGeometricShape('Rectangle', { left: X, top: Y, width: Wd, height: Ht }); });
+    if (!box) return { n: 0, failed };
+    await step('name', () => { box.name = 'UULA Suspended Frame'; });
+    // white, 40% see-through: the content shows faded under it; the yellow line is solid
+    await step('fill', () => { box.fill.setSolidColor('#FFFFFF'); });
+    await step('see-through', () => { box.fill.transparency = 0.4; });
+    await step('line', () => { box.lineFormat.visible = true; box.lineFormat.color = '#F5C242'; box.lineFormat.weight = 1.5; });
+    await step('corners', () => { box.adjustments.set(0, Math.min(0.5, 5 / Math.min(Wd, Ht))); });
     const tw = 74, th = 30, tri = 20, gap = 4, cx = X + Wd / 2, cy = Y + Ht / 2;
     const left0 = cx - (tw + gap + tri) / 2;
-    const t = sh.addTextBox('مـعـلـق', { left: left0, top: cy - th / 2, width: tw, height: th });
-    t.name = 'UULA Suspended Label';
-    const tf = t.textFrame; tf.wordWrap = false; tf.autoSizeSetting = 'AutoSizeNone'; tf.verticalAlignment = 'Middle';
-    tf.leftMargin = 0; tf.rightMargin = 0; tf.topMargin = 0; tf.bottomMargin = 0;
-    const f = tf.textRange.font; f.name = 'UULA Sans'; f.size = 20; f.bold = true; f.color = '#F5C242';
-    tf.textRange.paragraphFormat.horizontalAlignment = 'Center';
-    const g = sh.addGeometricShape('Triangle', { left: left0 + tw + gap, top: cy - tri / 2 + 1, width: tri, height: tri * 0.88 });
-    g.name = 'UULA Suspended Sign';
-    g.fill.setSolidColor('#FFD54A'); g.lineFormat.color = '#1A1A1A'; g.lineFormat.weight = 0.9;
-    try {
-      const gt = g.textFrame; gt.leftMargin = 0; gt.rightMargin = 0; gt.topMargin = 3; gt.bottomMargin = 0; gt.verticalAlignment = 'Middle';
-      gt.textRange.text = '!'; gt.textRange.font.size = 11; gt.textRange.font.bold = true; gt.textRange.font.color = '#1A1A1A'; gt.textRange.paragraphFormat.horizontalAlignment = 'Center';
-    } catch (e) {}
-    [box, t, g].forEach(x => x.load('id')); await ctx.sync();
-    try { const grp = sh.addGroup([box.id, t.id, g.id]); grp.name = 'UULA Suspended'; await ctx.sync(); } catch (e) {}
-    return shapes.items.length;
+    let t = null, g = null;
+    await step('word', () => { t = sh.addTextBox('مـعـلـق', { left: left0, top: cy - th / 2, width: tw, height: th }); t.name = 'UULA Suspended Label'; });
+    if (t) {
+      await step('word box', () => { const tf = t.textFrame; tf.wordWrap = false; tf.autoSizeSetting = 'AutoSizeNone'; tf.verticalAlignment = 'Middle'; tf.leftMargin = 0; tf.rightMargin = 0; tf.topMargin = 0; tf.bottomMargin = 0; });
+      await step('word look', () => { const f = t.textFrame.textRange.font; f.name = 'UULA Sans'; f.size = 20; f.bold = true; f.color = '#F5C242'; });
+      await step('word centre', () => { t.textFrame.textRange.paragraphFormat.horizontalAlignment = 'Center'; });
+      await step('word clear', () => { t.fill.clear(); t.lineFormat.visible = false; });
+    }
+    await step('sign', () => { g = sh.addGeometricShape('Triangle', { left: left0 + tw + gap, top: cy - tri / 2 + 1, width: tri, height: tri * 0.88 }); g.name = 'UULA Suspended Sign'; });
+    if (g) {
+      await step('sign look', () => { g.fill.setSolidColor('#FFD54A'); g.lineFormat.visible = true; g.lineFormat.color = '#1A1A1A'; g.lineFormat.weight = 0.9; });
+      await step('sign mark', () => { const gt = g.textFrame; gt.leftMargin = 0; gt.rightMargin = 0; gt.topMargin = 3; gt.bottomMargin = 0; gt.verticalAlignment = 'Middle'; gt.textRange.text = '!'; gt.textRange.font.size = 11; gt.textRange.font.bold = true; gt.textRange.font.color = '#1A1A1A'; gt.textRange.paragraphFormat.horizontalAlignment = 'Center'; });
+    }
+    const parts = [box, t, g].filter(Boolean);
+    await step('ids', () => parts.forEach(x => x.load('id')));
+    await step('group', () => { const grp = sh.addGroup(parts.map(x => x.id)); grp.name = 'UULA Suspended'; });
+    return { n: shapes.items.length, failed: failed.filter(f => f !== 'frame' && f !== 'corners') };
   });
 }
 async function pinRole(role, keepColour) {
   if (busy || !supported) return;
   busy = true; lock(); rsay('');
   if (role === 'cancelled') {
-    try { const n = await suspendSelected(); rsay(n ? L('وُضع إطار «معلّق» حول المحدد.', 'The «suspended» frame was put around the selection.') : L('حدّد في الشريحة ما تريد تعليقه أولًا.', 'Select what to suspend on the slide first.')); }
+    try { rsay(suspendSay(await suspendSelected())); }
     catch (e) { rsay(L('تعذّر: ', 'Could not: ') + errText(e)); }
     finally { busy = false; lock(); }
     return;
