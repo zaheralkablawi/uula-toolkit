@@ -4049,7 +4049,7 @@ const ROLE_TIP = {
   bullets: ['قائمة نقاط، كل سطر نقطة', 'A bullet list, one point per line'],
   qhead: ['عنوان قسم الأسئلة (أحمر عريض)', 'Heading of a questions section (bold red)'],
   question: ['نص السؤال مع علامة السؤال الحمراء', 'Question text with the red question mark'],
-  choice: ['خيارات سؤال الاختيار من متعدد', 'The choices of a multiple-choice question'],
+  choice: ['يحوّل المحدد إلى خيارات سؤال اختيار من متعدد (ⓐ ⓑ ⓒ ⓓ)', 'Turns the selection into the options of a multiple-choice question (ⓐ ⓑ ⓒ ⓓ)'],
   answer: ['يعلّم المحدد كحل ويلوّن نصه بالأزرق، فيُخفى عند «إخفاء الحلول». لا يتحرك شيء في الشريحة.', 'Marks the selection as a solution and colours its text blue, so «Hide solutions» hides it. Nothing on the slide moves.'],
   correct: ['الخيار الصحيح بالأزرق العريض، ويتحول للأسود عند «إخفاء الحلول»', 'The correct choice in bold blue, turns black when solutions are hidden'],
   given: ['شكل أو نص من السؤال نفسه: يبقى ظاهرًا عند «إخفاء الحلول» حتى لو كان أزرق', 'A shape or text that belongs to the question: it stays when solutions are hidden, even if blue'],
@@ -4096,8 +4096,7 @@ const MERGED = [
   { g: 'أسئلة', ge: 'Questions', items: [
     { id: 'qhead', ar: 'عنوان الأسئلة', en: 'Questions heading', col: 'FF0000', role: 'qhead', tpl: 'qhead' },
     { id: 'question', ar: 'سؤال', en: 'Question', col: 'FF0000', role: 'question', tpl: 'question' },
-    { id: 'choice', ar: 'خيارات السؤال', en: 'Choices', col: 'FFFFFF', role: 'choice' },
-    { id: 'mcq', ar: 'اختيار متعدد', en: 'Multiple choice', col: 'FF0000', tpl: 'mcq' },
+    { id: 'mcq', ar: 'اختيار متعدد', en: 'Multiple choice', col: 'FF0000', role: 'choice', tpl: 'mcq' },
     { id: 'qa', ar: 'سؤال وحله', en: 'Question + solution', col: '1F71DE', tpl: 'qa' },
     { id: 'qqr', ar: 'سؤال مع QR', en: 'Question + QR', col: 'FF0000', tpl: 'qqr' },
     { id: 'problem', ar: 'مسألة', en: 'Problem', col: '00B050', tpl: 'problem' }] },
@@ -4417,6 +4416,7 @@ async function pinRole(role, keepColour) {
     await unmark(newId);
     rsay(role === 'given' ? L('عُلِّم كشكل من السؤال: يبقى ظاهرًا عند إخفاء الحلول.', 'Marked as part of the question: it stays when solutions are hidden.')
       : role === 'correct' ? L('عُلِّم كخيار صحيح (أزرق عريض): يتحول للأسود عند إخفاء الحلول.', 'Marked as the correct choice (bold blue): it turns black when solutions are hidden.')
+      : role === 'choice' ? L('حُوِّل إلى خيارات «اختيار متعدد».', 'Turned into multiple-choice options.')
       : ITEM[role] ? L('حُوِّل إلى «' + ITEM[role].ar + '».', 'Turned into «' + ITEM[role].en + '».') : L('تم.', 'Done.'));
   } catch (e) { if (slideId) await clearSel(slideId); rsay(L('تعذّر التحويل: ', 'Could not restyle: ') + errText(e)); }
   finally { busy = false; lock(); }
