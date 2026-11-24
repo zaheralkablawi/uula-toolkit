@@ -4929,11 +4929,28 @@ async function distributeSlide(id, only) {
     }
     const lift = Math.max(0, bands[0].top - top);
     const room = floor - (bands[bands.length - 1].bottom - lift);
-    const share = Math.floor(room / bands.length / G2) * G2;
-    if (lift < 0.5 && share < G2) return { status: 'full' };
-    bands.forEach((b, k) => { const dy = k * Math.max(0, share) - lift; if (Math.abs(dy) > 0.2) b.items.forEach(s => { s.top = s.top + dy; }); });
+    // the free space goes into the gaps between the parts (the last part ends at the bottom of the room), in half
+    // page-grid steps; only real gaps get it (a question and the next one, a question and its options…), not lines
+    // that sit tight together (the options of one question), so the look of each part stays as it is
+    const G = G2 / 2, units = Math.max(0, Math.floor((room + 0.3) / G));
+    const gaps = bands.slice(0, -1).map((b, k) => ({ k, g: bands[k + 1].top - b.bottom }));
+    let cand = gaps.filter(x => x.g >= G2 * 0.75);
+    if (!cand.length) cand = gaps;
+    if (lift < 0.5 && (!cand.length || units < 1)) return { status: 'full' };
+    const add = new Array(bands.length).fill(0);
+    if (cand.length) {
+      const per = Math.floor(units / cand.length); let rem = units - per * cand.length;
+      cand.forEach(x => { add[x.k] = per; });
+      // what is left over goes to the widest gaps first (between questions rather than inside one)
+      for (const x of cand.slice().sort((p, q) => q.g - p.g || p.k - q.k)) { if (rem <= 0) break; add[x.k]++; rem--; }
+    }
+    // too little room for a half step in every gap: every gap gets the same small share instead (fair before on-grid)
+    const step = cand.length && units < cand.length ? Math.max(0, room) / cand.length / G : 1;
+    if (step !== 1) cand.forEach(x => { add[x.k] = 1; });
+    let dy = -lift;
+    bands.forEach((b, k) => { if (Math.abs(dy) > 0.2) b.items.forEach(s => { s.top = s.top + dy; }); dy += add[k] * G * step; });
     await ctx.sync();
-    return { status: 'ok', lines: Math.max(0, Math.round(share / G2)), bands: bands.length };
+    return { status: 'ok', pts: Math.round(units * G), gaps: cand.length };
   });
 }
 // horizontal: to the right / left margin (selected objects only, if any are selected on the current slide)
@@ -4979,7 +4996,7 @@ async function spacingRun(kind) {
       prog(k / ids.length); say(L('تنسيق المسافات ', 'Spacing ') + (k + 1) + L(' من ', ' of ') + ids.length + '…');
       try {
         if (kind === 'v') { const r = await spaceSlide(ids[k], sel); if (r.over) over.push(ids[k]); }
-        else if (kind === 'd') { const r = await distributeSlide(ids[k], sel); if (r.status !== 'ok') skipped.push({ id: ids[k], why: r.status }); else spread.push(r.lines); }
+        else if (kind === 'd') { const r = await distributeSlide(ids[k], sel); if (r.status !== 'ok') skipped.push({ id: ids[k], why: r.status }); else spread.push(r.pts); }
         else await alignSlide(ids[k], hMode, scope === 'cur');
       } catch (e) { line('err', '✗ ' + esc(errText(e))); }
     }
@@ -4987,7 +5004,7 @@ async function spacingRun(kind) {
     if (over.length) { const all = await allIds(); line('warn', L('• المحتوى أطول من الصفحة: ', '• Longer than the page: ') + slideLinks(over, i => all.indexOf(i) + 1)); }
     if (kind === 'd') {
       const all = await allIds(), num = i => all.indexOf(i) + 1;
-      if (spread.length) line('ok', L('✓ وُزّعت المساحة الفارغة بالتساوي على الشريحة (' + Math.min(...spread) + (Math.max(...spread) !== Math.min(...spread) ? '–' + Math.max(...spread) : '') + ' سطر إضافي تحت كل جزء).', '✓ The free space was shared out evenly over the slide (' + Math.min(...spread) + '+ extra lines under each part).'));
+      if (spread.length) line('ok', L('✓ وُزّعت المساحة الفارغة بالتساوي على المسافات بين أجزاء الشريحة.', '✓ The free space was shared out evenly between the parts of the slide.'));
       const why = { full: L('لا توجد مساحة فارغة', 'no free space'), none: L('فارغة', 'empty') };
       for (const w of ['full', 'none']) { const list = skipped.filter(x => x.why === w).map(x => x.id); if (list.length) line('', '• ' + why[w] + ': ' + slideLinks(list, num)); }
     }
