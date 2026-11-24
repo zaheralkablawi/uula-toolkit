@@ -150,9 +150,10 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
     <div class="pvt">
       <button type="button" class="ib" id="picBtn" data-ti="fromPic" title="تحويل الصورة المحددة إلى شكل"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><rect x="3" y="4" width="10" height="9" rx="1.5"/><path d="M3 11l3-3 3 3"/><path d="M15 9h3l-1.5-1.5M18 9l-1.5 1.5"/><path d="M14 20l3.5-6 3.5 6z"/></svg></button>
       <button type="button" class="ib" id="undoBtn" data-ti="undo" title="تراجع"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
-      <button type="button" class="ib" id="rotBtn" data-ti="rot" title="تدوير"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></svg></button>
+      <button type="button" class="ib" id="rotBtn" data-ti="rot" title="تدوير"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5L15 9l-6 4.5z" transform="rotate(-20 12 9)"/><path d="M5 17a8 8 0 0 0 14 0"/><path d="M19 13v4h-4"/></svg></button>
       <button type="button" class="ib" id="flipBtn" data-ti="flip" title="انعكاس"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3v18M9 7L3 17h6zM15 7l6 10h-6z"/></svg></button>
-      <button type="button" class="ib" id="resetBtn" data-ti="reset" title="الشكل الأصلي"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg></button>
+      <button type="button" class="ib" id="resetBtn" data-ti="reset" title="الشكل الأصلي"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v5h5"/></svg></button>
+      <button type="button" class="ib" id="clearBtn" data-ti="clear" title="مسح الرسم"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg></button>
     </div>
     <button type="button" class="ins" id="insert" data-ti="insert" title="إدراج"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg><span id="insTxt" data-i="insert">إدراج</span></button>
   </div>
@@ -221,7 +222,7 @@ const T={
   editing:['تعديل شكل محدد','Editing a selected shape'], cancel:['إلغاء','Cancel'],
   insert:['إدراج','Insert'], update:['تحديث','Update'], onShape:['على الشكل','On the shape'], onSolid:['على المجسم','On the solid'], onCircle:['على الدائرة','On the circle'],
   style:['التنسيق','Style'], noColor:['بلا لون','No color'], booklet:['ألوان المذكرة','Booklet colors'], more:['ألوان أخرى','More colors'], custom:['لون آخر…','More…'], close:['إغلاق','Close'],
-  upd:['تحديث جديد','New update'], menu:['القائمة','Menu'], undo:['تراجع','Undo'], rot:['تدوير','Rotate'], flip:['انعكاس','Flip'], reset:['الشكل الأصلي','Original shape'],
+  upd:['تحديث جديد','New update'], menu:['القائمة','Menu'], undo:['تراجع','Undo'], rot:['تدوير','Rotate'], flip:['انعكاس','Flip'], reset:['الشكل الأصلي','Original shape'], clear:['مسح الرسم','Clear the drawing'], emptyHint:['الرسم فارغ: اختر شكلًا من الأعلى','Empty: choose a shape above'],
   cLine:['لون الخط','Line color'], width:['سماكة الخط','Line width'], solid:['خط متصل','Solid line'], dash:['خط متقطع','Dashed line'], cFill:['التعبئة','Fill'], cText:['لون الكتابة','Text color'], cMark:['لون العلامات','Marks color'], fs:['حجم الكتابة','Text size'], ptShow:['النقاط على الرؤوس','Points on vertices'], nmText:['الأسماء حروف عادية','Names as normal letters'], dgAr:['أرقام هندية ١٢٣','Arabic-Indic digits ١٢٣'], dgEn:['أرقام إنجليزية 123','Western digits 123'], nmSym:['الأسماء رموزًا (خط Mazeri)','Names as math symbols (Mazeri font)'], cPt:['لون النقاط','Points color'], ptR:['حجم النقطة','Point size'], ptFull:['نقطة مغلقة','Filled point'], ptHollow:['نقطة مفرغة','Hollow point'], ptS:['صغيرة','Small'], ptM:['متوسطة','Medium'], ptL:['كبيرة','Large'],
   sca:['مختلف','Scalene'], iso:['متساوي الساقين','Isosceles'], equ:['متطابق','Equilateral'], rt:['قائم','Right'],
   hdash:['متقطعة','Dashed'], hhide:['مخفية','Hidden'], hsolid:['متصلة','Solid'],
@@ -478,7 +479,7 @@ let SOL=null, REG=[], FREE0=null;
 // نقطة لها اسم: يمكن إخفاء اسمها أو تغييره بالنقر عليها
 function lab2(p,pos,key,def){ REG.push({p,key,def}); if(!(S.hide&&S.hide[key])) nm(pos,(S.nm&&S.nm[key]!=null)?S.nm[key]:def); }
 function bboxPts(P){ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; P.forEach(p=>{ x0=Math.min(x0,p[0]); y0=Math.min(y0,p[1]); x1=Math.max(x1,p[0]); y1=Math.max(y1,p[1]); }); return {x:x0,y:y0,w:x1-x0,h:y1-y0}; }
-function build(){ PR=[]; REG=[]; if(S.tab==='p') buildPlane(); else if(S.tab==='c') buildCircle(); else buildSolid(); return PR; }
+function build(){ PR=[]; REG=[]; if(S.empty) return PR; if(S.tab==='p') buildPlane(); else if(S.tab==='c') buildCircle(); else buildSolid(); return PR; }
 
 /* نقطة على قطع ناقص بزاوية مرئية (مثل أقواس باوربوينت) */
 function ellPt(c,rx,ry,a){ const t=rad(a), co=Math.cos(t), si=Math.sin(t), k=rx*ry/Math.sqrt((ry*co)**2+(rx*si)**2); return [c[0]+k*co,c[1]+k*si]; }
@@ -512,7 +513,8 @@ function outSVG(pr){ const b=bboxPrims(pr), pad=4, x=b.x-pad, y=b.y-pad, w=b.w+2
 let SEL=null;   // {k:'side'|'vert', i}
 function draw(){
   const pr=build(); let h='<g>'+pr.map(primSVG).join('')+'</g><g id="hits">';
-  if(S.tab==='p'&&S.p.kind==='free'){ const G=S.p, P=G.pts;
+  if(S.empty){}
+  else if(S.tab==='p'&&S.p.kind==='free'){ const G=S.p, P=G.pts;
     G.sides.forEach((sd,i)=>{ const a=P[sd.a], b=P[sd.b]; h+=`<path class="hs${SEL&&SEL.k==='side'&&SEL.i===i?' sel':''}" data-h="side" data-i="${i}" d="M${f2(a[0])} ${f2(a[1])}L${f2(b[0])} ${f2(b[1])}"/>`; });
     P.forEach((p,i)=>{ h+=`<circle class="hv${(SEL&&SEL.k==='vert'&&SEL.i===i)||LINK===i?' sel':''}" data-h="vert" data-i="${i}" cx="${f2(p[0])}" cy="${f2(p[1])}" r="5"/>`; });
   } else if(S.tab==='p'){ const P=S.p.pts, n=P.length;
@@ -537,6 +539,7 @@ function draw(){
   const own=new Set(); if(S.tab==='c') ['A','B','D','E','F','G','H','I','C'].forEach(k=>own.add('c:'+k));
   const hs=[...h.matchAll(/data-h="sz"[^>]*cx="([\d.-]+)" cy="([\d.-]+)"/g)].map(m=>[+m[1],+m[2]]);
   REG.forEach(r=>{ if(own.has(r.key)||hs.some(q=>len(sub(q,r.p))<4)) return; h+=`<circle class="hv hp" data-h="pt" data-i="${esc(r.key)}" cx="${f2(r.p[0])}" cy="${f2(r.p[1])}" r="4.5"/>`; });
+  if(S.empty) h+=`<text x="160" y="125" text-anchor="middle" dominant-baseline="central" font-family="UULA Sans" font-size="13" fill="#9aa3b0">${esc(L('emptyHint'))}</text>`;
   $('fig').innerHTML=h+'</g>';
 }
 function svgPt(e){ const s=$('fig'), m=s.getScreenCTM().inverse(); return [e.clientX*m.a+e.clientY*m.c+m.e, e.clientX*m.b+e.clientY*m.d+m.f]; }
@@ -708,13 +711,13 @@ $('segFree').innerHTML=[['move','ftMove'],['link','ftLink'],['addpt','ftAdd'],['
 $('segFree').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; FT=b.dataset.k; LINK=null; closePop(); syncUI(); draw(); });
 $('segHid').innerHTML=[['dash','hdash'],['hide','hhide'],['solid','hsolid']].map(([k,t])=>`<button type="button" data-k="${k}" data-i="${t}">${L(t)}</button>`).join('');
 
-$('tabs').addEventListener('click',e=>{ const b=e.target.closest('[data-tab]'); if(!b) return; push(); S.tab=b.dataset.tab; closePop(); syncUI(); draw(); save(); });
-$('galP').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; push(); const k=b.dataset.k; closePop();
+$('tabs').addEventListener('click',e=>{ const b=e.target.closest('[data-tab]'); if(!b) return; push(); S.tab=b.dataset.tab; S.empty=false; closePop(); syncUI(); draw(); save(); });
+$('galP').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; push(); const k=b.dataset.k; closePop(); S.empty=false;
   if(k==='circ'){ S.tab='c'; } else if(k==='free'){ S.p=mkFree([[160,35],[45,205],[275,205],[130,205]],[[0,1],[1,3],[3,2],[2,0],[0,3]]); S.p.on={3:[1,2,(130-45)/230]}; FT='move'; } else S.p=mkPlane(k,k==='tri'?(S.p.kind==='tri'?S.p.sub:'iso'):S.p.sub||'iso',S.p.n||6);
   syncUI(); draw(); save(); });
-$('galS').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; push(); S.s.kind=b.dataset.k; syncUI(); draw(); save(); });
-$('segTri').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; push(); const keep=S.p; S.p=mkPlane('tri',b.dataset.k,keep.n); S.p.verts.forEach((v,i)=>{ if(keep.verts[i]) v.name=keep.verts[i].name; }); closePop(); syncUI(); draw(); save(); });
-$('segN').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; push(); S.p=mkPlane('poly','iso',+b.dataset.k); closePop(); syncUI(); draw(); save(); });
+$('galS').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; push(); S.s.kind=b.dataset.k; S.empty=false; syncUI(); draw(); save(); });
+$('segTri').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; push(); S.empty=false; const keep=S.p; S.p=mkPlane('tri',b.dataset.k,keep.n); S.p.verts.forEach((v,i)=>{ if(keep.verts[i]) v.name=keep.verts[i].name; }); closePop(); syncUI(); draw(); save(); });
+$('segN').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; push(); S.empty=false; S.p=mkPlane('poly','iso',+b.dataset.k); closePop(); syncUI(); draw(); save(); });
 $('segHid').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; push(); S.s.hidden=b.dataset.k; syncUI(); draw(); save(); });
 
 /* ---------- عناصر «على الشكل» ---------- */
@@ -785,7 +788,8 @@ document.addEventListener('pointerdown',e=>{ if(!$('pal').hidden&&!e.target.clos
 $('undoBtn').onclick=undo;
 $('rotBtn').onclick=()=>{ if(S.tab!=='p') return; push(); const c=cen(S.p.pts); S.p.pts=S.p.pts.map(p=>rot(p,c,-15)); draw(); save(); };
 $('flipBtn').onclick=()=>{ if(S.tab!=='p') return; push(); const c=cen(S.p.pts); S.p.pts=S.p.pts.map(p=>[2*c[0]-p[0],p[1]]); draw(); save(); };
-$('resetBtn').onclick=()=>{ push(); const d=defaults(); if(S.tab==='p'&&S.p.kind==='free'){ S.p.sides.forEach(s=>Object.assign(s,{len:'',show:false,ticks:0,par:0,dash:false})); S.p.angs={}; } else if(S.tab==='p') S.p=mkPlane(S.p.kind,S.p.sub,S.p.n); else if(S.tab==='c') S.c=d.c; else { S.s.size[S.s.kind]=d.s.size[S.s.kind]; S.s.lab[S.s.kind]=d.s.lab[S.s.kind]; }
+$('clearBtn').onclick=()=>{ push(); closePop(); S.empty=true; setEdit(null); syncUI(); draw(); save(); };
+$('resetBtn').onclick=()=>{ push(); S.empty=false; const d=defaults(); if(S.tab==='p'&&S.p.kind==='free'){ S.p.sides.forEach(s=>Object.assign(s,{len:'',show:false,ticks:0,par:0,dash:false})); S.p.angs={}; } else if(S.tab==='p') S.p=mkPlane(S.p.kind,S.p.sub,S.p.n); else if(S.tab==='c') S.c=d.c; else { S.s.size[S.s.kind]=d.s.size[S.s.kind]; S.s.lab[S.s.kind]=d.s.lab[S.s.kind]; }
   closePop(); syncUI(); draw(); save(); };
 document.addEventListener('keydown',e=>{ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'&&!e.target.closest('input')){ e.preventDefault(); undo(); } if(e.key==='Escape'){ closePop(); $('pal').hidden=true; } });
 
@@ -801,7 +805,7 @@ function syncUI(){
   $('optN').hidden=!(tab==='p'&&S.p.kind==='poly');
   $('optFree').hidden=!(tab==='p'&&S.p.kind==='free'); document.querySelectorAll('#segFree button').forEach(b=>setP(b,b.dataset.k===FT)); document.querySelectorAll('#segN button').forEach(b=>setP(b,+b.dataset.k===S.p.pts.length));
   $('optHid').hidden=tab!=='s'; document.querySelectorAll('#segHid button').forEach(b=>setP(b,b.dataset.k===S.s.hidden));
-  $('rotBtn').disabled=$('flipBtn').disabled=tab!=='p';
+  $('rotBtn').disabled=$('flipBtn').disabled=tab!=='p'||!!S.empty; $('clearBtn').disabled=!!S.empty;
   $('onLab').textContent=L(tab==='p'?'onShape':tab==='c'?'onCircle':'onSolid');
   $('hint').textContent=L(tab==='p'?'hintP':tab==='c'?'hintC':'hintS');
   if(tab==='p'&&S.p.kind==='free') $('hint').textContent=L(FT==='link'?'hintLink':FT==='addpt'?'hintAdd':FT==='del'?'hintDel':'hintFree');
@@ -902,6 +906,7 @@ async function insertWord(svg,json){
 }
 $('insert').onclick=async()=>{
   if(!HOST){ msg(L('noHost'),'bad'); return; }
+  if(S.empty){ msg(L('emptyHint'),'bad'); return; }
   closePop(); const pr=build(), bb=bboxPrims(pr), out=outSVG(pr), json=JSON.stringify({s:S,w:bb.w});
   $('insert').disabled=true; msg(L('inserting'));
   try{
@@ -1159,7 +1164,7 @@ async function pictureToShape(src,ed){
   msg(L('picReading'));
   const im=await loadImg(src), r=recognize(im);
   if(!r){ msg(L('picFail'),'bad'); return; }
-  push(); closePop();
+  push(); closePop(); S.empty=false;
   const A=ed&&ed.width?ed.width/r.W:0;   // من بكسلات الصورة إلى نقاط الشريحة
   let fit;
   if(r.type==='circle'){ const s=Math.min(1.5,170/(2*r.r)); fit={s,cx:r.c[0],cy:r.c[1]}; S.tab='c'; const d=defaults().c; S.c=d; S.c.r=r.r*s; S.c.c=[160,125];

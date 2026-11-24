@@ -130,6 +130,7 @@
       ['#rotBtn', E('يدير الشكل ١٥° عكس عقارب الساعة.', 'Rotates the shape 15° counterclockwise.', 'تدوير', 'Rotate')],
       ['#flipBtn', E('يعكس الشكل يمينًا ويسارًا.', 'Flips the shape left to right.', 'انعكاس', 'Flip')],
       ['#resetBtn', E('يرجع الشكل إلى وضعه الأصلي ويمسح العلامات.', 'Returns the shape to its original form and clears the marks.', 'الشكل الأصلي', 'Original shape')],
+      ['#clearBtn', E('يمسح كل ما في رقعة الرسم. للتراجع اضغط «تراجع»، أو اختر شكلًا جديدًا.', 'Clears everything in the drawing area. Use Undo to bring it back, or choose a new shape.', 'مسح الرسم', 'Clear the drawing')],
       ['#edCancel', E('يلغي تعديل الشكل المحدد، فيُدرج الشكل التالي جديدًا.', 'Stops editing the selected shape; the next insert adds a new one.')],
       ['#chips .chip', E('يُظهر هذا العنصر على الشكل أو يخفيه.', 'Shows or hides this item on the shape.')],
       ['#dims input', E('النص المكتوب على هذا البعد في الرسم.', 'The text written on this dimension.')],
