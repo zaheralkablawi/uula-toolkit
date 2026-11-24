@@ -155,6 +155,8 @@
       ['#cText', E('لون أسماء الرؤوس والأطوال والقياسات.', 'Color of names, lengths and measures.', 'لون الكتابة', 'Text color')],
       ['#cMark', E('لون علامات التساوي والتوازي والزوايا.', 'Color of equal, parallel and angle marks.', 'لون العلامات', 'Marks color')],
       ['#fsSel', E('حجم الكتابة على الشكل بخط المذكرة.', 'Text size on the shape, in the booklet font.', 'حجم الكتابة', 'Text size')],
+      ['#dgAr', E('الأطوال والقياسات بالأرقام الهندية (١٢٣).', 'Lengths and measures in Arabic-Indic digits (١٢٣).', 'أرقام هندية', 'Arabic-Indic digits')],
+      ['#dgEn', E('الأطوال والقياسات بالأرقام الإنجليزية (123).', 'Lengths and measures in Western digits (123).', 'أرقام إنجليزية', 'Western digits')],
       ['#nmText', E('أسماء الرؤوس والنقاط بحروف عادية بخط المذكرة.', 'Vertex and point names as normal letters in the booklet font.', 'حروف عادية', 'Normal letters')],
       ['#nmSym', E('أسماء الرؤوس والنقاط رموزًا رياضية بخط Mazeri Arabic Math symbol. يجب أن يكون الخط مثبتًا على الجهاز.', 'Vertex and point names as math symbols in the Mazeri Arabic Math symbol font. The font must be installed.', 'رموز رياضية', 'Math symbols')],
       ['#ptShow', E('يضع نقطة على كل رأس وعلى النقاط المسماة.', 'Puts a point on every vertex and named point.', 'النقاط', 'Points')],

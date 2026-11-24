@@ -179,9 +179,13 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
       <select class="sel" id="fsSel" data-ti="fs" title="حجم الكتابة"></select>
     </div>
     <div class="sty">
+      <button type="button" class="q" id="dgAr" data-ti="dgAr" title="أرقام هندية"><b style="font-size:11px">١٢</b></button>
+      <button type="button" class="q" id="dgEn" data-ti="dgEn" title="أرقام إنجليزية"><b style="font-size:11px">12</b></button>
+      <span class="sep"></span>
       <button type="button" class="q" id="nmText" data-ti="nmText" title="الأسماء حروف عادية"><b>أ</b></button>
       <button type="button" class="q" id="nmSym" data-ti="nmSym" title="الأسماء رموزًا"><b style="font-family:'Mazeri Arabic Math symbol';font-weight:400;font-size:17px">A</b></button>
-      <span class="sep"></span>
+    </div>
+    <div class="sty">
       <button type="button" class="q" id="ptShow" data-ti="ptShow" title="النقاط على الرؤوس"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 19L12 5l7 14"/><circle cx="12" cy="5" r="2.6" fill="currentColor"/><circle cx="5" cy="19" r="2.6" fill="currentColor"/><circle cx="19" cy="19" r="2.6" fill="currentColor"/></svg></button>
       <button type="button" class="q cbtn" id="cPt" data-k="pt" data-ti="cPt" title="لون النقاط"><svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="11" r="5" fill="currentColor"/></svg><span class="cbar"></span></button>
       <select class="sel" id="ptSel" style="max-width:80px" data-ti="ptR" title="حجم النقطة"></select>
@@ -218,7 +222,7 @@ const T={
   insert:['إدراج','Insert'], update:['تحديث','Update'], onShape:['على الشكل','On the shape'], onSolid:['على المجسم','On the solid'], onCircle:['على الدائرة','On the circle'],
   style:['التنسيق','Style'], noColor:['بلا لون','No color'], booklet:['ألوان المذكرة','Booklet colors'], more:['ألوان أخرى','More colors'], custom:['لون آخر…','More…'], close:['إغلاق','Close'],
   upd:['تحديث جديد','New update'], menu:['القائمة','Menu'], undo:['تراجع','Undo'], rot:['تدوير','Rotate'], flip:['انعكاس','Flip'], reset:['الشكل الأصلي','Original shape'],
-  cLine:['لون الخط','Line color'], width:['سماكة الخط','Line width'], solid:['خط متصل','Solid line'], dash:['خط متقطع','Dashed line'], cFill:['التعبئة','Fill'], cText:['لون الكتابة','Text color'], cMark:['لون العلامات','Marks color'], fs:['حجم الكتابة','Text size'], ptShow:['النقاط على الرؤوس','Points on vertices'], nmText:['الأسماء حروف عادية','Names as normal letters'], nmSym:['الأسماء رموزًا (خط Mazeri)','Names as math symbols (Mazeri font)'], cPt:['لون النقاط','Points color'], ptR:['حجم النقطة','Point size'], ptFull:['نقطة مغلقة','Filled point'], ptHollow:['نقطة مفرغة','Hollow point'], ptS:['صغيرة','Small'], ptM:['متوسطة','Medium'], ptL:['كبيرة','Large'],
+  cLine:['لون الخط','Line color'], width:['سماكة الخط','Line width'], solid:['خط متصل','Solid line'], dash:['خط متقطع','Dashed line'], cFill:['التعبئة','Fill'], cText:['لون الكتابة','Text color'], cMark:['لون العلامات','Marks color'], fs:['حجم الكتابة','Text size'], ptShow:['النقاط على الرؤوس','Points on vertices'], nmText:['الأسماء حروف عادية','Names as normal letters'], dgAr:['أرقام هندية ١٢٣','Arabic-Indic digits ١٢٣'], dgEn:['أرقام إنجليزية 123','Western digits 123'], nmSym:['الأسماء رموزًا (خط Mazeri)','Names as math symbols (Mazeri font)'], cPt:['لون النقاط','Points color'], ptR:['حجم النقطة','Point size'], ptFull:['نقطة مغلقة','Filled point'], ptHollow:['نقطة مفرغة','Hollow point'], ptS:['صغيرة','Small'], ptM:['متوسطة','Medium'], ptL:['كبيرة','Large'],
   sca:['مختلف','Scalene'], iso:['متساوي الساقين','Isosceles'], equ:['متطابق','Equilateral'], rt:['قائم','Right'],
   hdash:['متقطعة','Dashed'], hhide:['مخفية','Hidden'], hsolid:['متصلة','Solid'],
   tri:['مثلث','Triangle'], sq:['مربع','Square'], rect:['مستطيل','Rectangle'], para:['متوازي أضلاع','Parallelogram'], rho:['معين','Rhombus'], trap:['شبه منحرف','Trapezoid'], poly:['مضلع منتظم','Regular polygon'], circ:['دائرة','Circle'],
@@ -254,6 +258,8 @@ const proj=(p,a,b)=>{ const d=nrm(sub(b,a)); return add(a,mul(d,dot(sub(p,a),d))
 const lineX=(p,d,a,b)=>{ const e=sub(b,a), den=crs(d,e); if(Math.abs(den)<1e-9) return null; const t=crs(sub(a,p),e)/den; return add(p,mul(d,t)); };
 const AR='٠١٢٣٤٥٦٧٨٩';
 const arNum=s=>String(s).replace(/[0-9]/g,d=>AR[d]).replace('.', '٫');
+// الأرقام في الرسم: هندية (٠١٢) أو إنجليزية (012) حسب الاختيار
+const digits=s=>(S&&S.look&&S.look.digits==='en')?String(s).replace(/[٠-٩]/g,d=>AR.indexOf(d)).replace(/٫/g,'.'):String(s).replace(/[0-9]/g,d=>AR[d]).replace(/(\d|[٠-٩])\.(?=[0-9٠-٩])/g,'$1٫');
 const fmtLen=v=>arNum(Math.round(v*10)/10)+' سم';
 const fmtAng=v=>arNum(Math.round(v))+'°';
 const clone=o=>JSON.parse(JSON.stringify(o));
@@ -290,7 +296,7 @@ function defaults(){
     s:{ kind:'cyl', hidden:'dash', names:true, dims:true, centers:true,
         size:{cube:{w:130},box:{w:180,h:105,d:130},prism:{w:170,h:120,d:150},pyr:{w:170,h:150,d:150},cyl:{r:75,h:150},cone:{r:80,h:170},sph:{r:92}},
         lab:{cube:{w:'٤ سم'},box:{w:'٦ سم',h:'٣ سم',d:'٤ سم'},prism:{w:'٥ سم',h:'٤ سم',d:'٨ سم'},pyr:{w:'٦ سم',h:'ع'},cyl:{r:'نق',h:'ع'},cone:{r:'نق',h:'ع',l:'ل'},sph:{r:'نق'}} },
-    look:{ line:'#000000', w:2, dash:false, fill:null, text:'#000000', mark:'#000000', fs:16, pt:'#000000', ptShow:false, ptR:3, ptFill:true, names:'text' } };
+    look:{ line:'#000000', w:2, dash:false, fill:null, text:'#000000', mark:'#000000', fs:16, pt:'#000000', ptShow:false, ptR:3, ptFill:true, names:'text', digits:'ar' } };
 }
 let S=defaults();
 try{ const t=localStorage.getItem('uula-geometry-state-v1'); if(t){ const o=JSON.parse(t); if(o&&o.v===1){ const d=defaults(); S=Object.assign(d,o); S.look=Object.assign(defaults().look,o.look||{}); S.hide=o.hide||{}; S.nm=o.nm||{}; } } }catch(e){}
@@ -306,7 +312,7 @@ function seg(a,b,o){ o=o||{}; PR.push({t:'seg',a,b,c:o.c||LK().line,w:o.w||LK().
 function aux(a,b){ seg(a,b,{dash:true,w:Math.max(1,LK().w*.75)}); }
 function mk(a,b){ seg(a,b,{c:LK().mark,w:Math.max(1,LK().w*.7),dash:false}); }
 function arcP(c,r,a0,a1,o){ o=o||{}; PR.push({t:'ell',c,rx:r,ry:o.ry||r,a0,a1,c2:o.c||LK().mark,w:o.w||Math.max(1,LK().w*.7),dash:!!o.dash}); }
-function txt(p,s,o){ if(s==null||s==='') return; o=o||{}; PR.push({t:'txt',p,s:String(s),c:o.c||LK().text,fs:o.fs||LK().fs}); }
+function txt(p,s,o){ if(s==null||s==='') return; o=o||{}; PR.push({t:'txt',p,s:digits(String(s)),c:o.c||LK().text,fs:o.fs||LK().fs}); }
 function nm(p,s){ if(s==null||s==='') return; const k=String(s).trim(); if(LK().names==='sym'&&SYM[k]) PR.push({t:'txt',p,s:SYM[k],c:LK().text,fs:LK().fs*1.1,font:SYMFONT}); else txt(p,s); }
 function dotP(p){ const L2=LK(); PR.push({t:'dot',p,r:L2.ptR,c:L2.pt||L2.line,fill:L2.ptFill,w:Math.max(1,L2.w*.6)}); }
 function ptP(p){ if(LK().ptShow) dotP(p); }
@@ -730,6 +736,8 @@ $('dims').addEventListener('input',e=>{ const t=e.target; if(!t.dataset.k) retur
 [[2,'ptS'],[3,'ptM'],[4.5,'ptL']].forEach(([r,k])=>{ const o=document.createElement('option'); o.value=r; o.dataset.i=k; o.textContent=L(k); $('ptSel').appendChild(o); });
 $('ptSel').onchange=()=>{ push(); S.look.ptR=+$('ptSel').value; draw(); save(); };
 $('ptShow').onclick=()=>{ push(); S.look.ptShow=!S.look.ptShow; syncUI(); draw(); save(); };
+$('dgAr').onclick=()=>{ push(); S.look.digits='ar'; syncUI(); draw(); save(); };
+$('dgEn').onclick=()=>{ push(); S.look.digits='en'; syncUI(); draw(); save(); };
 $('nmText').onclick=()=>{ push(); S.look.names='text'; syncUI(); draw(); save(); };
 $('nmSym').onclick=()=>{ push(); S.look.names='sym'; syncUI(); draw(); save(); };
 $('ptFull').onclick=()=>{ push(); S.look.ptFill=true; syncUI(); draw(); save(); };
@@ -786,7 +794,7 @@ function syncUI(){
   $('hint').textContent=L(tab==='p'?'hintP':tab==='c'?'hintC':'hintS');
   if(tab==='p'&&S.p.kind==='free') $('hint').textContent=L(FT==='link'?'hintLink':FT==='addpt'?'hintAdd':FT==='del'?'hintDel':'hintFree');
   $('wSel').value=S.look.w; $('fsSel').value=S.look.fs; setP($('dSolid'),!S.look.dash); setP($('dDash'),S.look.dash);
-  $('ptSel').value=S.look.ptR; setP($('ptShow'),S.look.ptShow); setP($('ptFull'),S.look.ptFill); setP($('ptHollow'),!S.look.ptFill); setP($('nmText'),S.look.names!=='sym'); setP($('nmSym'),S.look.names==='sym');
+  $('ptSel').value=S.look.ptR; setP($('ptShow'),S.look.ptShow); setP($('ptFull'),S.look.ptFill); setP($('ptHollow'),!S.look.ptFill); setP($('nmText'),S.look.names!=='sym'); setP($('dgAr'),S.look.digits!=='en'); setP($('dgEn'),S.look.digits==='en'); setP($('nmSym'),S.look.names==='sym');
   paintColors(); syncChips(); syncDims();
 }
 function applyLang(){
@@ -1174,6 +1182,9 @@ async function pictureToShape(src,ed){
     if(T2.length){ const near=(q,R2)=>T2.some(x=>len(sub(x.c,q))<R2);
       for(let i=0;i<n;i++){ G.verts[i].showName=near(P0[i],r.fd*.13); const a=P0[i], b=P0[(i+1)%n], m=mid(a,b); G.sides[i].show=T2.some(x=>{ const dm=len(sub(x.c,m)); return dm<Math.max(r.fd*.12,len(sub(b,a))*.25)&&dm<len(sub(x.c,a))&&dm<len(sub(x.c,b)); }); } }
     S.tab='p'; S.p=G; }
+  // يُدرج الشكل بلا أسماء ولا أطوال ولا قياسات: الأداة لا تقرأ الكتابة، فيضيفها المستخدم بنفسه
+  if(S.tab==='p'){ S.p.verts.forEach(v=>{ v.showName=false; v.showAng=false; v.ang=''; }); S.p.sides.forEach(sd=>{ sd.show=false; sd.len=''; }); Object.values(S.p.angs||{}).forEach(A=>{ A.showAng=false; }); }
+  else if(S.tab==='c'){ S.c.show.names=false; S.c.show.meas=false; }
   if(ed){ const e=Object.assign({},ed,{pic:true}); if(A&&!ed.word){ const a=A/fit.s; e.place={a, bx:ed.left+(fit.cx-160/fit.s)*A, by:ed.top+(fit.cy-(S.tab==='c'?125:122)/fit.s)*A}; } setEdit(e); }
   syncUI(); draw(); save();
   msg(ed&&!ed.word?L('picDone'):L('picDoneW'),'good');
