@@ -1877,7 +1877,7 @@ function align(rects, W, mode, only) {
 // ---------- a container around the selected objects ----------
 // the selected objects (" #ursel" at the end of their name) get the container behind them: full width, one line
 // above and two below the content, the icon on the right and the content kept clear of it. Their text keeps its roles.
-const WRAP = { note: 'note', quote: 'quote', formula: 'formula', activity: 'activity', mars: 'mars', other: 'other', cancelled: 'cancelled', practice: 'practice' };
+const WRAP = { note: 'note', quote: 'quote', formula: 'formula', activity: 'activity', mars: 'mars', other: 'other', cancelled: 'cancelled' };   // «Practice» is the end of the lesson: always its own box under the last object
 // the selected pictures (graphs …) give their place to the UULA empty grid, cut to each picture's size
 // (light lines D3D8E0 every two page-grid steps, running off the edges, the cut centred on the picture)
 function gridCutX(id, name, g) {
