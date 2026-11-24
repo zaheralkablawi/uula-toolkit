@@ -4756,13 +4756,14 @@ async function pinRole(role, keepColour) {
 }
 
 // ---------- vertical spacing only ----------
-async function spaceSlide(id) {
+// only: the ids of the selected objects (two or more) — then the gaps are set between those only, the rest stays
+async function spaceSlide(id, only) {
   const { W, H } = await getSize();
   return run(async ctx => {
     const sh = ctx.presentation.slides.getItem(id).shapes;
-    sh.load('items/name,items/type,items/left,items/top,items/width,items/height'); await ctx.sync();
+    sh.load('items/id,items/name,items/type,items/left,items/top,items/width,items/height'); await ctx.sync();
     // text boxes take the height of their text (so the gaps are real)
-    for (const s of sh.items) if (s.type === 'TextBox') { try { s.textFrame.autoSizeSetting = 'AutoSizeShapeToFitText'; } catch (e) {} }
+    for (const s of sh.items) if (s.type === 'TextBox' && (!only || only.includes(s.id))) { try { s.textFrame.autoSizeSetting = 'AutoSizeShapeToFitText'; } catch (e) {} }
     await ctx.sync();
     const fills = sh.items.map(s => { try { s.fill.load('type'); return s.fill; } catch (e) { return null; } });
     sh.items.forEach(s => s.load('top,height'));
@@ -4774,13 +4775,32 @@ async function spaceSlide(id) {
       const box = (s.type === 'GeometricShape' && solid && s.width > W * 0.5) || /Container$/.test(nm);
       return { key: k, x: s.left * PT, y: s.top * PT, w: s.width * PT, h: s.height * PT, fixed, box };
     });
-    const mv = UR.spacing(rects, W * PT, H * PT);
+    const mine = only ? rects.filter(r => only.includes(sh.items[r.key].id)) : rects;
+    const mv = UR.spacing(mine, W * PT, H * PT);
+    // with a selection, the others stay where they are but still count: a selected object that would land on one of
+    // them goes under it (one grid row lower, on the page grid), and the selected ones after it follow by as much
+    if (only) {
+      const others = rects.filter(r => !mine.includes(r) && !r.fixed);
+      const ROWE = 2 * 6.695 * PT, Y0 = 22.58 * PT, snap = y => Y0 + Math.ceil((y - Y0 - 0.3 * PT) / ROWE * 2) * ROWE / 2;
+      const placed = mine.map(r => ({ r, y: mv[r.key] && mv[r.key].y != null ? mv[r.key].y : r.y, h: mv[r.key] && mv[r.key].h != null ? mv[r.key].h : r.h })).sort((a, b) => a.y - b.y);
+      let push = 0;
+      for (const p of placed) {
+        p.y += push;
+        for (let guard = 0; guard < 20; guard++) {
+          const hit = others.find(o => o.x < p.r.x + p.r.w - PT && o.x + o.w > p.r.x + PT && o.y < p.y + p.h - PT && o.y + o.h > p.y + PT);
+          if (!hit) break;
+          const ny = snap(hit.y + hit.h + ROWE); push += ny - p.y; p.y = ny;
+        }
+        mv[p.r.key] = Object.assign(mv[p.r.key] || {}, { y: p.y });
+      }
+    }
     let moved = 0, low = 0;
     for (const [k, m] of Object.entries(mv)) {
       const s = sh.items[+k];
       if (m.y != null && Math.abs(m.y / PT - s.top) > 0.2) { s.top = m.y / PT; moved++; }
       if (m.h != null) s.height = m.h / PT;
-      low = Math.max(low, (m.y != null ? m.y : rects[+k].y) + (m.h != null ? m.h : rects[+k].h));
+      const rk = rects.find(r => r.key === +k) || { y: 0, h: 0 };
+      low = Math.max(low, (m.y != null ? m.y : rk.y) + (m.h != null ? m.h : rk.h));
     }
     await ctx.sync();
     return { moved, over: low > (H - 54) * PT + PT };
@@ -4788,16 +4808,16 @@ async function spaceSlide(id) {
 }
 // distribute: after the gaps are fixed, the free space at the bottom of the page is shared out under the questions
 // (room for the student to write), as long as there is room; the first question keeps its place
-async function distributeSlide(id) {
-  await spaceSlide(id);
+async function distributeSlide(id, only) {
+  await spaceSlide(id, only);
   const { W, H } = await getSize();
   const flags = UR.questionFlags(await UR.openPackage(await exportSlide(id)));
   return run(async ctx => {
     const sh = ctx.presentation.slides.getItem(id).shapes;
-    sh.load('items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
+    sh.load('items/id,items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
     const lim = H - 54, G2 = 13.39;
     const free = sh.items.map((s, k) => ({ s, k, q: !!flags[k],
-      fixed: /^UULA (Footer|Watermark)|^CustomPageNumber_/.test(s.name || '') || s.top >= lim || s.left + s.width <= 0 || s.left >= W || s.top + s.height <= 0 || (s.width > W * 0.85 && s.height > H * 0.6) })).filter(o => !o.fixed);
+      fixed: /^UULA (Footer|Watermark)|^CustomPageNumber_/.test(s.name || '') || s.top >= lim || s.left + s.width <= 0 || s.left >= W || s.top + s.height <= 0 || (s.width > W * 0.85 && s.height > H * 0.6) })).filter(o => !o.fixed && (!only || only.includes(o.s.id)));
     if (!free.length) return { status: 'none' };
     const bottom = Math.max(...free.map(o => o.s.top + o.s.height));
     // the question starts (one per row)
@@ -4858,11 +4878,14 @@ async function spacingRun(kind) {
     const ids = await targetIds();
     if (!ids.length) { say(L('حدّد شريحة أولًا.', 'Select a slide first.')); return; }
     const over = [], skipped = [], spread = [];
+    // two or more objects selected: only those are spaced (vertical, distribute and horizontal alike)
+    const only = await run(async ctx => { const ss = ctx.presentation.getSelectedShapes(); ss.load('items/id'); await ctx.sync(); return ss.items.map(x => x.id); }).catch(() => []);
+    const sel = only.length > 1 ? only : null;
     for (let k = 0; k < ids.length; k++) {
       prog(k / ids.length); say(L('تنسيق المسافات ', 'Spacing ') + (k + 1) + L(' من ', ' of ') + ids.length + '…');
       try {
-        if (kind === 'v') { const r = await spaceSlide(ids[k]); if (r.over) over.push(ids[k]); }
-        else if (kind === 'd') { const r = await distributeSlide(ids[k]); if (r.status !== 'ok') skipped.push({ id: ids[k], why: r.status }); else spread.push(r.lines); }
+        if (kind === 'v') { const r = await spaceSlide(ids[k], sel); if (r.over) over.push(ids[k]); }
+        else if (kind === 'd') { const r = await distributeSlide(ids[k], sel); if (r.status !== 'ok') skipped.push({ id: ids[k], why: r.status }); else spread.push(r.lines); }
         else await alignSlide(ids[k], hMode, scope === 'cur');
       } catch (e) { line('err', '✗ ' + esc(errText(e))); }
     }
@@ -4874,7 +4897,7 @@ async function spacingRun(kind) {
       const why = { full: L('لا توجد مساحة كافية', 'no room left'), one: L('سؤال واحد فقط، والمساحة تحته أصلًا', 'only one question, the space is already under it'), noq: L('لا توجد أسئلة', 'no questions'), none: L('فارغة', 'empty') };
       for (const w of ['full', 'one', 'noq', 'none']) { const list = skipped.filter(x => x.why === w).map(x => x.id); if (list.length) line('', '• ' + why[w] + ': ' + slideLinks(list, num)); }
     }
-    say(L('تم تنسيق المسافات.', 'Spacing done.'));
+    say(sel ? L('تم تنسيق المسافات بين ' + sel.length + ' عناصر محددة فقط.', 'Spacing done between the ' + sel.length + ' selected objects only.') : L('تم تنسيق المسافات.', 'Spacing done.'));
   } catch (e) { prog(null); say(L('حدث خطأ: ', 'Error: ') + errText(e)); }
   finally { busy = false; lock(); }
 }
