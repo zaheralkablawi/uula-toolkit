@@ -1997,7 +1997,15 @@ function arrangeChoices(pkg, layout, dirOpt) {
     const w = Math.round(CW / order.length);
     order.forEach((t, k) => setGeom(t.el, { x: rtl ? M + CW - (k + 1) * w : M + k * w, y: y0, w, h: ROW }));
   } else {
-    order.forEach((t, k) => setGeom(t.el, { x: M, y: y0 + k * ROW, w: CW, h: ROW }));
+    // each box as wide as its text and a little more (no wrapping), on the right edge (rtl) or the left edge (ltr)
+    order.forEach((t, k) => {
+      const full = estimateText(t.c, CW);
+      let lo = 20 * PT, hi = CW;
+      for (let n = 0; n < 14; n++) { const mid = (lo + hi) / 2; if (estimateText(t.c, mid) <= full + PT) hi = mid; else lo = mid; }
+      const w = Math.min(CW, Math.round(hi + 6 * PT));
+      for (const c of allCores(t.el)) { const bp = kid(kid(c, 'txBody', 'p'), 'bodyPr', 'a'); if (bp) bp.setAttribute('wrap', 'none'); }
+      setGeom(t.el, { x: rtl ? M + CW - w : M, y: y0 + k * ROW, w, h: ROW });
+    });
   }
   return { xml: serialize(doc), count: order.length, dir };
 }
@@ -2535,7 +2543,9 @@ function spec(id, W) {
     // the options one under the other: ⓐ on the first line … ⓓ on the fourth, each line its own text box
     case 'mcqV': {
       const L = ['ⓐ', 'ⓑ', 'ⓒ', 'ⓓ'], ltr = OPT.dirNow === 'ltr';
-      return { gap: 0, snap: true, rows: L.map((l, k) => ({ gap: 0, cells: [txt(P.runs([T(l + ' '), T(ltr ? 'Option' : 'خيار')], { marL: 182880, ar: !ltr }))] })) };
+      // each box as wide as its text and a little more, growing as the answer is typed (no wrapping)
+      const bw = 72 * PT;
+      return { gap: 0, snap: true, rows: L.map((l, k) => ({ gap: 0, cells: [txt(P.runs([T(l + ' '), T(ltr ? 'Option' : 'خيار')], { marL: 182880, ar: !ltr }), { x: ltr ? M : R - bw, w: bw, nowrap: true })] })) };
     }
     case 'problem': return { gap: 1, rows: [
       { cells: [txt(P.q('اكتب نص المسألة هنا؟'))] },
@@ -2619,7 +2629,11 @@ function build(id, W, top, rels) {
   }
   s.rows.forEach((r, ri) => r.cells.forEach((c, ci) => {
     const meta = { role: 'cell', row: ri, cell: ci, t: c.t };
-    if (c.t === 'text') add(U.txX('UULA ' + id, c.x != null ? c.x : M, 0, c.w != null ? c.w : CW, ROW, c.xml), meta);
+    if (c.t === 'text') {
+      let x = U.txX('UULA ' + id, c.x != null ? c.x : M, 0, c.w != null ? c.w : CW, ROW, c.xml);
+      if (c.nowrap) x = /wrap="[a-z]+"/.test(x) ? x.replace(/wrap="[a-z]+"/, 'wrap="none"') : x.replace('<a:bodyPr', '<a:bodyPr wrap="none"');   // grows with its text
+      add(x, meta);
+    }
     else if (c.t === 'pic') add(U.picX('UULA ' + (c.name || c.key), rels.image(c.key), c.x != null ? c.x : M, 0, c.w, c.h), meta);
     else if (c.t === 'pill') add(U.pillX(c.term, 0, 0, U.pillW(c.term)), meta);
     else if (c.t === 'table') add(U.tableX(c.rows, W, c.o), meta);
@@ -4159,7 +4173,8 @@ async function insertTemplate(tid) {
       const { map } = await shapesByMark(ctx, newId);
       const idx = Array.from({ length: r.count }, (_, k) => r.first + k);
       const texts = idx.filter((i, k) => r.built.shapes[k].t === 'text' && map[i]);
-      texts.forEach(i => { try { map[i].textFrame.autoSizeSetting = 'AutoSizeShapeToFitText'; map[i].textFrame.wordWrap = true; } catch (e) {} });
+      // (vertical options keep «no wrapping»: each box grows with its own answer)
+      texts.forEach(i => { try { map[i].textFrame.autoSizeSetting = 'AutoSizeShapeToFitText'; if (tid !== 'mcqV') map[i].textFrame.wordWrap = true; } catch (e) {} });
       await ctx.sync();
       texts.forEach(i => map[i].load('height'));
       await ctx.sync();
@@ -4288,9 +4303,14 @@ async function arrangeSelected(layout) {
       // one under the other: by their real heights, each starting on the page grid right after the one above
       // (the UULA rule for options that follow each other: no empty line between them)
       if (layout !== 'row' && sel.length > 1) {
-        sel.forEach(x => { try { x.textFrame.autoSizeSetting = 'AutoSizeShapeToFitText'; } catch (e) {} });
+        // each box as wide as its text and a little more (no wrapping; it grows when more is typed), on the right
+        // edge of the page in right-to-left, on the left edge in left-to-right
+        sel.forEach(x => { try { const tf = x.textFrame; tf.wordWrap = false; tf.autoSizeSetting = 'AutoSizeShapeToFitText'; tf.leftMargin = 3; tf.rightMargin = 3; } catch (e) {} });
         await ctx.sync();
-        sel.forEach(x => x.load('top,height')); await ctx.sync();
+        sel.forEach(x => x.load('left,top,width,height')); await ctx.sync();
+        const { W: SW } = await getSize(), Mx = 36;
+        sel.forEach(x => { x.left = r.dir === 'rtl' ? SW - Mx - x.width : Mx; });
+        await ctx.sync();
         const Y0 = 22.58, G = 6.695, snap = y => Y0 + Math.max(0, Math.ceil((y - Y0 - 0.3) / G)) * G;
         const list = [...sel].sort((a, b) => a.top - b.top);
         let y = list[0].top;
