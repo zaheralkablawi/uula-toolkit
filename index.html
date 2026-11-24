@@ -82,6 +82,7 @@ var TK_ICONS = {
   upd: '<path d="M20 11a8 8 0 0 0-14.9-3.5L4 9"/><path d="M4 4v5h5"/><path d="M4 13a8 8 0 0 0 14.9 3.5L20 15"/><path d="M20 20v-5h-5"/>',
   lang: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/>',
   edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+  pic: '<rect x="3" y="4" width="10" height="9" rx="1.5"/><path d="M3 11l3-3 3 3"/><path d="M15 9h3l-1.5-1.5M18 9l-1.5 1.5"/><path d="M14 20l3.5-6 3.5 6z"/>',
   tools: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
   about: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/>',
   new: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M12 11v6M9 14h6"/>',
@@ -404,6 +405,7 @@ window.TK_TOOL = 'home';
 
     geometry: [
       ['#menuBtn', E('تعديل الشكل المحدد، والتحقق من التحديثات، وتغيير اللغة، وحول الأداة.', 'Edit the selected shape, check for updates, change the language and about.')],
+      ['#fromPicItem, #picBtn', E('حدّد صورة شكل في الشريحة ثم اضغط: تتعرف الأداة على الشكل (مثلث، رباعي، مضلع، دائرة) ورؤوسه، فتراجعه وتضيف الأسماء والعلامات، ثم «إدراج» ليحل محل الصورة بمقاسها. الكتابة على الصورة لا تُقرأ.', 'Select a picture of a shape, then click: the tool recognizes the shape and its vertices; check it, add names and marks, then Insert to replace the picture at its size. Text on the picture is not read.', 'تحويل الصورة إلى شكل', 'Picture to shape')],
       ['#loadSelItem', E('حدّد شكلًا أدرجته من قبل بالأداة، ثم اضغط لتعديله هنا.', 'Select a shape you inserted with the tool, then click to edit it here.')],
       ['#tabs [data-tab="p"]', E('المثلث والمربع والمستطيل ومتوازي الأضلاع والمعين وشبه المنحرف والمضلعات المنتظمة.', 'Triangles, squares, rectangles, parallelograms, rhombuses, trapezoids and regular polygons.')],
       ['#tabs [data-tab="c"]', E('الدائرة وعناصرها: المركز ونصف القطر والقطر والوتر والمماس والقوس والقطاع والزوايا.', 'The circle and its parts: center, radius, diameter, chord, tangent, arc, sector and angles.')],

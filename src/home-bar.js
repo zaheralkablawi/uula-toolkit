@@ -55,7 +55,7 @@ var TK_MENU_LEFT = 10;
     };
     new MutationObserver(fit).observe(m, { attributes: true, attributeFilter: ['hidden', 'dir'] });
     tkIcon(q('#chkUpd'), 'upd'); tkIcon(q('#langItem'), 'lang'); tkIcon(q('#aboutBtn'), 'about');
-    ['new', 'help', 'keys', 'news', 'about', 'edit'].forEach(function (a) { tkIcon(q('[data-act="' + a + '"]'), a); });
+    ['new', 'help', 'keys', 'news', 'about', 'edit', 'pic'].forEach(function (a) { tkIcon(q('[data-act="' + a + '"]'), a); });
   }
   // the ☰ button sits at the far left of the tool's top bar, in Arabic and English
   function menuBtnLeft() {

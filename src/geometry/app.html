@@ -120,6 +120,7 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
       <button type="button" class="ib" id="menuBtn" aria-haspopup="true" aria-expanded="false" data-ti="menu" title="القائمة" aria-label="القائمة"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h12M4 10h12M4 14h12"/></svg></button>
       <div class="menu" id="appMenu" role="menu" hidden>
         <button type="button" role="menuitem" id="loadSelItem" data-act="edit" data-i="loadSel">تعديل الشكل المحدد</button>
+        <button type="button" role="menuitem" id="fromPicItem" data-act="pic" data-i="fromPic">تحويل الصورة المحددة إلى شكل</button>
         <button type="button" role="menuitem" id="chkUpd" data-i="chkUpd">التحقق من التحديثات</button>
         <button type="button" role="menuitem" id="langItem">English</button>
         <button type="button" role="menuitem" id="aboutBtn" data-i="about">حول الأداة</button>
@@ -144,6 +145,7 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
     <svg id="fig" viewBox="0 0 320 250" xmlns="http://www.w3.org/2000/svg"></svg>
     <div class="pop" id="pop" hidden></div>
     <div class="pvt">
+      <button type="button" class="ib" id="picBtn" data-ti="fromPic" title="تحويل الصورة المحددة إلى شكل"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><rect x="3" y="4" width="10" height="9" rx="1.5"/><path d="M3 11l3-3 3 3"/><path d="M15 9h3l-1.5-1.5M18 9l-1.5 1.5"/><path d="M14 20l3.5-6 3.5 6z"/></svg></button>
       <button type="button" class="ib" id="undoBtn" data-ti="undo" title="تراجع"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
       <button type="button" class="ib" id="rotBtn" data-ti="rot" title="تدوير"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></svg></button>
       <button type="button" class="ib" id="flipBtn" data-ti="flip" title="انعكاس"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3v18M9 7L3 17h6zM15 7l6 10h-6z"/></svg></button>
@@ -194,6 +196,7 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
   <button type="button" class="more" id="palMore" data-i="custom">لون آخر…</button>
   <input type="color" id="palCustom" tabindex="-1" aria-hidden="true">
 </div>
+<input type="file" id="picFile" accept="image/*" hidden>
 <div class="modal" id="modal" hidden><div class="mbox" role="dialog" aria-modal="true"><h3 id="modalT"></h3><div id="modalB"></div><button type="button" class="mclose" id="modalX" data-i="close">إغلاق</button></div></div>
 
 <script>
@@ -205,7 +208,7 @@ const TITLE='UULA Geometry', TAG='UULA_GEOMETRY';
 
 /* ---------- اللغة ---------- */
 const T={
-  loadSel:['تعديل الشكل المحدد','Edit selected shape'], chkUpd:['التحقق من التحديثات','Check for updates'], about:['حول الأداة','About'],
+  loadSel:['تعديل الشكل المحدد','Edit selected shape'], fromPic:['تحويل الصورة المحددة إلى شكل','Convert the selected picture to a shape'], picReading:['جارٍ قراءة الصورة…','Reading the picture…'], picDone:['تم التعرف على الشكل. راجعه ثم اضغط «إدراج» ليحل محل الصورة.','Shape recognized. Check it, then click Insert to replace the picture.'], picDoneW:['تم التعرف على الشكل. راجعه ثم اضغط «إدراج».','Shape recognized. Check it, then click Insert.'], picFail:['لم أتعرف على شكل واضح في الصورة','No clear shape found in the picture'], picSel:['حدّد صورة الشكل أولاً','Select the picture of the shape first'], picEdit:['سيحل الشكل محل الصورة المحددة','The shape will replace the selected picture'], chkUpd:['التحقق من التحديثات','Check for updates'], about:['حول الأداة','About'],
   tabP:['مستوية','Plane'], tabC:['الدائرة','Circle'], tabS:['مجسمات','Solids'],
   type:['النوع','Type'], sides:['الأضلاع','Sides'], hidden:['الأحرف المخفية','Hidden edges'],
   editing:['تعديل شكل محدد','Editing a selected shape'], cancel:['إلغاء','Cancel'],
@@ -742,13 +745,15 @@ async function insertNative(pr,json,bb){
   await PowerPoint.run(async ctx=>{
     const shapes=ctx.presentation.getSelectedSlides().getItemAt(0).shapes;
     let ox=60, oy=60, sc=1;
-    if(EDIT){ ox=EDIT.left; oy=EDIT.top; sc=EDIT.w?EDIT.width/EDIT.w:1; }
+    let PL=null;
+    if(EDIT&&EDIT.place){ PL=EDIT.place; sc=PL.a; }
+    else if(EDIT){ ox=EDIT.left; oy=EDIT.top; sc=EDIT.w?EDIT.width/EDIT.w:1; }
     else { const ss=ctx.presentation.getSelectedShapes(); ss.load('items/left,items/top,items/width'); shapes.load('items/name'); await ctx.sync();
       if(ss.items.length){ const s=ss.items[0]; ox=s.left+s.width+20; oy=s.top; }
       else { // وسط الشريحة، وكل شكل جديد يُزاح قليلاً عن السابق حتى لا يغطيه
         let W=960, H=540; try{ const ps=ctx.presentation.pageSetup; ps.load('slideWidth,slideHeight'); await ctx.sync(); if(ps.slideWidth) { W=ps.slideWidth; H=ps.slideHeight; } }catch(e){}
         const n=shapes.items.filter(s=>s.name===TITLE).length; ox=Math.max(10,(W-bb.w)/2)+n*24; oy=Math.max(10,(H-bb.h)/2)+n*24; } }
-    const X=x=>ox+(x-bb.x)*sc, Y=y=>oy+(y-bb.y)*sc, made=[], arcs=[], tris=[];
+    const X=PL?(x=>PL.bx+x*PL.a):(x=>ox+(x-bb.x)*sc), Y=PL?(y=>PL.by+y*PL.a):(y=>oy+(y-bb.y)*sc), made=[], arcs=[], tris=[];
     const line=(sh,c,w,dash)=>{ sh.lineFormat.visible=true; sh.lineFormat.color=c; sh.lineFormat.weight=w; sh.lineFormat.dashStyle=dash?'Dash':'Solid'; };
     const tri=(A,B,Cc,fill)=>{ // مثلث بأي زوايا: شكل المثلث مع مقبض الرأس ودوران
       const P=[A,B,Cc]; let bi=0,bl=0; for(let i=0;i<3;i++){ const l=len(sub(P[(i+1)%3],P[i])); if(l>bl){ bl=l; bi=i; } }
@@ -815,7 +820,7 @@ $('insert').onclick=async()=>{
   }catch(e){ console.error(e); msg(typeof e==='string'?e:L('insFail'),'bad'); }
   $('insert').disabled=false;
 };
-function setEdit(e){ EDIT=e; $('edBar').hidden=!e; $('insTxt').textContent=L(e?'update':'insert'); }
+function setEdit(e){ EDIT=e; $('edBar').hidden=!e; $('insTxt').textContent=L(e?(e.pic?'insert':'update'):'insert'); const sp=$('edBar').querySelector('span'); sp.textContent=L(e&&e.pic?'picEdit':'editing'); }
 $('edCancel').onclick=()=>{ setEdit(null); msg(''); };
 $('loadSelItem').addEventListener('click',async()=>{
   if(!HOST){ msg(L('noHost'),'bad'); return; }
@@ -828,6 +833,136 @@ $('loadSelItem').addEventListener('click',async()=>{
     const d=defaults(); S=Object.assign(d,data.s); S.look=Object.assign(d.look,data.s.look||{}); push(); closePop(); syncUI(); draw(); save(); setEdit(ed); msg(L('loaded'));
   }catch(e){ console.error(e); msg(typeof e==='string'?e:L('insFail'),'bad'); }
 });
+
+/* ---------- تحويل صورة شكل إلى شكل هندسي (تعرّف تلقائي) ---------- */
+function loadImg(src){ return new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=src; }); }
+function recognize(im){
+  const MAX=480, k=Math.min(1,MAX/Math.max(im.naturalWidth,im.naturalHeight)), W=Math.max(8,Math.round(im.naturalWidth*k)), H=Math.max(8,Math.round(im.naturalHeight*k));
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,W,H); g.drawImage(im,0,0,W,H);
+  const D=g.getImageData(0,0,W,H).data, N=W*H, gray=new Uint8Array(N), hist=new Array(256).fill(0);
+  for(let i=0;i<N;i++){ const v=Math.round(.299*D[4*i]+.587*D[4*i+1]+.114*D[4*i+2]); gray[i]=v; hist[v]++; }
+  // عتبة أوتسو
+  let sum=0; for(let i=0;i<256;i++) sum+=i*hist[i]; let sB=0,wB=0,best=0,th=128;
+  for(let i=0;i<256;i++){ wB+=hist[i]; if(!wB) continue; const wF=N-wB; if(!wF) break; sB+=i*hist[i]; const mB=sB/wB, mF=(sum-sB)/wF, b=wB*wF*(mB-mF)*(mB-mF); if(b>best){ best=b; th=i; } }
+  th=Math.min(th,200);
+  const dark=new Uint8Array(N); for(let i=0;i<N;i++) dark[i]=gray[i]<th?1:0;
+  // المكوّنات المتصلة: الشكل أكبرها امتدادًا، والكتابة الصغيرة تُهمل
+  const lab=new Int32Array(N).fill(-1), comps=[], st=[];
+  for(let i=0;i<N;i++){ if(!dark[i]||lab[i]>=0) continue; const id=comps.length; let x0=W,y0=H,x1=0,y1=0,n=0; st.push(i); lab[i]=id;
+    while(st.length){ const j=st.pop(), x=j%W, y=(j-x)/W; n++; if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y;
+      for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){ const xx=x+dx, yy=y+dy; if(xx<0||yy<0||xx>=W||yy>=H) continue; const q=yy*W+xx; if(dark[q]&&lab[q]<0){ lab[q]=id; st.push(q); } } }
+    comps.push({id,x0,y0,x1,y1,n,d:Math.hypot(x1-x0,y1-y0)}); }
+  if(!comps.length) return null;
+  comps.sort((a,b)=>b.d-a.d); const F=comps[0]; if(F.d<Math.min(W,H)*.15) return null;
+  // كل ما يلمس مستطيل الشكل وكبير نسبيًا يُضم (خطوط متقطعة داخل الشكل)
+  const keep=new Set([F.id]); comps.forEach(c=>{ if(c.d>F.d*.12&&c.x0>=F.x0-2&&c.x1<=F.x1+2&&c.y0>=F.y0-2&&c.y1<=F.y1+2) keep.add(c.id); });
+  const M=new Uint8Array(N); for(let i=0;i<N;i++) if(lab[i]>=0&&lab[i]===F.id) M[i]=1;
+  const stroke=Math.max(1,Math.round(F.n/Math.max(1,(F.x1-F.x0+F.y1-F.y0))/2));
+  // توسيع بسيط لسد الفجوات
+  const Md=new Uint8Array(N), rr=Math.max(1,Math.min(3,stroke)); for(let y=0;y<H;y++) for(let x=0;x<W;x++){ if(!M[y*W+x]) continue; for(let dy=-rr;dy<=rr;dy++) for(let dx=-rr;dx<=rr;dx++){ const xx=x+dx,yy=y+dy; if(xx>=0&&yy>=0&&xx<W&&yy<H) Md[yy*W+xx]=1; } }
+  // الصورة الظلية: كل ما لا يصله الفراغ الخارجي
+  const out=new Uint8Array(N); const q=[]; const push=(x,y)=>{ const j=y*W+x; if(!Md[j]&&!out[j]){ out[j]=1; q.push(j); } };
+  for(let x=0;x<W;x++){ push(x,0); push(x,H-1); } for(let y=0;y<H;y++){ push(0,y); push(W-1,y); }
+  while(q.length){ const j=q.pop(), x=j%W, y=(j-x)/W; if(x>0)push(x-1,y); if(x<W-1)push(x+1,y); if(y>0)push(x,y-1); if(y<H-1)push(x,y+1); }
+  // حدود الصورة الظلية (تتبع مور)
+  const S=j=>!out[j]; let start=-1; for(let i=0;i<N&&start<0;i++) if(S(i)) start=i; if(start<0) return null;
+  const DX=[1,1,0,-1,-1,-1,0,1], DY=[0,1,1,1,0,-1,-1,-1], cont=[]; let cx=start%W, cy=(start-cx)/W, dir=7, guard=0;
+  do{ cont.push([cx,cy]); let found=false; for(let t=0;t<8;t++){ const d=(dir+6+t)%8, xx=cx+DX[d], yy=cy+DY[d]; if(xx<0||yy<0||xx>=W||yy>=H) continue; if(S(yy*W+xx)){ cx=xx; cy=yy; dir=d; found=true; break; } } if(!found) break; }
+  while(!(cx===start%W&&cy===(start-start%W)/W)&&++guard<N*2);
+  if(cont.length<12) return null;
+  let area=0,ax=0,ay=0; for(let i=0;i<N;i++) if(S(i)){ area++; ax+=i%W; ay+=(i-i%W)/W; } const C=[ax/area,ay/area];
+  const ds=cont.map(p=>Math.hypot(p[0]-C[0],p[1]-C[1])), m=ds.reduce((s,v)=>s+v,0)/ds.length, sd=Math.sqrt(ds.reduce((s,v)=>s+(v-m)*(v-m),0)/ds.length);
+  const res={W,H,stroke,inner:Md};
+  if(sd/m<.05&&Math.abs(area/(Math.PI*m*m)-1)<.15) return Object.assign(res,{type:'circle',c:C,r:m-stroke/2});
+  // دائرة تخرج منها خطوط (مماس، قطر ممتد): ملاءمة دائرة لنقاط الحدود مع إهمال الشاذ
+  const fitC=pts=>{ let sx=0,sy=0,sxx=0,syy=0,sxy=0,sxz=0,syz=0,sz=0; const n2=pts.length;
+    pts.forEach(([x,y])=>{ const z=x*x+y*y; sx+=x; sy+=y; sxx+=x*x; syy+=y*y; sxy+=x*y; sxz+=x*z; syz+=y*z; sz+=z; });
+    const A3=[[sxx,sxy,sx],[sxy,syy,sy],[sx,sy,n2]], B3=[-sxz,-syz,-sz];
+    const det=m3=>m3[0][0]*(m3[1][1]*m3[2][2]-m3[1][2]*m3[2][1])-m3[0][1]*(m3[1][0]*m3[2][2]-m3[1][2]*m3[2][0])+m3[0][2]*(m3[1][0]*m3[2][1]-m3[1][1]*m3[2][0]);
+    const d0=det(A3); if(Math.abs(d0)<1e-9) return null; const sol=[0,1,2].map(c=>det(A3.map((row,i)=>row.map((v,j)=>j===c?B3[i]:v)))/d0);
+    const cx2=-sol[0]/2, cy2=-sol[1]/2, r2=Math.sqrt(Math.max(0,cx2*cx2+cy2*cy2-sol[2])); return [cx2,cy2,r2]; };
+  let fc=fitC(cont), inl=cont;
+  for(let it=0;fc&&it<3;it++){ const tol=Math.max(3,stroke*2.5,fc[2]*.04); inl=cont.filter(([x,y])=>Math.abs(Math.hypot(x-fc[0],y-fc[1])-fc[2])<tol); if(inl.length<20) break; fc=fitC(inl); }
+  if(fc&&fc[2]>Math.min(W,H)*.08){ const bins=new Set(); inl.forEach(([x,y])=>bins.add(Math.floor(((Math.atan2(y-fc[1],x-fc[0])*180/Math.PI)+360)%360/10)));
+    if(inl.length/cont.length>.55&&bins.size>=31) return Object.assign(res,{type:'circle',c:[fc[0],fc[1]],r:fc[2]-stroke/2}); }
+  // تبسيط الحدود إلى مضلع
+  let per=0; for(let i=0;i<cont.length;i++){ const a=cont[i], b=cont[(i+1)%cont.length]; per+=Math.hypot(b[0]-a[0],b[1]-a[1]); }
+  const rdp=(pts,eps)=>{ if(pts.length<3) return pts; let dm=0,id=0; const a=pts[0], b=pts[pts.length-1], L2=Math.hypot(b[0]-a[0],b[1]-a[1])||1;
+    for(let i=1;i<pts.length-1;i++){ const d=Math.abs((b[0]-a[0])*(a[1]-pts[i][1])-(a[0]-pts[i][0])*(b[1]-a[1]))/L2; if(d>dm){ dm=d; id=i; } }
+    return dm>eps?rdp(pts.slice(0,id+1),eps).slice(0,-1).concat(rdp(pts.slice(id),eps)):[a,b]; };
+  // نبدأ من أبعد نقطة عن المركز حتى لا يُقسم رأس
+  let fi=0; ds.forEach((v,i)=>{ if(v>ds[fi]) fi=i; }); const rot2=cont.slice(fi).concat(cont.slice(0,fi));
+  let fj=1, fd=0; rot2.forEach((p,i)=>{ const d=Math.hypot(p[0]-rot2[0][0],p[1]-rot2[0][1]); if(d>fd){ fd=d; fj=i; } });   // نقطتان متقابلتان
+  const eps=Math.max(2.5,per*.018), h1=rdp(rot2.slice(0,fj+1),eps), h2=rdp(rot2.slice(fj).concat([rot2[0]]),eps);
+  let P=h1.slice(0,-1).concat(h2.slice(0,-1));
+  // إزالة الرؤوس شبه المستقيمة والمتقاربة
+  for(let pass=0;pass<4;pass++){ let ch=false;
+    for(let i=0;i<P.length&&P.length>3;i++){ const a=P[(i-1+P.length)%P.length], b=P[i], c=P[(i+1)%P.length]; const u=nrm(sub(a,b)), v=nrm(sub(c,b)); const an=deg(Math.acos(Math.max(-1,Math.min(1,dot(u,v)))));
+      if(an>162||len(sub(a,b))<per*.03){ P.splice(i,1); ch=true; break; } } if(!ch) break; }
+  if(P.length<3) return null;
+  // الرؤوس على منتصف سماكة الخط
+  const Cp=cen(P); P=P.map(p=>{ const d=nrm(sub(Cp,p)); return add(p,mul(d,stroke*.7)); });
+  return Object.assign(res,{type:'poly',pts:P});
+}
+// هل يوجد خط مرسوم بين نقطتين في الصورة؟
+function lineIn(r,a,b){ let hit=0,n=0; for(let t=.12;t<=.88;t+=.02){ const x=Math.round(a[0]+(b[0]-a[0])*t), y=Math.round(a[1]+(b[1]-a[1])*t); if(x<0||y<0||x>=r.W||y>=r.H) continue; n++; if(r.inner[y*r.W+x]) hit++; } return n&&hit/n>.85; }
+function classify(r){
+  let P=r.pts.map(p=>p.slice()); const n=P.length;
+  let A2=0; for(let i=0;i<n;i++){ const a=P[i], b=P[(i+1)%n]; A2+=a[0]*b[1]-b[0]*a[1]; } if(A2>0) P.reverse();   // نفس اتجاه رسم الأداة
+  let top=0; P.forEach((p,i)=>{ if(p[1]<P[top][1]-3||(Math.abs(p[1]-P[top][1])<=3&&p[0]<P[top][0])) top=i; }); P=P.slice(top).concat(P.slice(0,top));
+  const L=i=>len(sub(P[(i+1)%n],P[i])), near=(a,b,t)=>Math.abs(a-b)<=t*Math.max(a,b);
+  const angAt=i=>angSpan(P[i],P[(i-1+n)%n],P[(i+1)%n]).sw;
+  const rotTo=j=>{ P=P.slice(j).concat(P.slice(0,j)); };
+  let kind='poly', sub2='iso';
+  if(n===3){ kind='tri'; const s=[L(0),L(1),L(2)];
+    if(near(s[0],s[1],.03)&&near(s[1],s[2],.03)&&[0,1,2].every(i=>Math.abs(angAt(i)-60)<3)) sub2='equ';
+    else { let ri=-1; for(let i=0;i<3;i++) if(Math.abs(angAt(i)-90)<4) ri=i;
+      if(ri>=0){ sub2='rt'; rotTo((ri+2)%3); }
+      else { let ap=-1, bd=1; for(let i=0;i<3;i++){ const a=L((i+2)%3), b=L(i), d=Math.abs(a-b)/Math.max(a,b); if(d<.03&&d<bd){ bd=d; ap=i; } } if(ap>=0){ sub2='iso'; rotTo(ap); } else sub2='sca'; } } }
+  else if(n===4){ const dirA=i=>{ const d=sub(P[(i+1)%4],P[i]); return ((ang(d)%180)+180)%180; }, par=(i,j)=>{ const x=Math.abs(dirA(i)-dirA(j)); return Math.min(x,180-x)<5; };
+    const p02=par(0,2), p13=par(1,3), dg=Math.abs(((ang(sub(P[2],P[0]))-ang(sub(P[3],P[1])))%180+180)%180-90), eq=dg<3&&near(L(0),L(1),.04)&&near(L(1),L(2),.04), rt=[0,1,2,3].every(i=>Math.abs(angAt(i)-90)<4);
+    if(p02&&p13){ kind=eq?(rt?'sq':'rho'):(rt?'rect':'para'); if(kind==='rho'){ let t=0; P.forEach((p,i)=>{ if(p[1]<P[t][1]) t=i; }); rotTo(t); } }
+    else if(p02||p13){ kind='trap'; if(p02) rotTo(3); }   // الضلعان المتوازيان: ب ج و د أ
+  }
+  return {kind,sub:sub2,pts:P};
+}
+async function pictureToShape(src,ed){
+  msg(L('picReading'));
+  const im=await loadImg(src), r=recognize(im);
+  if(!r){ msg(L('picFail'),'bad'); return; }
+  push(); closePop();
+  const A=ed&&ed.width?ed.width/r.W:0;   // من بكسلات الصورة إلى نقاط الشريحة
+  let fit;
+  if(r.type==='circle'){ const s=Math.min(1.5,170/(2*r.r)); fit={s,cx:r.c[0],cy:r.c[1]}; S.tab='c'; const d=defaults().c; S.c=d; S.c.r=r.r*s; S.c.c=[160,125]; S.c.show=Object.assign(d.show,{radius:false}); }
+  else { const c=classify(r), bb=bboxPts(c.pts), s=Math.min(260/bb.w,195/bb.h), cxi=bb.x+bb.w/2, cyi=bb.y+bb.h/2; fit={s,cx:cxi,cy:cyi};
+    const G=mkPlane(c.kind,c.sub,c.pts.length); G.pts=c.pts.map(p=>[160+(p[0]-cxi)*s,122+(p[1]-cyi)*s]);
+    if(G.pts.length!==G.sides.length){ const g2=mkPlane('poly','iso',G.pts.length); g2.pts=G.pts; Object.assign(G,g2); }
+    // خطوط داخلية مرسومة في الصورة
+    const P0=c.pts, n=P0.length;
+    if(n===4&&lineIn(r,P0[0],P0[2])&&lineIn(r,P0[1],P0[3])) G.diag=true;
+    if(n===3) for(let i=0;i<3;i++){ const p=P0[i], a=P0[(i+1)%3], b=P0[(i+2)%3], F2=proj(p,a,b), M2=mid(a,b);
+      const far=q=>len(sub(q,a))>len(sub(b,a))*.1&&len(sub(q,b))>len(sub(b,a))*.1;
+      if(far(F2)&&lineIn(r,p,F2)) G.verts[i].alt=true; else if(lineIn(r,p,M2)) G.verts[i].med=true; }
+    S.tab='p'; S.p=G; }
+  if(ed){ const e=Object.assign({},ed,{pic:true}); if(A&&!ed.word){ const a=A/fit.s; e.place={a, bx:ed.left+(fit.cx-160/fit.s)*A, by:ed.top+(fit.cy-(S.tab==='c'?125:122)/fit.s)*A}; } setEdit(e); }
+  syncUI(); draw(); save();
+  msg(ed&&!ed.word?L('picDone'):L('picDoneW'),'good');
+}
+async function selectedPicture(){
+  if(HOST==='PowerPoint'){ let out=null;
+    await PowerPoint.run(async ctx=>{ const ss=ctx.presentation.getSelectedShapes(); ss.load('items/id,items/left,items/top,items/width,items/height'); await ctx.sync();
+      if(!ss.items.length) throw L('picSel'); const s=ss.items[0], img=s.getImageAsBase64({format:'Png'}); await ctx.sync();
+      out={src:'data:image/png;base64,'+img.value, ed:{id:s.id,left:s.left,top:s.top,width:s.width,height:s.height}}; });
+    return out; }
+  let out=null;
+  await Word.run(async ctx=>{ const pics=ctx.document.getSelection().inlinePictures; pics.load('items'); await ctx.sync(); if(!pics.items.length) throw L('picSel');
+    const b=pics.items[0].getBase64ImageSrc(); await ctx.sync(); out={src:'data:image/png;base64,'+b.value, ed:{word:true}}; });
+  return out;
+}
+const fromPic=async()=>{ if(!HOST){ $('picFile').value=''; $('picFile').click(); return; }
+  try{ const s=await selectedPicture(); await pictureToShape(s.src,s.ed); }catch(e){ console.error(e); msg(typeof e==='string'?e:L('picFail'),'bad'); } };
+$('fromPicItem').addEventListener('click',fromPic); $('picBtn').addEventListener('click',fromPic);
+$('picFile').addEventListener('change',()=>{ const f=$('picFile').files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>pictureToShape(rd.result,null); rd.readAsDataURL(f); });
 
 /* ---------- التحديثات: نفس طريقة UULA Arabic Math ---------- */
 (function(){
