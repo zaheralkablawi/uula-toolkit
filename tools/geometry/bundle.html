@@ -1012,6 +1012,8 @@ function recognize(im){
   for(let it=0;fc&&it<4;it++){ const tol=it<2?Math.max(3,stroke*2.5,fc[2]*.04):Math.max(2,stroke*1.5); inl=cont.filter(([x,y])=>Math.abs(Math.hypot(x-fc[0],y-fc[1])-fc[2])<tol); if(inl.length<20) break; fc=fitC(inl); }
   if(fc&&fc[2]>Math.min(W,H)*.08){ const tolD=Math.max(3,stroke*2.5,fc[2]*.04); inl=cont.filter(([x,y])=>Math.abs(Math.hypot(x-fc[0],y-fc[1])-fc[2])<tolD); const bins=new Set(); inl.forEach(([x,y])=>bins.add(Math.floor(((Math.atan2(y-fc[1],x-fc[0])*180/Math.PI)+360)%360/10)));
     if(inl.length/cont.length>.55&&bins.size>=31) return Object.assign(res,{type:'circle',c:[fc[0],fc[1]],r:fc[2]-stroke/2}); }
+  // مستقيمات مفتوحة (متوازيات وقواطع بأسهم): لا تُقرأ كمضلع مغلق
+  { const LF=lineFig(W,H,lab,comps,F,stroke,res); if(LF) return LF; }
   // تبسيط الحدود إلى مضلع
   let per=0; for(let i=0;i<cont.length;i++){ const a=cont[i], b=cont[(i+1)%cont.length]; per+=Math.hypot(b[0]-a[0],b[1]-a[1]); }
   const rdp=(pts,eps)=>{ if(pts.length<3) return pts; let dm=0,id=0; const a=pts[0], b=pts[pts.length-1], L2=Math.hypot(b[0]-a[0],b[1]-a[1])||1;
@@ -1038,6 +1040,101 @@ function recognize(im){
     const Q=[]; for(let i=0;i<n0;i++){ const L1=Lines[(i-1+n0)%n0], L2=Lines[i], X=lineX(L1[0],L1[1],L2[0],add(L2[0],L2[1])); Q.push(X&&len(sub(X,P[i]))<stroke*6+10?X:P[i]); }
     P=Q; }
   return Object.assign(res,{type:'poly',pts:P});
+}
+// شكل من مستقيمات مفتوحة: كشف المستقيمات بتحويل هاف، ثم نقاط التقاطع والأسهم وأسهم التوازي
+function lineFig(W,H,lab,comps,F,stroke,res){
+  const big=new Set(comps.filter(c=>c.d>=F.d*.2).map(c=>c.id));
+  const M=new Uint8Array(W*H), px=[]; for(let i=0;i<W*H;i++) if(lab[i]>=0&&big.has(lab[i])){ M[i]=1; px.push(i); }
+  if(px.length<50||px.length>70000) return null;
+  const ink=(q)=>{ const x=Math.round(q[0]), y=Math.round(q[1]); return x>=0&&y>=0&&x<W&&y<H&&M[y*W+x]===1; };
+  const NT=180, CS=[], SN=[]; for(let t=0;t<NT;t++){ CS.push(Math.cos(t*Math.PI/NT)); SN.push(Math.sin(t*Math.PI/NT)); }
+  const RM=Math.ceil(Math.hypot(W,H)), RW=2*RM+1, alive=new Uint8Array(px.length).fill(1), band=stroke+1.5, minL=F.d*.16, gapMax=Math.max(4,stroke*3+2), dashGap=Math.max(8,F.d*.045), lines=[];
+  const cover=(p0,d,t)=>{ const n=perp(d), q=add(p0,mul(d,t)); for(let o=-band;o<=band;o+=1) if(ink(add(q,mul(n,o)))) return true; return false; };
+  const run=(p0,d)=>{ const cv=[]; for(let t=-RM;t<=RM;t++) cv.push(cover(p0,d,t)?1:0);
+    let best=null, cur=null, gap=0;
+    for(let k=0;k<=cv.length;k++){ const v=k<cv.length&&cv[k];
+      if(v){ if(cur&&gap<=dashGap){ cur.t1=k; cur.on+=1; if(gap>gapMax) cur.dg++; } else { cur={t0:k,t1:k,on:1,dg:0}; } gap=0; }
+      else if(cur){ gap++; if(gap>dashGap||k===cv.length){ if(!best||cur.t1-cur.t0>best.t1-best.t0) best=cur; cur=null; gap=0; } } }
+    if(!best) return null; return {t0:best.t0-RM,t1:best.t1-RM,cov:best.on/(best.t1-best.t0+1),dg:best.dg}; };
+  const AL=M.slice();   // البكسلات التي لم تُنسب لمستقيم بعد
+  for(let it=0;it<16;it++){
+    const acc=new Int32Array(NT*RW);
+    for(let k=0;k<px.length;k++){ if(!alive[k]) continue; const x=px[k]%W, y=(px[k]-x)/W; for(let t=0;t<NT;t++) acc[t*RW+Math.round(x*CS[t]+y*SN[t])+RM]++; }
+    let bi=0; for(let i=1;i<acc.length;i++) if(acc[i]>acc[bi]) bi=i; if(acc[bi]<minL*.5) break;
+    const th=Math.floor(bi/RW), rho=bi%RW-RM, nn=[CS[th],SN[th]]; let d=[-nn[1],nn[0]], p0=mul(nn,rho);
+    let R=run(p0,d);
+    // تحسين الاتجاه بالمربعات الصغرى على بكسلات المستقيم
+    for(let pass=0;R&&pass<2;pass++){ let sx=0,sy=0,c=0; const sel=[]; for(let k=0;k<px.length;k++){ const x=px[k]%W, y=(px[k]-x)/W, v=sub([x,y],p0), t=dot(v,d); if(t<R.t0-1||t>R.t1+1) continue; if(Math.abs(dot(v,perp(d)))<=band){ sel.push([x,y]); sx+=x; sy+=y; c++; } }
+      if(c<10) break; const m=[sx/c,sy/c]; let a=0,b=0,e=0; sel.forEach(q=>{ const u=sub(q,m); a+=u[0]*u[0]; b+=u[0]*u[1]; e+=u[1]*u[1]; });
+      const an=.5*Math.atan2(2*b,a-e); let d2=[Math.cos(an),Math.sin(an)]; if(dot(d2,d)<0) d2=mul(d2,-1); d=d2; p0=m; R=run(p0,d); }
+    // نقتل أصوات بكسلات هذا المستقيم
+    const kill=(t0,t1)=>{ for(let k=0;k<px.length;k++){ if(!alive[k]) continue; const x=px[k]%W, y=(px[k]-x)/W, v=sub([x,y],p0), t=dot(v,d); if(t>=t0-2&&t<=t1+2&&Math.abs(dot(v,perp(d)))<=band+1){ alive[k]=0; AL[px[k]]=0; } } };
+    if(!R){ kill(-RM,RM); continue; }
+    // مستقيم جديد فعلًا؟ أغلب حبره يجب ألا يكون لمستقيم وجدناه قبله (لا تكرار عند الزوايا الحادة)
+    let fresh=0, tot=0; const nn2=perp(d); for(let t=R.t0;t<=R.t1;t+=2){ const q=add(p0,mul(d,t)); let on=false, al=false; for(let o=-band;o<=band;o+=1){ const z=add(q,mul(nn2,o)), x=Math.round(z[0]), y=Math.round(z[1]); if(x<0||y<0||x>=W||y>=H) continue; const j=y*W+x; if(M[j]){ on=true; if(AL[j]) al=true; } } if(on){ tot++; if(al) fresh++; } }
+    kill(R.t0,R.t1);
+    if(R.t1-R.t0<minL||fresh<tot*.6) continue;
+    lines.push({p:add(p0,mul(d,R.t0)),d,L:R.t1-R.t0,dash:R.cov<.8&&R.dg>=2}); }
+  // دمج المكرر
+  for(let i=0;i<lines.length;i++) for(let j=lines.length-1;j>i;j--){ const A=lines[i], B=lines[j]; if(Math.abs(dot(A.d,B.d))<Math.cos(rad(3))) continue;
+    const e=[B.p,add(B.p,mul(B.d,B.L))]; if(e.some(q=>Math.abs(dot(sub(q,A.p),perp(A.d)))>band*2)) continue;
+    const ts=[0,A.L,dot(sub(e[0],A.p),A.d),dot(sub(e[1],A.p),A.d)]; const lo=Math.min(...ts), hi=Math.max(...ts);
+    if(Math.max(ts[2],ts[3])<-gapMax||Math.min(ts[2],ts[3])>A.L+gapMax) continue; A.p=add(A.p,mul(A.d,lo)); A.L=hi-lo; lines.splice(j,1); }
+  if(lines.length<2) return null;
+  const E=l=>[l.p,add(l.p,mul(l.d,l.L))], tol=band*2+3;
+  const dSeg=(q,l)=>{ const t=Math.max(0,Math.min(l.L,dot(sub(q,l.p),l.d))); return len(sub(q,add(l.p,mul(l.d,t)))); };
+  // عرض الحبر عموديًا على المستقيم (لاكتشاف رؤوس الأسهم)
+  const wcap=Math.max(16,stroke*9);
+  const width=(l,t)=>{ const q=add(l.p,mul(l.d,t)), n=perp(l.d); let o0=null; for(let o=0;o<=band&&o0==null;o++){ if(ink(add(q,mul(n,o)))) o0=o; else if(ink(sub(q,mul(n,o)))) o0=-o; } if(o0==null) return 0;
+    let a=o0, b=o0; while(b-o0<wcap&&ink(add(q,mul(n,b+1)))) b++; while(o0-a<wcap&&ink(add(q,mul(n,a-1)))) a--; return b-a+1; };
+  const nearOther=(l,t)=>{ const q=add(l.p,mul(l.d,t)); return lines.some(m=>m!==l&&dSeg(q,m)<band*2+4); };
+  const aLen=Math.max(10,F.d*.06);
+  lines.forEach(l=>{ const ws=[]; for(let t=l.L*.1;t<=l.L*.9;t+=2) if(!nearOther(l,t)){ const w=width(l,t); if(w) ws.push(w); } ws.sort((a,b)=>a-b); const med=ws.length?ws[ws.length>>1]:stroke*2;
+    const thr=Math.max(med*2+2,med+4), fat=t=>{ if(nearOther(l,t)) return false; const w=width(l,t); return w>=thr&&w<wcap*2; };
+    // رأس السهم أطول من عرضه، أما النقطة المرسومة فطولها بقدر عرضها
+    const bul=t=>{ const w=width(l,t); return w>med+1&&w<wcap*2; };
+    // رأس السهم يتسع من رأسه إلى قاعدته ثم ينقطع (أعرض موضع عند أحد طرفيه)، والنقطة المرسومة متناظرة
+    const isArrow=(a,b)=>{ let mw=0, k1=a, k2=a; for(let t=a;t<=b;t++){ const w=width(l,t); if(w>mw){ mw=w; k1=k2=t; } else if(w===mw) k2=t; } const f=((k1+k2)/2-a)/Math.max(1,b-a); if(!(b-a+1>=mw*.6&&(f<.3||f>.7))) return false;
+      // من القاعدة إلى الرأس يضيق باستمرار حتى يصير رفيعًا (علامات // المائلة متذبذبة)
+      const dir=f>.5?-1:1; let t=f>.5?k2:k1, prev=mw, bad=0; const end=f>.5?a:b; while(t!==end){ t+=dir; const w=width(l,t); if(w>prev+1) bad++; prev=w; } return bad<=1&&width(l,end)<=mw*.6; };
+    const endArrow=fromEnd=>{ let c=0, last=0; for(let s=2;s<=aLen;s+=1){ const t=fromEnd?l.L-s:s; if(fat(t)){ c++; last=s; } } if(c<3) return false; let e=last; while(e<aLen*1.8&&bul(fromEnd?l.L-e-1:e+1)) e++;
+      return fromEnd?isArrow(l.L-e,l.L-1):isArrow(1,e); };
+    l.a1=endArrow(true); l.a0=endArrow(false);
+    l.mid=[]; let s0=-1; for(let t=aLen*1.4;t<=l.L-aLen*1.4+1;t+=1){ const f=t<=l.L-aLen*1.4&&fat(t); if(f){ if(s0<0) s0=t; } else if(s0>=0){ if(t-s0>=2&&t-s0<=aLen*1.6){ let a=s0, b=t-1; while(s0-a<aLen&&bul(a-1)) a--; while(b-t<aLen&&bul(b+1)) b++; if(isArrow(a,b)) l.mid.push((a+b)/2); } s0=-1; } } });
+  // نهايات حرة: لا تلمس مستقيمًا آخر
+  let free=0, arrows=0; lines.forEach(l=>{ E(l).forEach(q=>{ if(!lines.some(m=>m!==l&&dSeg(q,m)<tol)) free++; }); arrows+=(l.a0?1:0)+(l.a1?1:0); });
+  const mids=lines.reduce((a,l)=>a+l.mid.length,0);
+  const strong=free>=3||(arrows>=1&&free>=2)||mids>=1;   // أسهم التوازي في منتصف الخطوط: لا يصلح المضلع المغلق
+  // النقاط: التقاطعات أولًا ثم الأطراف
+  const pts=[], addPt=q=>{ for(let k=0;k<pts.length;k++) if(len(sub(pts[k],q))<tol) return k; pts.push(q.slice()); return pts.length-1; };
+  const onL=lines.map(()=>[]);
+  for(let i=0;i<lines.length;i++) for(let j=i+1;j<lines.length;j++){ const A=lines[i], B=lines[j]; if(Math.abs(crs(A.d,B.d))<Math.sin(rad(4))) continue;
+    const X=lineX(A.p,A.d,B.p,add(B.p,B.d)); if(!X) continue; const ta=dot(sub(X,A.p),A.d), tb=dot(sub(X,B.p),B.d);
+    if(ta<-tol||ta>A.L+tol||tb<-tol||tb>B.L+tol) continue; const k=addPt(X); onL[i].push(k); onL[j].push(k); }
+  lines.forEach((l,i)=>{ const [e0,e1]=E(l); l.k0=addPt(e0); l.k1=addPt(e1); onL[i].push(l.k0,l.k1); });
+  const segs=[], key=new Set(), meta=[];
+  lines.forEach((l,i)=>{ const ks=[...new Set(onL[i])].map(k=>({k,t:dot(sub(pts[k],l.p),l.d)})).sort((a,b)=>a.t-b.t);
+    for(let z=0;z+1<ks.length;z++){ const a=ks[z], b=ks[z+1]; if(a.k===b.k) continue; const kk=Math.min(a.k,b.k)+'-'+Math.max(a.k,b.k); if(key.has(kk)) continue; key.add(kk);
+      let arr=0; if(z+1===ks.length-1&&l.a1) arr|=1; if(z===0&&l.a0) arr|=2;
+      const mids=l.mid.filter(t=>t>a.t&&t<b.t); segs.push([a.k,b.k]); meta.push({arr,dash:l.dash,par:mids.length?Math.min(2,mids.length):0}); } });
+  if(segs.length<2) return null;
+  const G=mkFree(pts,segs); G.sides.forEach((sd,i)=>{ Object.assign(sd,meta[i]); if(!sd.arr) delete sd.arr; });
+  // العلامات والأقواس تُقرأ من حبر الشكل فقط، لا من الكتابة القريبة
+  const Mall=new Uint8Array(W*H); for(let y=0;y<H;y++) for(let x=0;x<W;x++){ if(!M[y*W+x]) continue; for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){ const xx=x+dx,yy=y+dy; if(xx>=0&&yy>=0&&xx<W&&yy<H) Mall[yy*W+xx]=1; } }
+  const rA=Object.assign({},res,{all:Mall});
+  G.sides.forEach(sd=>{ if(sd.par||sd.arr) return; const m=sideMarks(rA,pts[sd.a],pts[sd.b]); sd.ticks=m.ticks; sd.par=m.par; });
+  // رمز صغير داخل الزاوية قرب رأسها (مثل *) أصغر من الحروف والأرقام = علامة تساوي
+  const T=res.texts||[], tds=T.map(x=>x.d).sort((a,b)=>a-b), tMed=tds.length?tds[tds.length>>1]:0;
+  const star=(p,a,b)=>{ const s2=angSpan(p,a,b); return T.some(x=>{ if(x.d>tMed*.8) return false; const dd=len(sub(x.c,p)); if(dd>res.fd*.13||dd<stroke*3) return false; const aa=((ang(sub(x.c,p))-s2.a0)%360+360)%360; return aa>s2.sw*.15&&aa<s2.sw*.85; }); };
+  pts.forEach((p,i)=>{ freeAngles(G,i).forEach(([a,b])=>{ const A={}; if(rightAt(rA,p,pts[a],pts[b])) A.right=true; else { const k2=arcsAt(rA,p,pts[a],pts[b]); if(k2===1) A.arc=true; else if(k2>1) A.arcs=k2; else if(star(p,pts[a],pts[b])) A.arcs=1; } if(A.right||A.arc||A.arcs) G.angs[angKey(i,a,b)]=A; }); });
+  // علامة الزاوية القائمة عند طرف الضلع ليست شرطة تساوٍ: نعيد القراءة بعيدًا عنها
+  G.sides.forEach(sd=>{ if(!sd.ticks) return; const rt=k=>Object.entries(G.angs).some(([kk,A])=>A.right&&+kk.split(':')[0]===k&&kk.split(':')[1].split('-').map(Number).includes(k===sd.a?sd.b:sd.a));
+    let A=pts[sd.a], B=pts[sd.b]; const d=nrm(sub(B,A)), cut=res.fd*.07+stroke*3; if(rt(sd.a)) A=add(A,mul(d,cut)); if(rt(sd.b)) B=sub(B,mul(d,cut)); if(A===pts[sd.a]&&B===pts[sd.b]) return;
+    if(dot(sub(B,A),d)<res.fd*.06){ sd.ticks=0; return; } sd.ticks=sideMarks(rA,A,B).ticks; });
+  if(strong) return Object.assign(res,{type:'lines',G});
+  // غير ذلك: احتياط لشكل مركب إذا لم يلتقط التحليل العادي القطع الداخلية (نقطة يلتقي عندها ثلاثة خطوط أو أكثر)
+  if(pts.some((_,i)=>freeNb(G,i).length>=3)) res.alt=G;
+  return null;
 }
 // هل يوجد خط مرسوم بين نقطتين في الصورة؟
 function lineIn(r,a,b){ let hit=0,n=0; for(let t=.12;t<=.88;t+=.02){ const x=Math.round(a[0]+(b[0]-a[0])*t), y=Math.round(a[1]+(b[1]-a[1])*t); if(x<0||y<0||x>=r.W||y>=r.H) continue; n++; if(r.inner[y*r.W+x]) hit++; } return n&&hit/n>.85; }
@@ -1129,6 +1226,8 @@ function compose(r,c0){
   for(let a=0;a<cand.length;a++) for(let b=a+1;b<cand.length;b++){ const u=cand[a], v=cand[b];
     if(Array.from({length:n},(_,k)=>k).some(k=>onSide(u,k)&&onSide(v,k))) continue;
     if(len(sub(u.p,v.p))<r.fd*.08) continue;
+    // قطعة تنطبق على ضلع (عند الزوايا الحادة وأقواسها) ليست قطعة داخلية
+    if(Array.from({length:n},(_,k)=>k).some(k=>{ const A=P[k], B=P[(k+1)%n], dd=nrm(sub(B,A)), off=q=>Math.abs(crs(dd,sub(q,A))); return off(u.p)<r.stroke*3+4&&off(v.p)<r.stroke*3+4; })) continue;
     const between=cand.some((w,k)=>k!==a&&k!==b&&(()=>{ const d=sub(v.p,u.p), tt=dot(sub(w.p,u.p),d)/dot(d,d); if(tt<.05||tt>.95) return false; return len(sub(add(u.p,mul(d,tt)),w.p))<r.stroke*2+3; })());
     if(between) continue;
     const kd=lineKind(r,u.p,v.p); if(kd) inner.push([a,b,kd==='dash']); }
@@ -1195,7 +1294,7 @@ async function pictureToShape(src,ed){
     if(cp.chord){ sh.chord=true; A.D=Math.round(cp.chord[0]); A.E=Math.round(cp.chord[1]); }
     if(cp.tangent!=null){ sh.tangent=true; A.F=Math.round(cp.tangent); }
     sh.names=r.texts.length>0; }
-  else if(r.type==='poly'&&(FREE0=compose(r,classify(r)))){ const G=FREE0, bb=bboxPts(G.pts), s=Math.min(260/bb.w,195/bb.h), cxi=bb.x+bb.w/2, cyi=bb.y+bb.h/2; fit={s,cx:cxi,cy:cyi};
+  else if((r.type==='lines'&&(FREE0=r.G))||(r.type==='poly'&&(FREE0=r.alt||compose(r,classify(r))))){ const G=FREE0, bb=bboxPts(G.pts), s=Math.min(260/bb.w,195/bb.h), cxi=bb.x+bb.w/2, cyi=bb.y+bb.h/2; fit={s,cx:cxi,cy:cyi};
     G.pts=G.pts.map(p=>[160+(p[0]-cxi)*s,122+(p[1]-cyi)*s]); S.tab='p'; S.p=G; FT='move'; }
   else { const c0=classify(r), c=idealize(c0), bb=bboxPts(c.pts), s=Math.min(260/bb.w,195/bb.h), cxi=bb.x+bb.w/2, cyi=bb.y+bb.h/2; fit={s,cx:cxi,cy:cyi};
     const G=mkPlane(c.kind,c.sub,c.pts.length); G.pts=c.pts.map(p=>[160+(p[0]-cxi)*s,122+(p[1]-cyi)*s]);

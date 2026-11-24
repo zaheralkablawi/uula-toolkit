@@ -162,7 +162,7 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
     </div>
     <div class="sprow2" style="justify-content:space-between;grid-template-columns:auto auto"><span class="gt2" data-en="Restyle the slide">تحويل الشريحة لستايل علا</span><button type="button" class="big" id="goBtn" style="min-width:90px;padding:0 16px" data-en="Convert" data-ar-title="يحوّل الشريحة كلها إلى ستايل مذكرة علا: الخط والأحجام والألوان وترتيب المربعات." data-en-title="Restyles the whole slide to the UULA booklet: font, sizes, colours and the order of the boxes." title="يحوّل الشريحة كلها إلى ستايل مذكرة علا: الخط والأحجام والألوان وترتيب المربعات.">تحويل</button></div>
     <div class="sep"></div>
-    <div style="display:flex;gap:6px;align-items:stretch"><div id="selHint" class="selhint" style="flex:1;min-width:0"></div><button type="button" class="ib" id="opUndo" style="flex:none;width:32px" data-ar-title="تراجع عن آخر عملية دفعة واحدة" data-en-title="Undo the last operation at once" title="تراجع عن آخر عملية دفعة واحدة"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5L3.5 8.5 7 12"/><path d="M3.5 8.5H12a4.5 4.5 0 010 9H9"/></svg></button></div>
+    <div id="selHint" class="selhint"></div>
     <div id="roles" style="display:grid;gap:4px"></div>
     <div class="sep"></div>
     <div class="sprow" style="display:flex;gap:6px;align-items:center"><span class="splab gt2" style="white-space:nowrap" data-en="Spacing">تنسيق المسافات</span>
@@ -175,13 +175,13 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
         <button type="button" data-v="left" aria-pressed="false" title="محاذاة لليسار" data-ar-title="محاذاة لليسار" data-en-title="Align left"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 3h10M2 6.5h7M2 10h10M2 13.5h7"/></svg></button>
       </div>
     </div>
-    <div class="sep"></div>
-    <button type="button" class="sec" id="docxBtn" data-ar-title="كل جزء مميز في ملف الوورد يصبح مربعًا مستقلًا بستايل علا" data-en-title="Every tagged part of the Word file becomes its own UULA box"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 1.5h6l3 3v10h-9z"/><path d="M5.5 7.5l1 4 1.5-3 1.5 3 1-4" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-en="Insert a Word file…">إدراج ملف وورد…</span></button>
-    <input type="file" id="docxFile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
   </section>
 
 
   <section class="panel" data-pane="ins" hidden>
+    <button type="button" class="sec" id="docxBtn" data-ar-title="كل جزء مميز في ملف الوورد يصبح مربعًا مستقلًا بستايل علا" data-en-title="Every tagged part of the Word file becomes its own UULA box"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 1.5h6l3 3v10h-9z"/><path d="M5.5 7.5l1 4 1.5-3 1.5 3 1-4" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-en="Insert a Word file…">إدراج ملف وورد…</span></button>
+    <input type="file" id="docxFile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+    <div class="sep"></div>
     <span class="gt2" data-en="Page numbers">أرقام الصفحات</span>
     <label class="chk"><input type="checkbox" id="numChk" checked> <span data-en="Number the pages after each conversion">ترقيم الصفحات بعد كل تحويل</span></label>
     <div class="row" id="numRow"><span style="font-size:.82rem" data-en="Numbering starts at slide">يبدأ الترقيم من الشريحة</span><span style="display:flex;gap:6px;align-items:center"><input type="number" min="1" class="num" id="numStart" value="1"><button type="button" class="mini" id="numHere" data-en="Current">الحالية</button></span></div>
@@ -889,7 +889,7 @@ function styleText(it, ctx, pkg, forcedRole) {
     let ar = pr.text ? AR.test(pr.text) : arAll;
     if (pr.role === 'choice' && ctx.choiceDir) { ar = ctx.choiceDir === 'rtl'; choiceLetterDir(pr.p, ar); }
     // an equation line inside an Arabic box stays on the right with the text around it
-    if (!ar && arAll && !(pr.role === 'choice' && ctx.choiceDir) && pr.role !== 'question' && desc(pr.p, 'm', 'oMath').length && !desc(pr.p, 'a', 't').some(x => /[A-Za-z]{3,}/.test(x.textContent))) ar = true;
+    if (!ar && arAll && pr.role !== 'question' && desc(pr.p, 'm', 'oMath').length && !desc(pr.p, 'a', 't').some(x => /[A-Za-z]{3,}/.test(x.textContent))) ar = true;
     let bullet = null, marL = 0, indent = 0;
     if (st.q) {
       bullet = 'Q'; marL = 182880; indent = -182880;
@@ -1945,69 +1945,9 @@ function gridOver(pkg) {
 function choiceLetterDir(p, rtl) {
   const t = desc(p, 'a', 't').find(x => x.textContent.trim());
   if (!t) return;
-  const m = t.textContent.match(/^(\s*(?:[ⓐ-ⓩⒶ-Ⓩ]|\(?[A-Da-d][).]))[‎‏]?/);
+  const m = t.textContent.match(/^(\s*(?:[ⓐ-ⓩⒶ-Ⓩ]|\(?[A-Da-d][).]))‏?/);
   if (!m) return;
-  // right-to-left: U+200F keeps the letter on the right; left-to-right: U+200E keeps it on the left, even before Arabic
-  t.textContent = m[1] + (rtl ? '‏' : '‎') + t.textContent.slice(m[0].length);
-}
-// several selected text boxes become multiple-choice options: in one row (each a quarter … of the width) or one under
-// the other on the page grid. The order: their letters if they have them, otherwise reading order. Each gets its letter
-// (ⓐ ⓑ …) and the choice style; the direction: as chosen, or «auto» (Arabic text or an Arabic question above → right-to-left)
-function arrangeChoices(pkg, layout, dirOpt) {
-  const W = pkg.slideW, CW = W - 2 * M;
-  const doc = parseXml(pkg.files.slide);
-  const ctx = { scheme: readTheme(pkg.files), bodySz: 1100 };
-  const items = topItems(doc).map((el, i) => { const c = core(el), n = cnvOf(c); return { i, el, c, n, name: n ? n.getAttribute('name') || '' : '', g: geomOf(el, pkg) || { x: 0, y: 0, w: 0, h: 0 }, kind: c.localName === 'sp' && kid(c, 'txBody', 'p') ? 'text' : c.localName, text: textOf(c).trim() }; });
-  const sel = items.filter(t => / #ursel$/.test(t.name) && t.kind === 'text');
-  if (sel.length < 2) return { count: 0 };
-  const L = 'ⓐⓑⓒⓓⓔⓕⓖⓗ';
-  const letterOf = t => { const m = t.text.match(/^\s*([ⓐ-ⓩ])/); return m ? L.indexOf(m[1]) : -1; };
-  let dir = dirOpt || 'auto';
-  if (dir === 'auto') {
-    if (sel.some(t => AR.test(t.text.replace(/[ⓐ-ⓩ]/g, '')))) dir = 'rtl';
-    else {
-      const top = Math.min(...sel.map(t => t.g.y));
-      const above = items.filter(o => !sel.includes(o) && o.kind === 'text' && o.text && o.g.y + o.g.h <= top + 2 * PT).sort((a, b) => (b.g.y + b.g.h) - (a.g.y + a.g.h))[0];
-      dir = above ? (AR.test(above.text) ? 'rtl' : 'ltr') : 'rtl';
-    }
-  }
-  const rtl = dir === 'rtl';
-  // the order
-  const known = sel.every(t => letterOf(t) >= 0);
-  const order = known ? [...sel].sort((a, b) => letterOf(a) - letterOf(b))
-    : [...sel].sort((a, b) => Math.abs(a.g.y - b.g.y) > 6 * PT ? a.g.y - b.g.y : (rtl ? b.g.x - a.g.x : a.g.x - b.g.x));
-  // each gets its letter and the choice look
-  order.forEach((t, k) => {
-    // the letter: in front of the first text; a box with only an equation gets a small run before the equation
-    // (outside it: the equation itself is not touched), in the equation shape and in its plain-text copy alike
-    for (const c of allCores(t.el)) {
-      const ps = kids(kid(c, 'txBody', 'p'), 'p', 'a');
-      const p0 = ps.find(p => textOf(p).trim()) || ps[0];
-      if (!p0) continue;
-      const first = [...p0.children].find(x => x.localName !== 'pPr');
-      const tt = first && first.localName === 'r' ? kid(first, 't', 'a') : null;
-      if (tt) { tt.textContent = L[k] + ' ' + tt.textContent.replace(/^\s*[ⓐ-ⓩ]‏?\s*/, ''); continue; }
-      const r = frag(doc, '<a:r><a:rPr lang="en-US" sz="1100" dirty="0"/><a:t>' + L[k] + ' </a:t></a:r>');
-      p0.insertBefore(r, first || null);
-    }
-    t.text = textOf(t.c).trim();
-    ctx.choiceDir = dir;
-    styleText(t, ctx, pkg, 'choice');
-    plainShape(t.c); setBody(t.c, {});
-    for (const c of allCores(t.el)) if (c !== t.c) for (const p of kids(kid(c, 'txBody', 'p'), 'p', 'a')) {
-      let pPr = kid(p, 'pPr', 'a'); if (!pPr) { pPr = mk(doc, 'a', 'pPr'); p.insertBefore(pPr, p.firstChild); }
-      pPr.setAttribute('algn', dir === 'rtl' ? 'r' : 'l'); pPr.setAttribute('rtl', dir === 'rtl' ? '1' : '0'); choiceLetterDir(p, dir === 'rtl');
-    }
-  });
-  ctx.choiceDir = null;
-  const y0 = snapUp(Math.min(...sel.map(t => t.g.y)));
-  if (layout === 'row') {
-    const w = Math.round(CW / order.length);
-    order.forEach((t, k) => setGeom(t.el, { x: rtl ? M + CW - (k + 1) * w : M + k * w, y: y0, w, h: ROW }));
-  } else {
-    order.forEach((t, k) => setGeom(t.el, { x: M, y: y0 + k * ROW, w: CW, h: ROW }));
-  }
-  return { xml: serialize(doc), count: order.length, dir };
+  t.textContent = m[1] + (rtl ? '‏' : '') + t.textContent.slice(m[0].length);
 }
 // the selected multiple-choice options turned to the other direction: every paragraph right-to-left (algn r) or
 // left-to-right (algn l), and options standing side by side swap places so ⓐ is on the right (rtl) or the left (ltr)
@@ -2018,7 +1958,7 @@ function flipChoices(pkg, dir) {
   // the selected ones keep their mark: the pane selects them again afterwards (to turn them again at once)
   const texts = sel.filter(t => t.c.localName === 'sp' && kid(t.c, 'txBody', 'p'));
   const rtl = dir === 'rtl';
-  for (const t of texts) for (const c of allCores(t.el)) for (const p of kids(kid(c, 'txBody', 'p'), 'p', 'a')) {
+  for (const t of texts) for (const p of kids(kid(t.c, 'txBody', 'p'), 'p', 'a')) {
     let pPr = kid(p, 'pPr', 'a'); if (!pPr) { pPr = mk(doc, 'a', 'pPr'); p.insertBefore(pPr, p.firstChild); }
     pPr.setAttribute('algn', rtl ? 'r' : 'l'); pPr.setAttribute('rtl', rtl ? '1' : '0');
     choiceLetterDir(p, rtl);
@@ -2443,7 +2383,7 @@ function splitPoint(plan, lay) {
 
 return {
   questionFlags,
-  NS, PT, ROW, M, FOOT, C, STY, BOX, openPackage, buildPackage, parseXml, serialize, restyle, layout, applyLayout, splitParts, splitPoint, markNames, MARK, applyRole, wrapBox, gridOver, flipChoices, arrangeChoices, WRAP, reflow, spacing, align, findSolutions, hideSolutions, showSolutions, hasSolutions, TEXT_ROLES, BOX_ROLES, G, Y0, snapUp, snapX,
+  NS, PT, ROW, M, FOOT, C, STY, BOX, openPackage, buildPackage, parseXml, serialize, restyle, layout, applyLayout, splitParts, splitPoint, markNames, MARK, applyRole, wrapBox, gridOver, flipChoices, WRAP, reflow, spacing, align, findSolutions, hideSolutions, showSolutions, hasSolutions, TEXT_ROLES, BOX_ROLES, G, Y0, snapUp, snapX,
   // used by the templates module
   util: { pX, txX, boxX, gradBoxX, picX, pillX, pillW, lineX, tableX, makeRels, frag, topItems, core, cnvOf, maxId, spTreeOf, kid, kids, desc, xfrmOf, geomOf, setNext: n => { NEXT = n; }, snapUp, yearText, pageNumX, estimateText, iconW, iconH }
 };
@@ -4147,7 +4087,6 @@ async function wrapSelected(id, tid) {
 async function insertTemplate(tid) {
   if (busy || !supported) return;
   busy = true; lock(); tsay('');
-  await snapOp([await currentId().catch(() => null)].filter(Boolean));
   try {
     const id = await currentId();
     if (!id) { tsay(L('حدّد شريحة أولًا.', 'Select a slide first.')); return; }
@@ -4260,63 +4199,9 @@ function dirSeg() {
   });
   return d;
 }
-// how many text boxes are selected now (for the options buttons)
-async function selCount() {
-  // an equation box can be reported as another type: every selected object counts except pictures, tables, lines and groups
-  return run(async ctx => { const s = ctx.presentation.getSelectedShapes(); s.load('items/type'); await ctx.sync(); return s.items.filter(x => !['Image', 'Table', 'Line', 'Group', 'Chart', 'SmartArt', 'Media'].includes(x.type)).length; }).catch(() => 0);
-}
-// several selected text boxes become options: in one row, or one under the other; they stay selected afterwards
-async function arrangeSelected(layout) {
-  if (busy || !supported) return;
-  busy = true; lock();
-  await snapOp([await currentId().catch(() => null)].filter(Boolean));
-  let slideId = null;
-  try {
-    slideId = await run(async ctx => {
-      const slides = ctx.presentation.getSelectedSlides(); slides.load('items/id');
-      const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/name'); await ctx.sync();
-      if (!slides.items.length || !shapes.items.length) return null;
-      shapes.items.forEach(x => { x.name = (x.name || '').replace(/ #ursel$/, '') + ' #ursel'; });
-      await ctx.sync(); return slides.items[0].id;
-    });
-    if (!slideId) return;
-    const pkg = await UR.openPackage(await exportSlide(slideId));
-    const r = UR.arrangeChoices(pkg, layout, mcqDir);
-    if (!r.count) { await clearSel(slideId); say(L('حدّد مربعَي نص أو أكثر.', 'Select two or more text boxes.')); return; }
-    let newId = slideId;
-    if (!(await UQ.apply(slideId, pkg.files.slide, r.xml, exportSlide).catch(() => false))) {
-      newId = await insertAfter(await UR.buildPackage(pkg, r.xml, null), slideId);
-      await deleteSlide(slideId);
-    }
-    await run(async ctx => {
-      ctx.presentation.setSelectedSlides([newId]); await ctx.sync();
-      const sh = ctx.presentation.slides.getItem(newId).shapes; sh.load('items/id,items/name'); await ctx.sync();
-      const sel = sh.items.filter(x => / #ursel$/.test(x.name || ''));
-      // one under the other: by their real heights, each starting on the page grid right after the one above
-      // (the UULA rule for options that follow each other: no empty line between them)
-      if (layout !== 'row' && sel.length > 1) {
-        sel.forEach(x => { try { x.textFrame.autoSizeSetting = 'AutoSizeShapeToFitText'; } catch (e) {} });
-        await ctx.sync();
-        sel.forEach(x => x.load('top,height')); await ctx.sync();
-        const Y0 = 22.58, G = 6.695, snap = y => Y0 + Math.max(0, Math.ceil((y - Y0 - 0.3) / G)) * G;
-        const list = [...sel].sort((a, b) => a.top - b.top);
-        let y = list[0].top;
-        for (const x of list) { x.top = y; y = snap(y + x.height); }
-        await ctx.sync();
-      }
-      sel.forEach(x => { x.name = x.name.replace(/ #ursel$/, ''); }); await ctx.sync();
-      try { ctx.presentation.slides.getItem(newId).setSelectedShapes(sel.map(x => x.id)); await ctx.sync(); } catch (e) {}
-    }).catch(() => {});
-    slideId = null;
-    say((layout === 'row' ? L('رُتّبت ' + r.count + ' خيارات أفقيًا', r.count + ' options arranged in a row') : L('رُتّبت ' + r.count + ' خيارات عموديًا', r.count + ' options arranged in a column'))
-      + (r.dir === 'rtl' ? L('، من اليمين لليسار.', ', right-to-left.') : L('، من اليسار لليمين.', ', left-to-right.')));
-  } catch (e) { if (slideId) await clearSel(slideId); say(L('تعذّر ترتيب الخيارات: ', 'Could not arrange the options: ') + errText(e)); }
-  finally { busy = false; lock(); }
-}
 async function flipSelected(dir) {
   if (busy || !supported) return;
   busy = true; lock();
-  await snapOp([await currentId().catch(() => null)].filter(Boolean));
   let slideId = null;
   try {
     slideId = await run(async ctx => {
@@ -4422,8 +4307,7 @@ function tplName(tid) { const it = ALL_ITEMS.find(x => x.tpl === tid); return it
 function mergedTip(it) {
   const own = ROLE_TIP[it.role || it.id];
   const parts = [];
-  if (it.id === 'mcq' || it.id === 'mcqV') parts.push(L('مع تحديد مربعَي نص أو أكثر: تُرتَّب خيارات ' + (it.id === 'mcq' ? 'في صف واحد' : 'بعضها تحت بعض') + ' بحروفها ⓐ ⓑ … وباتجاه زر الاتجاه.', 'With two or more text boxes selected: they become options ' + (it.id === 'mcq' ? 'in one row' : 'one under the other') + ', lettered ⓐ ⓑ … in the chosen direction.'));
-  else if (it.role && own) parts.push(L('مع تحديد: ', 'With a selection: ') + L(own[0], own[1]));
+  if (it.role && own) parts.push(L('مع تحديد: ', 'With a selection: ') + L(own[0], own[1]));
   else if (it.role) parts.push(L('حدّد مربعًا ثم اضغط ليتحوّل إلى «' + it.ar + '».', 'Select a box, then press to turn it into «' + it.en + '».'));
   if (it.tpl === 'grid') parts.push(L('مع تحديد صور: توضع الشبكة مكان كل صورة وبمقاسها. بدون تحديد: تُضاف شبكة جديدة في الأسفل.', 'With pictures selected: the grid takes each picture\'s place and size. Nothing selected: a new grid is added at the bottom.'));
   else if (it.tpl && it.role) parts.push(L('بدون تحديد: يُضاف «' + it.ar + '» جديد في الأسفل.', 'Nothing selected: a new «' + it.en + '» is added at the bottom.'));
@@ -4448,11 +4332,8 @@ async function selCheck() {
 async function mergedPress(id) {
   const it = ITEM[id]; if (!it || busy || !supported) return;
   await selCheck();
-  if ((id === 'mcq' || id === 'mcqV') && (await selCount()) > 1) return arrangeSelected(id === 'mcq' ? 'row' : 'column');
-  if (id === 'mcqV' && selNow === 1) return pinRole('choice');
   if (id === 'cancelled') {
     if (busy) return; busy = true; lock();
-    await snapOp([await currentId().catch(() => null)].filter(Boolean));
     try { say(suspendSay(await suspendSelected())); } catch (e) { say(L('تعذّر: ', 'Could not: ') + errText(e)); }
     finally { busy = false; lock(); }
     return;
@@ -4493,7 +4374,6 @@ async function undoRedo(dir) {
   } catch (e) { say(L('تعذّر: ', 'Could not: ') + errText(e)); }
   finally { busy = false; lock(); }
 }
-$('opUndo').addEventListener('click', undoOp);
 $('undoBtn').addEventListener('click', () => undoRedo(-1));
 $('redoBtn').addEventListener('click', () => undoRedo(1));
 $('solRoles').addEventListener('click', e => { const b = e.target.closest('.tbtn'); if (b) pinRole(b.dataset.role, true); });
@@ -4507,40 +4387,6 @@ async function clearSel(slideId) {
 }
 // solution marks change only the selected objects, in place: no slide is rebuilt, nothing moves
 const QUIET = { answer: '1F71DE', correct: '2070DF', given: null, graph: null };
-// ---------- quick undo: the whole last operation at once ----------
-// before every operation of the tool the slides it may change are copied (by their place in the deck);
-// «تراجع» puts those copies back in their places, so one press undoes the whole operation (not step by step)
-const opStack = [];
-async function snapOp(ids) {
-  if (!ids || !ids.length || !supported || isWord || ids.length > 40) return;   // a very long deck: no copy (too heavy)
-  try {
-    const pos = await run(async ctx => { const sl = ctx.presentation.slides; sl.load('items/id'); await ctx.sync(); return ids.map(id => sl.items.findIndex(x => x.id === id)); });
-    const copies = [];
-    for (let k = 0; k < ids.length; k++) if (pos[k] >= 0) copies.push({ pos: pos[k], b64: await exportSlide(ids[k]) });
-    if (!copies.length) return;
-    opStack.push(copies); if (opStack.length > 10) opStack.shift();
-    opPaint();
-  } catch (e) {}
-}
-function opPaint() { const b = $('opUndo'); if (b) b.disabled = busy || !supported || !opStack.length; }
-async function undoOp() {
-  if (busy || !supported || !opStack.length) return;
-  busy = true; lock();
-  try {
-    const copies = opStack.pop();
-    let back = null;
-    for (const c of copies) {
-      const id = await run(async ctx => { const sl = ctx.presentation.slides; sl.load('items/id'); await ctx.sync(); return sl.items[c.pos] ? sl.items[c.pos].id : null; });
-      if (!id) continue;
-      back = await insertAfter(c.b64, id);
-      await deleteSlide(id);
-    }
-    if (back) await run(async ctx => { ctx.presentation.setSelectedSlides([back]); await ctx.sync(); }).catch(() => {});
-    solSlideId = null; await solLabel().catch(() => {});
-    say(L('رجعت الشريحة كما كانت قبل آخر عملية.', 'The slide is back as it was before the last operation.'));
-  } catch (e) { say(L('تعذّر التراجع: ', 'Could not undo: ') + errText(e)); }
-  finally { busy = false; lock(); }
-}
 // «Undo» / «Redo» of the marks given with the solution buttons (name, text colour, place), in place
 const undoStack = [], redoStack = [];
 function undoPaint() {
@@ -4662,7 +4508,6 @@ async function suspendSelected() {
 async function pinRole(role, keepColour) {
   if (busy || !supported) return;
   busy = true; lock(); rsay('');
-  await snapOp([await currentId().catch(() => null)].filter(Boolean));
   if (role === 'cancelled') {
     try { rsay(suspendSay(await suspendSelected())); }
     catch (e) { rsay(L('تعذّر: ', 'Could not: ') + errText(e)); }
@@ -4860,7 +4705,6 @@ async function alignSlide(id, mode, useSel) {
 async function spacingRun(kind) {
   if (busy || !supported) return;
   busy = true; lock(); res.innerHTML = '';
-  await snapOp(await targetIds().catch(() => []));
   try {
     const ids = await targetIds();
     if (!ids.length) { say(L('حدّد شريحة أولًا.', 'Select a slide first.')); return; }
@@ -5049,7 +4893,6 @@ async function solSlide(id, mode) {
 $('solBtn').addEventListener('click', async () => {
   if (busy || !supported) return;
   busy = true; lock(); res.innerHTML = '';
-  await snapOp(await targetIds().catch(() => []));
   solState = await slideSolHidden(await currentId().catch(() => null));
   const mode = solState ? 'show' : 'hide';
   try {
@@ -5420,13 +5263,12 @@ function lock() {
   $('solBtn').disabled = busy || !supported;
   $('spV').disabled = busy || !supported; $('spH').disabled = busy || !supported;
   document.querySelectorAll('.tbtn').forEach(b => { b.disabled = busy || !supported; });
-  undoPaint(); opPaint();
+  undoPaint();
   ['docxBtn', 'numDel', 'wAuto', 'wUntag', 'wClear', 'wMark', 'wUnmark'].forEach(k => { if ($(k)) $(k).disabled = busy || !supported; });
 }
 $('goBtn').addEventListener('click', async () => {
   if (busy || !supported) return;
   busy = true; lock(); res.innerHTML = '';
-  await snapOp(await targetIds().catch(() => []));
   try { await doConvert(); }
   catch (e) { prog(null); say(L('حدث خطأ: ', 'Error: ') + errText(e)); }
   finally { busy = false; lock(); }
