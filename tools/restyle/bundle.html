@@ -2438,13 +2438,15 @@ function spec(id, W) {
     }
     // the UULA empty graph grid (the same as a hidden solution graph): cells of two page-grid steps, light lines D3D8E0
     case 'grid': return { gap: 1, rows: [{ cells: [{ t: 'grid', cols: 8, rows: 7 }] }] };
-    case 'practice': return { gap: 1, box: { grad: true, name: 'Practice', h: 68 * PT }, rows: [
-      { side: true, cells: [
-        { t: 'pic', key: 'trophy', w: 44.7 * PT, h: 44.7 * PT, x: W - M - 50 * PT, dy: 4 * PT, name: 'Trophy' },
-        txt(U.pX('تـــــدرب وتــــفـــوق', { sz: 1400, b: 1, c: '6666FF' }), { x: 160 * PT, w: W - M - 60 * PT - 160 * PT, dy: 13 * PT }),
-        { t: 'pic', key: 'qr', w: 40.4 * PT, h: 46.7 * PT, x: M, dy: 10 * PT, name: 'QR' }
-      ] },
-      { gap: 0, cells: [txt(U.pX('جاوب على أهم أسئلة الدرس واثبت لنا قوتك في هذا الدرس!', { c: '180230' }), { x: 160 * PT, w: W - M - 60 * PT - 160 * PT })] }
+    // the same as in the booklet: box 75pt, the tall trophy rising above the box on the right, the title and the line
+    // close together, the QR on the left (measured from the booklet page)
+    case 'practice': return { gap: 2, box: { grad: true, name: 'Practice', h: 75 * PT, exact: true }, rows: [
+      { cells: [
+        { t: 'pic', key: 'trophy', w: 88.8 * PT, h: 88.8 * PT, x: W - 122.4 * PT, dy: -22.3 * PT, name: 'Trophy' },
+        txt(U.pX('تــدرب وتــفـوق', { sz: 1400, b: 1, c: '6666FF' }), { x: 100 * PT, w: W - 120 * PT - 100 * PT, dy: 15 * PT }),
+        txt(U.pX('جاوب على أهم أسئلة الدرس واثبت لنا قوتك في هذا الدرس!', { c: '180230' }), { x: 100 * PT, w: W - 120 * PT - 100 * PT, dy: 40 * PT }),
+        { t: 'pic', key: 'qr', w: 44 * PT, h: 51 * PT, x: 40 * PT, dy: 12 * PT, name: 'QR' }
+      ] }
     ] };
   }
   return null;
@@ -2459,7 +2461,7 @@ function build(id, W, top, rels) {
   const add = (x, meta) => { xml += x; shapes.push(meta); };
   if (s.box) {
     const b = s.box;
-    if (b.grad) add(U.gradBoxX(b.name, top, 68 * PT, W), { role: 'box' });
+    if (b.grad) add(U.gradBoxX(b.name, top, b.h || 68 * PT, W), { role: 'box' });
     else if (b.frame) add('<p:sp><p:nvSpPr><p:cNvPr id="' + nid() + '" name="UULA Cancelled Container"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="0" y="' + Math.round(top) + '"/><a:ext cx="' + W + '" cy="' + ROW * 4 + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill><a:ln w="19050"><a:solidFill><a:srgbClr val="FFC000"/></a:solidFill></a:ln></p:spPr><p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/><a:p><a:endParaRPr lang="ar-KW" dirty="0"/></a:p></p:txBody></p:sp>', { role: 'box' });
     else if (b.small) add('<p:sp><p:nvSpPr><p:cNvPr id="' + nid() + '" name="UULA Other Form Container"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="' + M + '" y="' + Math.round(top) + '"/><a:ext cx="' + CW + '" cy="' + ROW * 2 + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:solidFill><a:srgbClr val="FBEBD3"/></a:solidFill><a:ln><a:noFill/></a:ln></p:spPr><p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/><a:p><a:endParaRPr lang="ar-KW" dirty="0"/></a:p></p:txBody></p:sp>', { role: 'box' });
     else add(U.boxX(b.name, top, ROW * 4, b.fill, W), { role: 'box' });
@@ -2499,7 +2501,7 @@ function place(id, W, top, built, heights) {
   const hOf = (k, def) => heights && heights[k] != null ? heights[k] : def;
   const box = s.box;
   const boxK = built.shapes.findIndex(x => x.role === 'box');
-  let y = top + (box && !box.small ? ROW : 0);
+  let y = top + (box && !box.small && !box.exact ? ROW : 0);
   if (box && box.small) y = top + 4 * PT;
   const x1 = box && box.icon && !box.small ? W - M - 15 * PT : W - M;
   let bottom = y;
@@ -2538,7 +2540,7 @@ function place(id, W, top, built, heights) {
   if (box) {
     const bk = boxK;
     let h = box.small ? (bottom - top + 4 * PT) : (bottom + 2 * ROW - top);
-    if (box.h) h = Math.max(box.h, h);
+    if (box.h) h = box.exact ? box.h : Math.max(box.h, h);
     out[bk] = box.small ? { x: M, y: top, w: CW, h } : { x: 0, y: top, w: W, h };
     const ik = built.shapes.findIndex(x => x.role === 'icon');
     if (ik >= 0) out[ik] = box.small ? { x: W - M - 18 * PT, y: top + 2 * PT } : { x: W - 47 * PT, y: top + ROW - 2 * PT };
