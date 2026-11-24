@@ -184,7 +184,9 @@ $('list').addEventListener('click', e => {
 
 // ---- menu / about ----
 const say = m => { $('status').textContent = m; if (m) setTimeout(() => { if ($('status').textContent === m) $('status').textContent = ''; }, 5000); };
-function menu(o) { $('appMenu').hidden = !o; $('menuBtn').setAttribute('aria-expanded', String(o)); }
+function menu(o) { const m = $('appMenu'); m.hidden = !o; $('menuBtn').setAttribute('aria-expanded', String(o));
+  // same place as in every tool: the left edge of the pane
+  if (o) { m.style.position = 'fixed'; m.style.left = '10px'; m.style.right = 'auto'; m.style.top = ($('menuBtn').getBoundingClientRect().bottom + 4) + 'px'; } }
 $('menuBtn').addEventListener('click', e => { e.stopPropagation(); menu($('appMenu').hidden); });
 document.addEventListener('click', e => { if (!e.target.closest('.appmenu')) menu(false); });
 $('modalX').addEventListener('click', () => { $('modal').hidden = true; });

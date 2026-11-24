@@ -1,4 +1,5 @@
 // UULA Toolkit — thin bar added on top of every tool: back to the tools list
+var TK_MENU_LEFT = 10;
 (function () {
   function add() {
     if (document.getElementById('tkBar')) return;
@@ -23,7 +24,7 @@
       location.href = '../../index.html?v=' + Date.now();
     });
     document.body.insertBefore(b, document.body.firstChild);
-    menuIcons();
+    menuIcons(); pinGraphMenu();
   }
   function menuIcons() {
     var css2 = document.createElement('style'); css2.textContent = TK_MENU_CSS; document.head.appendChild(css2);
@@ -44,17 +45,24 @@
     }
     if (lb && q('#langItem')) lb.style.display = 'none';
     // keep the menu inside the pane in both languages (in English some tools open it towards the outside)
+    // every tool's menu opens at the same place: the left edge of the pane, in Arabic and English
     var fit = function () {
       if (m.hidden) return;
       var d = document.documentElement.lang === 'en' ? 'ltr' : 'rtl'; if (m.dir !== d) m.dir = d;
-      m.style.left = ''; m.style.right = '';
-      var r = m.getBoundingClientRect();
-      if (r.left < 4) { m.style.left = '0'; m.style.right = 'auto'; }
-      else if (r.right > window.innerWidth - 4) { m.style.right = '0'; m.style.left = 'auto'; }
+      var mb = document.getElementById('menuBtn'), top = mb ? mb.getBoundingClientRect().bottom + 4 : 40;
+      m.style.setProperty('position', 'fixed', 'important'); m.style.setProperty('left', TK_MENU_LEFT + 'px', 'important');
+      m.style.setProperty('right', 'auto', 'important'); m.style.setProperty('top', top + 'px', 'important');
     };
     new MutationObserver(fit).observe(m, { attributes: true, attributeFilter: ['hidden', 'dir'] });
     tkIcon(q('#chkUpd'), 'upd'); tkIcon(q('#langItem'), 'lang'); tkIcon(q('#aboutBtn'), 'about');
     ['new', 'help', 'keys', 'news', 'about', 'edit'].forEach(function (a) { tkIcon(q('[data-act="' + a + '"]'), a); });
+  }
+  // UULA Graph opens its menus from the top bar (#mnu): keep them at the same left edge too
+  function pinGraphMenu() {
+    var g = document.getElementById('mnu'); if (!g) return;
+    new MutationObserver(function () { if (g.hidden) return;
+      if (g.style.left !== TK_MENU_LEFT + 'px') { g.style.left = TK_MENU_LEFT + 'px'; g.style.right = 'auto'; } })
+      .observe(g, { attributes: true, attributeFilter: ['hidden', 'style'] });
   }
   if (document.body) add(); else document.addEventListener('DOMContentLoaded', add);
 })();
