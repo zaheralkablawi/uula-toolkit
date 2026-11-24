@@ -4294,10 +4294,11 @@ async function suspendSelected() {
       const x1 = Math.max(...shapes.items.map(s => s.left + s.width)), y1 = Math.max(...shapes.items.map(s => s.top + s.height));
       const pad = 6; X = x0 - pad; Y = y0 - pad; Wd = x1 - x0 + 2 * pad; Ht = y1 - y0 + 2 * pad;
     } else {
-      // nothing selected: the same box on its own, under the last object of the slide (content width, 4 rows high)
+      // nothing selected: the same box on its own, under the last object, as big as the booklet's «suspended» box
+      // (the full width of the page, about 74pt high)
       const pkg = await UR.openPackage(await exportSlide(sid));
       const ft = URT.freeTop(pkg, 1);
-      X = UR.M / PT; Wd = (pkg.slideW - 2 * UR.M) / PT; Y = ft.top / PT; Ht = 4 * UR.ROW / PT; n = -1;
+      X = 0; Wd = pkg.slideW / PT; Y = ft.top / PT; Ht = 5.5 * UR.ROW / PT; n = -1;
     }
     const failed = [];
     // each step on its own: one refusal does not stop the rest
