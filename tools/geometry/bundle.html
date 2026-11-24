@@ -43,7 +43,8 @@ header .bt .root:only-child{color:var(--fg);font-size:15px;letter-spacing:0}
 .opt{display:flex;align-items:center;gap:6px}
 .opt>.label{font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap}
 .opt .seg{flex:1}
-.opt .seg button{font-size:11.5px;height:26px;flex:auto}
+.opt .seg button{font-size:11.5px;height:26px;flex:auto;padding:0 4px}
+.opt .seg{min-width:0}
 .pv{position:relative;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;padding-bottom:36px}
 #fig{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none}
 #fig .hs{fill:none;stroke:transparent;stroke-width:14;cursor:pointer}
@@ -199,7 +200,7 @@ const T={
   style:['التنسيق','Style'], noColor:['بلا لون','No color'], booklet:['ألوان المذكرة','Booklet colors'], more:['ألوان أخرى','More colors'], custom:['لون آخر…','More…'], close:['إغلاق','Close'],
   upd:['تحديث جديد','New update'], menu:['القائمة','Menu'], undo:['تراجع','Undo'], rot:['تدوير','Rotate'], flip:['انعكاس','Flip'], reset:['الشكل الأصلي','Original shape'],
   cLine:['لون الخط','Line color'], width:['سماكة الخط','Line width'], solid:['خط متصل','Solid line'], dash:['خط متقطع','Dashed line'], cFill:['التعبئة','Fill'], cText:['لون الكتابة','Text color'], cMark:['لون العلامات','Marks color'], fs:['حجم الكتابة','Text size'],
-  sca:['مختلف الأضلاع','Scalene'], iso:['متساوي الساقين','Isosceles'], equ:['متطابق الأضلاع','Equilateral'], rt:['قائم','Right'],
+  sca:['مختلف','Scalene'], iso:['متساوي الساقين','Isosceles'], equ:['متطابق','Equilateral'], rt:['قائم','Right'],
   hdash:['متقطعة','Dashed'], hhide:['مخفية','Hidden'], hsolid:['متصلة','Solid'],
   tri:['مثلث','Triangle'], sq:['مربع','Square'], rect:['مستطيل','Rectangle'], para:['متوازي أضلاع','Parallelogram'], rho:['معين','Rhombus'], trap:['شبه منحرف','Trapezoid'], poly:['مضلع منتظم','Regular polygon'], circ:['دائرة','Circle'],
   cube:['مكعب','Cube'], box:['متوازي مستطيلات','Cuboid'], prism:['منشور','Prism'], pyr:['هرم','Pyramid'], cyl:['أسطوانة','Cylinder'], cone:['مخروط','Cone'], sph:['كرة','Sphere'],
@@ -714,7 +715,11 @@ async function insertNative(pr,json,bb){
     const shapes=ctx.presentation.getSelectedSlides().getItemAt(0).shapes;
     let ox=60, oy=60, sc=1;
     if(EDIT){ ox=EDIT.left; oy=EDIT.top; sc=EDIT.w?EDIT.width/EDIT.w:1; }
-    else { const ss=ctx.presentation.getSelectedShapes(); ss.load('items/left,items/top,items/width'); await ctx.sync(); if(ss.items.length){ const s=ss.items[0]; ox=s.left+s.width+20; oy=s.top; } }
+    else { const ss=ctx.presentation.getSelectedShapes(); ss.load('items/left,items/top,items/width'); shapes.load('items/name'); await ctx.sync();
+      if(ss.items.length){ const s=ss.items[0]; ox=s.left+s.width+20; oy=s.top; }
+      else { // وسط الشريحة، وكل شكل جديد يُزاح قليلاً عن السابق حتى لا يغطيه
+        let W=960, H=540; try{ const ps=ctx.presentation.pageSetup; ps.load('slideWidth,slideHeight'); await ctx.sync(); if(ps.slideWidth) { W=ps.slideWidth; H=ps.slideHeight; } }catch(e){}
+        const n=shapes.items.filter(s=>s.name===TITLE).length; ox=Math.max(10,(W-bb.w)/2)+n*24; oy=Math.max(10,(H-bb.h)/2)+n*24; } }
     const X=x=>ox+(x-bb.x)*sc, Y=y=>oy+(y-bb.y)*sc, made=[], arcs=[], tris=[];
     const line=(sh,c,w,dash)=>{ sh.lineFormat.visible=true; sh.lineFormat.color=c; sh.lineFormat.weight=w; sh.lineFormat.dashStyle=dash?'Dash':'Solid'; };
     const tri=(A,B,Cc,fill)=>{ // مثلث بأي زوايا: شكل المثلث مع مقبض الرأس ودوران
