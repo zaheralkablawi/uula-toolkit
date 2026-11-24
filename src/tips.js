@@ -107,7 +107,46 @@
       ['[data-act="news"]', E('آخر ما أُضيف إلى الأداة.', '')]
     ],
 
-    graph: []
+    graph: [],
+
+    geometry: [
+      ['#menuBtn', E('تعديل الشكل المحدد، والتحقق من التحديثات، وتغيير اللغة، وحول الأداة.', 'Edit the selected shape, check for updates, change the language and about.')],
+      ['#loadSelItem', E('حدّد شكلًا أدرجته من قبل بالأداة، ثم اضغط لتعديله هنا.', 'Select a shape you inserted with the tool, then click to edit it here.')],
+      ['#tabs [data-tab="p"]', E('المثلث والمربع والمستطيل ومتوازي الأضلاع والمعين وشبه المنحرف والمضلعات المنتظمة.', 'Triangles, squares, rectangles, parallelograms, rhombuses, trapezoids and regular polygons.')],
+      ['#tabs [data-tab="c"]', E('الدائرة وعناصرها: المركز ونصف القطر والقطر والوتر والمماس والقوس والقطاع والزوايا.', 'The circle and its parts: center, radius, diameter, chord, tangent, arc, sector and angles.')],
+      ['#tabs [data-tab="s"]', E('المكعب ومتوازي المستطيلات والمنشور والهرم والأسطوانة والمخروط والكرة.', 'Cube, cuboid, prism, pyramid, cylinder, cone and sphere.')],
+      ['#galP button, #galS button', E('اضغط لرسم هذا الشكل.', 'Click to draw this shape.')],
+      ['#segTri button', E('نوع المثلث. السحب يحافظ على النوع.', 'Triangle type. Dragging keeps the type.')],
+      ['#segN button', E('عدد أضلاع المضلع المنتظم.', 'Number of sides of the regular polygon.')],
+      ['#segHid button', E('طريقة رسم الأحرف الخلفية المخفية: متقطعة أو مخفية أو متصلة.', 'How hidden back edges are drawn: dashed, hidden or solid.')],
+      ['#insert', E('في الباوربوينت: يُدرج الشكل أشكالًا عادية في مجموعة واحدة، يمكن تعديلها وتحريكها. في الوورد: صورةً.', 'In PowerPoint: inserts editable shapes in one group. In Word: a picture.', 'إدراج', 'Insert')],
+      ['#undoBtn', E('يتراجع عن آخر تغيير (⌘Z).', 'Undoes the last change (⌘Z).', 'تراجع', 'Undo')],
+      ['#rotBtn', E('يدير الشكل ١٥° عكس عقارب الساعة.', 'Rotates the shape 15° counterclockwise.', 'تدوير', 'Rotate')],
+      ['#flipBtn', E('يعكس الشكل يمينًا ويسارًا.', 'Flips the shape left to right.', 'انعكاس', 'Flip')],
+      ['#resetBtn', E('يرجع الشكل إلى وضعه الأصلي ويمسح العلامات.', 'Returns the shape to its original form and clears the marks.', 'الشكل الأصلي', 'Original shape')],
+      ['#edCancel', E('يلغي تعديل الشكل المحدد، فيُدرج الشكل التالي جديدًا.', 'Stops editing the selected shape; the next insert adds a new one.')],
+      ['#chips .chip', E('يُظهر هذا العنصر على الشكل أو يخفيه.', 'Shows or hides this item on the shape.')],
+      ['#dims input', E('النص المكتوب على هذا البعد في الرسم.', 'The text written on this dimension.')],
+      ['#pop [data-a="show"]', E('يكتب طول الضلع بجانبه. اكتب في المربع نصًا آخر إن أردت.', 'Writes the side length next to it. Type other text in the box if you like.', 'إظهار الطول', 'Show length')],
+      ['#pop [data-a^="t"]', E('شرطات تساوي الأضلاع: الأضلاع المتساوية لها العدد نفسه من الشرطات.', 'Equal-side marks: equal sides get the same number of marks.', 'شرطات التساوي', 'Equal marks')],
+      ['#pop [data-a^="p"]', E('رمز التوازي المعتمد //: الأضلاع المتوازية لها الرمز نفسه.', 'The parallel sign //: parallel sides get the same sign.', 'رمز التوازي', 'Parallel sign')],
+      ['#pop [data-a="dash"]', E('يرسم هذا الضلع بخط متقطع.', 'Draws this side dashed.', 'متقطع', 'Dashed')],
+      ['#pop [data-a="nm"]', E('يُظهر اسم الرأس أو يخفيه. غيّر الاسم من المربع.', 'Shows or hides the vertex name. Change the name in the box.', 'اسم الرأس', 'Vertex name')],
+      ['#pop [data-a="sa"]', E('يكتب قياس الزاوية. اكتب في المربع قياسًا آخر أو رمزًا إن أردت.', 'Writes the angle measure. Type another value or symbol in the box if you like.', 'قياس الزاوية', 'Angle measure')],
+      ['#pop [data-a="rt"]', E('علامة الزاوية القائمة عند هذا الرأس.', 'Right-angle mark at this vertex.', 'زاوية قائمة', 'Right angle')],
+      ['#pop [data-a^="a"]', E('أقواس تساوي الزوايا: الزوايا المتساوية لها العدد نفسه من الأقواس.', 'Equal-angle arcs: equal angles get the same number of arcs.', 'أقواس التساوي', 'Equal arcs')],
+      ['#pop [data-a="alt"]', E('الارتفاع من هذا الرأس، مع علامة القائمة عند قدمه.', 'The altitude from this vertex, with a right-angle mark at its foot.', 'الارتفاع', 'Altitude')],
+      ['#pop [data-a="med"]', E('المتوسط من هذا الرأس إلى منتصف الضلع المقابل.', 'The median from this vertex to the midpoint of the opposite side.', 'المتوسط', 'Median')],
+      ['#pop [data-a="bis"]', E('منصف الزاوية عند هذا الرأس.', 'The angle bisector at this vertex.', 'منصف الزاوية', 'Bisector')],
+      ['#cLine', E('لون خطوط الشكل.', 'Color of the shape\'s lines.', 'لون الخط', 'Line color')],
+      ['#wSel', E('سماكة خطوط الشكل بالنقاط.', 'Line width in points.', 'سماكة الخط', 'Line width')],
+      ['#dSolid', E('خطوط الشكل متصلة.', 'Solid lines.', 'خط متصل', 'Solid line')],
+      ['#dDash', E('خطوط الشكل متقطعة.', 'Dashed lines.', 'خط متقطع', 'Dashed line')],
+      ['#cFill', E('لون تعبئة الشكل، أو بلا لون.', 'Fill color of the shape, or none.', 'التعبئة', 'Fill')],
+      ['#cText', E('لون أسماء الرؤوس والأطوال والقياسات.', 'Color of names, lengths and measures.', 'لون الكتابة', 'Text color')],
+      ['#cMark', E('لون علامات التساوي والتوازي والزوايا.', 'Color of equal, parallel and angle marks.', 'لون العلامات', 'Marks color')],
+      ['#fsSel', E('حجم الكتابة على الشكل بخط المذكرة.', 'Text size on the shape, in the booklet font.', 'حجم الكتابة', 'Text size')]
+    ]
   };
   RULES.cover = RULES.dark;
 

@@ -1,6 +1,6 @@
 ﻿أداة UULA Toolkit لبرنامجي PowerPoint وWord (ويندوز)
 =====================================================
-كل أدوات علا في إضافة واحدة: Restyle وArabic Math وGraph وDark وCover.
+كل أدوات علا في إضافة واحدة: Design وArabic Math وGraph وGeometry وDark وPPT Video Template.
 
 التثبيت:
 1) فك ضغط هذا الملف (Extract All).

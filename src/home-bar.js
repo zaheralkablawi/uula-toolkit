@@ -54,7 +54,7 @@
     };
     new MutationObserver(fit).observe(m, { attributes: true, attributeFilter: ['hidden', 'dir'] });
     tkIcon(q('#chkUpd'), 'upd'); tkIcon(q('#langItem'), 'lang'); tkIcon(q('#aboutBtn'), 'about');
-    ['new', 'help', 'keys', 'news', 'about'].forEach(function (a) { tkIcon(q('[data-act="' + a + '"]'), a); });
+    ['new', 'help', 'keys', 'news', 'about', 'edit'].forEach(function (a) { tkIcon(q('[data-act="' + a + '"]'), a); });
   }
   if (document.body) add(); else document.addEventListener('DOMContentLoaded', add);
 })();

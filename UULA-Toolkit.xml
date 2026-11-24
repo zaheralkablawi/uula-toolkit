@@ -5,11 +5,11 @@
   xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
   xsi:type="TaskPaneApp">
   <Id>36f5f959-c945-487a-b5d3-c33d6c76f199</Id>
-  <Version>1.4.0.0</Version>
+  <Version>1.5.0.0</Version>
   <ProviderName>Zaher Alkablawi</ProviderName>
   <DefaultLocale>ar-SA</DefaultLocale>
   <DisplayName DefaultValue="UULA Toolkit"/>
-  <Description DefaultValue="كل أدوات علا للباوربوينت والوورد في إضافة واحدة: Design وArabic Math وGraph وDark وPPT Video Template."/>
+  <Description DefaultValue="كل أدوات علا للباوربوينت والوورد في إضافة واحدة: Design وArabic Math وGraph وGeometry وDark وPPT Video Template."/>
   <IconUrl DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icon-32.png"/>
   <HighResolutionIconUrl DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icon-64.png"/>
   <SupportUrl DefaultValue="https://github.com/zaheralkablawi/uula-toolkit"/>
@@ -68,6 +68,16 @@
                   <Supertip><Title resid="T.graph"/><Description resid="T.graph.tip"/></Supertip>
                   <Icon><bt:Image size="16" resid="T.graph.i16"/><bt:Image size="32" resid="T.graph.i32"/><bt:Image size="80" resid="T.graph.i80"/></Icon>
                   <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_graph</TaskpaneId><SourceLocation resid="T.graph.u"/></Action>
+                </Control>
+              </Group>
+              <Group id="UULATK.G_geometryP">
+                <Label resid="T.geometry"/>
+                <Icon><bt:Image size="16" resid="T.geometry.i16"/><bt:Image size="32" resid="T.geometry.i32"/><bt:Image size="80" resid="T.geometry.i80"/></Icon>
+                <Control xsi:type="Button" id="UULATK.T_geometryP">
+                  <Label resid="T.geometry"/>
+                  <Supertip><Title resid="T.geometry"/><Description resid="T.geometry.tip"/></Supertip>
+                  <Icon><bt:Image size="16" resid="T.geometry.i16"/><bt:Image size="32" resid="T.geometry.i32"/><bt:Image size="80" resid="T.geometry.i80"/></Icon>
+                  <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_geometry</TaskpaneId><SourceLocation resid="T.geometry.u"/></Action>
                 </Control>
               </Group>
               <Group id="UULATK.G_darkP">
@@ -139,6 +149,16 @@
                   <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_graph</TaskpaneId><SourceLocation resid="T.graph.u"/></Action>
                 </Control>
               </Group>
+              <Group id="UULATK.G_geometryD">
+                <Label resid="T.geometry"/>
+                <Icon><bt:Image size="16" resid="T.geometry.i16"/><bt:Image size="32" resid="T.geometry.i32"/><bt:Image size="80" resid="T.geometry.i80"/></Icon>
+                <Control xsi:type="Button" id="UULATK.T_geometryD">
+                  <Label resid="T.geometry"/>
+                  <Supertip><Title resid="T.geometry"/><Description resid="T.geometry.tip"/></Supertip>
+                  <Icon><bt:Image size="16" resid="T.geometry.i16"/><bt:Image size="32" resid="T.geometry.i32"/><bt:Image size="80" resid="T.geometry.i80"/></Icon>
+                  <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_geometry</TaskpaneId><SourceLocation resid="T.geometry.u"/></Action>
+                </Control>
+              </Group>
               <Label resid="TK.Tab"/>
             </CustomTab>
           </ExtensionPoint>
@@ -159,6 +179,9 @@
         <bt:Image id="T.graph.i16" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/graph-16.png"/>
         <bt:Image id="T.graph.i32" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/graph-32.png"/>
         <bt:Image id="T.graph.i80" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/graph-80.png"/>
+        <bt:Image id="T.geometry.i16" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/geometry-16.png"/>
+        <bt:Image id="T.geometry.i32" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/geometry-32.png"/>
+        <bt:Image id="T.geometry.i80" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/geometry-80.png"/>
         <bt:Image id="T.dark.i16" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/dark-16.png"/>
         <bt:Image id="T.dark.i32" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/dark-32.png"/>
         <bt:Image id="T.dark.i80" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/dark-80.png"/>
@@ -171,6 +194,7 @@
         <bt:Url id="T.restyle.u" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?tool=restyle"/>
         <bt:Url id="T.math.u" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?tool=math"/>
         <bt:Url id="T.graph.u" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?tool=graph"/>
+        <bt:Url id="T.geometry.u" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?tool=geometry"/>
         <bt:Url id="T.dark.u" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?tool=dark"/>
         <bt:Url id="T.cover.u" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?tool=cover"/>
       </bt:Urls>
@@ -181,6 +205,7 @@
         <bt:String id="T.restyle" DefaultValue="Design"/>
         <bt:String id="T.math" DefaultValue="Arabic Math"/>
         <bt:String id="T.graph" DefaultValue="Graph"/>
+        <bt:String id="T.geometry" DefaultValue="Geometry"/>
         <bt:String id="T.dark" DefaultValue="Dark"/>
         <bt:String id="T.cover" DefaultValue="PPT Video Template"/>
       </bt:ShortStrings>
@@ -189,6 +214,7 @@
         <bt:String id="T.restyle.tip" DefaultValue="تحويل الشرائح لستايل علا وقوالب المذكرة. تفتح في نافذة خاصة بها."/>
         <bt:String id="T.math.tip" DefaultValue="كتابة المعادلات العربية وإدراجها. تفتح في نافذة خاصة بها."/>
         <bt:String id="T.graph.tip" DefaultValue="رسم الدوال وإدراجها صورةً. تفتح في نافذة خاصة بها."/>
+        <bt:String id="T.geometry.tip" DefaultValue="رسم الأشكال الهندسية والمجسمات وإدراجها أشكالًا قابلة للتعديل. تفتح في نافذة خاصة بها."/>
         <bt:String id="T.dark.tip" DefaultValue="تقسيم أوراق العمل وتحويلها إلى الوضع الداكن. تفتح في نافذة خاصة بها."/>
         <bt:String id="T.cover.tip" DefaultValue="شريحة الغلاف والشرائح الداخلية من قالب فيديو علا. تفتح في نافذة خاصة بها."/>
       </bt:LongStrings>

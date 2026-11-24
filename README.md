@@ -1,6 +1,6 @@
 # UULA Toolkit
 
-كل إضافات علا للباوربوينت والوورد في إضافة واحدة: Design (UULA Restyle) وArabic Math وGraph وDark وPPT Video Template.
+كل إضافات علا للباوربوينت والوورد في إضافة واحدة: Design (UULA Restyle) وArabic Math وGraph وGeometry وDark وPPT Video Template.
 
 - `taskpane.html` يفتح دائمًا أحدث نسخة من `index.html` (قائمة الأدوات).
 - كل أداة صفحتها في `tools/<id>/app.html`، وتنفتح فقط عند اختيارها (لا بطء).
@@ -11,7 +11,7 @@
 
 ## الأدوات تُفتح مباشرة من مستودعاتها
 - كل أداة في `tools/<id>/app.html` صفحة تحميل صغيرة: تجلب أحدث `app.html` من مستودع الأداة نفسه لحظة فتحها
-  (uula-restyle, uula-math, uula-graph, uula-dark)، ثم تضيف عليها أجزاء Toolkit من `tk-runtime.js`
+  (uula-restyle, uula-math, uula-graph, uula-geometry, uula-dark)، ثم تضيف عليها أجزاء Toolkit من `tk-runtime.js`
   (شريط «كل الأدوات»، والتنسيق الموحد، والتلميحات، والشعارات).
 - لذلك **التعديل على أداة يكون في مستودعها هي**؛ يصل إلى Toolkit تلقائيًا بدون بناء جديد.
   (PPT Video Template = صفحة UULA Dark في وضع cover.)

@@ -19,6 +19,7 @@ TOOLS = {
     'restyle': PAGES + 'uula-restyle/app.html',
     'math': PAGES + 'uula-math/app.html',
     'graph': PAGES + 'uula-graph/app.html',
+    'geometry': PAGES + 'uula-geometry/app.html',
     'dark': PAGES + 'uula-dark/app.html',
     'cover': PAGES + 'uula-dark/app.html',      # PPT Video Template = UULA Dark's page in "cover" mode
 }
@@ -77,12 +78,14 @@ BUNDLES = {
                                                                    ('TEMPLATES', 'templates.js'), ('WORD', 'word.js'), ('APP', 'app.js')]),
     'math': sibling('uula-math') or read(SRC / 'math' / 'app.html'),
     'graph': sibling('uula-graph') or read(SRC / 'graph' / 'app.html'),
+    'geometry': sibling('uula-geometry') or read(SRC / 'geometry' / 'app.html'),
     'dark': dark,
     'cover': dark,
 }
 # keep src/math and src/graph in step with the bundles
-for k, f in [('math', SRC / 'math' / 'app.html'), ('graph', SRC / 'graph' / 'app.html')]:
-    if BUNDLES[k] != read(f): f.write_text(BUNDLES[k], encoding='utf8')
+for k, f in [('math', SRC / 'math' / 'app.html'), ('graph', SRC / 'graph' / 'app.html'), ('geometry', SRC / 'geometry' / 'app.html')]:
+    f.parent.mkdir(exist_ok=True)
+    if not f.exists() or BUNDLES[k] != read(f): f.write_text(BUNDLES[k], encoding='utf8')
 
 LOADER = '''<!doctype html>
 <html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">

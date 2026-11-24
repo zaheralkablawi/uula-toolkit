@@ -8,7 +8,7 @@ from xml.sax.saxutils import escape
 ROOT = pathlib.Path(__file__).parent
 U = 'https://zaheralkablawi.github.io/uula-toolkit/'
 ID = '36f5f959-c945-487a-b5d3-c33d6c76f199'
-VERSION = '1.4.0.0'
+VERSION = '1.5.0.0'
 # the tool buttons, in ribbon order: id, label, Arabic tip, hosts (from src/tools-list.js)
 tools = json.loads(subprocess.check_output(['node', '-e', '''
 global.window = {}; eval(require('fs').readFileSync('src/tools-list.js', 'utf8').replace(/var /g, 'global.'));
