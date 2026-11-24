@@ -4291,12 +4291,22 @@ async function abPress() {
     const n = await run(async ctx => {
       const ss = ctx.presentation.getSelectedShapes(); ss.load('items/id,items/left,items/top,items/width,items/height'); await ctx.sync();
       const sh = ctx.presentation.slides.getItem(id).shapes;
-      // the places: one per line of selected shapes (shapes that overlap in height make one line)
-      const spots = [];
+      // the places: shapes that overlap in height make a line; in a line, shapes close to each other make one place
+      // (two pairs side by side → two places); each place gets its own box where the shapes were
+      const lines = [];
       for (const s of [...ss.items].sort((a, b) => a.top - b.top)) {
-        const sp = spots.find(p => Math.min(p.b, s.top + s.height) - Math.max(p.t, s.top) > Math.min(p.b - p.t, s.height) * 0.3);
-        if (sp) { sp.l = Math.min(sp.l, s.left); sp.r = Math.max(sp.r, s.left + s.width); sp.t = Math.min(sp.t, s.top); sp.b = Math.max(sp.b, s.top + s.height); sp.shapes.push(s); }
-        else spots.push({ l: s.left, r: s.left + s.width, t: s.top, b: s.top + s.height, shapes: [s] });
+        const ln = lines.find(l => l.some(o => Math.min(o.top + o.height, s.top + s.height) - Math.max(o.top, s.top) > Math.min(o.height, s.height) * 0.3));
+        if (ln) ln.push(s); else lines.push([s]);
+      }
+      const spots = [];
+      for (const ln of lines) {
+        ln.sort((a, b) => a.left - b.left);
+        let cur = null;
+        for (const s of ln) {
+          const near = cur && s.left - cur.r < Math.max(24, 1.5 * Math.max(...cur.shapes.map(o => o.width), s.width)) && cur.shapes.length < 2;
+          if (near) { cur.l = Math.min(cur.l, s.left); cur.r = Math.max(cur.r, s.left + s.width); cur.t = Math.min(cur.t, s.top); cur.b = Math.max(cur.b, s.top + s.height); cur.shapes.push(s); }
+          else { cur = { l: s.left, r: s.left + s.width, t: s.top, b: s.top + s.height, shapes: [s] }; spots.push(cur); }
+        }
       }
       if (!spots.length) spots.push({ l: 36, r: 110, t: top, b: top + 20, shapes: [] });
       const made = [];
