@@ -16,7 +16,7 @@ html,body{margin:0;background:var(--bg);color:var(--fg)}
 body{font:14px "UULA Sans",-apple-system,"Segoe UI",Tahoma,sans-serif;line-height:1.45}
 button,input,select{font-family:inherit;color:inherit}
 .wrap{max-width:520px;margin:0 auto;padding:8px 10px 12px;display:flex;flex-direction:column;gap:8px}
-header{display:flex;align-items:center;gap:6px}
+header{display:flex;align-items:center;gap:6px;position:relative}
 header h1{margin:0;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600}
 header h1 svg.logo{width:30px;height:30px;flex:none}
 header .bt{display:flex;flex-direction:column;justify-content:center;line-height:15px}
@@ -28,8 +28,8 @@ header .bt .root:only-child{color:var(--fg);font-size:15px;letter-spacing:0}
 .ib:disabled{opacity:.45;cursor:default}
 .hsp{margin-inline-start:auto}
 .updbtn .dot{position:absolute;top:3px;left:3px;width:7px;height:7px;border-radius:50%;background:#e5322d}
-.appmenu{position:relative}
-.menu{position:absolute;top:32px;left:0;z-index:60;min-width:190px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.18);padding:4px;display:flex;flex-direction:column}
+.appmenu{position:static}
+.menu{position:absolute;top:34px;left:0!important;right:auto!important;z-index:60;min-width:190px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.18);padding:4px;display:flex;flex-direction:column}
 .menu button{border:0;background:none;text-align:start;padding:6px 9px;border-radius:5px;font-size:12px;cursor:pointer}
 .menu button:hover{background:var(--bg)}
 .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
