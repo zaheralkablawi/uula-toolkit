@@ -55,6 +55,9 @@ header .bt .root:only-child{color:var(--fg);font-size:15px;letter-spacing:0}
 #fig .hb{fill:transparent;cursor:move}
 #fig .hv{fill:transparent;pointer-events:all;stroke:#1f71de;stroke-width:1.6;cursor:grab}
 #fig .hv.sel{stroke-width:3}
+#fig .ha{fill:transparent;stroke:none;pointer-events:all;cursor:pointer}
+#fig .ha:hover{fill:rgba(31,113,222,.10)}
+#fig .ha.sel{fill:rgba(31,113,222,.2)}
 #fig .hp{stroke-dasharray:2 2;cursor:pointer}
 #fig .hc{fill:none;stroke:transparent;stroke-width:12;cursor:ew-resize}
 .ins{position:absolute;left:6px;bottom:6px;height:28px;padding:0 10px;border-radius:7px;border:1px solid var(--accent);background:var(--accent);color:#fff;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;cursor:pointer}
@@ -299,10 +302,10 @@ function defaults(){
     s:{ kind:'cyl', hidden:'dash', names:true, dims:true, centers:true,
         size:{cube:{w:130},box:{w:180,h:105,d:130},prism:{w:170,h:120,d:150},pyr:{w:170,h:150,d:150},cyl:{r:75,h:150},cone:{r:80,h:170},sph:{r:92}},
         lab:{cube:{w:'٤ سم'},box:{w:'٦ سم',h:'٣ سم',d:'٤ سم'},prism:{w:'٥ سم',h:'٤ سم',d:'٨ سم'},pyr:{w:'٦ سم',h:'ع'},cyl:{r:'نق',h:'ع'},cone:{r:'نق',h:'ع',l:'ل'},sph:{r:'نق'}} },
-    look:{ line:'#000000', w:2, dash:false, fill:null, text:'#000000', mark:'#000000', fs:16, pt:'#000000', ptShow:false, ptR:3, ptFill:true, names:'text', digits:'ar' } };
+    look:{ line:'#000000', w:2, dash:false, fill:null, text:'#000000', mark:'#000000', fs:16, pt:'#000000', ptShow:false, ptR:3, ptFill:true, names:'sym', symDef:1, digits:'ar' } };
 }
 let S=defaults();
-try{ const t=localStorage.getItem('uula-geometry-state-v1'); if(t){ const o=JSON.parse(t); if(o&&o.v===1){ const d=defaults(); S=Object.assign(d,o); S.look=Object.assign(defaults().look,o.look||{}); S.hide=o.hide||{}; S.nm=o.nm||{}; } } }catch(e){}
+try{ const t=localStorage.getItem('uula-geometry-state-v1'); if(t){ const o=JSON.parse(t); if(o&&o.v===1){ const d=defaults(); S=Object.assign(d,o); S.look=Object.assign(defaults().look,o.look||{}); if(!S.look.symDef){ S.look.names='sym'; S.look.symDef=1; } S.hide=o.hide||{}; S.nm=o.nm||{}; } } }catch(e){}
 function save(){ try{ localStorage.setItem('uula-geometry-state-v1',JSON.stringify(S)); }catch(e){} }
 let HIST=[]; const push=()=>{ HIST.push(JSON.stringify(S)); if(HIST.length>60) HIST.shift(); };
 function undo(){ if(!HIST.length) return; S=JSON.parse(HIST.pop()); closePop(); syncUI(); draw(); save(); }
@@ -315,8 +318,13 @@ function seg(a,b,o){ o=o||{}; PR.push({t:'seg',a,b,c:o.c||LK().line,w:o.w||LK().
 function aux(a,b){ seg(a,b,{dash:true,w:Math.max(1,LK().w*.75)}); }
 function mk(a,b){ seg(a,b,{c:LK().mark,w:Math.max(1,LK().w*.7),dash:false}); }
 function arcP(c,r,a0,a1,o){ o=o||{}; PR.push({t:'ell',c,rx:r,ry:o.ry||r,a0,a1,c2:o.c||LK().mark,w:o.w||Math.max(1,LK().w*.7),dash:!!o.dash}); }
-function txt(p,s,o){ if(s==null||s==='') return; o=o||{}; PR.push({t:'txt',p,s:digits(String(s)),c:o.c||LK().text,fs:o.fs||LK().fs}); }
-function nm(p,s){ if(s==null||s==='') return; const k=String(s).trim(); if(LK().names==='sym'&&SYM[k]) PR.push({t:'txt',p,s:SYM[k],c:LK().text,fs:LK().fs*1.1,font:SYMFONT}); else txt(p,s); }
+function txt(p,s,o){ if(s==null||s==='') return; o=o||{}; PR.push({t:'txt',p,s:digits(String(s)),c:o.c||LK().text,fs:o.fs||LK().fs,from:o.from}); }
+// كتابة يعتبرها المستخدم اسمًا (طول ضلع، زاوية): الحرف الواحد يُكتب رمزًا إذا كانت الأسماء رموزًا، والرقم وحده في الزاوية يأخذ °
+function lbl(p,s,o){ if(s==null||s==='') return; o=o||{}; const k=String(s).trim();
+  if(LK().names==='sym'&&SYM[k]){ PR.push({t:'txt',p,s:SYM[k],c:LK().text,fs:(o.fs||LK().fs)*1.1,font:SYMFONT,from:o.from}); return; }
+  if(o.deg&&/^[0-9\u0660-\u0669.,٫]+$/.test(k)){ const v=parseFloat(k.replace(/[\u0660-\u0669]/g,d=>d.charCodeAt(0)-0x660).replace(/[٫,]/g,'.')); if(isFinite(v)){ txt(p,fmtAng(v),o); return; } }
+  txt(p,s,o); }
+function nm(p,s,from){ if(s==null||s==='') return; const k=String(s).trim(); if(LK().names==='sym'&&SYM[k]) PR.push({t:'txt',p,s:SYM[k],c:LK().text,fs:LK().fs*1.1,font:SYMFONT,from}); else txt(p,s,{from}); }
 function dotP(p){ const L2=LK(); PR.push({t:'dot',p,r:L2.ptR,c:L2.pt||L2.line,fill:L2.ptFill,w:Math.max(1,L2.w*.6)}); }
 function ptP(p){ if(LK().ptShow) dotP(p); }
 // زاوية بين اتجاهين من نقطة، بالاتجاه الأصغر (أقل من 180)
@@ -326,7 +334,7 @@ function angleArcs(P,A,B,k,r0){ const s=angSpan(P,A,B); for(let i=0;i<k;i++) arc
 function angleSym(p,A,B,sym,num,r0){ const s=angSpan(p,A,B), bi=rad((s.a0+s.a1)/2), u=[Math.cos(bi),Math.sin(bi)], fs=LK().fs, extra=s.sw<50?8:0; let r=Math.max(r0+7,17)+extra;
   if(sym==='*'){ const c=add(p,mul(u,r)), h=fs*.24; for(const a of [90,30,150]){ const d=[Math.cos(rad(a)),Math.sin(rad(a))]; mk(add(c,mul(d,h)),sub(c,mul(d,h))); } r+=fs*.55; }
   else if(sym==='•'){ PR.push({t:'dot',p:add(p,mul(u,r)),r:Math.max(2.2,fs*.15),c:LK().mark,fill:true}); r+=fs*.5; }
-  if(num!=null&&num!==''){ r+=sym?fs*.25:0; txt(add(p,mul(u,r)),num,{fs:fs*.85}); r+=fs*.6; }
+  if(num!=null&&num!==''){ r+=sym?fs*.25:0; txt(add(p,mul(u,r)),num,{fs:fs*.85,from:p}); r+=fs*.6; }
   return r; }
 // رأس سهم مملوء عند نقطة باتجاه معيّن
 function arrowHead(tip,d,c){ const w=LK().w, L2=Math.max(7,w*4), W2=Math.max(3.2,w*1.9), n=perp(d), b=sub(tip,mul(d,L2)); PR.push({t:'poly',pts:[tip.slice(),add(b,mul(n,W2)),sub(b,mul(n,W2))],fill:c||LK().mark}); }
@@ -349,14 +357,14 @@ function buildFree(){
   const G=S.p, P=G.pts, fs=LK().fs, C=cen(P);
   G.sides.forEach(sd=>{ seg(P[sd.a],P[sd.b],{dash:sd.dash||LK().dash}); segArrows(P[sd.a],P[sd.b],sd.arr); });
   G.sides.forEach(sd=>{ const a=P[sd.a], b=P[sd.b], both=sd.ticks&&sd.par; sideTicks(a,b,sd.ticks,both?-9:0); parMarks(a,b,sd.par,both?9:0);
-    if(sd.show){ const m=mid(a,b); let nn=perp(nrm(sub(b,a))); if(dot(nn,sub(m,C))<0) nn=mul(nn,-1); txt(add(m,mul(nn,fs*.95)),sd.len||fmtLen(len(sub(b,a))/40)); } });
+    if(sd.show){ const m=mid(a,b); let nn=perp(nrm(sub(b,a))); if(dot(nn,sub(m,C))<0) nn=mul(nn,-1); lbl(add(m,mul(nn,fs*1.1)),sd.len||fmtLen(len(sub(b,a))/40),{from:m}); } });
   Object.entries(G.angs||{}).forEach(([key,A])=>{ const [i,ab]=key.split(':'), [a,b]=ab.split('-').map(Number), p=P[+i]; if(!p||!P[a]||!P[b]) return;
     if(A.right) rightMark(p,P[a],P[b]); let r0=18; if(A.arcs){ angleArcs(p,P[a],P[b],A.arcs,18); r0=18+A.arcs*4.5; } else if((A.arc||A.showAng)&&!A.right){ angleArcs(p,P[a],P[b],1,16); r0=20; }
     if(A.dir){ const rr=Math.max(r0+6,26); angleArrow(p,P[a],P[b],A.dir,rr); r0=rr+4; }
     if(A.sym||A.num) r0=angleSym(p,P[a],P[b],A.sym,A.num,A.right?12:r0)-fs*.5;
-    if(A.showAng){ const s=angSpan(p,P[a],P[b]), bi=rad((s.a0+s.a1)/2), rr=r0+fs*.95+(s.sw<45?10:0); txt(add(p,[Math.cos(bi)*rr,Math.sin(bi)*rr]),A.ang||fmtAng(s.sw),{fs:fs*.85}); } });
+    if(A.showAng){ const s=angSpan(p,P[a],P[b]), bi=rad((s.a0+s.a1)/2), rr=r0+fs*.95+(s.sw<45?10:0); lbl(add(p,[Math.cos(bi)*rr,Math.sin(bi)*rr]),A.ang||fmtAng(s.sw),{fs:fs*.85,from:p,deg:1}); } });
   P.forEach((p,i)=>{ ptP(p); const V=G.verts[i]; if(!V||!V.showName) return; const nb=freeNb(G,i); let d=[0,0]; nb.forEach(j=>{ d=add(d,nrm(sub(P[j],p))); });
-    d=mul(d,-1); if(len(d)<.3){ d=nb.length?perp(nrm(sub(P[nb[0]],p))):sub(p,C); if(dot(d,sub(p,C))<0) d=mul(d,-1); } nm(add(p,mul(nrm(d),fs*.95)),V.name); });
+    d=mul(d,-1); if(len(d)<.3){ d=nb.length?perp(nrm(sub(P[nb[0]],p))):sub(p,C); if(dot(d,sub(p,C))<0) d=mul(d,-1); } nm(add(p,mul(nrm(d),fs*1.05)),V.name,p); });
 }
 function buildPlane(){
   if(S.p.kind==='free') return buildFree();
@@ -371,7 +379,7 @@ function buildPlane(){
   for(let i=0;i<n;i++){ const sd=G.sides[i], a=P[i], b=P[(i+1)%n];
     const both=sd.ticks&&sd.par; sideTicks(a,b,sd.ticks,both?-9:0); parMarks(a,b,sd.par,both?9:0);
     if(sd.show){ const m=mid(a,b); let nn=perp(nrm(sub(b,a))); if(dot(nn,sub(m,C))<0) nn=mul(nn,-1); let lp=m; if(FEET.some(f=>len(sub(f,m))<fs*2)){ const d=nrm(sub(b,a)), sh=Math.min(len(sub(b,a))*.28,fs*2.6); lp=add(m,mul(d,FEET.some(f=>dot(sub(f,m),d)>0)?-sh:sh)); }
-    txt(add(lp,mul(nn,fs*.95)),sd.len||fmtLen(len(sub(b,a))/40)); } }
+    lbl(add(lp,mul(nn,fs*1.1)),sd.len||fmtLen(len(sub(b,a))/40),{from:lp}); } }
   // الرؤوس
   FEET.forEach(f=>ptP(f));
   for(let i=0;i<n;i++){ const V=G.verts[i], p=P[i], a=P[(i-1+n)%n], b=P[(i+1)%n]; ptP(p);
@@ -379,8 +387,8 @@ function buildPlane(){
     let r0=18; if(V.arcs){ angleArcs(p,a,b,V.arcs,18); r0=18+V.arcs*4.5; } else if((V.showAng||V.arc)&&!V.right){ angleArcs(p,a,b,1,16); r0=20; }
     if(V.dir){ const rr=Math.max(r0+6,26); angleArrow(p,a,b,V.dir,rr); r0=rr+4; }
     if(V.sym||V.num) r0=angleSym(p,a,b,V.sym,V.num,V.right?12:r0)-fs*.5;
-    if(V.showAng){ const s=angSpan(p,a,b), bi=rad((s.a0+s.a1)/2); const rr=r0+fs*.95+(s.sw<45?10:0); txt(add(p,[Math.cos(bi)*rr,Math.sin(bi)*rr]),V.ang||fmtAng(s.sw),{fs:fs*.85}); }
-    if(V.showName) nm(add(p,mul(outward(P,i),fs*.95)),V.name);
+    if(V.showAng){ const s=angSpan(p,a,b), bi=rad((s.a0+s.a1)/2); const rr=r0+fs*.95+(s.sw<45?10:0); lbl(add(p,[Math.cos(bi)*rr,Math.sin(bi)*rr]),V.ang||fmtAng(s.sw),{fs:fs*.85,from:p,deg:1}); }
+    if(V.showName) nm(add(p,mul(outward(P,i),fs*1.05)),V.name,p);
   }
   // الارتفاع والمتوسط والمنصف (المثلث: إلى الضلع المقابل؛ الرباعي: من الرأس إلى ب ج)
   for(let i=0;i<n;i++){ const V=G.verts[i]; if(!(V.alt||V.med||V.bis)) continue;
@@ -489,7 +497,7 @@ function buildSolid(){
 }
 let SOL=null, REG=[], FREE0=null;
 // نقطة لها اسم: يمكن إخفاء اسمها أو تغييره بالنقر عليها
-function lab2(p,pos,key,def){ REG.push({p,key,def}); if(!(S.hide&&S.hide[key])) nm(pos,(S.nm&&S.nm[key]!=null)?S.nm[key]:def); }
+function lab2(p,pos,key,def){ REG.push({p,key,def}); if(!(S.hide&&S.hide[key])) nm(pos,(S.nm&&S.nm[key]!=null)?S.nm[key]:def,p); }
 function bboxPts(P){ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; P.forEach(p=>{ x0=Math.min(x0,p[0]); y0=Math.min(y0,p[1]); x1=Math.max(x1,p[0]); y1=Math.max(y1,p[1]); }); return {x:x0,y:y0,w:x1-x0,h:y1-y0}; }
 function build(){ PR=[]; REG=[]; if(S.empty) return PR; if(S.tab==='p') buildPlane(); else if(S.tab==='c') buildCircle(); else buildSolid(); return PR; }
 
@@ -522,16 +530,21 @@ function outSVG(pr){ const b=bboxPrims(pr), pad=4, x=b.x-pad, y=b.y-pad, w=b.w+2
   return {svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f2(x)} ${f2(y)} ${f2(w)} ${f2(h)}" width="${f2(w)}" height="${f2(h)}">${pr.map(primSVG).join('')}</svg>`,w,h}; }
 
 /* ---------- المعاينة والمقابض ---------- */
-let SEL=null;   // {k:'side'|'vert', i}
+let SEL=null;   // {k:'side'|'vert', i, ak: مفتاح الزاوية المحددة}
+// منطقة نقر للزاوية: قطاع صغير عند الرأس
+function secHit(p,a,b,i,key){ const s=angSpan(p,a,b), r=s.sw<40?34:26, A0=rad(s.a0), A1=rad(s.a0+s.sw), q0=add(p,[Math.cos(A0)*r,Math.sin(A0)*r]), q1=add(p,[Math.cos(A1)*r,Math.sin(A1)*r]);
+  return `<path class="ha${SEL&&SEL.ak===key?' sel':''}" data-h="ang" data-i="${i}" data-k="${key}" d="M${f2(p[0])} ${f2(p[1])}L${f2(q0[0])} ${f2(q0[1])}A${r} ${r} 0 ${s.sw>180?1:0} 1 ${f2(q1[0])} ${f2(q1[1])}Z"/>`; }
 function draw(){
   const pr=build(); let h='<g>'+pr.map(primSVG).join('')+'</g><g id="hits">';
   if(S.empty){}
   else if(S.tab==='p'&&S.p.kind==='free'){ const G=S.p, P=G.pts;
     G.sides.forEach((sd,i)=>{ const a=P[sd.a], b=P[sd.b]; h+=`<path class="hs${SEL&&SEL.k==='side'&&SEL.i===i?' sel':''}" data-h="side" data-i="${i}" d="M${f2(a[0])} ${f2(a[1])}L${f2(b[0])} ${f2(b[1])}"/>`; });
+    P.forEach((p,i)=>freeAngles(G,i).forEach(([a,b])=>{ h+=secHit(p,P[a],P[b],i,angKey(i,a,b)); }));   // فوق الأضلاع: الزوايا الضيقة تبقى قابلة للنقر
     P.forEach((p,i)=>{ h+=`<circle class="hv${(SEL&&SEL.k==='vert'&&SEL.i===i)||LINK===i?' sel':''}" data-h="vert" data-i="${i}" cx="${f2(p[0])}" cy="${f2(p[1])}" r="5"/>`; });
   } else if(S.tab==='p'){ const P=S.p.pts, n=P.length;
     h+=`<path class="hb" data-h="body" d="M${P.map(q=>f2(q[0])+' '+f2(q[1])).join('L')}Z"/>`;
     for(let i=0;i<n;i++){ const a=P[i], b=P[(i+1)%n]; h+=`<path class="hs${SEL&&SEL.k==='side'&&SEL.i===i?' sel':''}" data-h="side" data-i="${i}" d="M${f2(a[0])} ${f2(a[1])}L${f2(b[0])} ${f2(b[1])}"/>`; }
+    P.forEach((p,i)=>{ h+=secHit(p,P[(i-1+n)%n],P[(i+1)%n],i,'n'+i); });
     P.forEach((p,i)=>{ h+=`<circle class="hv${SEL&&SEL.k==='vert'&&SEL.i===i?' sel':''}" data-h="vert" data-i="${i}" cx="${f2(p[0])}" cy="${f2(p[1])}" r="5"/>`; });
   } else if(S.tab==='c'){ const K=S.c, sh=K.show;
     h+=`<circle class="hc" data-h="rad" cx="${K.c[0]}" cy="${K.c[1]}" r="${K.r}"/>`;
@@ -597,7 +610,7 @@ $('fig').addEventListener('pointerdown',e=>{
   const t=e.target.closest('[data-h]'); if(!t) { closePop(); if(LINK!=null){ LINK=null; draw(); } return; }
   if(S.tab==='p'&&S.p.kind==='free'&&FT!=='move'){ e.preventDefault(); closePop(); freeTool(t,e); return; }
   e.preventDefault(); $('fig').setPointerCapture(e.pointerId);
-  DRAG={h:t.dataset.h, i:t.dataset.i, p0:svgPt(e), st:JSON.stringify(S), moved:false, cx:e.clientX, cy:e.clientY};
+  DRAG={h:t.dataset.h, i:t.dataset.i, k:t.dataset.k, p0:svgPt(e), st:JSON.stringify(S), moved:false, cx:e.clientX, cy:e.clientY};
 });
 $('fig').addEventListener('pointermove',e=>{
   if(!DRAG) return; const p=svgPt(e); const d=sub(p,DRAG.p0);
@@ -605,7 +618,7 @@ $('fig').addEventListener('pointermove',e=>{
   if(!DRAG.moved){ DRAG.moved=true; closePop(); }
   const O=JSON.parse(DRAG.st);
   if(DRAG.h==='vert'){ S.p.pts=O.p.pts; setVertex(+DRAG.i,p); }
-  else if(DRAG.h==='body'||DRAG.h==='side'){ S.p.pts=O.p.pts.map(q=>add(q,d)); }   // تحريك الشكل كله
+  else if(DRAG.h==='body'||DRAG.h==='side'||DRAG.h==='ang'){ S.p.pts=O.p.pts.map(q=>add(q,d)); }   // تحريك الشكل كله
   else if(DRAG.h==='cen'){ S.c.c=add(O.c.c,d); }
   else if(DRAG.h==='rad'){ S.c.r=Math.max(20,Math.min(150,len(sub(p,S.c.c)))); }
   else if(DRAG.h==='cp'){ S.c.a[DRAG.i]=Math.round(ang(sub(p,S.c.c))); }
@@ -624,7 +637,8 @@ const endDrag=e=>{ if(!DRAG) return; const D=DRAG; DRAG=null;
   else if(D.h==='cp'){ openPop('pt','c:'+D.i,D.cx,D.cy); }
   else if(D.h==='cen'){ openPop('pt','c:C',D.cx,D.cy); }
   else if(D.h==='sz'){ const r=REG.find(x=>len(sub(x.p,D.p0))<8); if(r) openPop('pt',r.key,D.cx,D.cy); }
-  else if(D.h==='side'){ openPop('side',+D.i,D.cx,D.cy); } };
+  else if(D.h==='side'){ openPop('side',+D.i,D.cx,D.cy); }
+  else if(D.h==='ang'){ openPop('vert',+D.i,D.cx,D.cy,D.k); } };
 $('fig').addEventListener('pointerup',endDrag); $('fig').addEventListener('pointercancel',()=>{ DRAG=null; });
 
 /* ---------- نافذة الضلع والرأس ---------- */
@@ -644,8 +658,8 @@ const ICO={ cw:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stro
   alt:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4L3 20h18z"/><path d="M12 4v16" stroke-dasharray="3 2"/></svg>',
   med:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 4L3 20h18z"/><path d="M8 4l4 16" stroke-dasharray="3 2"/></svg>',
   bis:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4L3 20h18z"/><path d="M12 4l-1 16" stroke-dasharray="3 2"/><path d="M10 9a3 3 0 0 0 4 0"/></svg>' };
-function openPop(k,i,cx,cy){
-  SEL={k,i}; draw(); const pop=$('pop'), G=S.p, n=G.pts.length;
+function openPop(k,i,cx,cy,ak){
+  SEL={k,i}; if(ak) SEL.ak=ak; draw(); const pop=$('pop'), G=S.p, n=G.pts.length;
   const name=j=>G.verts[(j+n)%n].name;
   const qb=(act,ico,on,tip)=>`<button type="button" class="q" data-a="${act}" aria-pressed="${!!on}" title="${tip}">${ico}</button>`;
   let h;
@@ -660,7 +674,7 @@ function openPop(k,i,cx,cy){
       <div class="r">${qb('p1',ICO.p1,sd.par===1,L('par'))}${qb('p2',ICO.p2,sd.par===2,L('par'))}<span class="sep" style="width:1px;height:18px;background:var(--line)"></span>${qb('ar1',ICO.ae,(sd.arr||0)&1,L('arrEnd'))}${qb('ar2',ICO.as,(sd.arr||0)&2,L('arrStart'))}</div>`;
   } else if(G.kind==='free'){ const V=G.verts[i];
     const rows=freeAngles(G,i).map(([a,b])=>{ const key=angKey(i,a,b), A=G.angs[key]||{};
-      return `<div class="r" style="border-top:1px solid var(--line);padding-top:4px"><span class="note angico" style="flex:1;font-size:12px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 20H4L16 5"/></svg><bdi>${esc(G.verts[a].name)}${esc(V.name)}${esc(G.verts[b].name)}</bdi></span><input class="pNumF" data-key="${key}" value="${esc(A.num||'')}" placeholder="${L('angNum')}" title="${L('angNumT')}" style="max-width:46px;flex:none"></div>
+      return `<div class="r" style="border-top:1px solid var(--line);padding-top:4px"><span class="note angico" style="flex:1;font-size:12px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 20H4L16 5"/></svg><bdi>${esc(G.verts[a].name)}${esc(V.name)}${esc(G.verts[b].name)}</bdi></span><input class="pAngF" data-key="${key}" value="${esc(A.ang||'')}" placeholder="${esc(fmtAng(angSpan(G.pts[i],G.pts[a],G.pts[b]).sw))}" title="${L('showAng')}" style="max-width:52px;flex:none"><input class="pNumF" data-key="${key}" value="${esc(A.num||'')}" placeholder="${L('angNum')}" title="${L('angNumT')}" style="max-width:46px;flex:none"></div>
         <div class="r">${qb('fa|'+key+'|arc',ICO.a1,A.arc,L('arcOnly'))}${qb('fa|'+key+'|a1',ICO.a1e,A.arcs===1,L('arcs'))}${qb('fa|'+key+'|rt',ICO.rt,A.right,L('rightM'))}${qb('fa|'+key+'|st',ICO.star,A.sym==='*',L('symStar'))}${qb('fa|'+key+'|dt',ICO.dotI,A.sym==='•',L('symDot'))}${qb('fa|'+key+'|dcw',ICO.cw,A.dir==='cw',L('dirCw'))}${qb('fa|'+key+'|dccw',ICO.ccw,A.dir==='ccw',L('dirCcw'))}${qb('fa|'+key+'|sa',ICO.ang,A.showAng,L('showAng'))}</div>`; }).join('');
     h=`<div class="ph"><span>${L('vertex')} ${esc(V.name)}</span><button type="button" data-a="x">✕</button></div>
       <div class="r"><input id="pName" value="${esc(V.name)}" title="${L('vname')}" style="max-width:44px">${qb('nm','<b>أ</b>',V.showName,L('vname'))}</div>${rows}`;
@@ -676,14 +690,18 @@ function openPop(k,i,cx,cy){
       ${n===3||(n===4&&i===0)?`<div class="r">${qb('alt',ICO.alt,V.alt,L('alt'))}${n===3?qb('med',ICO.med,V.med,L('med'))+qb('bis',ICO.bis,V.bis,L('bis')):''}</div>`:''}`;
   }
   if(!(G.kind==='free'&&k==='vert')) pop.style.width='';
-  pop.innerHTML=h; pop.hidden=false; placePop(pop,cx,cy); if(k==='vert') nameReady();
+  pop.innerHTML=h; pop.hidden=false; placePop(pop,cx,cy);
+  // ما يُكتب بعد النقر يذهب مباشرة إلى الشيء المحدد: اسم الرأس، طول الضلع، أو قياس/اسم الزاوية
+  if(k==='side') nameReady($('pLen'));
+  else if(ak) nameReady(G.kind==='free'?pop.querySelector(`.pAngF[data-key="${ak}"]`):$('pAng'));
+  else if(k==='vert') nameReady();
 }
 // بعد النقر على نقطة: أي حرف يُكتب يصبح اسمها مباشرة
-function nameReady(){ const inp=$('pName')||$('pPt'); if(!inp) return; inp.focus({preventScroll:true}); inp.select(); }
+function nameReady(el){ const inp=el||$('pName')||$('pPt'); if(!inp) return; inp.focus({preventScroll:true}); inp.select(); }
 function placePop(pop,cx,cy){
   // اللوحة تحت الرسم مباشرة فلا تغطي الشكل
   try{ pop.scrollIntoView({block:'nearest'}); }catch(e){}
-  const inp0=pop.querySelector('input'); if(inp0) inp0.addEventListener('keydown',ev=>{ if(ev.key==='Enter') closePop(); });
+  pop.querySelectorAll('input').forEach(x=>x.addEventListener('keydown',ev=>{ if(ev.key==='Enter') closePop(); }));
   return;
   const pr=$('pv').getBoundingClientRect(), pw=pop.offsetWidth, ph=pop.offsetHeight;
   let x=cx-pr.left+12, y=cy-pr.top-ph/2; if(x+pw>pr.width-4) x=cx-pr.left-pw-12; x=Math.max(4,Math.min(pr.width-pw-4,x)); y=Math.max(4,Math.min(pr.height-ph-38,y));
@@ -697,6 +715,7 @@ $('pop').addEventListener('input',e=>{ if(!SEL) return; const G=S.p, t=e.target;
   if(t.id==='pAng'){ const V=G.verts[SEL.i]; V.ang=t.value; if(t.value) V.showAng=true; }
   if(t.id==='pPt'){ S.nm[SEL.i]=t.value; if(t.value) delete S.hide[SEL.i]; }
   if(t.id==='pNum'){ G.verts[SEL.i].num=t.value; }
+  if(t.classList.contains('pAngF')){ const k=t.dataset.key, A=(G.angs[k]||(G.angs[k]={})); A.ang=t.value; if(t.value) A.showAng=true; }
   if(t.classList.contains('pNumF')){ const k=t.dataset.key; (G.angs[k]||(G.angs[k]={})).num=t.value; }
   draw(); save(); syncChips(); });
 $('pop').addEventListener('focusin',e=>{ if(e.target.tagName==='INPUT'&&!e.target.dataset.h){ e.target.dataset.h=1; push(); } });
@@ -892,7 +911,9 @@ async function insertNative(pr,json,bb){
       else if(p.t==='dot'){ const s=shapes.addGeometricShape('Ellipse',{left:X(p.p[0]-p.r),top:Y(p.p[1]-p.r),width:2*p.r*sc,height:2*p.r*sc});
         if(p.fill===false){ s.fill.setSolidColor('#ffffff'); line(s,p.c,p.w,false); } else { s.fill.setSolidColor(p.c); s.lineFormat.visible=false; } made.push(s); }
       else if(p.t==='txt'){ const w=p.fs*(.62*Math.max(1,p.s.length)+1.2), h=p.fs*1.5;
-        const s=shapes.addTextBox(p.s,{left:X(p.p[0])-w/2,top:Y(p.p[1])-h/2,width:w,height:h}); const tf=s.textFrame;
+        // بُعد الاسم عن الخط بالنقاط كما في المعاينة، لأن الخط لا يُصغَّر مع الشكل
+        const tx=p.from?X(p.from[0])+(p.p[0]-p.from[0])*Math.max(1,sc):X(p.p[0]), ty=p.from?Y(p.from[1])+(p.p[1]-p.from[1])*Math.max(1,sc):Y(p.p[1]);
+        const s=shapes.addTextBox(p.s,{left:tx-w/2,top:ty-h/2,width:w,height:h}); const tf=s.textFrame;
         tf.wordWrap=false; tf.autoSizeSetting='AutoSizeNone'; tf.leftMargin=0; tf.rightMargin=0; tf.topMargin=0; tf.bottomMargin=0; tf.verticalAlignment='Middle';
         tf.textRange.font.name=p.font||'UULA Sans'; tf.textRange.font.size=p.fs; tf.textRange.font.color=p.c; tf.textRange.paragraphFormat.horizontalAlignment='Center';
         s.fill.clear(); s.lineFormat.visible=false; made.push(s); }
