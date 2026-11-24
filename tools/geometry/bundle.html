@@ -1096,7 +1096,7 @@ function lineFig(W,H,lab,comps,F,stroke,res){
     // رأس السهم يتسع من رأسه إلى قاعدته ثم ينقطع (أعرض موضع عند أحد طرفيه)، والنقطة المرسومة متناظرة
     const isArrow=(a,b)=>{ let mw=0, k1=a, k2=a; for(let t=a;t<=b;t++){ const w=width(l,t); if(w>mw){ mw=w; k1=k2=t; } else if(w===mw) k2=t; } const f=((k1+k2)/2-a)/Math.max(1,b-a); if(!(b-a+1>=mw*.6&&(f<.3||f>.7))) return false;
       // من القاعدة إلى الرأس يضيق باستمرار حتى يصير رفيعًا (علامات // المائلة متذبذبة)
-      const dir=f>.5?-1:1; let t=f>.5?k2:k1, prev=mw, bad=0; const end=f>.5?a:b; while(t!==end){ t+=dir; const w=width(l,t); if(w>prev+1) bad++; prev=w; } return bad<=1&&width(l,end)<=mw*.6; };
+      const dir=f>.5?-1:1; let t=f>.5?k2:k1, prev=mw, bad=0; const end=f>.5?a:b; while(dir>0?t+1<=end:t-1>=end){ t+=dir; const w=width(l,t); if(w>prev+1) bad++; prev=w; } return bad<=1&&width(l,end)<=mw*.6; };
     const endArrow=fromEnd=>{ let c=0, last=0; for(let s=2;s<=aLen;s+=1){ const t=fromEnd?l.L-s:s; if(fat(t)){ c++; last=s; } } if(c<3) return false; let e=last; while(e<aLen*1.8&&bul(fromEnd?l.L-e-1:e+1)) e++;
       return fromEnd?isArrow(l.L-e,l.L-1):isArrow(1,e); };
     l.a1=endArrow(true); l.a0=endArrow(false);
@@ -1111,7 +1111,9 @@ function lineFig(W,H,lab,comps,F,stroke,res){
   for(let i=0;i<lines.length;i++) for(let j=i+1;j<lines.length;j++){ const A=lines[i], B=lines[j]; if(Math.abs(crs(A.d,B.d))<Math.sin(rad(4))) continue;
     const X=lineX(A.p,A.d,B.p,add(B.p,B.d)); if(!X) continue; const ta=dot(sub(X,A.p),A.d), tb=dot(sub(X,B.p),B.d);
     if(ta<-tol||ta>A.L+tol||tb<-tol||tb>B.L+tol) continue; const k=addPt(X); onL[i].push(k); onL[j].push(k); }
-  lines.forEach((l,i)=>{ const [e0,e1]=E(l); l.k0=addPt(e0); l.k1=addPt(e1); onL[i].push(l.k0,l.k1); });
+  // طرف قريب من تقاطع على المستقيم نفسه هو ذلك التقاطع (الخط يقف قبل الضلع ببكسلات)
+  const snap=(i,q)=>{ let b=-1, bd=Math.max(tol*2.5,12); onL[i].forEach(k=>{ const dd=len(sub(pts[k],q)); if(dd<bd){ bd=dd; b=k; } }); return b>=0?b:addPt(q); };
+  lines.forEach((l,i)=>{ const [e0,e1]=E(l); l.k0=snap(i,e0); l.k1=snap(i,e1); onL[i].push(l.k0,l.k1); });
   const segs=[], key=new Set(), meta=[];
   lines.forEach((l,i)=>{ const ks=[...new Set(onL[i])].map(k=>({k,t:dot(sub(pts[k],l.p),l.d)})).sort((a,b)=>a.t-b.t);
     for(let z=0;z+1<ks.length;z++){ const a=ks[z], b=ks[z+1]; if(a.k===b.k) continue; const kk=Math.min(a.k,b.k)+'-'+Math.max(a.k,b.k); if(key.has(kk)) continue; key.add(kk);
@@ -1125,7 +1127,7 @@ function lineFig(W,H,lab,comps,F,stroke,res){
   G.sides.forEach(sd=>{ if(sd.par||sd.arr) return; const m=sideMarks(rA,pts[sd.a],pts[sd.b]); sd.ticks=m.ticks; sd.par=m.par; });
   // رمز صغير داخل الزاوية قرب رأسها (مثل *) أصغر من الحروف والأرقام = علامة تساوي
   const T=res.texts||[], tds=T.map(x=>x.d).sort((a,b)=>a-b), tMed=tds.length?tds[tds.length>>1]:0;
-  const star=(p,a,b)=>{ const s2=angSpan(p,a,b); return T.some(x=>{ if(x.d>tMed*.8) return false; const dd=len(sub(x.c,p)); if(dd>res.fd*.13||dd<stroke*3) return false; const aa=((ang(sub(x.c,p))-s2.a0)%360+360)%360; return aa>s2.sw*.15&&aa<s2.sw*.85; }); };
+  const star=(p,a,b)=>{ const s2=angSpan(p,a,b); return T.some(x=>{ if(x.d>tMed*.8||x.d>res.fd*.032) return false; const dd=len(sub(x.c,p)); if(dd>res.fd*.13||dd<stroke*3) return false; const aa=((ang(sub(x.c,p))-s2.a0)%360+360)%360; return aa>s2.sw*.15&&aa<s2.sw*.85; }); };
   pts.forEach((p,i)=>{ freeAngles(G,i).forEach(([a,b])=>{ const A={}; if(rightAt(rA,p,pts[a],pts[b])) A.right=true; else { const k2=arcsAt(rA,p,pts[a],pts[b]); if(k2===1) A.arc=true; else if(k2>1) A.arcs=k2; else if(star(p,pts[a],pts[b])) A.arcs=1; } if(A.right||A.arc||A.arcs) G.angs[angKey(i,a,b)]=A; }); });
   // علامة الزاوية القائمة عند طرف الضلع ليست شرطة تساوٍ: نعيد القراءة بعيدًا عنها
   G.sides.forEach(sd=>{ if(!sd.ticks) return; const rt=k=>Object.entries(G.angs).some(([kk,A])=>A.right&&+kk.split(':')[0]===k&&kk.split(':')[1].split('-').map(Number).includes(k===sd.a?sd.b:sd.a));
@@ -1169,7 +1171,8 @@ function rightAt(r,p,a,b){ const u=nrm(sub(a,p)), v=nrm(sub(b,p)); if(Math.abs(a
     if(c1/k>.75&&c2/k>.75&&!PX(r,add(p,mul(add(u,v),s*.45)))) return true; } return false; }
 // أقواس الزاوية: عددها
 function arcsAt(r,p,a,b){ const s=angSpan(p,a,b), hits=[], r0=Math.max(r.stroke*3+4,(r.stroke*5)/(rad(s.sw)*.6)); for(let rr=r0;rr<=r.fd*.11;rr+=1){ let k=0,c=0; for(let f=.2;f<=.8;f+=.06){ k++; const an=rad(s.a0+s.sw*f); if(PX(r,[p[0]+Math.cos(an)*rr,p[1]+Math.sin(an)*rr])) c++; } hits.push(c/k>=.8?1:0); }
-  let n=0; for(let i=0;i<hits.length;i++) if(hits[i]&&!hits[i-1]) n++; return Math.min(3,n); }
+  // القوس خط رفيع: كتلة حبر عريضة (حرف أو رقم ملاصق) ليست قوسًا
+  let n=0, rl=0; const mxr=r.stroke*2+4; for(let i=0;i<=hits.length;i++){ if(i<hits.length&&hits[i]) rl++; else { if(rl&&rl<=mxr) n++; rl=0; } } return Math.min(3,n); }
 const inPoly=(P,q)=>{ let ins=false; for(let i=0,j=P.length-1;i<P.length;j=i++){ const a=P[i],b=P[j]; if((a[1]>q[1])!==(b[1]>q[1])&&q[0]<(b[0]-a[0])*(q[1]-a[1])/(b[1]-a[1])+a[0]) ins=!ins; } return ins; };
 // تصحيح الشكل ليطابق نوعه تمامًا (قاعدة أفقية، زوايا قائمة، أضلاع متساوية)
 function idealize(c){ let P=c.pts.map(p=>p.slice()); const n=P.length, C=cen(P);
