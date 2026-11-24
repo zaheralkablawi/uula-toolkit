@@ -81,6 +81,10 @@ header .bt .root:only-child{color:var(--fg);font-size:15px;letter-spacing:0}
 #msg.bad{color:var(--danger)}#msg.good{color:var(--ok)}
 .pop{position:relative;background:#fff;border:1px solid #bcd3f5;border-radius:10px;box-shadow:0 2px 8px rgba(31,113,222,.12);padding:8px;display:flex;flex-direction:column;gap:6px;font-size:12px;width:auto!important}
 .pop .r input{max-width:150px!important}
+.pop input.w1{flex:none;width:44px}
+.pop input.w2{flex:none;width:60px}
+.pop .sep2{width:6px;flex:none}
+.pop{gap:5px;padding:6px 8px}
 .pop .angico{display:inline-flex;align-items:center;gap:3px}
 .pop .ph{font-weight:600;color:var(--muted);font-size:11.5px;display:flex;justify-content:space-between;align-items:center}
 .pop .ph button{border:0;background:none;cursor:pointer;color:var(--muted);font-size:13px;padding:0 2px}
@@ -667,29 +671,20 @@ function openPop(k,i,cx,cy,ak){
   let h;
   if(k==='pt'){ const r=REG.find(x=>x.key===i), def=r?r.def:'', cur=(S.nm[i]!=null)?S.nm[i]:def;
     pop.innerHTML=`<div class="ph"><span>${L('point')} ${esc(cur)}</span><button type="button" data-a="x">✕</button></div>
-      <div class="r"><input id="pPt" value="${esc(cur)}" title="${L('vname')}" style="max-width:52px">${qb('pnm','<b>أ</b>',!S.hide[i],L('showName'))}</div>`;
+      <div class="r"><input id="pPt" class="w1" value="${esc(cur)}" title="${L('vname')}">${qb('pnm','<b>أ</b>',!S.hide[i],L('showName'))}</div>`;
     pop.hidden=false; placePop(pop,cx,cy); nameReady(); return; }
   if(k==='side'){ const sd=G.sides[i], ia=G.kind==='free'?sd.a:i, ib=G.kind==='free'?sd.b:(i+1)%n;
     h=`<div class="ph"><span>${L('side')} <bdi>${esc(G.verts[ia].name)} ${esc(G.verts[ib].name)}</bdi></span><button type="button" data-a="x">✕</button></div>
-      <div class="r"><input id="pLen" placeholder="${esc(fmtLen(len(sub(G.pts[ib],G.pts[ia]))/40))}" value="${esc(sd.len)}">${qb('show',ICO.len,sd.show,L('showLen'))}</div>
-      <div class="r">${qb('t1',ICO.t1,sd.ticks===1,L('ticks'))}${qb('t2',ICO.t2,sd.ticks===2,L('ticks'))}${qb('t3',ICO.t3,sd.ticks===3,L('ticks'))}${qb('dash',ICO.dash,sd.dash,L('dashed'))}</div>
-      <div class="r">${qb('p1',ICO.p1,sd.par===1,L('par'))}${qb('p2',ICO.p2,sd.par===2,L('par'))}<span class="sep" style="width:1px;height:18px;background:var(--line)"></span>${qb('ar1',ICO.ae,(sd.arr||0)&1,L('arrEnd'))}${qb('ar2',ICO.as,(sd.arr||0)&2,L('arrStart'))}</div>`;
+      <div class="r"><input id="pLen" class="w2" placeholder="${esc(fmtLen(len(sub(G.pts[ib],G.pts[ia]))/40))}" value="${esc(sd.len)}">${qb('show',ICO.len,sd.show,L('showLen'))}<span class="sep2"></span>${qb('t1',ICO.t1,sd.ticks===1,L('ticks'))}${qb('t2',ICO.t2,sd.ticks===2,L('ticks'))}${qb('t3',ICO.t3,sd.ticks===3,L('ticks'))}${qb('dash',ICO.dash,sd.dash,L('dashed'))}<span class="sep2"></span>${qb('p1',ICO.p1,sd.par===1,L('par'))}${qb('p2',ICO.p2,sd.par===2,L('par'))}<span class="sep2"></span>${qb('ar1',ICO.ae,(sd.arr||0)&1,L('arrEnd'))}${qb('ar2',ICO.as,(sd.arr||0)&2,L('arrStart'))}</div>`;
   } else if(G.kind==='free'){ const V=G.verts[i];
     const rows=freeAngles(G,i).map(([a,b])=>{ const key=angKey(i,a,b), A=G.angs[key]||{};
-      return `<div class="r" style="border-top:1px solid var(--line);padding-top:4px"><span class="note angico" style="flex:1;font-size:12px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 20H4L16 5"/></svg><bdi>${esc(G.verts[a].name)} ${esc(V.name)} ${esc(G.verts[b].name)}</bdi></span><input class="pAngF" data-key="${key}" value="${esc(A.ang||'')}" placeholder="${esc(fmtAng(angSpan(G.pts[i],G.pts[a],G.pts[b]).sw))}" title="${L('showAng')}" style="max-width:52px;flex:none"><input class="pNumF" data-key="${key}" value="${esc(A.num||'')}" placeholder="${L('angNum')}" title="${L('angNumT')}" style="max-width:46px;flex:none"></div>
-        <div class="r">${qb('fa|'+key+'|arc',ICO.a1,A.arc,L('arcOnly'))}${qb('fa|'+key+'|a1',ICO.a1e,A.arcs===1,L('arcs'))}${qb('fa|'+key+'|rt',ICO.rt,A.right,L('rightM'))}${qb('fa|'+key+'|st',ICO.star,A.sym==='*',L('symStar'))}${qb('fa|'+key+'|dt',ICO.dotI,A.sym==='•',L('symDot'))}${qb('fa|'+key+'|dcw',ICO.cw,A.dir==='cw',L('dirCw'))}${qb('fa|'+key+'|dccw',ICO.ccw,A.dir==='ccw',L('dirCcw'))}${qb('fa|'+key+'|sa',ICO.ang,A.showAng,L('showAng'))}</div>`; }).join('');
+      return `<div class="r" style="border-top:1px solid var(--line);padding-top:4px"><span class="note angico" style="flex:1;font-size:12px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 20H4L16 5"/></svg><bdi>${esc(G.verts[a].name)} ${esc(V.name)} ${esc(G.verts[b].name)}</bdi></span><input class="pAngF w2" data-key="${key}" value="${esc(A.ang||'')}" placeholder="${esc(fmtAng(angSpan(G.pts[i],G.pts[a],G.pts[b]).sw))}" title="${L('showAng')}"><input class="pNumF w1" data-key="${key}" value="${esc(A.num||'')}" placeholder="${L('angNum')}" title="${L('angNumT')}">${qb('fa|'+key+'|arc',ICO.a1,A.arc,L('arcOnly'))}${qb('fa|'+key+'|a1',ICO.a1e,A.arcs===1,L('arcs'))}${qb('fa|'+key+'|rt',ICO.rt,A.right,L('rightM'))}${qb('fa|'+key+'|st',ICO.star,A.sym==='*',L('symStar'))}${qb('fa|'+key+'|dt',ICO.dotI,A.sym==='•',L('symDot'))}${qb('fa|'+key+'|dcw',ICO.cw,A.dir==='cw',L('dirCw'))}${qb('fa|'+key+'|dccw',ICO.ccw,A.dir==='ccw',L('dirCcw'))}${qb('fa|'+key+'|sa',ICO.ang,A.showAng,L('showAng'))}</div>`; }).join('');
     h=`<div class="ph"><span>${L('vertex')} ${esc(V.name)}</span><button type="button" data-a="x">✕</button></div>
-      <div class="r"><input id="pName" value="${esc(V.name)}" title="${L('vname')}" style="max-width:44px">${qb('nm','<b>أ</b>',V.showName,L('vname'))}</div>${rows}`;
-    pop.style.width='200px';
+      <div class="r"><input id="pName" class="w1" value="${esc(V.name)}" title="${L('vname')}">${qb('nm','<b>أ</b>',V.showName,L('vname'))}</div>${rows}`;
   } else { const V=G.verts[i], s=angSpan(G.pts[i],G.pts[(i-1+n)%n],G.pts[(i+1)%n]);
     h=`<div class="ph"><span>${L('vertex')} ${esc(V.name)}</span><button type="button" data-a="x">✕</button></div>
-      <div class="r"><input id="pName" value="${esc(V.name)}" title="${L('vname')}" style="max-width:44px">${qb('nm','<b>أ</b>',V.showName,L('vname'))}</div>
-      <div class="r"><input id="pAng" placeholder="${esc(fmtAng(s.sw))}" value="${esc(V.ang)}">${qb('sa',ICO.ang,V.showAng,L('showAng'))}</div>
-      <div class="r">${qb('arc',ICO.a1,V.arc,L('arcOnly'))}${qb('rt',ICO.rt,V.right,L('rightM'))}</div>
-      <div class="r">${qb('dcw',ICO.cw,V.dir==='cw',L('dirCw'))}${qb('dccw',ICO.ccw,V.dir==='ccw',L('dirCcw'))}<span class="note" style="font-size:11px;flex:1">${L('directed')}</span></div>
-      <div class="r">${qb('st',ICO.star,V.sym==='*',L('symStar'))}${qb('dt',ICO.dotI,V.sym==='•',L('symDot'))}<input id="pNum" value="${esc(V.num||'')}" placeholder="${L('angNum')}" title="${L('angNumT')}" style="max-width:60px"></div>
-      <div class="r"><span class="note" style="font-size:11px;flex:1">${L('arcsShort')}</span>${qb('a1',ICO.a1e,V.arcs===1,L('arcs'))}${qb('a2',ICO.a2,V.arcs===2,L('arcs'))}${qb('a3',ICO.a3,V.arcs===3,L('arcs'))}</div>
-      ${n===3||(n===4&&i===0)?`<div class="r">${qb('alt',ICO.alt,V.alt,L('alt'))}${n===3?qb('med',ICO.med,V.med,L('med'))+qb('bis',ICO.bis,V.bis,L('bis')):''}</div>`:''}`;
+      <div class="r"><input id="pName" class="w1" value="${esc(V.name)}" title="${L('vname')}">${qb('nm','<b>أ</b>',V.showName,L('vname'))}<span class="sep2"></span><input id="pAng" class="w2" placeholder="${esc(fmtAng(s.sw))}" value="${esc(V.ang)}" title="${L('showAng')}">${qb('sa',ICO.ang,V.showAng,L('showAng'))}<span class="sep2"></span><input id="pNum" class="w1" value="${esc(V.num||'')}" placeholder="${L('angNum')}" title="${L('angNumT')}"></div>
+      <div class="r">${qb('arc',ICO.a1,V.arc,L('arcOnly'))}${qb('rt',ICO.rt,V.right,L('rightM'))}<span class="sep2"></span>${qb('a1',ICO.a1e,V.arcs===1,L('arcs'))}${qb('a2',ICO.a2,V.arcs===2,L('arcs'))}${qb('a3',ICO.a3,V.arcs===3,L('arcs'))}${qb('st',ICO.star,V.sym==='*',L('symStar'))}${qb('dt',ICO.dotI,V.sym==='•',L('symDot'))}<span class="sep2"></span>${qb('dcw',ICO.cw,V.dir==='cw',L('dirCw'))}${qb('dccw',ICO.ccw,V.dir==='ccw',L('dirCcw'))}${n===3||(n===4&&i===0)?'<span class="sep2"></span>'+qb('alt',ICO.alt,V.alt,L('alt'))+(n===3?qb('med',ICO.med,V.med,L('med'))+qb('bis',ICO.bis,V.bis,L('bis')):''):''}</div>`;
   }
   if(!(G.kind==='free'&&k==='vert')) pop.style.width='';
   pop.innerHTML=h; pop.hidden=false; placePop(pop,cx,cy);
