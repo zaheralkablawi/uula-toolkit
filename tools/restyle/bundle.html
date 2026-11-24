@@ -1911,7 +1911,7 @@ function align(rects, W, mode, only) {
 // above and two below the content, the icon on the right and the content kept clear of it. Their text keeps its roles.
 const WRAP = { note: 'note', quote: 'quote', formula: 'formula', activity: 'activity', mars: 'mars', other: 'other', cancelled: 'cancelled' };   // «Practice» is the end of the lesson: always its own box under the last object
 // the selected pictures (graphs …) give their place to the UULA empty grid, cut to each picture's size
-// (light lines D3D8E0 every two page-grid steps, running off the edges, the cut centred on the picture)
+// (lines A0A8B4, 0.75pt, clear in print, every two page-grid steps, running off the edges, the cut centred on the picture)
 function gridCutX(id, name, g) {
   const w = Math.max(1, Math.round(g.w)), h = Math.max(1, Math.round(g.h)), step = ROW * 1.75;
   const ox = (w / 2) % step, oy = (h / 2) % step;
@@ -1920,7 +1920,7 @@ function gridCutX(id, name, g) {
   for (let y = oy; y <= h + 1; y += step) { const v = Math.min(h, Math.round(y)); path += '<a:moveTo><a:pt x="0" y="' + v + '"/></a:moveTo><a:lnTo><a:pt x="' + w + '" y="' + v + '"/></a:lnTo>'; }
   return '<p:sp><p:nvSpPr><p:cNvPr id="' + id + '" name="' + name + '"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="' + Math.round(g.x) + '" y="' + Math.round(g.y) + '"/><a:ext cx="' + w + '" cy="' + h + '"/></a:xfrm>'
     + '<a:custGeom><a:avLst/><a:gdLst/><a:ahLst/><a:cxnLst/><a:rect l="0" t="0" r="r" b="b"/><a:pathLst><a:path w="' + w + '" h="' + h + '" fill="none">' + path + '</a:path></a:pathLst></a:custGeom>'
-    + '<a:noFill/><a:ln w="6350"><a:solidFill><a:srgbClr val="D3D8E0"/></a:solidFill></a:ln></p:spPr></p:sp>';
+    + '<a:noFill/><a:ln w="9525"><a:solidFill><a:srgbClr val="A0A8B4"/></a:solidFill></a:ln></p:spPr></p:sp>';
 }
 function gridOver(pkg) {
   const doc = parseXml(pkg.files.slide);
@@ -2518,7 +2518,7 @@ function spec(id, W) {
       const ans = Array.from({ length: n }, () => 'ⓐ'); ans.push('الحل');
       return { gap: 1, rows: [{ cells: [{ t: 'table', rows: [head, ans], o: { sol: true, name: 'UULA Solution Table', widths: [...Array(n).fill(0.8 / n), 0.2] } }] }] };
     }
-    // the UULA empty graph grid (the same as a hidden solution graph): cells of two page-grid steps, light lines D3D8E0
+    // the UULA empty graph grid (the same as a hidden solution graph): cells of two page-grid steps, lines A0A8B4 0.75pt (clear in print)
     case 'grid': return { gap: 1, rows: [{ cells: [{ t: 'grid', cols: 8, rows: 7 }] }] };
     // the same as in the booklet: box 75pt, the tall trophy rising above the box on the right, the title and the line
     // close together, the QR on the left (measured from the booklet page)
@@ -2571,7 +2571,7 @@ function gridX(cols, rows) {
   for (let k = 0; k <= rows; k++) { const y = Math.round(half + k * S); path += '<a:moveTo><a:pt x="0" y="' + y + '"/></a:moveTo><a:lnTo><a:pt x="' + w + '" y="' + y + '"/></a:lnTo>'; }
   return '<p:sp><p:nvSpPr><p:cNvPr id="' + nid() + '" name="UULA Graph Grid"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + w + '" cy="' + h + '"/></a:xfrm>'
     + '<a:custGeom><a:avLst/><a:gdLst/><a:ahLst/><a:cxnLst/><a:rect l="0" t="0" r="r" b="b"/><a:pathLst><a:path w="' + w + '" h="' + h + '" fill="none">' + path + '</a:path></a:pathLst></a:custGeom>'
-    + '<a:noFill/><a:ln w="6350"><a:solidFill><a:srgbClr val="D3D8E0"/></a:solidFill></a:ln></p:spPr></p:sp>';
+    + '<a:noFill/><a:ln w="9525"><a:solidFill><a:srgbClr val="A0A8B4"/></a:solidFill></a:ln></p:spPr></p:sp>';
 }
 let NID = 5000;
 function nid() { return String(NID++); }
@@ -3988,8 +3988,8 @@ async function gridSelected(id) {
         const x0 = p.left, y0 = p.top, w = p.width, h = p.height, step = 13.39 * 1.75;
         const lines = [];
         // each line a very thin filled rectangle (a zero-wide line is tilted by PowerPoint for Mac)
-        const T = 0.5;
-        const add = (l, t, ww, hh) => { const ln = sh.addGeometricShape('Rectangle', { left: l, top: t, width: ww, height: hh }); ln.fill.setSolidColor('#D3D8E0'); ln.lineFormat.visible = false; ln.name = 'UULA Graph Grid Line'; lines.push(ln); made.push(ln); };
+        const T = 0.75;
+        const add = (l, t, ww, hh) => { const ln = sh.addGeometricShape('Rectangle', { left: l, top: t, width: ww, height: hh }); ln.fill.setSolidColor('#A0A8B4'); ln.lineFormat.visible = false; ln.name = 'UULA Graph Grid Line'; lines.push(ln); made.push(ln); };
         for (let x = (w / 2) % step; x <= w + 0.01; x += step) add(x0 + Math.min(x, w - T), y0, T, h);
         for (let y = (h / 2) % step; y <= h + 0.01; y += step) add(x0, y0 + Math.min(y, h - T), w, T);
         lines.forEach(l => l.load('id'));
@@ -4712,12 +4712,12 @@ $('spD').addEventListener('click', () => spacingRun('d'));
 
 // ---------- hide / show the solutions ----------
 // an empty grid from a graph picture: the coloured drawing is removed and the grid lines / axes it covered are drawn again
-// the UULA empty grid (light lines D3D8E0 on a clear background, cells of two page-grid steps), cut to w×h points
+// the UULA empty grid (lines A0A8B4, clear in print, on a clear background, cells of two page-grid steps), cut to w×h points
 function gridPicture(wPt, hPt) {
   const S = 4, cell = 13.39 * 1.75, cv = document.createElement('canvas');
   cv.width = Math.max(4, Math.round(wPt * S)); cv.height = Math.max(4, Math.round(hPt * S));
   const g = cv.getContext('2d');
-  g.strokeStyle = '#D3D8E0'; g.lineWidth = 0.5 * S;
+  g.strokeStyle = '#A0A8B4'; g.lineWidth = 0.75 * S;
   const step = cell * S;
   // the lines run off the edges, as a grid cut out of a bigger sheet; the cut is centred on the picture
   const ox = ((cv.width / 2) % step), oy = ((cv.height / 2) % step);
