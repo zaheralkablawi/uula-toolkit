@@ -864,7 +864,7 @@ function recognize(im){
   // عتبة أوتسو
   let sum=0; for(let i=0;i<256;i++) sum+=i*hist[i]; let sB=0,wB=0,best=0,th=128;
   for(let i=0;i<256;i++){ wB+=hist[i]; if(!wB) continue; const wF=N-wB; if(!wF) break; sB+=i*hist[i]; const mB=sB/wB, mF=(sum-sB)/wF, b=wB*wF*(mB-mF)*(mB-mF); if(b>best){ best=b; th=i; } }
-  th=Math.min(th,200);
+  th=Math.min(200,Math.max(th,165));   // الخطوط الرفيعة المتقطعة رمادية بعد التنعيم
   const dark=new Uint8Array(N); for(let i=0;i<N;i++) dark[i]=gray[i]<th?1:0;
   // المكوّنات المتصلة: الشكل أكبرها امتدادًا، والكتابة الصغيرة تُهمل
   const lab=new Int32Array(N).fill(-1), comps=[], st=[];
@@ -877,7 +877,12 @@ function recognize(im){
   // كل ما يلمس مستطيل الشكل وكبير نسبيًا يُضم (خطوط متقطعة داخل الشكل)
   const keep=new Set([F.id]); comps.forEach(c=>{ if(c.d>F.d*.12&&c.x0>=F.x0-2&&c.x1<=F.x1+2&&c.y0>=F.y0-2&&c.y1<=F.y1+2) keep.add(c.id); });
   const M=new Uint8Array(N); for(let i=0;i<N;i++) if(lab[i]>=0&&lab[i]===F.id) M[i]=1;
-  const stroke=Math.max(1,Math.round(F.n/Math.max(1,(F.x1-F.x0+F.y1-F.y0))/2));
+  const M0=(x,y)=>M[y*W+x]===1;
+  // سماكة الخط: الطول الأكثر تكرارًا لمقاطع الحبر الأفقية والعمودية
+  const rl=[]; for(let y=F.y0;y<=F.y1;y+=2){ let s=-1; for(let x=F.x0;x<=F.x1+1;x++){ const v=x<=F.x1&&M0(x,y); if(v&&s<0) s=x; else if(!v&&s>=0){ rl.push(x-s); s=-1; } } }
+  for(let x=F.x0;x<=F.x1;x+=2){ let s=-1; for(let y=F.y0;y<=F.y1+1;y++){ const v=y<=F.y1&&M0(x,y); if(v&&s<0) s=y; else if(!v&&s>=0){ rl.push(y-s); s=-1; } } }
+  const hs=new Array(40).fill(0); rl.forEach(v=>{ if(v<40) hs[v]++; }); let mode=1; for(let i=1;i<40;i++) if(hs[i]>hs[mode]) mode=i;
+  const stroke=Math.max(1,Math.round(mode/2));
   // توسيع بسيط لسد الفجوات
   const Md=new Uint8Array(N), rr=Math.max(1,Math.min(3,stroke)); for(let y=0;y<H;y++) for(let x=0;x<W;x++){ if(!M[y*W+x]) continue; for(let dy=-rr;dy<=rr;dy++) for(let dx=-rr;dx<=rr;dx++){ const xx=x+dx,yy=y+dy; if(xx>=0&&yy>=0&&xx<W&&yy<H) Md[yy*W+xx]=1; } }
   // الصورة الظلية: كل ما لا يصله الفراغ الخارجي
@@ -892,7 +897,11 @@ function recognize(im){
   if(cont.length<12) return null;
   let area=0,ax=0,ay=0; for(let i=0;i<N;i++) if(S(i)){ area++; ax+=i%W; ay+=(i-i%W)/W; } const C=[ax/area,ay/area];
   const ds=cont.map(p=>Math.hypot(p[0]-C[0],p[1]-C[1])), m=ds.reduce((s,v)=>s+v,0)/ds.length, sd=Math.sqrt(ds.reduce((s,v)=>s+(v-m)*(v-m),0)/ds.length);
-  const res={W,H,stroke,inner:Md};
+  // كل الحبر داخل مستطيل الشكل (للخطوط المتقطعة والعلامات)، والكتابة خارج الشكل (للأسماء والأطوال)
+  const ex=Math.round(F.d*.08), bx0=Math.max(0,F.x0-ex), by0=Math.max(0,F.y0-ex), bx1=Math.min(W-1,F.x1+ex), by1=Math.min(H-1,F.y1+ex);
+  const all=new Uint8Array(N); for(let y=by0;y<=by1;y++) for(let x=bx0;x<=bx1;x++){ if(!dark[y*W+x]) continue; for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){ const xx=x+dx,yy=y+dy; if(xx>=0&&yy>=0&&xx<W&&yy<H) all[yy*W+xx]=1; } }
+  const texts=comps.filter(c=>c.id!==F.id&&c.d<F.d*.2&&c.d>2).map(c=>({c:[(c.x0+c.x1)/2,(c.y0+c.y1)/2],d:c.d}));
+  const res={W,H,stroke,inner:Md,all,gray,fd:F.d,texts};
   if(sd/m<.05&&Math.abs(area/(Math.PI*m*m)-1)<.15) return Object.assign(res,{type:'circle',c:C,r:m-stroke/2});
   // دائرة تخرج منها خطوط (مماس، قطر ممتد): ملاءمة دائرة لنقاط الحدود مع إهمال الشاذ
   const fitC=pts=>{ let sx=0,sy=0,sxx=0,syy=0,sxy=0,sxz=0,syz=0,sz=0; const n2=pts.length;
@@ -902,8 +911,8 @@ function recognize(im){
     const d0=det(A3); if(Math.abs(d0)<1e-9) return null; const sol=[0,1,2].map(c=>det(A3.map((row,i)=>row.map((v,j)=>j===c?B3[i]:v)))/d0);
     const cx2=-sol[0]/2, cy2=-sol[1]/2, r2=Math.sqrt(Math.max(0,cx2*cx2+cy2*cy2-sol[2])); return [cx2,cy2,r2]; };
   let fc=fitC(cont), inl=cont;
-  for(let it=0;fc&&it<3;it++){ const tol=Math.max(3,stroke*2.5,fc[2]*.04); inl=cont.filter(([x,y])=>Math.abs(Math.hypot(x-fc[0],y-fc[1])-fc[2])<tol); if(inl.length<20) break; fc=fitC(inl); }
-  if(fc&&fc[2]>Math.min(W,H)*.08){ const bins=new Set(); inl.forEach(([x,y])=>bins.add(Math.floor(((Math.atan2(y-fc[1],x-fc[0])*180/Math.PI)+360)%360/10)));
+  for(let it=0;fc&&it<4;it++){ const tol=it<2?Math.max(3,stroke*2.5,fc[2]*.04):Math.max(2,stroke*1.5); inl=cont.filter(([x,y])=>Math.abs(Math.hypot(x-fc[0],y-fc[1])-fc[2])<tol); if(inl.length<20) break; fc=fitC(inl); }
+  if(fc&&fc[2]>Math.min(W,H)*.08){ const tolD=Math.max(3,stroke*2.5,fc[2]*.04); inl=cont.filter(([x,y])=>Math.abs(Math.hypot(x-fc[0],y-fc[1])-fc[2])<tolD); const bins=new Set(); inl.forEach(([x,y])=>bins.add(Math.floor(((Math.atan2(y-fc[1],x-fc[0])*180/Math.PI)+360)%360/10)));
     if(inl.length/cont.length>.55&&bins.size>=31) return Object.assign(res,{type:'circle',c:[fc[0],fc[1]],r:fc[2]-stroke/2}); }
   // تبسيط الحدود إلى مضلع
   let per=0; for(let i=0;i<cont.length;i++){ const a=cont[i], b=cont[(i+1)%cont.length]; per+=Math.hypot(b[0]-a[0],b[1]-a[1]); }
@@ -921,11 +930,95 @@ function recognize(im){
       if(an>162||len(sub(a,b))<per*.03){ P.splice(i,1); ch=true; break; } } if(!ch) break; }
   if(P.length<3) return null;
   // الرؤوس على منتصف سماكة الخط
-  const Cp=cen(P); P=P.map(p=>{ const d=nrm(sub(Cp,p)); return add(p,mul(d,stroke*.7)); });
+  // الرؤوس الدقيقة: تقاطع خطوط منتصف سماكة الأضلاع
+  { const n0=P.length, Lines=[];
+    for(let i=0;i<n0;i++){ const A=P[i], B=P[(i+1)%n0], d=nrm(sub(B,A)), nn=perp(d), Lx=len(sub(B,A)), cs=[];
+      for(let s=Lx*.2;s<=Lx*.8;s+=2){ const q=add(A,mul(d,s)); let c0=null; for(let o=0;o<=stroke+6&&c0==null;o++){ for(const sg of [1,-1]){ const z=add(q,mul(nn,sg*o)), x=Math.round(z[0]), y=Math.round(z[1]); if(x>=0&&y>=0&&x<W&&y<H&&M[y*W+x]){ c0=sg*o; break; } } }
+        if(c0==null) continue; let hi=c0, lo=c0; const ink=o=>{ const z=add(q,mul(nn,o)), x=Math.round(z[0]), y=Math.round(z[1]); return x>=0&&y>=0&&x<W&&y<H&&M[y*W+x]; };
+        while(hi<c0+stroke*3+2&&ink(hi+1)) hi++; while(lo>c0-stroke*3-2&&ink(lo-1)) lo--; if(hi-lo<=stroke*3) cs.push((hi+lo)/2); }
+      cs.sort((a,b)=>a-b); const off=cs.length?cs[cs.length>>1]:0; Lines.push([add(A,mul(nn,off)),d]); }
+    const Q=[]; for(let i=0;i<n0;i++){ const L1=Lines[(i-1+n0)%n0], L2=Lines[i], X=lineX(L1[0],L1[1],L2[0],add(L2[0],L2[1])); Q.push(X&&len(sub(X,P[i]))<stroke*6+10?X:P[i]); }
+    P=Q; }
   return Object.assign(res,{type:'poly',pts:P});
 }
 // هل يوجد خط مرسوم بين نقطتين في الصورة؟
 function lineIn(r,a,b){ let hit=0,n=0; for(let t=.12;t<=.88;t+=.02){ const x=Math.round(a[0]+(b[0]-a[0])*t), y=Math.round(a[1]+(b[1]-a[1])*t); if(x<0||y<0||x>=r.W||y>=r.H) continue; n++; if(r.inner[y*r.W+x]) hit++; } return n&&hit/n>.85; }
+const PX=(r,p)=>{ const x=Math.round(p[0]), y=Math.round(p[1]); return x>=0&&y>=0&&x<r.W&&y<r.H&&r.all[y*r.W+x]; };
+// خط بين نقطتين: متصل أو متقطع أو لا شيء
+function lineKind(r,a,b){ let n=0,h1=0,h2=0; for(let t=.12;t<=.88;t+=.01){ const q=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t], x=Math.round(q[0]), y=Math.round(q[1]); if(x<0||y<0||x>=r.W||y>=r.H) continue; n++; if(r.inner[y*r.W+x]) h1++; if(r.all[y*r.W+x]) h2++; }
+  if(!n) return null; if(h1/n>.85) return 'solid'; if(h2/n>.42) return 'dash'; return null; }
+// شرطات التساوي (عمودية على الضلع) ورمز التوازي // (مائل) قرب منتصف الضلع
+function sideMarks(r,A,B){ const d=nrm(sub(B,A)), n=perp(d), Lx=len(sub(B,A)), o0=r.stroke+2, o1=r.stroke+Math.max(6,r.fd*.02), mx=Math.max(7,r.fd*.025);
+  const P=[],M=[], w=r.stroke+4, span=o1-o0+1, offs=[];
+  // أين يقع خط الضلع فعلًا (قد يبعد بكسلًا أو اثنين عن الخط المحسوب)
+  for(let s=Lx*.18;s<=Lx*.82;s+=2){ const q=add(A,mul(d,s)); for(let o=0;o<=w;o++){ if(PX(r,add(q,mul(n,o)))){ offs.push(o); break; } if(PX(r,sub(q,mul(n,o)))){ offs.push(-o); break; } } }
+  offs.sort((a,b)=>a-b); const off=offs.length?offs[offs.length>>1]:0, band=r.stroke+2;
+  for(let s=Lx*.18;s<=Lx*.82;s+=1){ const q=add(A,mul(d,s)); let pp=0,mm=0;
+    for(let k=1;k<=2;k++){ if(PX(r,add(q,mul(n,off+band+k)))) pp=1; if(PX(r,add(q,mul(n,off-band-k)))) mm=1; }   // خط قريب خارج الضلع: كل شرطة تقطعه في مكان مستقل
+    P.push(pp); M.push(mm); }
+  const runs=a=>{ const o=[]; let s=-1; for(let i=0;i<=a.length;i++){ if(i<a.length&&a[i]){ if(s<0) s=i; } else if(s>=0){ if(i-s<=mx) o.push((s+i-1)/2); s=-1; } } return o; };
+  // كل علامة: نقيس ميلها مباشرة (عمودية = شرطة تساوي، مائلة = رمز التوازي)
+  const pr=runs(P); let tk=0, sl=0; const s0=Lx*.18;
+  const ink=(sc,o)=>PX(r,add(add(A,mul(d,s0+sc)),mul(n,o)));
+  // نتتبع الشرطة نفسها بكسلًا بكسلًا من قرب الضلع إلى طرفها
+  const follow=(c,sg)=>{ const oA=off+sg*(band+1), oB=off+sg*(band+span-1); let s1=null; for(let k=0;k<=4&&s1==null;k++){ if(ink(c+k,oA)) s1=c+k; else if(ink(c-k,oA)) s1=c-k; } if(s1==null) return null;
+    const ctr=(sc0,o)=>{ let a=null; for(let k=0;k<=6&&a==null;k++){ if(ink(sc0+k*.5,o)) a=sc0+k*.5; else if(ink(sc0-k*.5,o)) a=sc0-k*.5; } if(a==null) return null; let l=a, rr=a; while(rr-a<8&&ink(rr+.5,o)) rr+=.5; while(a-l<8&&ink(l-.5,o)) l-=.5; return (l+rr)/2; };
+    let c1=ctr(s1,oA); if(c1==null) return null; s1=c1; let sc=s1, o=oA, steps=0; while(o!==oB){ o+=sg; const nx=ctr(sc,o); if(nx==null||Math.abs(nx-sc)>2.5) break; sc=nx; steps++; }
+    return steps>=3?(sc-s1)/steps:null; };
+  pr.forEach(c=>{ const a1=follow(c,1); if(a1==null) return; const slope=Math.abs(a1); if(slope<.3) tk++; else if(slope<1.6) sl++; });
+  if(sl&&sl>=tk){ sl+=tk; tk=0; } else if(tk&&sl){ tk+=sl; sl=0; }   // علامات الضلع الواحد من نوع واحد
+  return {ticks:Math.min(3,tk), par:sl>=2?Math.min(2,sl-1):0}; }
+// علامة الزاوية القائمة عند رأس
+function rightAt(r,p,a,b){ const u=nrm(sub(a,p)), v=nrm(sub(b,p)); if(Math.abs(angSpan(p,a,b).sw-90)>8) return false;
+  for(let s=r.stroke*3+4;s<=Math.max(r.stroke*3+8,r.fd*.07);s+=1){ let c1=0,c2=0,k=0; for(let t=.35;t<=.75;t+=.05){ k++; if(PX(r,add(add(p,mul(u,s)),mul(v,s*t)))) c1++; if(PX(r,add(add(p,mul(v,s)),mul(u,s*t)))) c2++; }
+    if(c1/k>.75&&c2/k>.75&&!PX(r,add(p,mul(add(u,v),s*.45)))) return true; } return false; }
+// أقواس الزاوية: عددها
+function arcsAt(r,p,a,b){ const s=angSpan(p,a,b), hits=[], r0=Math.max(r.stroke*3+4,(r.stroke*5)/(rad(s.sw)*.6)); for(let rr=r0;rr<=r.fd*.11;rr+=1){ let k=0,c=0; for(let f=.2;f<=.8;f+=.06){ k++; const an=rad(s.a0+s.sw*f); if(PX(r,[p[0]+Math.cos(an)*rr,p[1]+Math.sin(an)*rr])) c++; } hits.push(c/k>=.8?1:0); }
+  let n=0; for(let i=0;i<hits.length;i++) if(hits[i]&&!hits[i-1]) n++; return Math.min(3,n); }
+const inPoly=(P,q)=>{ let ins=false; for(let i=0,j=P.length-1;i<P.length;j=i++){ const a=P[i],b=P[j]; if((a[1]>q[1])!==(b[1]>q[1])&&q[0]<(b[0]-a[0])*(q[1]-a[1])/(b[1]-a[1])+a[0]) ins=!ins; } return ins; };
+// تصحيح الشكل ليطابق نوعه تمامًا (قاعدة أفقية، زوايا قائمة، أضلاع متساوية)
+function idealize(c){ let P=c.pts.map(p=>p.slice()); const n=P.length, C=cen(P);
+  let best=99, ba=0; for(let i=0;i<n;i++){ const a=ang(sub(P[(i+1)%n],P[i])); const dd=((a%90)+90+45)%90-45; if(Math.abs(dd)<Math.abs(best)){ best=dd; ba=a; } }
+  if(Math.abs(best)<4) P=P.map(p=>rot(p,C,-best));
+  const k=c.kind, s=c.sub;
+  if(k==='tri'){ if(s==='iso'){ const m=mid(P[1],P[2]), d=nrm(sub(P[2],P[1])); P[0]=sub(P[0],mul(d,dot(sub(P[0],m),d))); }
+    else if(s==='rt'){ const d=nrm(perp(sub(P[2],P[1]))); P[0]=add(P[1],mul(d,dot(sub(P[0],P[1]),d))); }
+    else if(s==='equ'){ let q=rot(P[2],P[1],-60); if(Math.sign(crs(sub(P[1],P[0]),sub(P[2],P[0])))!==Math.sign(crs(sub(P[1],q),sub(P[2],q)))) q=rot(P[2],P[1],60); P[0]=q; } }
+  else if(k==='sq'||k==='rect'){ const c2=cen(P), a=rad(ang(sub(P[1],P[0]))+(ang(sub(P[2],P[3]))-ang(sub(P[1],P[0]))+540)%360/2-90); let w=(len(sub(P[1],P[0]))+len(sub(P[2],P[3])))/2, h=(len(sub(P[2],P[1]))+len(sub(P[3],P[0])))/2; if(k==='sq') w=h=(w+h)/2;
+    const u=[Math.cos(a),Math.sin(a)], v=perp(u), dir=Math.sign(dot(sub(P[1],P[0]),u))||1, dir2=Math.sign(dot(sub(P[3],P[0]),v))||1;
+    P[0]=sub(sub(c2,mul(u,dir*w/2)),mul(v,dir2*h/2)); P[1]=add(P[0],mul(u,dir*w)); P[2]=add(P[1],mul(v,dir2*h)); P[3]=add(P[0],mul(v,dir2*h)); }
+  else if(k==='rho'){ const c2=mid(mid(P[0],P[2]),mid(P[1],P[3])), d1=nrm(sub(P[2],P[0])), h1=(len(sub(P[2],P[0])))/2, h2=len(sub(P[3],P[1]))/2, d2=mul(perp(d1),Math.sign(dot(perp(d1),sub(P[3],P[1])))||1);
+    P=[sub(c2,mul(d1,h1)),sub(c2,mul(d2,h2)),add(c2,mul(d1,h1)),add(c2,mul(d2,h2))]; }
+  else if(k==='para'){ P[3]=add(P[0],sub(P[2],P[1])); }
+  else if(k==='trap'){ const d=nrm(sub(P[2],P[1])); P[3]=add(P[0],mul(d,dot(sub(P[3],P[0]),d))); }
+  else if(n>=5){ const L0=P.map((p,i)=>len(sub(P[(i+1)%n],p))), mL=L0.reduce((a,b)=>a+b)/n; if(L0.every(l=>Math.abs(l-mL)<mL*.06)){ const c2=cen(P), R0=P.reduce((a,p)=>a+len(sub(p,c2)),0)/n, a0=ang(sub(P[0],c2)), sg=Math.sign(crs(sub(P[1],P[0]),sub(P[2],P[0])))||-1;
+      P=P.map((_,i)=>{ const a=rad(a0+(sg<0?-1:1)*i*360/n); return [c2[0]+R0*Math.cos(a),c2[1]+R0*Math.sin(a)]; }); } }
+  return Object.assign({},c,{pts:P}); }
+// أجزاء الدائرة المرسومة في الصورة
+function circleParts(r){ const c=r.c, R0=r.r, st=r.stroke, out={}; const Pt=a=>[c[0]+R0*Math.cos(rad(a)),c[1]+R0*Math.sin(a*Math.PI/180)];
+  const J=[]; for(let a=0;a<360;a++){ let h=0; for(let k=0;k<3;k++){ const rr=R0-2*st-6-k*2; if(PX(r,[c[0]+rr*Math.cos(rad(a)),c[1]+rr*Math.sin(rad(a))])) h=1; } J.push(h); }
+  const js=[]; let s=-1; for(let i=0;i<=360;i++){ const v=i<360&&J[i]; if(v){ if(s<0) s=i; } else if(s>=0){ if(i-s<25) js.push((s+i-1)/2); s=-1; } }
+  for(let i=js.length-1;i>0;i--) if(js[i]-js[i-1]<7){ js[i-1]=(js[i]+js[i-1])/2; js.splice(i,1); }
+  if(js.length>1&&js[0]+360-js[js.length-1]<7){ js[0]=((js[0]+js[js.length-1]+360)/2)%360; js.pop(); }
+  const radii=js.filter(a=>lineKind(r,c,Pt(a))), chords=[];
+  for(let i=0;i<js.length;i++) for(let j=i+1;j<js.length;j++){ const d=Math.abs((((js[i]-js[j])%360)+360)%360-180); if(d<12) continue; const dl=180-d; if(R0*(1-Math.cos(rad(dl/2)))<st*5+6) continue; /* وتر قريب جدًا من القوس لا يُميَّز */ if(lineKind(r,Pt(js[i]),Pt(js[j]))) chords.push([js[i],js[j]]); }
+  out.center=PX(r,c)&&PX(r,[c[0]+st,c[1]])&&PX(r,[c[0]-st,c[1]]);
+  let used=new Set(); const opp=(a,b)=>Math.abs((((a-b)%360)+360)%360-180)<8;
+  for(let i=0;i<radii.length&&!out.diam;i++) for(let j=i+1;j<radii.length;j++) if(opp(radii[i],radii[j])){ out.diam=radii[i]; used.add(i); used.add(j); break; }
+  const rest=radii.filter((_,i)=>!used.has(i));
+  if(rest.length>=2){ out.central=[rest[0],rest[1]]; const ma=(rest[0]+rest[1])/2+(Math.abs(rest[0]-rest[1])>180?180:0), q=[c[0]+R0*.6*Math.cos(rad(ma)),c[1]+R0*.6*Math.sin(rad(ma))], g=r.gray[Math.round(q[1])*r.W+Math.round(q[0])]; if(g<246&&g>100) out.sector=true; }
+  else if(rest.length===1) out.radius=rest[0];
+  const dia=out.diam!=null?[out.diam,out.diam+180]:null; const ch=chords.filter(([a,b])=>!(dia&&opp(a,b)&&(opp(a,dia[0])||opp(b,dia[0]))));
+  let bestIns=null; for(let i=0;i<ch.length;i++) for(let j=i+1;j<ch.length;j++){ const sh=[ch[i][0],ch[i][1]].find(x=>ch[j].includes(x)); if(sh==null) continue;
+      const o1=ch[i][0]===sh?ch[i][1]:ch[i][0], o2=ch[j][0]===sh?ch[j][1]:ch[j][0], sep=Math.abs((((o1-o2)%360)+360)%360-180); const score=180-sep;
+      if(!bestIns||score>bestIns.score) bestIns={score,v:[sh,o1,o2],i,j}; }
+  if(bestIns){ out.inscribed=bestIns.v; ch.splice(bestIns.j,1); ch.splice(bestIns.i,1); }
+  if(ch.length) out.chord=ch[0];
+  // المماس: خط يمس الدائرة من الخارج
+  let bt=0, ba=null; for(let a=0;a<360;a+=2){ const nd=[Math.cos(rad(a)),Math.sin(rad(a))], p=Pt(a), td=perp(nd); let k=0,h=0;
+    for(let f=.15;f<=.5;f+=.04){ for(const sg of [1,-1]){ k++; let hit=false; for(let o=-st-2;o<=st+3&&!hit;o++) if(PX(r,add(add(p,mul(td,sg*R0*f)),mul(nd,o)))) hit=true; if(hit) h++; } } if(h/k>bt){ bt=h/k; ba=a; } }
+  if(bt>.85){ out.tangent=ba; if(out.central&&out.central.some(x=>Math.abs((((x-ba)%360)+540)%360-180)<8)){ const o2=out.central.find(x=>Math.abs((((x-ba)%360)+540)%360-180)>=8); delete out.central; delete out.sector; if(o2!=null&&out.radius==null) out.radius=o2; } }
+  return out; }
 function classify(r){
   let P=r.pts.map(p=>p.slice()); const n=P.length;
   let A2=0; for(let i=0;i<n;i++){ const a=P[i], b=P[(i+1)%n]; A2+=a[0]*b[1]-b[0]*a[1]; } if(A2>0) P.reverse();   // نفس اتجاه رسم الأداة
@@ -937,8 +1030,8 @@ function classify(r){
   if(n===3){ kind='tri'; const s=[L(0),L(1),L(2)];
     if(near(s[0],s[1],.03)&&near(s[1],s[2],.03)&&[0,1,2].every(i=>Math.abs(angAt(i)-60)<3)) sub2='equ';
     else { let ri=-1; for(let i=0;i<3;i++) if(Math.abs(angAt(i)-90)<4) ri=i;
-      if(ri>=0){ sub2='rt'; rotTo((ri+2)%3); }
-      else { let ap=-1, bd=1; for(let i=0;i<3;i++){ const a=L((i+2)%3), b=L(i), d=Math.abs(a-b)/Math.max(a,b); if(d<.03&&d<bd){ bd=d; ap=i; } } if(ap>=0){ sub2='iso'; rotTo(ap); } else sub2='sca'; } } }
+      if(ri===1) sub2='rt';
+      else { let ap=-1, bd=1; for(let i=0;i<3;i++){ const a=L((i+2)%3), b=L(i), d=Math.abs(a-b)/Math.max(a,b); if(d<.03&&d<bd){ bd=d; ap=i; } } sub2=ap===0?'iso':'sca'; } } }   // الرأس العلوي «أ» كما في الصورة
   else if(n===4){ const dirA=i=>{ const d=sub(P[(i+1)%4],P[i]); return ((ang(d)%180)+180)%180; }, par=(i,j)=>{ const x=Math.abs(dirA(i)-dirA(j)); return Math.min(x,180-x)<5; };
     const p02=par(0,2), p13=par(1,3), dg=Math.abs(((ang(sub(P[2],P[0]))-ang(sub(P[3],P[1])))%180+180)%180-90), eq=dg<3&&near(L(0),L(1),.04)&&near(L(1),L(2),.04), rt=[0,1,2,3].every(i=>Math.abs(angAt(i)-90)<4);
     if(p02&&p13){ kind=eq?(rt?'sq':'rho'):(rt?'rect':'para'); if(kind==='rho'){ let t=0; P.forEach((p,i)=>{ if(p[1]<P[t][1]) t=i; }); rotTo(t); } }
@@ -953,16 +1046,35 @@ async function pictureToShape(src,ed){
   push(); closePop();
   const A=ed&&ed.width?ed.width/r.W:0;   // من بكسلات الصورة إلى نقاط الشريحة
   let fit;
-  if(r.type==='circle'){ const s=Math.min(1.5,170/(2*r.r)); fit={s,cx:r.c[0],cy:r.c[1]}; S.tab='c'; const d=defaults().c; S.c=d; S.c.r=r.r*s; S.c.c=[160,125]; S.c.show=Object.assign(d.show,{radius:false}); }
-  else { const c=classify(r), bb=bboxPts(c.pts), s=Math.min(260/bb.w,195/bb.h), cxi=bb.x+bb.w/2, cyi=bb.y+bb.h/2; fit={s,cx:cxi,cy:cyi};
+  if(r.type==='circle'){ const s=Math.min(1.5,170/(2*r.r)); fit={s,cx:r.c[0],cy:r.c[1]}; S.tab='c'; const d=defaults().c; S.c=d; S.c.r=r.r*s; S.c.c=[160,125];
+    const cp=circleParts(r), sh=Object.assign(d.show,{radius:false,center:!!cp.center||!!(cp.radius!=null||cp.diam!=null||cp.central)}), A=S.c.a;
+    if(cp.radius!=null){ sh.radius=true; A.A=Math.round(cp.radius); }
+    if(cp.diam!=null){ sh.diam=true; A.B=Math.round(cp.diam); }
+    if(cp.central){ sh.central=true; A.H=Math.round(cp.central[0]); A.G=Math.round(cp.central[1]); if((((A.G-A.H)%360)+360)%360>180){ const t2=A.G; A.G=A.H; A.H=t2; } if(cp.sector) sh.sector=true; }
+    if(cp.inscribed){ sh.inscribed=true; A.I=Math.round(cp.inscribed[0]); if(!cp.central){ A.H=Math.round(cp.inscribed[1]); A.G=Math.round(cp.inscribed[2]); if((((A.G-A.H)%360)+360)%360>180){ const t2=A.G; A.G=A.H; A.H=t2; } } }
+    if(cp.chord){ sh.chord=true; A.D=Math.round(cp.chord[0]); A.E=Math.round(cp.chord[1]); }
+    if(cp.tangent!=null){ sh.tangent=true; A.F=Math.round(cp.tangent); }
+    sh.names=r.texts.length>0; }
+  else { const c0=classify(r), c=idealize(c0), bb=bboxPts(c.pts), s=Math.min(260/bb.w,195/bb.h), cxi=bb.x+bb.w/2, cyi=bb.y+bb.h/2; fit={s,cx:cxi,cy:cyi};
     const G=mkPlane(c.kind,c.sub,c.pts.length); G.pts=c.pts.map(p=>[160+(p[0]-cxi)*s,122+(p[1]-cyi)*s]);
     if(G.pts.length!==G.sides.length){ const g2=mkPlane('poly','iso',G.pts.length); g2.pts=G.pts; Object.assign(G,g2); }
     // خطوط داخلية مرسومة في الصورة
-    const P0=c.pts, n=P0.length;
-    if(n===4&&lineIn(r,P0[0],P0[2])&&lineIn(r,P0[1],P0[3])) G.diag=true;
-    if(n===3) for(let i=0;i<3;i++){ const p=P0[i], a=P0[(i+1)%3], b=P0[(i+2)%3], F2=proj(p,a,b), M2=mid(a,b);
-      const far=q=>len(sub(q,a))>len(sub(b,a))*.1&&len(sub(q,b))>len(sub(b,a))*.1;
-      if(far(F2)&&lineIn(r,p,F2)) G.verts[i].alt=true; else if(lineIn(r,p,M2)) G.verts[i].med=true; }
+    const P0=c0.pts, n=P0.length;   // القياس على الرؤوس كما في الصورة قبل التصحيح
+    if(n===4&&lineKind(r,P0[0],P0[2])&&lineKind(r,P0[1],P0[3])) G.diag=true;
+    for(let i=0;i<n;i++){ const p=P0[i], a=P0[(i+1)%n], b=P0[(i+2)%n];
+      if(n===3){ const F2=proj(p,a,b), M2=mid(a,b), far=q=>len(sub(q,a))>len(sub(b,a))*.1&&len(sub(q,b))>len(sub(b,a))*.1;
+        if(far(F2)&&lineKind(r,p,F2)) G.verts[i].alt=true; else if(lineKind(r,p,M2)) G.verts[i].med=true;
+        else { const s2=angSpan(p,a,b), bi=rad((s2.a0+s2.a1)/2), D2=lineX(p,[Math.cos(bi),Math.sin(bi)],a,b); if(D2&&lineKind(r,p,D2)) G.verts[i].bis=true; } }
+      else if(n===4&&i===0&&(c.kind==='para'||c.kind==='trap')){ const F2=proj(p,a,b); if(lineKind(r,p,F2)) G.verts[0].alt=true; } }
+    // العلامات: شرطات التساوي، رمز التوازي، الزاوية القائمة، أقواس الزوايا
+    for(let i=0;i<n;i++){ const m=sideMarks(r,P0[i],P0[(i+1)%n]); G.sides[i].ticks=m.ticks; G.sides[i].par=m.par;
+      if(n===3&&(G.verts[(i+2)%3].med||G.verts[(i+2)%3].alt)&&m.ticks===2) G.sides[i].ticks=0;
+      const p=P0[i], a=P0[(i-1+n)%n], b=P0[(i+1)%n], V=G.verts[i];
+      if(rightAt(r,p,a,b)) V.right=true; else { const k2=arcsAt(r,p,a,b); if(k2===1) V.arc=true; else if(k2>1) V.arcs=k2; } }
+    // الأسماء والأطوال: تظهر حيث توجد كتابة بجانبها في الصورة
+    const T2=r.texts.filter(x=>!inPoly(P0,x.c));
+    if(T2.length){ const near=(q,R2)=>T2.some(x=>len(sub(x.c,q))<R2);
+      for(let i=0;i<n;i++){ G.verts[i].showName=near(P0[i],r.fd*.13); const a=P0[i], b=P0[(i+1)%n], m=mid(a,b); G.sides[i].show=near(m,Math.max(r.fd*.12,len(sub(b,a))*.25))&&!near(a,r.fd*.08)&&!near(b,r.fd*.08); } }
     S.tab='p'; S.p=G; }
   if(ed){ const e=Object.assign({},ed,{pic:true}); if(A&&!ed.word){ const a=A/fit.s; e.place={a, bx:ed.left+(fit.cx-160/fit.s)*A, by:ed.top+(fit.cy-(S.tab==='c'?125:122)/fit.s)*A}; } setEdit(e); }
   syncUI(); draw(); save();
