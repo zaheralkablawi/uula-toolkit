@@ -302,10 +302,10 @@ function defaults(){
     s:{ kind:'cyl', hidden:'dash', names:true, dims:true, centers:true,
         size:{cube:{w:130},box:{w:180,h:105,d:130},prism:{w:170,h:120,d:150},pyr:{w:170,h:150,d:150},cyl:{r:75,h:150},cone:{r:80,h:170},sph:{r:92}},
         lab:{cube:{w:'٤ سم'},box:{w:'٦ سم',h:'٣ سم',d:'٤ سم'},prism:{w:'٥ سم',h:'٤ سم',d:'٨ سم'},pyr:{w:'٦ سم',h:'ع'},cyl:{r:'نق',h:'ع'},cone:{r:'نق',h:'ع',l:'ل'},sph:{r:'نق'}} },
-    look:{ line:'#000000', w:2, dash:false, fill:null, text:'#000000', mark:'#000000', fs:16, pt:'#000000', ptShow:false, ptR:3, ptFill:true, names:'sym', symDef:1, digits:'ar' } };
+    look:{ line:'#000000', w:2, dash:false, fill:null, text:'#000000', mark:'#000000', fs:12, fsDef:1, pt:'#000000', ptShow:false, ptR:3, ptFill:true, names:'sym', symDef:1, digits:'ar' } };
 }
 let S=defaults();
-try{ const t=localStorage.getItem('uula-geometry-state-v1'); if(t){ const o=JSON.parse(t); if(o&&o.v===1){ const d=defaults(); S=Object.assign(d,o); S.look=Object.assign(defaults().look,o.look||{}); if(!S.look.symDef){ S.look.names='sym'; S.look.symDef=1; } S.hide=o.hide||{}; S.nm=o.nm||{}; } } }catch(e){}
+try{ const t=localStorage.getItem('uula-geometry-state-v1'); if(t){ const o=JSON.parse(t); if(o&&o.v===1){ const d=defaults(); S=Object.assign(d,o); S.look=Object.assign(defaults().look,o.look||{}); if(!(o.look||{}).symDef){ S.look.names='sym'; S.look.symDef=1; } if(!(o.look||{}).fsDef){ S.look.fs=12; S.look.fsDef=1; } S.hide=o.hide||{}; S.nm=o.nm||{}; } } }catch(e){}
 function save(){ try{ localStorage.setItem('uula-geometry-state-v1',JSON.stringify(S)); }catch(e){} }
 let HIST=[]; const push=()=>{ HIST.push(JSON.stringify(S)); if(HIST.length>60) HIST.shift(); };
 function undo(){ if(!HIST.length) return; S=JSON.parse(HIST.pop()); closePop(); syncUI(); draw(); save(); }
