@@ -38,6 +38,7 @@ header .bt .root:only-child{color:var(--fg);font-size:15px;letter-spacing:0}
 .seg button+button{border-inline-start:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:600}
 .gal{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
+#galP{grid-template-columns:repeat(9,1fr)}
 .gal button{height:34px;border:1px solid var(--line);border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
 .gal button:hover{border-color:var(--accent)}
 .gal button[aria-pressed="true"]{border-color:var(--accent);background:var(--soft);color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
@@ -137,6 +138,7 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
   <div class="gal" id="galS"></div>
 
   <div class="opt" id="optTri"><span class="label" data-i="type">النوع</span><div class="seg" id="segTri"></div></div>
+  <div class="opt" id="optFree"><span class="label" data-i="tools">أدوات</span><div class="seg" id="segFree"></div></div>
   <div class="opt" id="optN"><span class="label" data-i="sides">الأضلاع</span><div class="seg" id="segN"></div></div>
   <div class="opt" id="optHid"><span class="label" data-i="hidden">الأحرف المخفية</span><div class="seg" id="segHid"></div></div>
 
@@ -221,7 +223,7 @@ const T={
   hdash:['متقطعة','Dashed'], hhide:['مخفية','Hidden'], hsolid:['متصلة','Solid'],
   tri:['مثلث','Triangle'], sq:['مربع','Square'], rect:['مستطيل','Rectangle'], para:['متوازي أضلاع','Parallelogram'], rho:['معين','Rhombus'], trap:['شبه منحرف','Trapezoid'], poly:['مضلع منتظم','Regular polygon'], circ:['دائرة','Circle'],
   cube:['مكعب','Cube'], box:['متوازي مستطيلات','Cuboid'], prism:['منشور','Prism'], pyr:['هرم','Pyramid'], cyl:['أسطوانة','Cylinder'], cone:['مخروط','Cone'], sph:['كرة','Sphere'],
-  names:['أسماء الرؤوس','Vertex names'], arcsAll:['رموز الزوايا','Angle marks'], arcOnly:['رمز الزاوية (بدون قياس)','Angle mark (no measure)'], arcsShort:['التساوي','Equal'], point:['النقطة','Point'], showName:['إظهار الاسم','Show name'], lens:['الأطوال','Lengths'], angs:['الزوايا','Angles'], alt:['الارتفاع','Altitude'], med:['المتوسط','Median'], bis:['منصف الزاوية','Bisector'], diag:['القطران','Diagonals'],
+  names:['أسماء الرؤوس','Vertex names'], free:['شكل مركب','Composite shape'], tools:['أدوات','Tools'], ftMove:['تحريك','Move'], ftLink:['وصل نقطتين','Connect'], ftAdd:['نقطة على قطعة','Point on segment'], ftDel:['حذف','Delete'], hintFree:['اسحب النقاط لتغيير الشكل، وانقر نقطة لتسميتها ووضع علامات زواياها، وانقر قطعة لعلاماتها وطولها.','Drag points to reshape; click a point for its name and angle marks; click a segment for its marks and length.'], hintLink:['انقر نقطة ثم نقطة أخرى لرسم قطعة بينهما.','Click a point, then another to draw a segment.'], hintAdd:['انقر على قطعة لإضافة نقطة عليها.','Click a segment to add a point on it.'], hintDel:['انقر قطعة أو نقطة لحذفها.','Click a segment or point to delete it.'], arcsAll:['رموز الزوايا','Angle marks'], arcOnly:['رمز الزاوية (بدون قياس)','Angle mark (no measure)'], arcsShort:['التساوي','Equal'], point:['النقطة','Point'], showName:['إظهار الاسم','Show name'], lens:['الأطوال','Lengths'], angs:['الزوايا','Angles'], alt:['الارتفاع','Altitude'], med:['المتوسط','Median'], bis:['منصف الزاوية','Bisector'], diag:['القطران','Diagonals'],
   pnames:['أسماء النقاط','Point names'], center:['المركز','Center'], radius:['نصف القطر','Radius'], diam:['القطر','Diameter'], chord:['الوتر','Chord'], tangent:['المماس','Tangent'], arc:['القوس','Arc'], sector:['القطاع','Sector'], central:['الزاوية المركزية','Central angle'], inscribed:['الزاوية المحيطية','Inscribed angle'], meas:['القياسات','Measures'],
   dimsC:['الأبعاد','Dimensions'], centers:['المركزان','Centers'],
   hintP:['انقر ضلعًا أو رأسًا أو نقطة على الرسم لتمييزها أو إخفاء اسمها، واسحب الرؤوس لتغيير الشكل.','Click a side, vertex or point to mark it or hide its name; drag vertices to reshape.'],
@@ -272,6 +274,14 @@ function mkPlane(kind,sub,n){ const P=shapePts(kind,sub,n);
     verts:P.map((_,i)=>({name:NAMES[i],showName:true,ang:'',showAng:false,arc:false,arcs:0,right:false,alt:false,med:false,bis:false})),
     diag:false };
 }
+// الشكل المركب: نقاط حرة وقطع بينها وزوايا عند أي نقطة
+function mkFree(P,segs){ return { kind:'free', sub:'', n:P.length, pts:P.map(p=>p.slice()), verts:P.map((_,i)=>({name:NAMES[i]||'',showName:true})),
+  sides:segs.map(([a,b])=>({a,b,len:'',show:false,ticks:0,par:0,dash:false})), angs:{}, on:{}, diag:false }; }
+const angKey=(i,a,b)=>i+':'+Math.min(a,b)+'-'+Math.max(a,b);
+function freeNb(G,i){ const nb=[]; G.sides.forEach(s=>{ if(s.a===i) nb.push(s.b); else if(s.b===i) nb.push(s.a); }); return nb; }
+function freeAngles(G,i){ const P=G.pts, nb=freeNb(G,i).map(j=>({j,a:((ang(sub(P[j],P[i]))%360)+360)%360})).sort((x,y)=>x.a-y.a);
+  if(nb.length<2) return []; if(nb.length===2) return [[nb[0].j,nb[1].j]];
+  const out=[]; for(let k=0;k<nb.length;k++){ const x=nb[k], y=nb[(k+1)%nb.length], sw=((y.a-x.a)%360+360)%360; if(sw>1&&sw<178) out.push([x.j,y.j]); } return out; }
 function defaults(){
   return { v:1, tab:'p', hide:{}, nm:{},
     p:mkPlane('tri','iso',6),
@@ -312,7 +322,19 @@ function parMarks(a,b,k,shift){ if(!k) return; let d=nrm(sub(b,a)); if(d[0]<0||(
 function outward(P,i){ const n=P.length, a=P[(i-1+n)%n], b=P[(i+1)%n], u=nrm(sub(a,P[i])), v=nrm(sub(b,P[i])); let d=mul(add(u,v),-1); if(len(d)<1e-3) d=sub(P[i],cen(P)); return nrm(d); }
 
 /* ---------- الأشكال المستوية ---------- */
+function buildFree(){
+  const G=S.p, P=G.pts, fs=LK().fs, C=cen(P);
+  G.sides.forEach(sd=>seg(P[sd.a],P[sd.b],{dash:sd.dash||LK().dash}));
+  G.sides.forEach(sd=>{ const a=P[sd.a], b=P[sd.b], both=sd.ticks&&sd.par; sideTicks(a,b,sd.ticks,both?-9:0); parMarks(a,b,sd.par,both?9:0);
+    if(sd.show){ const m=mid(a,b); let nn=perp(nrm(sub(b,a))); if(dot(nn,sub(m,C))<0) nn=mul(nn,-1); txt(add(m,mul(nn,fs*.95)),sd.len||fmtLen(len(sub(b,a))/40)); } });
+  Object.entries(G.angs||{}).forEach(([key,A])=>{ const [i,ab]=key.split(':'), [a,b]=ab.split('-').map(Number), p=P[+i]; if(!p||!P[a]||!P[b]) return;
+    if(A.right) rightMark(p,P[a],P[b]); let r0=18; if(A.arcs){ angleArcs(p,P[a],P[b],A.arcs,18); r0=18+A.arcs*4.5; } else if((A.arc||A.showAng)&&!A.right){ angleArcs(p,P[a],P[b],1,16); r0=20; }
+    if(A.showAng){ const s=angSpan(p,P[a],P[b]), bi=rad((s.a0+s.a1)/2), rr=r0+fs*.95+(s.sw<45?10:0); txt(add(p,[Math.cos(bi)*rr,Math.sin(bi)*rr]),A.ang||fmtAng(s.sw),{fs:fs*.85}); } });
+  P.forEach((p,i)=>{ ptP(p); const V=G.verts[i]; if(!V||!V.showName) return; const nb=freeNb(G,i); let d=[0,0]; nb.forEach(j=>{ d=add(d,nrm(sub(P[j],p))); });
+    d=mul(d,-1); if(len(d)<.3){ d=nb.length?perp(nrm(sub(P[nb[0]],p))):sub(p,C); if(dot(d,sub(p,C))<0) d=mul(d,-1); } nm(add(p,mul(nrm(d),fs*.95)),V.name); });
+}
 function buildPlane(){
+  if(S.p.kind==='free') return buildFree();
   const G=S.p, P=G.pts, n=P.length, fs=LK().fs, C=cen(P);
   let nextName=n;
   const newName=()=>NAMES[nextName++]||'';
@@ -438,7 +460,7 @@ function buildSolid(){
     if(Z.dims){ aux([cx,by],[cx+r,by]); txt([cx+r/2,by-fs*.75],lb.r); }
   }
 }
-let SOL=null, REG=[];
+let SOL=null, REG=[], FREE0=null;
 // نقطة لها اسم: يمكن إخفاء اسمها أو تغييره بالنقر عليها
 function lab2(p,pos,key,def){ REG.push({p,key,def}); if(!(S.hide&&S.hide[key])) nm(pos,(S.nm&&S.nm[key]!=null)?S.nm[key]:def); }
 function bboxPts(P){ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; P.forEach(p=>{ x0=Math.min(x0,p[0]); y0=Math.min(y0,p[1]); x1=Math.max(x1,p[0]); y1=Math.max(y1,p[1]); }); return {x:x0,y:y0,w:x1-x0,h:y1-y0}; }
@@ -476,7 +498,10 @@ function outSVG(pr){ const b=bboxPrims(pr), pad=4, x=b.x-pad, y=b.y-pad, w=b.w+2
 let SEL=null;   // {k:'side'|'vert', i}
 function draw(){
   const pr=build(); let h='<g>'+pr.map(primSVG).join('')+'</g><g id="hits">';
-  if(S.tab==='p'){ const P=S.p.pts, n=P.length;
+  if(S.tab==='p'&&S.p.kind==='free'){ const G=S.p, P=G.pts;
+    G.sides.forEach((sd,i)=>{ const a=P[sd.a], b=P[sd.b]; h+=`<path class="hs${SEL&&SEL.k==='side'&&SEL.i===i?' sel':''}" data-h="side" data-i="${i}" d="M${f2(a[0])} ${f2(a[1])}L${f2(b[0])} ${f2(b[1])}"/>`; });
+    P.forEach((p,i)=>{ h+=`<circle class="hv${(SEL&&SEL.k==='vert'&&SEL.i===i)||LINK===i?' sel':''}" data-h="vert" data-i="${i}" cx="${f2(p[0])}" cy="${f2(p[1])}" r="5"/>`; });
+  } else if(S.tab==='p'){ const P=S.p.pts, n=P.length;
     h+=`<path class="hb" data-h="body" d="M${P.map(q=>f2(q[0])+' '+f2(q[1])).join('L')}Z"/>`;
     for(let i=0;i<n;i++){ const a=P[i], b=P[(i+1)%n]; h+=`<path class="hs${SEL&&SEL.k==='side'&&SEL.i===i?' sel':''}" data-h="side" data-i="${i}" d="M${f2(a[0])} ${f2(a[1])}L${f2(b[0])} ${f2(b[1])}"/>`; }
     P.forEach((p,i)=>{ h+=`<circle class="hv${SEL&&SEL.k==='vert'&&SEL.i===i?' sel':''}" data-h="vert" data-i="${i}" cx="${f2(p[0])}" cy="${f2(p[1])}" r="5"/>`; });
@@ -505,6 +530,10 @@ function svgPt(e){ const s=$('fig'), m=s.getScreenCTM().inverse(); return [e.cli
 /* قيود السحب لكل شكل */
 function setVertex(i,p){
   const G=S.p, P=G.pts, n=P.length, k=G.kind, o=P.map(q=>q.slice());
+  if(k==='free'){ const on=G.on||(G.on={});
+    if(on[i]){ const [a,b]=on[i], A=P[a], B=P[b], d=sub(B,A), tt=Math.max(.03,Math.min(.97,dot(sub(p,A),d)/(dot(d,d)||1))); on[i][2]=tt; P[i]=add(A,mul(d,tt)); } else P[i]=p;
+    for(let pass=0;pass<2;pass++) Object.entries(on).forEach(([j,[a,b,tt]])=>{ if(+j!==i&&P[a]&&P[b]) P[+j]=add(P[a],mul(sub(P[b],P[a]),tt)); });
+    return; }
   if(k==='tri'){
     if(G.sub==='sca') P[i]=p;
     else if(G.sub==='iso'){ if(i===0){ const m=mid(P[1],P[2]), d=nrm(sub(P[2],P[1])); P[0]=sub(p,mul(d,dot(sub(p,m),d))); }
@@ -524,9 +553,20 @@ function setVertex(i,p){
   else { const c=cen(o), v0=sub(o[i],c), v1=sub(p,c), sc=len(v1)/(len(v0)||1), da=ang(v1)-ang(v0); for(let j=0;j<n;j++) P[j]=add(c,mul(sub(rot(o[j],c,da),c),sc)); }
 }
 
-let DRAG=null;
+let DRAG=null, FT='move', LINK=null;
+function freeDelPoint(G,k){ G.sides=G.sides.filter(s=>s.a!==k&&s.b!==k); G.sides.forEach(s=>{ if(s.a>k) s.a--; if(s.b>k) s.b--; });
+  const on={}; Object.entries(G.on||{}).forEach(([j,v])=>{ j=+j; if(j===k||v[0]===k||v[1]===k) return; on[j>k?j-1:j]=[v[0]>k?v[0]-1:v[0],v[1]>k?v[1]-1:v[1],v[2]]; }); G.on=on;
+  const an={}; Object.entries(G.angs||{}).forEach(([key,A])=>{ const [i,ab]=key.split(':'), [a,b]=ab.split('-').map(Number); if(+i===k||a===k||b===k) return; const f=x=>x>k?x-1:x; an[angKey(f(+i),f(a),f(b))]=A; }); G.angs=an;
+  G.pts.splice(k,1); G.verts.splice(k,1); G.n=G.pts.length; }
+function freeTool(t,e){ const G=S.p, h=t.dataset.h, i=+t.dataset.i;
+  if(FT==='link'){ if(h!=='vert') return; if(LINK==null){ LINK=i; draw(); return; } if(LINK!==i&&!G.sides.some(s=>(s.a===LINK&&s.b===i)||(s.a===i&&s.b===LINK))){ push(); G.sides.push({a:LINK,b:i,len:'',show:false,ticks:0,par:0,dash:false}); } LINK=null; draw(); save(); return; }
+  if(FT==='addpt'){ if(h!=='side') return; push(); const sd=G.sides[i], A=G.pts[sd.a], B=G.pts[sd.b], q=svgPt(e), d=sub(B,A), tt=Math.max(.05,Math.min(.95,dot(sub(q,A),d)/(dot(d,d)||1)));
+    const k=G.pts.length; G.pts.push(add(A,mul(d,tt))); let nmv=NAMES.find(x=>!G.verts.some(v=>v.name===x))||''; G.verts.push({name:nmv,showName:true}); G.on[k]=[sd.a,sd.b,tt];
+    G.sides.splice(i,1,{a:sd.a,b:k,len:'',show:false,ticks:0,par:0,dash:sd.dash},{a:k,b:sd.b,len:'',show:false,ticks:0,par:0,dash:sd.dash}); G.n=G.pts.length; draw(); save(); return; }
+  if(FT==='del'){ push(); if(h==='side') G.sides.splice(i,1); else if(h==='vert'&&G.pts.length>2) freeDelPoint(G,i); draw(); save(); syncChips(); return; } }
 $('fig').addEventListener('pointerdown',e=>{
-  const t=e.target.closest('[data-h]'); if(!t) { closePop(); return; }
+  const t=e.target.closest('[data-h]'); if(!t) { closePop(); if(LINK!=null){ LINK=null; draw(); } return; }
+  if(S.tab==='p'&&S.p.kind==='free'&&FT!=='move'){ e.preventDefault(); closePop(); freeTool(t,e); return; }
   e.preventDefault(); $('fig').setPointerCapture(e.pointerId);
   DRAG={h:t.dataset.h, i:t.dataset.i, p0:svgPt(e), st:JSON.stringify(S), moved:false, cx:e.clientX, cy:e.clientY};
 });
@@ -536,7 +576,7 @@ $('fig').addEventListener('pointermove',e=>{
   if(!DRAG.moved){ DRAG.moved=true; closePop(); }
   const O=JSON.parse(DRAG.st);
   if(DRAG.h==='vert'){ S.p.pts=O.p.pts; setVertex(+DRAG.i,p); }
-  else if(DRAG.h==='body'||DRAG.h==='side'){ S.p.pts=O.p.pts.map(q=>add(q,d)); }
+  else if(DRAG.h==='body'||DRAG.h==='side'){ S.p.pts=O.p.pts.map(q=>add(q,d)); }   // تحريك الشكل كله
   else if(DRAG.h==='cen'){ S.c.c=add(O.c.c,d); }
   else if(DRAG.h==='rad'){ S.c.r=Math.max(20,Math.min(150,len(sub(p,S.c.c)))); }
   else if(DRAG.h==='cp'){ S.c.a[DRAG.i]=Math.round(ang(sub(p,S.c.c))); }
@@ -584,11 +624,17 @@ function openPop(k,i,cx,cy){
     pop.innerHTML=`<div class="ph"><span>${L('point')} ${esc(cur)}</span><button type="button" data-a="x">✕</button></div>
       <div class="r"><input id="pPt" value="${esc(cur)}" title="${L('vname')}" style="max-width:52px">${qb('pnm','<b>أ</b>',!S.hide[i],L('showName'))}</div>`;
     pop.hidden=false; placePop(pop,cx,cy); return; }
-  if(k==='side'){ const sd=G.sides[i];
-    h=`<div class="ph"><span>${L('side')} ${name(i)}${name(i+1)}</span><button type="button" data-a="x">✕</button></div>
-      <div class="r"><input id="pLen" placeholder="${esc(fmtLen(len(sub(G.pts[(i+1)%n],G.pts[i]))/40))}" value="${esc(sd.len)}">${qb('show',ICO.len,sd.show,L('showLen'))}</div>
+  if(k==='side'){ const sd=G.sides[i], ia=G.kind==='free'?sd.a:i, ib=G.kind==='free'?sd.b:(i+1)%n;
+    h=`<div class="ph"><span>${L('side')} ${esc(G.verts[ia].name)}${esc(G.verts[ib].name)}</span><button type="button" data-a="x">✕</button></div>
+      <div class="r"><input id="pLen" placeholder="${esc(fmtLen(len(sub(G.pts[ib],G.pts[ia]))/40))}" value="${esc(sd.len)}">${qb('show',ICO.len,sd.show,L('showLen'))}</div>
       <div class="r">${qb('t1',ICO.t1,sd.ticks===1,L('ticks'))}${qb('t2',ICO.t2,sd.ticks===2,L('ticks'))}${qb('t3',ICO.t3,sd.ticks===3,L('ticks'))}${qb('dash',ICO.dash,sd.dash,L('dashed'))}</div>
       <div class="r">${qb('p1',ICO.p1,sd.par===1,L('par'))}${qb('p2',ICO.p2,sd.par===2,L('par'))}</div>`;
+  } else if(G.kind==='free'){ const V=G.verts[i];
+    const rows=freeAngles(G,i).map(([a,b])=>{ const key=angKey(i,a,b), A=G.angs[key]||{};
+      return `<div class="r"><span class="note" style="flex:1;font-size:11.5px;unicode-bidi:plaintext">∠ ${esc(G.verts[a].name)}${esc(V.name)}${esc(G.verts[b].name)}</span>${qb('fa|'+key+'|arc',ICO.a1,A.arc,L('arcOnly'))}${qb('fa|'+key+'|a1',ICO.a1e,A.arcs===1,L('arcs'))}${qb('fa|'+key+'|rt',ICO.rt,A.right,L('rightM'))}${qb('fa|'+key+'|sa',ICO.ang,A.showAng,L('showAng'))}</div>`; }).join('');
+    h=`<div class="ph"><span>${L('vertex')} ${esc(V.name)}</span><button type="button" data-a="x">✕</button></div>
+      <div class="r"><input id="pName" value="${esc(V.name)}" title="${L('vname')}" style="max-width:44px">${qb('nm','<b>أ</b>',V.showName,L('vname'))}</div>${rows}`;
+    pop.style.width='190px';
   } else { const V=G.verts[i], s=angSpan(G.pts[i],G.pts[(i-1+n)%n],G.pts[(i+1)%n]);
     h=`<div class="ph"><span>${L('vertex')} ${esc(V.name)}</span><button type="button" data-a="x">✕</button></div>
       <div class="r"><input id="pName" value="${esc(V.name)}" title="${L('vname')}" style="max-width:44px">${qb('nm','<b>أ</b>',V.showName,L('vname'))}</div>
@@ -597,6 +643,7 @@ function openPop(k,i,cx,cy){
       <div class="r"><span class="note" style="font-size:11px;flex:1">${L('arcsShort')}</span>${qb('a1',ICO.a1e,V.arcs===1,L('arcs'))}${qb('a2',ICO.a2,V.arcs===2,L('arcs'))}${qb('a3',ICO.a3,V.arcs===3,L('arcs'))}</div>
       ${n===3||(n===4&&i===0)?`<div class="r">${qb('alt',ICO.alt,V.alt,L('alt'))}${n===3?qb('med',ICO.med,V.med,L('med'))+qb('bis',ICO.bis,V.bis,L('bis')):''}</div>`:''}`;
   }
+  if(!(G.kind==='free'&&k==='vert')) pop.style.width='';
   pop.innerHTML=h; pop.hidden=false; placePop(pop,cx,cy);
 }
 function placePop(pop,cx,cy){
@@ -619,6 +666,8 @@ $('pop').addEventListener('click',e=>{ const b=e.target.closest('[data-a]'); if(
   if(SEL.k==='pt'){ if(a==='pnm'){ if(S.hide[SEL.i]) delete S.hide[SEL.i]; else S.hide[SEL.i]=true; } }
   else if(SEL.k==='side'){ const sd=G.sides[SEL.i];
     if(a==='show') sd.show=!sd.show; else if(a[0]==='t'){ const v=+a[1]; sd.ticks=sd.ticks===v?0:v; } else if(a[0]==='p'){ const v=+a[1]; sd.par=sd.par===v?0:v; } else if(a==='dash') sd.dash=!sd.dash; }
+  else if(a.startsWith('fa|')){ const [,key,op]=a.split('|'); const A=G.angs[key]||(G.angs[key]={});
+    if(op==='arc') A.arc=!A.arc; else if(op==='a1') A.arcs=A.arcs===1?0:1; else if(op==='rt') A.right=!A.right; else if(op==='sa') A.showAng=!A.showAng; }
   else { const V=G.verts[SEL.i];
     if(a==='nm') V.showName=!V.showName; else if(a==='sa') V.showAng=!V.showAng; else if(a==='arc') V.arc=!V.arc; else if(a==='rt') V.right=!V.right;
     else if(a[0]==='a'&&a.length===2){ const v=+a[1]; V.arcs=V.arcs===v?0:v; } else if(a==='alt'||a==='med'||a==='bis') V[a]=!V[a]; }
@@ -629,7 +678,7 @@ document.addEventListener('pointerdown',e=>{ if(!$('pop').hidden&&!e.target.clos
 
 /* ---------- المعارض والخيارات ---------- */
 const GAL_P=[['tri','<path d="M12 4l9 16H3z"/>'],['sq','<rect x="5" y="5" width="14" height="14"/>'],['rect','<rect x="3" y="7" width="18" height="10"/>'],['para','<path d="M7 7h14l-4 10H3z"/>'],
-  ['rho','<path d="M12 3l7 9-7 9-7-9z"/>'],['trap','<path d="M8 7h8l5 10H3z"/>'],['poly','<path d="M12 3l8.6 6.2-3.3 10.1H6.7L3.4 9.2z"/>'],['circ','<circle cx="12" cy="12" r="8.5"/>']];
+  ['rho','<path d="M12 3l7 9-7 9-7-9z"/>'],['trap','<path d="M8 7h8l5 10H3z"/>'],['poly','<path d="M12 3l8.6 6.2-3.3 10.1H6.7L3.4 9.2z"/>'],['free','<path d="M10 4L3 20h18z"/><path d="M10 4l2 16"/><circle cx="12" cy="20" r="1.6" fill="currentColor"/>'],['circ','<circle cx="12" cy="12" r="8.5"/>']];
 const GAL_S=[['cube','<path d="M4 8h11v11H4zM4 8l5-4h11l-5 4M20 4v11l-5 4"/>'],['box','<path d="M2 10h14v9H2zM2 10l5-4h15l-6 4M22 6v9l-6 4"/>'],['prism','<path d="M3 19h11l-5.5-11zM8.5 8L14 4l5.5 11-5.5 4M14 4"/>'],
   ['pyr','<path d="M12 3L3 18l7 3 11-4zM12 3l-2 18M12 3l9 14"/>'],['cyl','<ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v12M19 6v12M5 18a7 2.5 0 0 0 14 0"/>'],['cone','<path d="M12 3L5 18M12 3l7 15M5 18a7 2.5 0 0 0 14 0"/>'],['sph','<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12a8.5 2.8 0 0 0 17 0"/>']];
 const gIco=d=>`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">${d}</svg>`;
@@ -637,11 +686,13 @@ $('galP').innerHTML=GAL_P.map(([k,d])=>`<button type="button" data-k="${k}" data
 $('galS').innerHTML=GAL_S.map(([k,d])=>`<button type="button" data-k="${k}" data-ti="${k}" title="${L(k)}">${gIco(d)}</button>`).join('');
 $('segTri').innerHTML=['sca','iso','equ','rt'].map(k=>`<button type="button" data-k="${k}" data-i="${k}">${L(k)}</button>`).join('');
 $('segN').innerHTML=[5,6,7,8,9,10].map(n=>`<button type="button" data-k="${n}">${arNum(n)}</button>`).join('');
+$('segFree').innerHTML=[['move','ftMove'],['link','ftLink'],['addpt','ftAdd'],['del','ftDel']].map(([k,t2])=>`<button type="button" data-k="${k}" data-i="${t2}">${L(t2)}</button>`).join('');
+$('segFree').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; FT=b.dataset.k; LINK=null; closePop(); syncUI(); draw(); });
 $('segHid').innerHTML=[['dash','hdash'],['hide','hhide'],['solid','hsolid']].map(([k,t])=>`<button type="button" data-k="${k}" data-i="${t}">${L(t)}</button>`).join('');
 
 $('tabs').addEventListener('click',e=>{ const b=e.target.closest('[data-tab]'); if(!b) return; push(); S.tab=b.dataset.tab; closePop(); syncUI(); draw(); save(); });
 $('galP').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; push(); const k=b.dataset.k; closePop();
-  if(k==='circ'){ S.tab='c'; } else S.p=mkPlane(k,k==='tri'?(S.p.kind==='tri'?S.p.sub:'iso'):S.p.sub||'iso',S.p.n||6);
+  if(k==='circ'){ S.tab='c'; } else if(k==='free'){ S.p=mkFree([[160,35],[45,205],[275,205],[130,205]],[[0,1],[1,3],[3,2],[2,0],[0,3]]); S.p.on={3:[1,2,(130-45)/230]}; FT='move'; } else S.p=mkPlane(k,k==='tri'?(S.p.kind==='tri'?S.p.sub:'iso'):S.p.sub||'iso',S.p.n||6);
   syncUI(); draw(); save(); });
 $('galS').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; push(); S.s.kind=b.dataset.k; syncUI(); draw(); save(); });
 $('segTri').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; push(); const keep=S.p; S.p=mkPlane('tri',b.dataset.k,keep.n); S.p.verts.forEach((v,i)=>{ if(keep.verts[i]) v.name=keep.verts[i].name; }); closePop(); syncUI(); draw(); save(); });
@@ -650,6 +701,7 @@ $('segHid').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); 
 
 /* ---------- عناصر «على الشكل» ---------- */
 function chipList(){
+  if(S.tab==='p'&&S.p.kind==='free'){ const G=S.p; return [['names',G.verts.every(v=>v.showName)],['lens',G.sides.every(s=>s.show)]]; }
   if(S.tab==='p'){ const G=S.p, n=G.pts.length, V=G.verts, all=f=>V.every(f);
     const c=[['names',all(v=>v.showName)],['lens',G.sides.every(s=>s.show)],['arcsAll',all(v=>v.arc)],['angs',all(v=>v.showAng)]];
     if(n===3) c.push(['alt',V[0].alt],['med',V[0].med],['bis',V[0].bis]);
@@ -713,7 +765,7 @@ document.addEventListener('pointerdown',e=>{ if(!$('pal').hidden&&!e.target.clos
 $('undoBtn').onclick=undo;
 $('rotBtn').onclick=()=>{ if(S.tab!=='p') return; push(); const c=cen(S.p.pts); S.p.pts=S.p.pts.map(p=>rot(p,c,-15)); draw(); save(); };
 $('flipBtn').onclick=()=>{ if(S.tab!=='p') return; push(); const c=cen(S.p.pts); S.p.pts=S.p.pts.map(p=>[2*c[0]-p[0],p[1]]); draw(); save(); };
-$('resetBtn').onclick=()=>{ push(); const d=defaults(); if(S.tab==='p') S.p=mkPlane(S.p.kind,S.p.sub,S.p.n); else if(S.tab==='c') S.c=d.c; else { S.s.size[S.s.kind]=d.s.size[S.s.kind]; S.s.lab[S.s.kind]=d.s.lab[S.s.kind]; }
+$('resetBtn').onclick=()=>{ push(); const d=defaults(); if(S.tab==='p'&&S.p.kind==='free'){ S.p.sides.forEach(s=>Object.assign(s,{len:'',show:false,ticks:0,par:0,dash:false})); S.p.angs={}; } else if(S.tab==='p') S.p=mkPlane(S.p.kind,S.p.sub,S.p.n); else if(S.tab==='c') S.c=d.c; else { S.s.size[S.s.kind]=d.s.size[S.s.kind]; S.s.lab[S.s.kind]=d.s.lab[S.s.kind]; }
   closePop(); syncUI(); draw(); save(); };
 document.addEventListener('keydown',e=>{ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'&&!e.target.closest('input')){ e.preventDefault(); undo(); } if(e.key==='Escape'){ closePop(); $('pal').hidden=true; } });
 
@@ -726,11 +778,13 @@ function syncUI(){
   if(tab==='c') $('galP').hidden=false;
   document.querySelectorAll('#galS button').forEach(b=>setP(b,b.dataset.k===S.s.kind));
   $('optTri').hidden=!(tab==='p'&&S.p.kind==='tri'); document.querySelectorAll('#segTri button').forEach(b=>setP(b,b.dataset.k===S.p.sub));
-  $('optN').hidden=!(tab==='p'&&S.p.kind==='poly'); document.querySelectorAll('#segN button').forEach(b=>setP(b,+b.dataset.k===S.p.pts.length));
+  $('optN').hidden=!(tab==='p'&&S.p.kind==='poly');
+  $('optFree').hidden=!(tab==='p'&&S.p.kind==='free'); document.querySelectorAll('#segFree button').forEach(b=>setP(b,b.dataset.k===FT)); document.querySelectorAll('#segN button').forEach(b=>setP(b,+b.dataset.k===S.p.pts.length));
   $('optHid').hidden=tab!=='s'; document.querySelectorAll('#segHid button').forEach(b=>setP(b,b.dataset.k===S.s.hidden));
   $('rotBtn').disabled=$('flipBtn').disabled=tab!=='p';
   $('onLab').textContent=L(tab==='p'?'onShape':tab==='c'?'onCircle':'onSolid');
   $('hint').textContent=L(tab==='p'?'hintP':tab==='c'?'hintC':'hintS');
+  if(tab==='p'&&S.p.kind==='free') $('hint').textContent=L(FT==='link'?'hintLink':FT==='addpt'?'hintAdd':FT==='del'?'hintDel':'hintFree');
   $('wSel').value=S.look.w; $('fsSel').value=S.look.fs; setP($('dSolid'),!S.look.dash); setP($('dDash'),S.look.dash);
   $('ptSel').value=S.look.ptR; setP($('ptShow'),S.look.ptShow); setP($('ptFull'),S.look.ptFill); setP($('ptHollow'),!S.look.ptFill); setP($('nmText'),S.look.names!=='sym'); setP($('nmSym'),S.look.names==='sym');
   paintColors(); syncChips(); syncDims();
@@ -1019,6 +1073,48 @@ function circleParts(r){ const c=r.c, R0=r.r, st=r.stroke, out={}; const Pt=a=>[
     for(let f=.15;f<=.5;f+=.04){ for(const sg of [1,-1]){ k++; let hit=false; for(let o=-st-2;o<=st+3&&!hit;o++) if(PX(r,add(add(p,mul(td,sg*R0*f)),mul(nd,o)))) hit=true; if(hit) h++; } } if(h/k>bt){ bt=h/k; ba=a; } }
   if(bt>.85){ out.tangent=ba; if(out.central&&out.central.some(x=>Math.abs((((x-ba)%360)+540)%360-180)<8)){ const o2=out.central.find(x=>Math.abs((((x-ba)%360)+540)%360-180)>=8); delete out.central; delete out.sector; if(o2!=null&&out.radius==null) out.radius=o2; } }
   return out; }
+// شكل مركب: نقاط على الأضلاع تخرج منها خطوط، وقطع داخلية بين النقاط
+function compose(r,c0){
+  const P=c0.pts, n=P.length, C=cen(P), cand=P.map((p,i)=>({p,side:-1,i})), runMax=Math.max(8,r.fd*.03);
+  for(let i=0;i<n;i++){ const A=P[i], B=P[(i+1)%n], d=nrm(sub(B,A)), Lx=len(sub(B,A)); let nn=perp(d); if(dot(nn,sub(C,mid(A,B)))<0) nn=mul(nn,-1);
+    const hs=[], s0=Lx*.06; for(let s=s0;s<=Lx*.94;s+=1){ const q=add(A,mul(d,s)); let inn=0,ou=0; for(let o=r.stroke+4;o<=r.stroke+9;o++){ if(PX(r,add(q,mul(nn,o)))) inn++; if(PX(r,sub(q,mul(nn,o)))) ou++; } hs.push(inn>=2?1:0); }
+    let s=-1; for(let k=0;k<=hs.length;k++){ const v=k<hs.length&&hs[k]; if(v){ if(s<0) s=k; } else if(s>=0){ if(k-s<=runMax){ const sc=s0+(s+k-1)/2; cand.push({p:add(A,mul(d,sc)),side:i,t:sc/Lx}); } s=-1; } } }
+  // القطع الداخلية
+  const onSide=(u,sd)=>u.side===sd||(u.side<0&&(u.i===sd||u.i===(sd+1)%n));
+  const inner=[];
+  for(let a=0;a<cand.length;a++) for(let b=a+1;b<cand.length;b++){ const u=cand[a], v=cand[b];
+    if(Array.from({length:n},(_,k)=>k).some(k=>onSide(u,k)&&onSide(v,k))) continue;
+    if(len(sub(u.p,v.p))<r.fd*.08) continue;
+    const between=cand.some((w,k)=>k!==a&&k!==b&&(()=>{ const d=sub(v.p,u.p), tt=dot(sub(w.p,u.p),d)/dot(d,d); if(tt<.05||tt>.95) return false; return len(sub(add(u.p,mul(d,tt)),w.p))<r.stroke*2+3; })());
+    if(between) continue;
+    const kd=lineKind(r,u.p,v.p); if(kd) inner.push([a,b,kd==='dash']); }
+  const used=new Set(); inner.forEach(([a,b])=>{ used.add(a); used.add(b); });
+  const sidePts=cand.map((c,k)=>({c,k})).filter(x=>x.c.side>=0&&used.has(x.k));
+  if(!inner.length) return null;
+  // حالات الأشكال الجاهزة: ارتفاع أو متوسط أو منصف واحد في مثلث، أو قطرا رباعي
+  if(n===3&&inner.length===1&&sidePts.length===1){ const [a,b]=inner[0], vi=a<n?a:b, sp=cand[a<n?b:a], A=P[(vi+1)%3], B=P[(vi+2)%3];
+    const F=proj(P[vi],A,B), M=mid(A,B), s2=angSpan(P[vi],A,B), bi=rad((s2.a0+s2.a1)/2), D=lineX(P[vi],[Math.cos(bi),Math.sin(bi)],A,B), tol=len(sub(B,A))*.04;
+    if(len(sub(sp.p,F))<tol||len(sub(sp.p,M))<tol||(D&&len(sub(sp.p,D))<tol)) return null; }
+  if(n===4&&!sidePts.length&&inner.length===2) return null;
+  // بناء الشكل المركب: الرؤوس، ثم نقاط الأضلاع مرتبة على كل ضلع
+  const pts=P.map(p=>p.slice()), idx=new Map(); for(let k=0;k<n;k++) idx.set(k,k);
+  const on={}, segs=[];
+  for(let i=0;i<n;i++){ const sp=sidePts.filter(x=>x.c.side===i).sort((x,y)=>x.c.t-y.c.t); let prev=i;
+    sp.forEach(x=>{ const k=pts.length; pts.push(x.c.p.slice()); idx.set(x.k,k); on[k]=[i,(i+1)%n,x.c.t]; segs.push([prev,k]); prev=k; }); segs.push([prev,(i+1)%n]); }
+  const G=mkFree(pts,segs); G.on=on; const nOuter=segs.length;
+  inner.forEach(([a,b,dash])=>{ G.sides.push({a:idx.get(a),b:idx.get(b),len:'',show:false,ticks:0,par:0,dash}); });
+  // العلامات والزوايا والأسماء والأطوال من الصورة
+  G.sides.forEach(sd=>{ const m=sideMarks(r,pts[sd.a],pts[sd.b]); sd.ticks=m.ticks; sd.par=m.par; });
+  const T=r.texts;
+  pts.forEach((p,i)=>{ freeAngles(G,i).forEach(([a,b])=>{ const key=angKey(i,a,b), A={};
+      if(rightAt(r,p,pts[a],pts[b])) A.right=true; else { const k2=arcsAt(r,p,pts[a],pts[b]); if(k2===1) A.arc=true; else if(k2>1) A.arcs=k2; }
+      // رمز صغير مكتوب داخل الزاوية (مثل *) = علامة تساوي
+      const s2=angSpan(p,pts[a],pts[b]); if(!A.right&&!A.arc&&!A.arcs&&T.some(x=>{ const dd=len(sub(x.c,p)); if(dd>r.fd*.13||dd<r.stroke*3) return false; let aa=((ang(sub(x.c,p))-s2.a0)%360+360)%360; return aa>2&&aa<s2.sw-2; })) A.arcs=1;
+      if(A.right||A.arc||A.arcs) G.angs[key]=A; }); });
+  if(T.length){ const outT=T.filter(x=>!inPoly(P,x.c)), near=(L2,q,R2)=>L2.some(x=>len(sub(x.c,q))<R2);
+    pts.forEach((p,i)=>{ G.verts[i].showName=near(i<n?outT:T,p,r.fd*.12); });
+    G.sides.forEach(sd=>{ const a=pts[sd.a], b=pts[sd.b], m=mid(a,b), L2=len(sub(b,a)); sd.show=T.some(x=>{ const dm=len(sub(x.c,m)); return dm<Math.max(r.fd*.09,L2*.28)&&dm<len(sub(x.c,a))&&dm<len(sub(x.c,b)); }); }); }
+  return G; }
 function classify(r){
   let P=r.pts.map(p=>p.slice()); const n=P.length;
   let A2=0; for(let i=0;i<n;i++){ const a=P[i], b=P[(i+1)%n]; A2+=a[0]*b[1]-b[0]*a[1]; } if(A2>0) P.reverse();   // نفس اتجاه رسم الأداة
@@ -1055,6 +1151,8 @@ async function pictureToShape(src,ed){
     if(cp.chord){ sh.chord=true; A.D=Math.round(cp.chord[0]); A.E=Math.round(cp.chord[1]); }
     if(cp.tangent!=null){ sh.tangent=true; A.F=Math.round(cp.tangent); }
     sh.names=r.texts.length>0; }
+  else if(r.type==='poly'&&(FREE0=compose(r,classify(r)))){ const G=FREE0, bb=bboxPts(G.pts), s=Math.min(260/bb.w,195/bb.h), cxi=bb.x+bb.w/2, cyi=bb.y+bb.h/2; fit={s,cx:cxi,cy:cyi};
+    G.pts=G.pts.map(p=>[160+(p[0]-cxi)*s,122+(p[1]-cyi)*s]); S.tab='p'; S.p=G; FT='move'; }
   else { const c0=classify(r), c=idealize(c0), bb=bboxPts(c.pts), s=Math.min(260/bb.w,195/bb.h), cxi=bb.x+bb.w/2, cyi=bb.y+bb.h/2; fit={s,cx:cxi,cy:cyi};
     const G=mkPlane(c.kind,c.sub,c.pts.length); G.pts=c.pts.map(p=>[160+(p[0]-cxi)*s,122+(p[1]-cyi)*s]);
     if(G.pts.length!==G.sides.length){ const g2=mkPlane('poly','iso',G.pts.length); g2.pts=G.pts; Object.assign(G,g2); }
@@ -1074,7 +1172,7 @@ async function pictureToShape(src,ed){
     // الأسماء والأطوال: تظهر حيث توجد كتابة بجانبها في الصورة
     const T2=r.texts.filter(x=>!inPoly(P0,x.c));
     if(T2.length){ const near=(q,R2)=>T2.some(x=>len(sub(x.c,q))<R2);
-      for(let i=0;i<n;i++){ G.verts[i].showName=near(P0[i],r.fd*.13); const a=P0[i], b=P0[(i+1)%n], m=mid(a,b); G.sides[i].show=near(m,Math.max(r.fd*.12,len(sub(b,a))*.25))&&!near(a,r.fd*.08)&&!near(b,r.fd*.08); } }
+      for(let i=0;i<n;i++){ G.verts[i].showName=near(P0[i],r.fd*.13); const a=P0[i], b=P0[(i+1)%n], m=mid(a,b); G.sides[i].show=T2.some(x=>{ const dm=len(sub(x.c,m)); return dm<Math.max(r.fd*.12,len(sub(b,a))*.25)&&dm<len(sub(x.c,a))&&dm<len(sub(x.c,b)); }); } }
     S.tab='p'; S.p=G; }
   if(ed){ const e=Object.assign({},ed,{pic:true}); if(A&&!ed.word){ const a=A/fit.s; e.place={a, bx:ed.left+(fit.cx-160/fit.s)*A, by:ed.top+(fit.cy-(S.tab==='c'?125:122)/fit.s)*A}; } setEdit(e); }
   syncUI(); draw(); save();
