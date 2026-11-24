@@ -73,6 +73,8 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 .selhint b{color:#9aa3ad;font-weight:400}
 .selhint[data-on="1"]{color:#1f71de;background:#e7effc;border-color:#b9d0f5}
 .selhint[data-on="1"] b{color:#1f71de}
+.selhint[data-on="need"]{color:#b4541a;background:#fff4e5;border-color:#f3c58f}
+.selhint[data-on="need"] b{color:#b4541a;font-weight:700}
 .tbtn[style*="background"]:hover{filter:brightness(.95)}
 .tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
 .tbtn{font:inherit;font-size:.72rem;min-height:24px;padding:1px 5px;white-space:nowrap;overflow:hidden;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);cursor:pointer;text-align:start;display:flex;align-items:center;gap:4px;line-height:1.2}
@@ -4161,7 +4163,16 @@ async function mergedPress(id) {
   }
   if (selNow && it.role) return pinRole(it.role);
   if (it.tpl) return insertTemplate(it.tpl);
-  say(L('حدّد في الشريحة المربع الذي تريد تحويله إلى «' + it.ar + '» أولًا.', 'Select the box to turn into «' + it.en + '» first.'));
+  needSel(it);
+}
+// a button that needs a selection, pressed with nothing selected: the line above the list says so, clearly, for a moment
+let needTimer = 0;
+function needSel(it) {
+  const msg = L('حدّد أولًا الكائن الذي تريد تحويله إلى «' + it.ar + '»', 'First select the object to turn into «' + it.en + '»');
+  say(msg + '.');
+  const h = $('selHint'); if (!h) return;
+  h.dataset.on = 'need'; h.innerHTML = '<b>!</b> ' + msg;
+  clearTimeout(needTimer); needTimer = setTimeout(selPaint, 3500);
 }
 $('roles').addEventListener('click', e => { const b = e.target.closest('.tbtn'); if (b) mergedPress(b.dataset.item); });
 // the same solution buttons beside «Hide solutions»
@@ -4324,7 +4335,7 @@ async function pinRole(role, keepColour) {
     try {
       const n = await quietMark(role, keepColour);
       if (n < 0) { rsay(L('عُلِّم كحل وأُخفي، لأن حلول الشريحة مخفية الآن. يظهر مع «إظهار الحلول».', 'Marked as a solution and hidden, since the slide\'s solutions are hidden now. «Show solutions» brings it back.')); return; }
-      rsay(!n ? L('حدّد مربعًا في الشريحة أولًا.', 'Select a box on the slide first.')
+      rsay(!n ? L('حدّد أولًا الكائن الذي تريد تمييزه.', 'First select the object to mark.')
         : role === 'given' ? L('عُلِّم كجزء من السؤال: يبقى ظاهرًا عند إخفاء الحلول.', 'Marked as part of the question: it stays when solutions are hidden.')
         : role === 'correct' ? (keepColour ? L('عُلِّم كخيار صحيح: يتحول للأسود عند إخفاء الحلول.', 'Marked as the correct choice: it turns black when solutions are hidden.') : L('عُلِّم كخيار صحيح (أزرق عريض): يتحول للأسود عند إخفاء الحلول.', 'Marked as the correct choice (bold blue): it turns black when solutions are hidden.'))
         : keepColour ? L('عُلِّم كحل: يُخفى عند إخفاء الحلول.', 'Marked as a solution: it is hidden when solutions are hidden.') : L('عُلِّم كحل (أزرق): يُخفى عند إخفاء الحلول.', 'Marked as a solution (blue): it is hidden when solutions are hidden.'));
