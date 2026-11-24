@@ -640,7 +640,7 @@ function openPop(k,i,cx,cy){
   if(k==='pt'){ const r=REG.find(x=>x.key===i), def=r?r.def:'', cur=(S.nm[i]!=null)?S.nm[i]:def;
     pop.innerHTML=`<div class="ph"><span>${L('point')} ${esc(cur)}</span><button type="button" data-a="x">✕</button></div>
       <div class="r"><input id="pPt" value="${esc(cur)}" title="${L('vname')}" style="max-width:52px">${qb('pnm','<b>أ</b>',!S.hide[i],L('showName'))}</div>`;
-    pop.hidden=false; placePop(pop,cx,cy); return; }
+    pop.hidden=false; placePop(pop,cx,cy); nameReady(); return; }
   if(k==='side'){ const sd=G.sides[i], ia=G.kind==='free'?sd.a:i, ib=G.kind==='free'?sd.b:(i+1)%n;
     h=`<div class="ph"><span>${L('side')} ${esc(G.verts[ia].name)}${esc(G.verts[ib].name)}</span><button type="button" data-a="x">✕</button></div>
       <div class="r"><input id="pLen" placeholder="${esc(fmtLen(len(sub(G.pts[ib],G.pts[ia]))/40))}" value="${esc(sd.len)}">${qb('show',ICO.len,sd.show,L('showLen'))}</div>
@@ -663,8 +663,10 @@ function openPop(k,i,cx,cy){
       ${n===3||(n===4&&i===0)?`<div class="r">${qb('alt',ICO.alt,V.alt,L('alt'))}${n===3?qb('med',ICO.med,V.med,L('med'))+qb('bis',ICO.bis,V.bis,L('bis')):''}</div>`:''}`;
   }
   if(!(G.kind==='free'&&k==='vert')) pop.style.width='';
-  pop.innerHTML=h; pop.hidden=false; placePop(pop,cx,cy);
+  pop.innerHTML=h; pop.hidden=false; placePop(pop,cx,cy); if(k==='vert') nameReady();
 }
+// بعد النقر على نقطة: أي حرف يُكتب يصبح اسمها مباشرة
+function nameReady(){ const inp=$('pName')||$('pPt'); if(!inp) return; inp.focus({preventScroll:true}); inp.select(); }
 function placePop(pop,cx,cy){
   const pr=$('pv').getBoundingClientRect(), pw=pop.offsetWidth, ph=pop.offsetHeight;
   let x=cx-pr.left+12, y=cy-pr.top-ph/2; if(x+pw>pr.width-4) x=cx-pr.left-pw-12; x=Math.max(4,Math.min(pr.width-pw-4,x)); y=Math.max(4,Math.min(pr.height-ph-38,y));
@@ -674,9 +676,9 @@ function placePop(pop,cx,cy){
 function closePop(){ $('pop').hidden=true; if(SEL){ SEL=null; draw(); } }
 $('pop').addEventListener('input',e=>{ if(!SEL) return; const G=S.p, t=e.target;
   if(t.id==='pLen'){ const sd=G.sides[SEL.i]; sd.len=t.value; if(t.value) sd.show=true; }
-  if(t.id==='pName'){ G.verts[SEL.i].name=t.value; }
+  if(t.id==='pName'){ G.verts[SEL.i].name=t.value; if(t.value) G.verts[SEL.i].showName=true; }
   if(t.id==='pAng'){ const V=G.verts[SEL.i]; V.ang=t.value; if(t.value) V.showAng=true; }
-  if(t.id==='pPt'){ S.nm[SEL.i]=t.value; }
+  if(t.id==='pPt'){ S.nm[SEL.i]=t.value; if(t.value) delete S.hide[SEL.i]; }
   if(t.id==='pNum'){ G.verts[SEL.i].num=t.value; }
   if(t.classList.contains('pNumF')){ const k=t.dataset.key; (G.angs[k]||(G.angs[k]={})).num=t.value; }
   draw(); save(); syncChips(); });
