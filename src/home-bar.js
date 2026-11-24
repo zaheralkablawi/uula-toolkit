@@ -1,5 +1,12 @@
 // UULA Toolkit — thin bar added on top of every tool: back to the tools list
 var TK_MENU_LEFT = 10;
+// when a tool centers its content in a wide pane, the ☰ button and its menu follow the content's left edge
+function tkMenuLeft() {
+  var mb = document.getElementById('menuBtn'), w = mb && (mb.closest('.appmenu') || mb), row = w && w.parentElement;
+  if (!row) return TK_MENU_LEFT;
+  var r = row.getBoundingClientRect(), x = r.left + (parseFloat(getComputedStyle(row).paddingLeft) || 0);
+  return x > 30 ? Math.round(x) : TK_MENU_LEFT;
+}
 (function () {
   function add() {
     if (document.getElementById('tkBar')) return;
@@ -50,7 +57,7 @@ var TK_MENU_LEFT = 10;
       if (m.hidden) return;
       var d = document.documentElement.lang === 'en' ? 'ltr' : 'rtl'; if (m.dir !== d) m.dir = d;
       var mb = document.getElementById('menuBtn'), top = mb ? mb.getBoundingClientRect().bottom + 4 : 40;
-      m.style.setProperty('position', 'fixed', 'important'); m.style.setProperty('left', TK_MENU_LEFT + 'px', 'important');
+      m.style.setProperty('position', 'fixed', 'important'); m.style.setProperty('left', tkMenuLeft() + 'px', 'important');
       m.style.setProperty('right', 'auto', 'important'); m.style.setProperty('top', top + 'px', 'important');
     };
     new MutationObserver(fit).observe(m, { attributes: true, attributeFilter: ['hidden', 'dir'] });
@@ -68,7 +75,7 @@ var TK_MENU_LEFT = 10;
     w.style.order = 99 * k; w.style.marginInlineStart = ltr ? '0' : '4px'; w.style.marginInlineEnd = ltr ? '4px' : '0';
     // the same distance from the edge in every tool (TK_MENU_LEFT), whatever the tool's own padding
     w.style.position = 'relative';
-    var line = function () { w.style.left = '0px'; var x = mb.getBoundingClientRect().left; w.style.left = (TK_MENU_LEFT - x) + 'px'; };
+    var line = function () { w.style.left = '0px'; var x = mb.getBoundingClientRect().left; w.style.left = (tkMenuLeft() - x) + 'px'; };
     line(); addEventListener('resize', line);
     new MutationObserver(line).observe(document.documentElement, { attributes: true, attributeFilter: ['lang', 'dir'] });
   }
