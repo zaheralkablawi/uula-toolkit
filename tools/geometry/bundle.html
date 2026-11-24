@@ -75,6 +75,13 @@ header .bt .root:only-child{color:var(--fg);font-size:15px;letter-spacing:0}
 .edbar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--soft);border:1px solid #bcd3f5;border-radius:8px;padding:4px 8px;font-size:12px;color:var(--accent)}
 .edbar button{border:1px solid var(--line);background:#fff;border-radius:6px;font-size:12px;height:24px;padding:0 8px;cursor:pointer}
 #msg{unicode-bidi:plaintext;font-size:12.8px;color:var(--muted);text-align:center;min-height:0}
+#ctx{position:fixed;z-index:85;min-width:170px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.18);padding:4px;display:flex;flex-direction:column}
+#ctx button{display:flex;align-items:center;gap:8px;border:0;background:none;text-align:start;padding:5px 8px;border-radius:5px;font-size:12px;cursor:pointer;color:var(--fg)}
+#ctx button:hover{background:var(--bg)}
+#ctx button .ci{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+#ctx button .ci svg{width:15px;height:15px}
+#ctx button .ck{margin-inline-start:auto;color:var(--accent);font-weight:700;padding-inline-start:10px}
+#ctx hr{border:0;border-top:1px solid var(--line);margin:3px 4px}
 #msg:empty{display:none}
 #hint{text-align:center}
 #hint:empty{display:none}
@@ -215,6 +222,7 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
   <button type="button" class="more" id="palMore" data-i="custom">لون آخر…</button>
   <input type="color" id="palCustom" tabindex="-1" aria-hidden="true">
 </div>
+<div id="ctx" role="menu" hidden></div>
 <input type="file" id="picFile" accept="image/*" hidden>
 <div class="modal" id="modal" hidden><div class="mbox" role="dialog" aria-modal="true"><h3 id="modalT"></h3><div id="modalB"></div><button type="button" class="mclose" id="modalX" data-i="close">إغلاق</button></div></div>
 
@@ -245,6 +253,7 @@ const T={
   hintP:['انقر ضلعًا أو رأسًا أو نقطة على الرسم لتمييزها أو إخفاء اسمها، واسحب الرؤوس لتغيير الشكل.','Click a side, vertex or point to mark it or hide its name; drag vertices to reshape.'],
   hintC:['اسحب النقاط على الدائرة لتحريكها، وانقر نقطة لإخفاء اسمها أو تغييره، واسحب الدائرة لتغيير نصف قطرها.','Drag points along the circle, click a point to hide or change its name, drag the circle to resize.'],
   hintS:['اسحب المقابض الزرقاء لتغيير أبعاد المجسم.','Drag the blue handles to change the size.'],
+  typeName:['اكتب الاسم…','Type the name…'], typeLen:['اكتب الطول…','Type the length…'],
   side:['الضلع','Side'], vertex:['الرأس','Vertex'], showLen:['إظهار الطول','Show length'], showAng:['إظهار القياس','Show measure'], ticks:['شرطات التساوي','Equal marks'], par:['رمز التوازي //','Parallel //'], dashed:['متقطع','Dashed'],
   vname:['اسم الرأس','Vertex name'], rightM:['علامة الزاوية القائمة','Right-angle mark'], arcs:['أقواس تساوي الزوايا','Equal-angle arcs'], fromV:['من هذا الرأس','From this vertex'],
   wL:['الطول','Length'], wW:['العرض','Width'], wH:['الارتفاع','Height'], wE:['الحرف','Edge'], wR:['نصف القطر','Radius'], wS:['الراسم','Slant'],
@@ -613,6 +622,7 @@ function freeTool(t,e){ const G=S.p, h=t.dataset.h, i=+t.dataset.i;
     G.sides.splice(i,1,{a:sd.a,b:k,len:'',show:false,ticks:0,par:0,dash:sd.dash},{a:k,b:sd.b,len:'',show:false,ticks:0,par:0,dash:sd.dash}); G.n=G.pts.length; draw(); save(); return; }
   if(FT==='del'){ push(); if(h==='side') G.sides.splice(i,1); else if(h==='vert'&&G.pts.length>2) freeDelPoint(G,i); draw(); save(); syncChips(); return; } }
 $('fig').addEventListener('pointerdown',e=>{
+  if(e.button!==0&&e.pointerType==='mouse') return;   // الزر الأيمن للقائمة فقط
   const t=e.target.closest('[data-h]'); if(!t) { closePop(); if(LINK!=null){ LINK=null; draw(); } return; }
   if(S.tab==='p'&&S.p.kind==='free'&&FT!=='move'){ e.preventDefault(); closePop(); freeTool(t,e); return; }
   e.preventDefault(); $('fig').setPointerCapture(e.pointerId);
@@ -730,7 +740,7 @@ $('pop').addEventListener('click',e=>{ const b=e.target.closest('[data-a]'); if(
   const keep=SEL; draw(); save(); syncChips();
   openPop(keep.k,keep.i,0,0);
 });
-document.addEventListener('pointerdown',e=>{ if(!$('pop').hidden&&!e.target.closest('#pop')&&!e.target.closest('#fig')) closePop(); });
+document.addEventListener('pointerdown',e=>{ if(!$('pop').hidden&&!e.target.closest('#pop')&&!e.target.closest('#fig')&&!e.target.closest('#ctx')) closePop(); });
 
 /* ---------- المعارض والخيارات ---------- */
 const GAL_P=[['tri','<path d="M12 4l9 16H3z"/>'],['sq','<rect x="5" y="5" width="14" height="14"/>'],['rect','<rect x="3" y="7" width="18" height="10"/>'],['para','<path d="M7 7h14l-4 10H3z"/>'],
@@ -854,6 +864,40 @@ $('flipBtn').onclick=()=>{ if(S.tab!=='p') return; push(); const c=cen(S.p.pts);
 $('clearBtn').onclick=()=>{ push(); closePop(); S.empty=true; setEdit(null); syncUI(); draw(); save(); };
 $('resetBtn').onclick=()=>{ push(); S.empty=false; const d=defaults(); if(S.tab==='p'&&S.p.kind==='free'){ S.p.sides.forEach(s=>Object.assign(s,{len:'',show:false,ticks:0,par:0,dash:false})); S.p.angs={}; } else if(S.tab==='p') S.p=mkPlane(S.p.kind,S.p.sub,S.p.n); else if(S.tab==='c') S.c=d.c; else { S.s.size[S.s.kind]=d.s.size[S.s.kind]; S.s.lab[S.s.kind]=d.s.lab[S.s.kind]; }
   closePop(); syncUI(); draw(); save(); };
+/* ---------- قائمة الزر الأيمن على الرسم: أهم الخيارات للشيء الذي تحته ---------- */
+function ctxClose(){ $('ctx').hidden=true; }
+$('fig').addEventListener('contextmenu',e=>{ e.preventDefault(); if(DRAG) return;
+  const t=e.target.closest('[data-h]'), h=t&&t.dataset.h, i=t&&t.dataset.i, items=[];   // [مفتاح زر في اللوحة أو دالة، أيقونة، النص]
+  const fromPop=(a,lab)=>{ const b=$('pop').querySelector(`[data-a="${a}"]`); if(b) items.push({a,ico:b.innerHTML,lab:lab||b.title,on:b.getAttribute('aria-pressed')==='true'}); };
+  const fromBtn=id=>{ const b=$(id); if(b&&!b.disabled&&!b.hidden) items.push({fn:()=>b.click(),ico:b.querySelector('svg')?b.querySelector('svg').outerHTML:'',lab:b.title||b.textContent}); };
+  const free=S.tab==='p'&&S.p.kind==='free';
+  if(S.tab==='p'&&(h==='vert'||h==='ang')){
+    openPop('vert',+i,e.clientX,e.clientY,h==='ang'?t.dataset.k:undefined); const G=S.p;
+    if(h==='vert') items.push({fn:()=>nameReady(),ico:'<b>أ</b>',lab:L('typeName')});
+    if(h==='vert') fromPop('nm',L('showName'));
+    const k=free?(h==='ang'?t.dataset.k:null):'';
+    if(!free){ fromPop('sa'); fromPop('arc'); fromPop('rt'); fromPop('st'); }
+    else if(k){ ['sa','arc','rt','st'].forEach(x=>fromPop('fa|'+k+'|'+x)); }
+    if(free&&h==='vert'&&G.pts.length>2) items.push({sep:1},{fn:()=>{ push(); freeDelPoint(G,+i); closePop(); draw(); save(); syncChips(); },ico:CI.del,lab:L('ftDel')}); }
+  else if(S.tab==='p'&&h==='side'){
+    openPop('side',+i,e.clientX,e.clientY);
+    items.push({fn:()=>nameReady($('pLen')),ico:ICO.len,lab:L('typeLen')});
+    fromPop('show'); fromPop('t1'); fromPop('dash'); fromPop('p1'); fromPop('ar1');
+    if(free) items.push({sep:1},{fn:()=>{ push(); S.p.sides.splice(+i,1); closePop(); draw(); save(); syncChips(); },ico:CI.del,lab:L('ftDel')}); }
+  else if(h==='pt'||h==='cp'||h==='cen'){
+    const key=h==='pt'?i:h==='cp'?'c:'+i:'c:C'; openPop('pt',key,e.clientX,e.clientY);
+    items.push({fn:()=>nameReady(),ico:'<b>أ</b>',lab:L('typeName')}); fromPop('pnm',L('showName')); }
+  else { closePop(); ['undoBtn','rotBtn','flipBtn','resetBtn','picBtn','clearBtn'].forEach(fromBtn); items.push({sep:1}); fromBtn('insert'); }
+  if(!items.length) return;
+  const m=$('ctx'); m.innerHTML=items.map((x,j)=>x.sep?'<hr>':`<button type="button" data-j="${j}"><span class="ci">${x.ico||''}</span><span>${esc(x.lab||'')}</span>${x.on?'<span class="ck">✓</span>':''}</button>`).join('');
+  m._items=items; m.hidden=false; m.dir=document.documentElement.lang==='en'?'ltr':'rtl';
+  const w=m.offsetWidth, hh=m.offsetHeight; m.style.left=Math.max(4,Math.min(innerWidth-w-4,e.clientX))+'px'; m.style.top=Math.max(4,Math.min(innerHeight-hh-4,e.clientY))+'px';
+});
+$('ctx').addEventListener('click',e=>{ const b=e.target.closest('[data-j]'); if(!b) return; const x=$('ctx')._items[+b.dataset.j]; ctxClose();
+  if(x.fn) x.fn(); else { const pb=$('pop').querySelector(`[data-a="${x.a}"]`); if(pb) pb.click(); } });
+document.addEventListener('pointerdown',e=>{ if(!$('ctx').hidden&&!e.target.closest('#ctx')) ctxClose(); },true);
+addEventListener('blur',ctxClose); addEventListener('resize',ctxClose); document.addEventListener('scroll',ctxClose,true);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') ctxClose(); });
 document.addEventListener('keydown',e=>{ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'&&!e.target.closest('input')){ e.preventDefault(); undo(); } if(e.key==='Escape'){ closePop(); $('pal').hidden=true; } });
 
 /* ---------- واجهة ---------- */
