@@ -61,6 +61,11 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 .tgroup{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:6px;border:1px solid var(--line);border-radius:9px;padding:6px 7px;background:#fafbfc}
 .tgroup .gt{font-size:.7rem;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:5px;white-space:nowrap;min-height:24px}
 .tgroup .tgrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.tgroup .subrows{display:grid;gap:4px;min-width:0}
+.subrow{display:grid;grid-template-columns:38px minmax(0,1fr);gap:4px;align-items:center}
+.sublab{font-size:.66rem;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden}
+.dirseg{width:auto!important;margin:0!important;height:24px}
+.dirseg button{height:22px}
 .tgroup .tbtn{white-space:nowrap!important;min-width:0;container-type:inline-size}
 .tgroup .tbtn span{text-overflow:ellipsis!important;min-width:0}
 @container (max-width: 62px){ .tbtn span{display:none} .tbtn i{margin-inline:auto} }
@@ -881,6 +886,7 @@ function styleText(it, ctx, pkg, forcedRole) {
   for (const pr of roles) {
     const st = STY[pr.role] || STY.body;
     let ar = pr.text ? AR.test(pr.text) : arAll;
+    if (pr.role === 'choice' && ctx.choiceDir) ar = ctx.choiceDir === 'rtl';
     // an equation line inside an Arabic box stays on the right with the text around it
     if (!ar && arAll && pr.role !== 'question' && desc(pr.p, 'm', 'oMath').length && !desc(pr.p, 'a', 't').some(x => /[A-Za-z]{3,}/.test(x.textContent))) ar = true;
     let bullet = null, marL = 0, indent = 0;
@@ -1634,10 +1640,11 @@ function markNames(doc) {
 // ---------- one object at a time ----------
 // the user picks what a selected object is; its name keeps the choice ("UULA:answer …") so a later
 // full conversion respects it. Selected shapes carry " #ursel" at the end of their name.
-function applyRole(pkg, role) {
+function applyRole(pkg, role, opt) {
   const W = pkg.slideW, H = pkg.slideH, CW = W - 2 * M;
   const doc = parseXml(pkg.files.slide);
   const ctx = { scheme: readTheme(pkg.files), bodySz: 1100 };
+  opt = opt || {};
   const rels = makeRels(pkg);
   NEXT = maxId(doc) + 1;
   const spTree = spTreeOf(doc);
@@ -1670,7 +1677,21 @@ function applyRole(pkg, role) {
     if (t.kind === 'pic' || t.kind === 'grpSp') { stylePic(t, false); rename(t, role === 'answer' ? 'answer' : 'pic'); out.push({ idx: t.i, kind: 'pic' }); continue; }
     if (t.kind !== 'text') { rename(t, role); continue; }
     const isBox = BOX_ROLES.includes(role);
+    // multiple-choice options: right-to-left (ⓐ on the right) or left-to-right (ⓐ on the left, as in English).
+    // «auto»: Arabic options, or an Arabic question above them → right-to-left; otherwise left-to-right
+    if (role === 'choice') {
+      let dir = opt.dir || 'auto';
+      if (dir === 'auto') {
+        if (AR.test(t.text || '')) dir = 'rtl';
+        else {
+          const above = items.filter(o => o !== t && o.kind === 'text' && o.g.y + o.g.h <= t.g.y + 2 * PT && (o.text || '').trim()).sort((a, b) => (b.g.y + b.g.h) - (a.g.y + a.g.h))[0];
+          dir = above ? (AR.test(above.text) ? 'rtl' : 'ltr') : 'rtl';
+        }
+      }
+      ctx.choiceDir = dir;
+    }
     styleText(t, ctx, pkg, isBox ? 'body' : role);
+    ctx.choiceDir = null;
     setBody(t.c, {});
     plainShape(t.c, false);
     rename(t, role);
@@ -2402,9 +2423,11 @@ function spec(id, W) {
     ] }] };
     case 'mcq': {
       const w = CW / 4, L = ['ⓐ', 'ⓑ', 'ⓒ', 'ⓓ'];
-      // the options only (the question has its own button), under the last object
+      // the options only (the question has its own button), under the last object;
+      // right-to-left: ⓐ on the right … ⓓ on the left; left-to-right (English): ⓐ on the left … ⓓ on the right
+      const ltr = OPT.dirNow === 'ltr';
       return { gap: 0, rows: [
-        { side: true, cells: L.map((l, k) => txt(P.runs([T(l + ' '), T('خيار')], { marL: 182880 }), { x: R - (k + 1) * w, w })) }
+        { side: true, cells: L.map((l, k) => txt(P.runs([T(l + ' '), T(ltr ? 'Option' : 'خيار')], { marL: 182880, ar: !ltr }), { x: ltr ? M + k * w : R - (k + 1) * w, w })) }
       ] };
     }
     case 'problem': return { gap: 1, rows: [
@@ -2589,7 +2612,25 @@ function freeTop(pkg, gapRows, fixed) {
 }
 
 // put a template on a slide package; returns the new slide XML + what is needed to refine it later
+// settings from the pane: the direction of multiple-choice options ('auto' | 'rtl' | 'ltr')
+const OPT = { mcqDir: 'auto', dirNow: 'rtl' };
+function setOpt(o) { Object.assign(OPT, o); }
+// «auto»: the question above (the lowest text on the slide) decides: Arabic → right-to-left, otherwise left-to-right
+function dirFor(pkg) {
+  if (OPT.mcqDir === 'rtl' || OPT.mcqDir === 'ltr') return OPT.mcqDir;
+  const doc = UR.parseXml(pkg.files.slide);
+  let low = null;
+  for (const el of U.topItems(doc)) {
+    const c = U.core(el), n = U.cnvOf(c), name = n ? n.getAttribute('name') || '' : '';
+    if (/^UULA (Footer|Watermark)|^CustomPageNumber_/.test(name)) continue;
+    const t = U.desc(c, 'a', 't').map(x => x.textContent).join('').trim(); if (!t) continue;
+    const g = U.geomOf(el, pkg); if (!g || g.y >= pkg.slideH - UR.FOOT * 0.6) continue;
+    if (!low || g.y + g.h > low.b) low = { b: g.y + g.h, t };
+  }
+  return low && !/[\u0600-\u06FF]/.test(low.t) ? 'ltr' : 'rtl';
+}
 function apply(pkg, id) {
+  if (id === 'mcq') OPT.dirNow = dirFor(pkg);
   const s = spec(id, pkg.slideW); if (!s) throw new Error('template?');
   const doc = UR.parseXml(pkg.files.slide);
   const mx = U.maxId(doc);
@@ -2624,7 +2665,7 @@ function apply(pkg, id) {
 }
 
 const GROUP_EN = { 'عناوين': 'Headings', 'نصوص': 'Text', 'أسئلة': 'Questions', 'إطارات': 'Frames', 'جداول': 'Tables', 'نهاية الدرس': 'Lesson end' };
-return { LIST, GROUP_EN, spec, build, place, freeTop, apply };
+return { LIST, GROUP_EN, spec, build, place, freeTop, apply, setOpt };
 })();
 if (typeof module !== 'undefined') module.exports = URT;
 </script>
@@ -4068,15 +4109,48 @@ const ROLE_TIP = {
 const FRAME_ROLES = ['note', 'quote', 'def', 'formula', 'other', 'activity', 'mars'];
 const ROLE_EN = { chapter: 'Unit title', lesson: 'Lesson title', topic: 'Topic heading', body: 'Paragraph', bullets: 'Bullet list', qhead: 'Questions heading', question: 'Question text', answer: 'Solution', choice: 'Choices',
   correct: 'Correct choice', given: 'Part of question', note: 'Note', quote: 'Quote', def: 'Definition', formula: 'Formulas', other: 'Other form', activity: 'Activity', mars: 'From Mars', cancelled: 'Suspended', table: 'With header', tableMain: 'Header + main column', tablePlain: 'No header' };
+function mergedBtn(it) {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; b.dataset.item = it.id;
+  if (it.role) b.dataset.role = it.role; if (it.tpl) b.dataset.id = it.tpl;
+  b.title = mergedTip(it); b.innerHTML = iconHtml(it.tpl === 'header' ? 'lesson' : it.id, it.col) + '<span>' + L(it.ar, it.en) + '</span>';
+  tint(b, it.id); return b;
+}
+// direction of multiple-choice options: auto / right-to-left / left-to-right (kept in the file)
+let mcqDir = 'auto';
+function dirSeg() {
+  const d = document.createElement('div'); d.className = 'seg seg3 icoseg dirseg'; d.style.gridColumn = 'span 2';
+  const ic = { auto: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5l1.3 3.2 3.2 1.3-3.2 1.3L8 11.5 6.7 8.3 3.5 7l3.2-1.3z"/></svg>',
+    rtl: '<svg viewBox="0 0 18 14" width="17" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="7" r="3"/><path d="M9 7H2M4.5 4.5L2 7l2.5 2.5"/></svg>',
+    ltr: '<svg viewBox="0 0 18 14" width="17" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="4" cy="7" r="3"/><path d="M9 7h7M13.5 4.5L16 7l-2.5 2.5"/></svg>' };
+  const tip = { auto: ['اتجاه الخيارات تلقائي: سؤال عربي ← الخيارات من اليمين، سؤال إنجليزي → من اليسار', 'Options direction automatic: Arabic question → from the right, English question → from the left'],
+    rtl: ['الخيارات من اليمين إلى اليسار: ⓐ في اليمين', 'Options right-to-left: ⓐ on the right'], ltr: ['الخيارات من اليسار إلى اليمين: ⓐ في اليسار (كالإنجليزي)', 'Options left-to-right: ⓐ on the left (as in English)'] };
+  for (const v of ['auto', 'rtl', 'ltr']) {
+    const b = document.createElement('button'); b.type = 'button'; b.dataset.v = v; b.title = L(tip[v][0], tip[v][1]);
+    b.setAttribute('aria-pressed', String(v === mcqDir)); b.innerHTML = ic[v]; d.appendChild(b);
+  }
+  d.addEventListener('click', e => { e.stopPropagation(); const b = e.target.closest('button'); if (!b) return; setMcqDir(b.dataset.v, true); });
+  return d;
+}
+function setMcqDir(v, store) {
+  mcqDir = v; URT.setOpt({ mcqDir: v });
+  document.querySelectorAll('.dirseg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+  if (store) { const st = docSettings(); if (st) { st.set('urMcqDir', v); st.saveAsync(); } }
+}
 function buildRoleList() {
   const host = $('roles'); host.innerHTML = '';
   for (const g of MERGED) {
     const { d, grid } = groupCard('obj', g.g, L(g.g, g.ge));
-    for (const it of g.items) {
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; b.dataset.item = it.id;
-      if (it.role) b.dataset.role = it.role; if (it.tpl) b.dataset.id = it.tpl;
-      b.title = mergedTip(it); b.innerHTML = iconHtml(it.tpl === 'header' ? 'lesson' : it.id, it.col) + '<span>' + L(it.ar, it.en) + '</span>';
-      tint(b, it.id); grid.appendChild(b);
+    if (g.items) g.items.forEach(it => grid.appendChild(mergedBtn(it)));
+    else {
+      grid.className = 'subrows';
+      for (const r of g.rows) {
+        const row = document.createElement('div'); row.className = 'subrow';
+        const lab = document.createElement('span'); lab.className = 'sublab'; lab.textContent = r.label ? L(r.label, r.le) : '';
+        const tg = document.createElement('div'); tg.className = 'tgrid';
+        r.items.forEach(it => tg.appendChild(mergedBtn(it)));
+        if (r.dir) tg.appendChild(dirSeg());
+        row.appendChild(lab); row.appendChild(tg); grid.appendChild(row);
+      }
     }
     d.appendChild(grid); host.appendChild(d);
   }
@@ -4093,15 +4167,19 @@ const MERGED = [
     { id: 'bullets', ar: 'نقاط مرقّمة', en: 'Bullet list', col: 'FFFFFF', role: 'bullets', tpl: 'bullets' },
     { id: 'cols', ar: 'نقاط بأعمدة', en: 'Bullet columns', col: 'FFFFFF', tpl: 'cols' },
     { id: 'pill', ar: 'كبسولة تعريف', en: 'Term pill', col: '1F71DC', tpl: 'pill' }] },
-  { g: 'أسئلة', ge: 'Questions', items: [
-    { id: 'qhead', ar: 'عنوان الأسئلة', en: 'Questions heading', col: 'FF0000', role: 'qhead', tpl: 'qhead' },
-    { id: 'question', ar: 'سؤال', en: 'Question', col: 'FF0000', role: 'question', tpl: 'question' },
-    { id: 'mcq', ar: 'اختيار متعدد', en: 'Multiple choice', col: 'FF0000', role: 'choice', tpl: 'mcq' },
-    { id: 'qqr', ar: 'سؤال مع QR', en: 'Question + QR', col: 'FF0000', tpl: 'qqr' },
-    { id: 'problem', ar: 'مسألة', en: 'Problem', col: '00B050', tpl: 'problem' }] },
-  { g: 'الحلول', ge: 'Solutions', items: [
-    { id: 'answer', ar: 'حل السؤال', en: 'Solution', col: '1F71DE', role: 'answer', tpl: 'answer' },
-    { id: 'correct', ar: 'الخيار الصحيح', en: 'Correct choice', col: '2070DF', role: 'correct' }] },
+  // one card for questions: the general ones, then written (essay) questions with their solution,
+  // then multiple choice with the correct choice and the direction of the options
+  { g: 'أسئلة', ge: 'Questions', rows: [
+    { items: [
+      { id: 'qhead', ar: 'عنوان الأسئلة', en: 'Questions heading', col: 'FF0000', role: 'qhead', tpl: 'qhead' },
+      { id: 'question', ar: 'سؤال', en: 'Question', col: 'FF0000', role: 'question', tpl: 'question' }] },
+    { label: 'مقالي', le: 'Essay', items: [
+      { id: 'problem', ar: 'مسألة', en: 'Problem', col: '00B050', tpl: 'problem' },
+      { id: 'qqr', ar: 'سؤال مع QR', en: 'Question + QR', col: 'FF0000', tpl: 'qqr' },
+      { id: 'answer', ar: 'حل السؤال', en: 'Solution', col: '1F71DE', role: 'answer', tpl: 'answer' }] },
+    { label: 'اختياري', le: 'Choice', dir: true, items: [
+      { id: 'mcq', ar: 'اختيار متعدد', en: 'Multiple choice', col: 'FF0000', role: 'choice', tpl: 'mcq' },
+      { id: 'correct', ar: 'الخيار الصحيح', en: 'Correct choice', col: '2070DF', role: 'correct' }] }] },
   { g: 'إطارات', ge: 'Frames', items: [
     { id: 'note', ar: 'ملاحظة', en: 'Note', role: 'note', tpl: 'note' },
     { id: 'quote', ar: 'نص مقتطف', en: 'Quote', role: 'quote', tpl: 'quote' },
@@ -4120,8 +4198,9 @@ const MERGED = [
   { g: 'نهاية الدرس', ge: 'End of lesson', items: [
     { id: 'practice', ar: 'تدرب وتفوق', en: 'Practice & excel', col: 'EBE6FE', tpl: 'practice' }] }
 ];
-const ITEM = Object.fromEntries(MERGED.flatMap(g => g.items).map(x => [x.id, x]));
-function tplName(tid) { const it = MERGED.flatMap(g => g.items).find(x => x.tpl === tid); return it ? [it.ar, it.en] : ['قالب', 'block']; }
+const ALL_ITEMS = MERGED.flatMap(g => g.items || g.rows.flatMap(r => r.items));
+const ITEM = Object.fromEntries(ALL_ITEMS.map(x => [x.id, x]));
+function tplName(tid) { const it = ALL_ITEMS.find(x => x.tpl === tid); return it ? [it.ar, it.en] : ['قالب', 'block']; }
 function mergedTip(it) {
   const own = ROLE_TIP[it.role || it.id];
   const parts = [];
@@ -4365,7 +4444,7 @@ async function pinRole(role, keepColour) {
     slideId = got.id;
     const pkg = await UR.openPackage(await exportSlide(slideId));
     let r;
-    try { r = UR.applyRole(pkg, role); if (['given', 'correct'].includes(role)) r.targets = []; }
+    try { r = UR.applyRole(pkg, role, { dir: mcqDir }); if (['given', 'correct'].includes(role)) r.targets = []; }
     catch (e) { await clearSel(slideId); rsay(e.message === 'nosel' ? L('حدّد مربعًا في الشريحة أولًا.', 'Select a box on the slide first.') : L('تعذّر التحويل: ', 'Could not restyle: ') + errText(e)); return; }
     // in place when it can be done exactly (nothing moves on screen); otherwise the slide is rebuilt
     let newId = slideId;
@@ -5165,6 +5244,7 @@ ready.then(info => {
   const s = docSettings();
   if (s) {
     const st = s.get('urNumStart'); if (st) $('numStart').value = st;
+    const md = s.get('urMcqDir'); if (md) setMcqDir(md);
     const on = s.get('urNum'); if (on === false) $('numChk').checked = false;
   }
   $('numRow').style.opacity = $('numChk').checked ? '' : '.5';
