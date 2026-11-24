@@ -2404,7 +2404,7 @@ function spec(id, W) {
       const w = CW / 4, L = ['ⓐ', 'ⓑ', 'ⓒ', 'ⓓ'];
       // the options only (the question has its own button), under the last object
       return { gap: 0, rows: [
-        { side: true, cells: L.map((l, k) => txt(P.runs([T(l + ' '), T(k === 0 ? 'الإجابة الصحيحة' : 'خيار', k === 0 ? { b: 1, c: C.answerOk } : {})], { marL: 182880 }), { x: R - (k + 1) * w, w })) }
+        { side: true, cells: L.map((l, k) => txt(P.runs([T(l + ' '), T('خيار')], { marL: 182880 }), { x: R - (k + 1) * w, w })) }
       ] };
     }
     case 'problem': return { gap: 1, rows: [
