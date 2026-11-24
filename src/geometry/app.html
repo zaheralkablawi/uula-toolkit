@@ -40,7 +40,7 @@ header .bt .root:only-child{color:var(--fg);font-size:15px;letter-spacing:0}
 .gal{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
 #galP{grid-template-columns:repeat(9,1fr)}
 .tabi{flex:none}
-.tabi button{width:34px;flex:none;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+.tabi button{width:40px;font-size:12.5px;flex:none;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center}
 .opt>.label{display:none}
 .opt .seg button svg{display:block;margin:auto}
 .sec .sty+.sty,.sec .chips+.sty{border-top:1px solid var(--line);padding-top:6px}
@@ -131,7 +131,7 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
     <h1 dir="ltr"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/><path d="M16 8.6L23.4 21.6H8.6z" fill="none" stroke="#1f71de" stroke-width="2.3" stroke-linejoin="round"/></svg><span class="bt"><span class="root">UULA</span><span class="sub">Geometry</span></span></h1>
     
     <span class="hsp"></span>
-    <div class="seg tabi" id="tabs" role="tablist"><button type="button" data-tab="p" data-ti="tabP" title="مستوية"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4L3 20h18z"/></svg></button><button type="button" data-tab="c" data-ti="tabC" title="الدائرة"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/></svg></button><button type="button" data-tab="s" data-ti="tabS" title="مجسمات"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v8"/></svg></button></div>
+    <div class="seg tabi" id="tabs" role="tablist"><button type="button" data-tab="p" data-ti="tabP" title="مستوية"><b dir="ltr">2D</b></button><button type="button" data-tab="s" data-ti="tabS" title="مجسمات"><b dir="ltr">3D</b></button></div>
     <span class="hsp"></span>
     <button type="button" class="ib updbtn" id="updBtn" hidden data-ti="upd" title="تحديث جديد" aria-label="تحديث جديد"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10a6 6 0 1 1-1.8-4.3"/><path d="M16.2 3.2v3.5h-3.5"/></svg><span class="dot"></span></button>
     <div class="appmenu" id="menuWrap">
@@ -864,7 +864,7 @@ document.addEventListener('keydown',e=>{ if((e.metaKey||e.ctrlKey)&&e.key.toLowe
 /* ---------- واجهة ---------- */
 function setP(el,on){ el.setAttribute('aria-pressed',on?'true':'false'); }
 function syncUI(){
-  const tab=S.tab; document.querySelectorAll('#tabs button').forEach(b=>setP(b,b.dataset.tab===tab));
+  const tab=S.tab; document.querySelectorAll('#tabs button').forEach(b=>setP(b,b.dataset.tab===tab||(tab==='c'&&b.dataset.tab==='p')));   // الدائرة ضمن الأشكال المستوية
   $('galP').hidden=tab!=='p'; $('galS').hidden=tab!=='s';
   document.querySelectorAll('#galP button').forEach(b=>setP(b,(tab==='p'&&b.dataset.k===S.p.kind)||(tab==='c'&&b.dataset.k==='circ')));
   if(tab==='c') $('galP').hidden=false;
