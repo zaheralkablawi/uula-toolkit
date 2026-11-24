@@ -60,6 +60,9 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 .tgroup .gt{font-size:.7rem;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px}
 .tgroup .gt .bar{flex:none;width:3px;height:12px;border-radius:2px}
 #roles{display:grid;gap:6px}
+.sec.ico{width:32px;padding:0}
+.icoseg{width:96px!important;margin-inline-start:auto}
+.icoseg button{display:grid;place-items:center;padding:0}
 .selhint{font-size:.76rem;color:var(--muted);background:#f3f5f8;border:1px solid var(--line);border-radius:8px;padding:5px 8px}
 .selhint b{color:#9aa3ad;font-weight:400}
 .selhint[data-on="1"]{color:#1f71de;background:#e7effc;border-color:#b9d0f5}
@@ -148,16 +151,16 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
     <div id="selHint" class="selhint"></div>
     <div id="roles" style="display:grid;gap:4px"></div>
     <div class="sep"></div>
-    <div class="sprow"><span class="splab gt2" data-en="Spacing">تنسيق المسافات</span>
-      <button type="button" class="sec" id="spV" data-ar-title="ضبط المسافات بين الكائنات من الأعلى والأسفل" data-en-title="Fix the vertical gaps between objects"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 2v12M5 4.5 8 1.8l3 2.7M5 11.5 8 14.2l3-2.7"/></svg><span data-en="Vertical">رأسي</span></button>
-      <button type="button" class="sec" id="spH" data-ar-title="محاذاة الكائنات إلى اليمين أو اليسار" data-en-title="Align objects to the right or left"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 8h12M4.5 5 1.8 8l2.7 3M11.5 5l2.7 3-2.7 3"/></svg><span data-en="Horizontal">أفقي</span></button>
-      <button type="button" class="sec" id="spD" data-ar-title="توزيع الكائنات على الشريحة كاملة: المساحة الفارغة تُقسم تحت الأسئلة ليكتب الطالب (إن وُجدت مساحة)" data-en-title="Spread the objects over the whole slide: the free space is shared under the questions for the student to write (if there is room)"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 2h10M3 14h10"/><rect x="5" y="5" width="6" height="2" rx=".5"/><rect x="5" y="9" width="6" height="2" rx=".5"/></svg><span data-en="Distribute">توزيع</span></button>
+    <div class="sprow" style="display:flex;gap:6px;align-items:center"><span class="splab gt2" style="white-space:nowrap" data-en="Spacing">تنسيق المسافات</span>
+      <button type="button" class="sec ico" id="spD" title="توزيع الكائنات على الشريحة كاملة: المساحة الفارغة تُقسم تحت الأسئلة ليكتب الطالب (إن وُجدت مساحة)" data-ar-title="توزيع الكائنات على الشريحة كاملة: المساحة الفارغة تُقسم تحت الأسئلة ليكتب الطالب (إن وُجدت مساحة)" data-en-title="Spread the objects over the whole slide: the free space is shared under the questions for the student to write (if there is room)"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 2h10M3 14h10"/><rect x="5" y="5" width="6" height="2" rx=".5"/><rect x="5" y="9" width="6" height="2" rx=".5"/></svg></button>
+      <button type="button" class="sec ico" id="spV" title="ضبط المسافات بين الكائنات من الأعلى والأسفل" data-ar-title="ضبط المسافات بين الكائنات من الأعلى والأسفل" data-en-title="Fix the vertical gaps between objects"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 2v12M5 4.5 8 1.8l3 2.7M5 11.5 8 14.2l3-2.7"/></svg></button>
+      <button type="button" class="sec ico" id="spH" title="محاذاة الكائنات إلى اليمين أو اليسار" data-ar-title="محاذاة الكائنات إلى اليمين أو اليسار" data-en-title="Align objects to the right or left"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 8h12M4.5 5 1.8 8l2.7 3M11.5 5l2.7 3-2.7 3"/></svg></button>
+      <div class="seg seg3 icoseg" id="hAlign">
+        <button type="button" data-v="auto" aria-pressed="true" title="محاذاة تلقائية" data-ar-title="محاذاة تلقائية" data-en-title="Automatic alignment"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 2.5l1.3 3.2 3.2 1.3-3.2 1.3L8 11.5 6.7 8.3 3.5 7l3.2-1.3z"/><path d="M12.5 11.5l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" stroke-width="1"/></svg></button>
+        <button type="button" data-v="right" aria-pressed="false" title="محاذاة لليمين" data-ar-title="محاذاة لليمين" data-en-title="Align right"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M14 3H4M14 6.5H7M14 10H4M14 13.5H7"/></svg></button>
+        <button type="button" data-v="left" aria-pressed="false" title="محاذاة لليسار" data-ar-title="محاذاة لليسار" data-en-title="Align left"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 3h10M2 6.5h7M2 10h10M2 13.5h7"/></svg></button>
+      </div>
     </div>
-    <div class="sprow2"><span class="splab" data-en="Alignment">المحاذاة الأفقية</span><div class="seg seg3" id="hAlign">
-      <button type="button" data-v="auto" aria-pressed="true" data-en="Auto">تلقائي</button>
-      <button type="button" data-v="right" aria-pressed="false" data-en="Right">يمين</button>
-      <button type="button" data-v="left" aria-pressed="false" data-en="Left">يسار</button>
-    </div></div>
   </section>
 
 
