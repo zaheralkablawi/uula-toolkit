@@ -4010,7 +4010,7 @@ const ROLES = [
   { g: 'نصوص', ge: 'Text', items: [['body', 'فقرة شرح', 'FFFFFF'], ['bullets', 'نقاط مرقّمة', 'FFFFFF']] },
   { g: 'أسئلة', ge: 'Questions', items: [['qhead', 'عنوان الأسئلة', 'FF0000'], ['question', 'نص السؤال', 'FF0000'], ['choice', 'خيارات السؤال', 'FFFFFF']] },
   { g: 'الحلول', ge: 'Solutions', items: [['answer', 'حل السؤال', '1F71DE'], ['correct', 'الخيار الصحيح', '2070DF']] },
-  { g: 'إطارات حول المحدد', ge: 'Frames around the selection', items: [['note', 'ملاحظة', 'FBEBD3'], ['quote', 'نص مقتطف', 'E2F0D9'], ['def', 'تعريف', 'E2F0D9'], ['formula', 'قوانين', 'D3E4F5'], ['other', 'صيغة أخرى', 'FBEBD3'], ['activity', 'نشاط', 'F1F1F1'], ['mars', 'من المريخ', 'F1F1F1']] },
+  { g: 'إطارات حول المحدد', ge: 'Frames around the selection', items: [['note', 'ملاحظة', 'FBEBD3'], ['quote', 'نص مقتطف', 'E2F0D9'], ['def', 'تعريف', 'E2F0D9'], ['formula', 'قوانين', 'D3E4F5'], ['other', 'صيغة أخرى', 'FBEBD3'], ['activity', 'نشاط', 'F1F1F1'], ['mars', 'من المريخ', 'F1F1F1'], ['cancelled', 'معلّق', 'FFFFFF']] },
   { g: 'تنسيق جدول محدد', ge: 'Selected table', items: [['table', 'جدول برأس', 'CAD0D8'], ['tableMain', 'رأس وعمود رئيسي', 'DAE0E9'], ['tablePlain', 'جدول بلا رأس', 'F1F1F1']] }
 ];
 // the same buttons beside «Hide solutions» only mark: the colour stays as it is (colours are set in «Format»)
@@ -4039,13 +4039,14 @@ const ROLE_TIP = {
   other: ['إطار صغير «صيغة أخرى» حول ما حددته', 'A small «other form» frame around the selection'],
   activity: ['إطار نشاط حول ما حددته', 'An activity frame around the selection'],
   mars: ['إطار «من المريخ» حول ما حددته', 'A «from Mars» frame around the selection'],
+  cancelled: ['إطار «معلّق» حول ما حددته: إطار أصفر، والمحتوى تحته باهت، وفي وسطه «مـعـلـق» مع مثلث التحذير.', 'A «suspended» frame around the selection: yellow frame, the content faded under it, «suspended» with the warning triangle in the middle.'],
   table: ['حدّد جدولًا: صف رأس رمادي وصفوف متبادلة', 'Select a table: gray header row, alternating rows'],
   tableMain: ['حدّد جدولًا: صف رأس وعمود أول رئيسي', 'Select a table: header row and a main first column'],
   tablePlain: ['حدّد جدولًا: بلا صف رأس، صفوف متبادلة', 'Select a table: no header row, alternating rows']
 };
 const FRAME_ROLES = ['note', 'quote', 'def', 'formula', 'other', 'activity', 'mars'];
 const ROLE_EN = { chapter: 'Unit title', lesson: 'Lesson title', topic: 'Topic heading', body: 'Paragraph', bullets: 'Bullet list', qhead: 'Questions heading', question: 'Question text', answer: 'Solution', choice: 'Choices',
-  correct: 'Correct choice', given: 'Part of question', note: 'Note', quote: 'Quote', def: 'Definition', formula: 'Formulas', other: 'Other form', activity: 'Activity', mars: 'From Mars', table: 'With header', tableMain: 'Header + main column', tablePlain: 'No header' };
+  correct: 'Correct choice', given: 'Part of question', note: 'Note', quote: 'Quote', def: 'Definition', formula: 'Formulas', other: 'Other form', activity: 'Activity', mars: 'From Mars', cancelled: 'Suspended', table: 'With header', tableMain: 'Header + main column', tablePlain: 'No header' };
 function buildRoleList() {
   const host = $('roles'); host.innerHTML = '';
   for (const g of ROLES) {
@@ -4159,9 +4160,52 @@ async function quietMark(role, keepColour) {
     return hiddenNow ? -sel.length : sel.length;
   });
 }
+// «Suspended»: a yellow frame over the selection, the content faded under it, and «مـعـلـق» with the warning
+// triangle in the middle — drawn in place and grouped (the content itself stays as it is, under it)
+async function suspendSelected() {
+  return run(async ctx => {
+    const slides = ctx.presentation.getSelectedSlides(); slides.load('items/id');
+    const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/left,items/top,items/width,items/height');
+    await ctx.sync();
+    if (!slides.items.length || !shapes.items.length) return 0;
+    const sh = ctx.presentation.slides.getItem(slides.items[0].id).shapes;
+    const x0 = Math.min(...shapes.items.map(s => s.left)), y0 = Math.min(...shapes.items.map(s => s.top));
+    const x1 = Math.max(...shapes.items.map(s => s.left + s.width)), y1 = Math.max(...shapes.items.map(s => s.top + s.height));
+    const pad = 6, X = x0 - pad, Y = y0 - pad, Wd = x1 - x0 + 2 * pad, Ht = y1 - y0 + 2 * pad;
+    const box = sh.addGeometricShape('RoundRectangle', { left: X, top: Y, width: Wd, height: Ht });
+    box.name = 'UULA Suspended Frame';
+    box.fill.setSolidColor('#FFFFFF'); box.fill.transparency = 0.22;
+    box.lineFormat.color = '#F5C242'; box.lineFormat.weight = 1.5;
+    try { box.adjustments.set(0, Math.min(0.5, 5 / Math.min(Wd, Ht))); } catch (e) {}
+    const tw = 74, th = 30, tri = 20, gap = 4, cx = X + Wd / 2, cy = Y + Ht / 2;
+    const left0 = cx - (tw + gap + tri) / 2;
+    const t = sh.addTextBox('مـعـلـق', { left: left0, top: cy - th / 2, width: tw, height: th });
+    t.name = 'UULA Suspended Label';
+    const tf = t.textFrame; tf.wordWrap = false; tf.autoSizeSetting = 'AutoSizeNone'; tf.verticalAlignment = 'Middle';
+    tf.leftMargin = 0; tf.rightMargin = 0; tf.topMargin = 0; tf.bottomMargin = 0;
+    const f = tf.textRange.font; f.name = 'UULA Sans'; f.size = 20; f.bold = true; f.color = '#F5C242';
+    tf.textRange.paragraphFormat.horizontalAlignment = 'Center';
+    const g = sh.addGeometricShape('Triangle', { left: left0 + tw + gap, top: cy - tri / 2 + 1, width: tri, height: tri * 0.88 });
+    g.name = 'UULA Suspended Sign';
+    g.fill.setSolidColor('#FFD54A'); g.lineFormat.color = '#1A1A1A'; g.lineFormat.weight = 0.9;
+    try {
+      const gt = g.textFrame; gt.leftMargin = 0; gt.rightMargin = 0; gt.topMargin = 3; gt.bottomMargin = 0; gt.verticalAlignment = 'Middle';
+      gt.textRange.text = '!'; gt.textRange.font.size = 11; gt.textRange.font.bold = true; gt.textRange.font.color = '#1A1A1A'; gt.textRange.paragraphFormat.horizontalAlignment = 'Center';
+    } catch (e) {}
+    [box, t, g].forEach(x => x.load('id')); await ctx.sync();
+    try { const grp = sh.addGroup([box.id, t.id, g.id]); grp.name = 'UULA Suspended'; await ctx.sync(); } catch (e) {}
+    return shapes.items.length;
+  });
+}
 async function pinRole(role, keepColour) {
   if (busy || !supported) return;
   busy = true; lock(); rsay('');
+  if (role === 'cancelled') {
+    try { const n = await suspendSelected(); rsay(n ? L('وُضع إطار «معلّق» حول المحدد.', 'The «suspended» frame was put around the selection.') : L('حدّد في الشريحة ما تريد تعليقه أولًا.', 'Select what to suspend on the slide first.')); }
+    catch (e) { rsay(L('تعذّر: ', 'Could not: ') + errText(e)); }
+    finally { busy = false; lock(); }
+    return;
+  }
   if (role in QUIET) {
     try {
       const n = await quietMark(role, keepColour);
