@@ -24,7 +24,7 @@ var TK_MENU_LEFT = 10;
       location.href = '../../index.html?v=' + Date.now();
     });
     document.body.insertBefore(b, document.body.firstChild);
-    menuIcons(); pinGraphMenu();
+    menuIcons(); pinGraphMenu(); menuBtnLeft();
   }
   function menuIcons() {
     var css2 = document.createElement('style'); css2.textContent = TK_MENU_CSS; document.head.appendChild(css2);
@@ -56,6 +56,21 @@ var TK_MENU_LEFT = 10;
     new MutationObserver(fit).observe(m, { attributes: true, attributeFilter: ['hidden', 'dir'] });
     tkIcon(q('#chkUpd'), 'upd'); tkIcon(q('#langItem'), 'lang'); tkIcon(q('#aboutBtn'), 'about');
     ['new', 'help', 'keys', 'news', 'about', 'edit'].forEach(function (a) { tkIcon(q('[data-act="' + a + '"]'), a); });
+  }
+  // the ☰ button sits at the far left of the tool's top bar, in Arabic and English
+  function menuBtnLeft() {
+    var mb = document.getElementById('menuBtn'); if (!mb) return;
+    var w = mb.closest('.appmenu') || mb, row = w.parentElement; if (!row) return;
+    var cs = getComputedStyle(row); if (cs.display.indexOf('flex') < 0) return;
+    var ltr = cs.direction === 'ltr', k = ltr ? -1 : 1;
+    var sp = document.createElement('span'); sp.style.cssText = 'flex:1 1 0;min-width:0;order:' + (97 * k); row.appendChild(sp);
+    var upd = document.getElementById('updBtn'); if (upd && upd.parentElement === row) { upd.style.order = 98 * k; upd.style.marginInlineStart = '0'; upd.style.marginInlineEnd = '0'; }
+    w.style.order = 99 * k; w.style.marginInlineStart = ltr ? '0' : '4px'; w.style.marginInlineEnd = ltr ? '4px' : '0';
+    // the same distance from the edge in every tool (TK_MENU_LEFT), whatever the tool's own padding
+    w.style.position = 'relative';
+    var line = function () { w.style.left = '0px'; var x = mb.getBoundingClientRect().left; w.style.left = (TK_MENU_LEFT - x) + 'px'; };
+    line(); addEventListener('resize', line);
+    new MutationObserver(line).observe(document.documentElement, { attributes: true, attributeFilter: ['lang', 'dir'] });
   }
   // UULA Graph opens its menus from the top bar (#mnu): keep them at the same left edge too
   function pinGraphMenu() {

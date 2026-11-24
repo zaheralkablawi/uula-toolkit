@@ -184,6 +184,11 @@ $('list').addEventListener('click', e => {
 
 // ---- menu / about ----
 const say = m => { $('status').textContent = m; if (m) setTimeout(() => { if ($('status').textContent === m) $('status').textContent = ''; }, 5000); };
+(function () { // the ☰ button: same distance from the left edge as in every tool
+  const w = $('menuBtn').closest('.appmenu') || $('menuBtn'); w.style.position = 'relative';
+  const line = () => { w.style.left = '0px'; w.style.left = (10 - $('menuBtn').getBoundingClientRect().left) + 'px'; };
+  line(); addEventListener('resize', line); new MutationObserver(line).observe(document.documentElement, { attributes: true, attributeFilter: ['lang', 'dir'] });
+})();
 function menu(o) { const m = $('appMenu'); m.hidden = !o; $('menuBtn').setAttribute('aria-expanded', String(o));
   // same place as in every tool: the left edge of the pane
   if (o) { m.style.position = 'fixed'; m.style.left = '10px'; m.style.right = 'auto'; m.style.top = ($('menuBtn').getBoundingClientRect().bottom + 4) + 'px'; } }

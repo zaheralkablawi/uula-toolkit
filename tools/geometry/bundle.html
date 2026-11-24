@@ -26,7 +26,7 @@ header .bt .root:only-child{color:var(--fg);font-size:15px;letter-spacing:0}
 .ib{width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:#fff;display:inline-flex;align-items:center;justify-content:center;color:var(--fg);position:relative;padding:0;cursor:pointer;flex:none}
 .ib:hover{border-color:var(--accent)}
 .ib:disabled{opacity:.45;cursor:default}
-.hsp{margin-inline-start:auto}
+.hsp{flex:1}
 .updbtn .dot{position:absolute;top:3px;left:3px;width:7px;height:7px;border-radius:50%;background:#e5322d}
 .appmenu{position:static}
 .menu{position:absolute;top:34px;left:0!important;right:auto!important;z-index:60;min-width:190px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.18);padding:4px;display:flex;flex-direction:column}
@@ -51,8 +51,8 @@ header .bt .root:only-child{color:var(--fg);font-size:15px;letter-spacing:0}
 #fig .hs:hover{stroke:rgba(31,113,222,.18)}
 #fig .hs.sel{stroke:rgba(31,113,222,.28)}
 #fig .hb{fill:transparent;cursor:move}
-#fig .hv{fill:#fff;stroke:#1f71de;stroke-width:1.6;cursor:grab}
-#fig .hv.sel{fill:#1f71de}
+#fig .hv{fill:transparent;pointer-events:all;stroke:#1f71de;stroke-width:1.6;cursor:grab}
+#fig .hv.sel{stroke-width:3}
 #fig .hc{fill:none;stroke:transparent;stroke-width:12;cursor:ew-resize}
 .ins{position:absolute;left:6px;bottom:6px;height:28px;padding:0 10px;border-radius:7px;border:1px solid var(--accent);background:var(--accent);color:#fff;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;cursor:pointer}
 .ins:hover{filter:brightness(1.08)}
@@ -112,7 +112,9 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
 <div class="wrap" id="app">
   <header>
     <h1 dir="ltr"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12.5" fill="none" stroke="#1f71de" stroke-width="2.6"/><path d="M16 8.6L23.4 21.6H8.6z" fill="none" stroke="#1f71de" stroke-width="2.3" stroke-linejoin="round"/></svg><span class="bt"><span class="root">UULA</span><span class="sub">Geometry</span></span></h1>
-    <button type="button" class="ib updbtn hsp" id="updBtn" hidden data-ti="upd" title="تحديث جديد" aria-label="تحديث جديد"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10a6 6 0 1 1-1.8-4.3"/><path d="M16.2 3.2v3.5h-3.5"/></svg><span class="dot"></span></button>
+    
+    <span class="hsp"></span>
+    <button type="button" class="ib updbtn" id="updBtn" hidden data-ti="upd" title="تحديث جديد" aria-label="تحديث جديد"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10a6 6 0 1 1-1.8-4.3"/><path d="M16.2 3.2v3.5h-3.5"/></svg><span class="dot"></span></button>
     <div class="appmenu" id="menuWrap">
       <button type="button" class="ib" id="menuBtn" aria-haspopup="true" aria-expanded="false" data-ti="menu" title="القائمة" aria-label="القائمة"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h12M4 10h12M4 14h12"/></svg></button>
       <div class="menu" id="appMenu" role="menu" hidden>
@@ -170,6 +172,13 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
       <button type="button" class="q cbtn" id="cMark" data-k="mark" data-ti="cMark" title="لون العلامات"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 19a12 12 0 0 1 8-12"/><path d="M5 19h14"/></svg><span class="cbar"></span></button>
       <select class="sel" id="fsSel" data-ti="fs" title="حجم الكتابة"></select>
     </div>
+    <div class="sty">
+      <button type="button" class="q" id="ptShow" data-ti="ptShow" title="النقاط على الرؤوس"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 19L12 5l7 14"/><circle cx="12" cy="5" r="2.6" fill="currentColor"/><circle cx="5" cy="19" r="2.6" fill="currentColor"/><circle cx="19" cy="19" r="2.6" fill="currentColor"/></svg></button>
+      <button type="button" class="q cbtn" id="cPt" data-k="pt" data-ti="cPt" title="لون النقاط"><svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="11" r="5" fill="currentColor"/></svg><span class="cbar"></span></button>
+      <select class="sel" id="ptSel" style="max-width:80px" data-ti="ptR" title="حجم النقطة"></select>
+      <button type="button" class="q" id="ptFull" data-ti="ptFull" title="نقطة مغلقة"><svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="currentColor"/></svg></button>
+      <button type="button" class="q" id="ptHollow" data-ti="ptHollow" title="نقطة مفرغة"><svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+    </div>
   </div>
   <footer>By Zaher Alkablawi <span id="ver"></span></footer>
 </div>
@@ -199,7 +208,7 @@ const T={
   insert:['إدراج','Insert'], update:['تحديث','Update'], onShape:['على الشكل','On the shape'], onSolid:['على المجسم','On the solid'], onCircle:['على الدائرة','On the circle'],
   style:['التنسيق','Style'], noColor:['بلا لون','No color'], booklet:['ألوان المذكرة','Booklet colors'], more:['ألوان أخرى','More colors'], custom:['لون آخر…','More…'], close:['إغلاق','Close'],
   upd:['تحديث جديد','New update'], menu:['القائمة','Menu'], undo:['تراجع','Undo'], rot:['تدوير','Rotate'], flip:['انعكاس','Flip'], reset:['الشكل الأصلي','Original shape'],
-  cLine:['لون الخط','Line color'], width:['سماكة الخط','Line width'], solid:['خط متصل','Solid line'], dash:['خط متقطع','Dashed line'], cFill:['التعبئة','Fill'], cText:['لون الكتابة','Text color'], cMark:['لون العلامات','Marks color'], fs:['حجم الكتابة','Text size'],
+  cLine:['لون الخط','Line color'], width:['سماكة الخط','Line width'], solid:['خط متصل','Solid line'], dash:['خط متقطع','Dashed line'], cFill:['التعبئة','Fill'], cText:['لون الكتابة','Text color'], cMark:['لون العلامات','Marks color'], fs:['حجم الكتابة','Text size'], ptShow:['النقاط على الرؤوس','Points on vertices'], cPt:['لون النقاط','Points color'], ptR:['حجم النقطة','Point size'], ptFull:['نقطة مغلقة','Filled point'], ptHollow:['نقطة مفرغة','Hollow point'], ptS:['صغيرة','Small'], ptM:['متوسطة','Medium'], ptL:['كبيرة','Large'],
   sca:['مختلف','Scalene'], iso:['متساوي الساقين','Isosceles'], equ:['متطابق','Equilateral'], rt:['قائم','Right'],
   hdash:['متقطعة','Dashed'], hhide:['مخفية','Hidden'], hsolid:['متصلة','Solid'],
   tri:['مثلث','Triangle'], sq:['مربع','Square'], rect:['مستطيل','Rectangle'], para:['متوازي أضلاع','Parallelogram'], rho:['معين','Rhombus'], trap:['شبه منحرف','Trapezoid'], poly:['مضلع منتظم','Regular polygon'], circ:['دائرة','Circle'],
@@ -260,10 +269,10 @@ function defaults(){
     s:{ kind:'cyl', hidden:'dash', names:true, dims:true, centers:true,
         size:{cube:{w:130},box:{w:180,h:105,d:130},prism:{w:170,h:120,d:150},pyr:{w:170,h:150,d:150},cyl:{r:75,h:150},cone:{r:80,h:170},sph:{r:92}},
         lab:{cube:{w:'٤ سم'},box:{w:'٦ سم',h:'٣ سم',d:'٤ سم'},prism:{w:'٥ سم',h:'٤ سم',d:'٨ سم'},pyr:{w:'٦ سم',h:'ع'},cyl:{r:'نق',h:'ع'},cone:{r:'نق',h:'ع',l:'ل'},sph:{r:'نق'}} },
-    look:{ line:'#000000', w:2, dash:false, fill:null, text:'#000000', mark:'#000000', fs:16 } };
+    look:{ line:'#000000', w:2, dash:false, fill:null, text:'#000000', mark:'#000000', fs:16, pt:'#000000', ptShow:false, ptR:3, ptFill:true } };
 }
 let S=defaults();
-try{ const t=localStorage.getItem('uula-geometry-state-v1'); if(t){ const o=JSON.parse(t); if(o&&o.v===1) S=Object.assign(defaults(),o); } }catch(e){}
+try{ const t=localStorage.getItem('uula-geometry-state-v1'); if(t){ const o=JSON.parse(t); if(o&&o.v===1){ const d=defaults(); S=Object.assign(d,o); S.look=Object.assign(defaults().look,o.look||{}); } } }catch(e){}
 function save(){ try{ localStorage.setItem('uula-geometry-state-v1',JSON.stringify(S)); }catch(e){} }
 let HIST=[]; const push=()=>{ HIST.push(JSON.stringify(S)); if(HIST.length>60) HIST.shift(); };
 function undo(){ if(!HIST.length) return; S=JSON.parse(HIST.pop()); closePop(); syncUI(); draw(); save(); }
@@ -277,7 +286,8 @@ function aux(a,b){ seg(a,b,{dash:true,w:Math.max(1,LK().w*.75)}); }
 function mk(a,b){ seg(a,b,{c:LK().mark,w:Math.max(1,LK().w*.7),dash:false}); }
 function arcP(c,r,a0,a1,o){ o=o||{}; PR.push({t:'ell',c,rx:r,ry:o.ry||r,a0,a1,c2:o.c||LK().mark,w:o.w||Math.max(1,LK().w*.7),dash:!!o.dash}); }
 function txt(p,s,o){ if(s==null||s==='') return; o=o||{}; PR.push({t:'txt',p,s:String(s),c:o.c||LK().text,fs:o.fs||LK().fs}); }
-function dotP(p,r){ PR.push({t:'dot',p,r:r||2.6,c:LK().line}); }
+function dotP(p){ const L2=LK(); PR.push({t:'dot',p,r:L2.ptR,c:L2.pt||L2.line,fill:L2.ptFill,w:Math.max(1,L2.w*.6)}); }
+function ptP(p){ if(LK().ptShow) dotP(p); }
 // زاوية بين اتجاهين من نقطة، بالاتجاه الأصغر (أقل من 180)
 function angSpan(P,A,B){ let a0=ang(sub(A,P)), a1=ang(sub(B,P)); let sw=((a1-a0)%360+360)%360; if(sw>180){ const t=a0; a0=a1; a1=t; sw=360-sw; } return {a0,a1:a0+sw,sw}; }
 function angleArcs(P,A,B,k,r0){ const s=angSpan(P,A,B); for(let i=0;i<k;i++) arcP(P,(r0||18)+i*4.5,s.a0,s.a1); return s; }
@@ -304,7 +314,8 @@ function buildPlane(){
     if(sd.show){ const m=mid(a,b); let nn=perp(nrm(sub(b,a))); if(dot(nn,sub(m,C))<0) nn=mul(nn,-1); let lp=m; if(FEET.some(f=>len(sub(f,m))<fs*2)){ const d=nrm(sub(b,a)), sh=Math.min(len(sub(b,a))*.28,fs*2.6); lp=add(m,mul(d,FEET.some(f=>dot(sub(f,m),d)>0)?-sh:sh)); }
     txt(add(lp,mul(nn,fs*.95)),sd.len||fmtLen(len(sub(b,a))/40)); } }
   // الرؤوس
-  for(let i=0;i<n;i++){ const V=G.verts[i], p=P[i], a=P[(i-1+n)%n], b=P[(i+1)%n];
+  FEET.forEach(f=>ptP(f));
+  for(let i=0;i<n;i++){ const V=G.verts[i], p=P[i], a=P[(i-1+n)%n], b=P[(i+1)%n]; ptP(p);
     if(V.right) rightMark(p,a,b);
     let r0=18; if(V.arcs){ angleArcs(p,a,b,V.arcs,18); r0=18+V.arcs*4.5; } else if(V.showAng&&!V.right){ angleArcs(p,a,b,1,16); r0=20; }
     if(V.showAng){ const s=angSpan(p,a,b), bi=rad((s.a0+s.a1)/2); const rr=r0+fs*.95+(s.sw<45?10:0); txt(add(p,[Math.cos(bi)*rr,Math.sin(bi)*rr]),V.ang||fmtAng(s.sw),{fs:fs*.85}); }
@@ -336,16 +347,16 @@ function feetList(G){ const P=G.pts, n=P.length, out=[];
 function buildCircle(){
   const K=S.c, c=K.c, r=K.r, sh=K.show, fs=LK().fs, A=K.a;
   const P=k=>[c[0]+r*Math.cos(rad(A[k])), c[1]+r*Math.sin(rad(A[k]))];
-  const lab=(k,name)=>{ if(!sh.names) return; const d=[Math.cos(rad(A[k])),Math.sin(rad(A[k]))]; txt(add(c,mul(d,r+fs*.9)),name); };
+  const lab=(k,name)=>{ ptP(P(k)); if(!sh.names) return; const d=[Math.cos(rad(A[k])),Math.sin(rad(A[k]))]; txt(add(c,mul(d,r+fs*.9)),name); };
   const swGH=(((A.G-A.H)%360)+360)%360;
   if(sh.sector) PR.push({t:'pie',c,r,a0:A.H,a1:A.H+swGH,fill:LK().fill||'#cfe0f8'});
   PR.push({t:'ell',c,rx:r,ry:r,a0:0,a1:360,c2:LK().line,w:LK().w,dash:LK().dash,fill:sh.sector?null:LK().fill});
   if(sh.arc) PR.push({t:'ell',c,rx:r,ry:r,a0:A.H,a1:A.H+swGH,c2:LK().mark,w:LK().w*1.8,dash:false});
   if(sh.center){ dotP(c); if(sh.names) txt(add(c,[fs*.7,fs*.75]),'م'); }
   if(sh.radius){ seg(c,P('A')); if(sh.meas) txt(add(mid(c,P('A')),mul(perp(nrm(sub(P('A'),c))),-fs*.8)),'نق',{fs:fs*.85}); lab('A','أ'); }
-  if(sh.diam){ seg(P('B'),[2*c[0]-P('B')[0],2*c[1]-P('B')[1]]); const opp=A.B+180; lab('B','ب'); if(sh.names){ const d=[Math.cos(rad(opp)),Math.sin(rad(opp))]; txt(add(c,mul(d,r+fs*.9)),'ج'); } }
+  if(sh.diam){ seg(P('B'),[2*c[0]-P('B')[0],2*c[1]-P('B')[1]]); const opp=A.B+180; lab('B','ب'); ptP([2*c[0]-P('B')[0],2*c[1]-P('B')[1]]); if(sh.names){ const d=[Math.cos(rad(opp)),Math.sin(rad(opp))]; txt(add(c,mul(d,r+fs*.9)),'ج'); } }
   if(sh.chord){ seg(P('D'),P('E')); lab('D','د'); lab('E','هـ'); }
-  if(sh.tangent){ const p=P('F'), d=perp([Math.cos(rad(A.F)),Math.sin(rad(A.F))]), L2=r*.85; seg(add(p,mul(d,L2)),sub(p,mul(d,L2))); dotP(p); rightMark(p,c,add(p,d),9); aux(c,p); lab('F','و'); }
+  if(sh.tangent){ const p=P('F'), d=perp([Math.cos(rad(A.F)),Math.sin(rad(A.F))]), L2=r*.85; seg(add(p,mul(d,L2)),sub(p,mul(d,L2))); rightMark(p,c,add(p,d),9); aux(c,p); if(!LK().ptShow) dotP(p); lab('F','و'); }
   const needGH=sh.arc||sh.sector||sh.central||sh.inscribed;
   if(sh.sector||sh.central){ seg(c,P('G')); seg(c,P('H')); }
   if(sh.central){ const s=angSpan(c,P('G'),P('H')); arcP(c,18,s.a0,s.a1); if(sh.meas){ const bi=rad((s.a0+s.a1)/2); txt(add(c,[Math.cos(bi)*(30+fs*.4),Math.sin(bi)*(30+fs*.4)]),fmtAng(s.sw),{fs:fs*.85}); } }
@@ -378,6 +389,7 @@ function buildSolid(){
     if(LK().fill){ F.forEach((f,fi)=>{ if(vis[fi]) PR.push({t:'poly',pts:f.map(i=>P2[i].slice()),fill:LK().fill}); }); }
     E.forEach((v,key)=>{ const [a,b]=key.split('-').map(Number); if(v) seg(P2[a],P2[b]); else if(hid!=='hide') seg(P2[a],P2[b],hidOpt()); });
     const C2=cen(P2);
+    P2.forEach(p=>ptP(p));
     if(Z.names) P2.forEach((p,i)=>{ const dd=nrm(sub(p,C2)); txt(add(p,mul(dd,fs*.95)),NAMES[i]); });
     if(Z.dims){
       if(k==='cube'||k==='box'){ const m=mid(P2[0],P2[1]); txt(add(m,[0,fs*1.05]),lb.w);
@@ -440,7 +452,7 @@ function primSVG(p){
   if(p.t==='pie'){ const a=ellPt(p.c,p.r,p.r,p.a0); return `<path d="M${f2(p.c[0])} ${f2(p.c[1])}L${f2(a[0])} ${f2(a[1])}${arcPath(p.c,p.r,p.r,p.a0,p.a1).replace(/^M[^A]*/,'')}Z" fill="${p.fill}" stroke="none"/>`; }
   if(p.t==='poly') return `<path d="M${p.pts.map(q=>f2(q[0])+' '+f2(q[1])).join('L')}Z" fill="${p.fill}" stroke="none"/>`;
   if(p.t==='txt') return `<text x="${f2(p.p[0])}" y="${f2(p.p[1])}" font-family="UULA Sans" font-size="${p.fs}" fill="${p.c}" text-anchor="middle" dominant-baseline="central" direction="rtl">${esc(p.s)}</text>`;
-  if(p.t==='dot') return `<circle cx="${f2(p.p[0])}" cy="${f2(p.p[1])}" r="${p.r}" fill="${p.c}"/>`;
+  if(p.t==='dot') return p.fill===false?`<circle cx="${f2(p.p[0])}" cy="${f2(p.p[1])}" r="${p.r}" fill="#ffffff" stroke="${p.c}" stroke-width="${p.w}"/>`:`<circle cx="${f2(p.p[0])}" cy="${f2(p.p[1])}" r="${p.r}" fill="${p.c}"/>`;
   return '';
 }
 function outSVG(pr){ const b=bboxPrims(pr), pad=4, x=b.x-pad, y=b.y-pad, w=b.w+2*pad, h=b.h+2*pad;
@@ -632,6 +644,11 @@ $('dims').addEventListener('input',e=>{ const t=e.target; if(!t.dataset.k) retur
 /* ---------- التنسيق ---------- */
 [1,1.5,2,2.5,3,4,6].forEach(w=>{ const o=document.createElement('option'); o.value=w; o.textContent=w+' pt'; $('wSel').appendChild(o); });
 [10,12,14,16,18,20,24,28,32].forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; $('fsSel').appendChild(o); });
+[[2,'ptS'],[3,'ptM'],[4.5,'ptL']].forEach(([r,k])=>{ const o=document.createElement('option'); o.value=r; o.dataset.i=k; o.textContent=L(k); $('ptSel').appendChild(o); });
+$('ptSel').onchange=()=>{ push(); S.look.ptR=+$('ptSel').value; draw(); save(); };
+$('ptShow').onclick=()=>{ push(); S.look.ptShow=!S.look.ptShow; syncUI(); draw(); save(); };
+$('ptFull').onclick=()=>{ push(); S.look.ptFill=true; syncUI(); draw(); save(); };
+$('ptHollow').onclick=()=>{ push(); S.look.ptFill=false; syncUI(); draw(); save(); };
 $('wSel').onchange=()=>{ push(); S.look.w=+$('wSel').value; draw(); save(); };
 $('fsSel').onchange=()=>{ push(); S.look.fs=+$('fsSel').value; draw(); save(); };
 $('dSolid').onclick=()=>{ push(); S.look.dash=false; syncUI(); draw(); save(); };
@@ -682,6 +699,7 @@ function syncUI(){
   $('onLab').textContent=L(tab==='p'?'onShape':tab==='c'?'onCircle':'onSolid');
   $('hint').textContent=L(tab==='p'?'hintP':tab==='c'?'hintC':'hintS');
   $('wSel').value=S.look.w; $('fsSel').value=S.look.fs; setP($('dSolid'),!S.look.dash); setP($('dDash'),S.look.dash);
+  $('ptSel').value=S.look.ptR; setP($('ptShow'),S.look.ptShow); setP($('ptFull'),S.look.ptFill); setP($('ptHollow'),!S.look.ptFill);
   paintColors(); syncChips(); syncDims();
 }
 function applyLang(){
@@ -739,7 +757,8 @@ async function insertNative(pr,json,bb){
         const s=shapes.addGeometricShape(full?'Ellipse':'Arc',box); if(full&&p.fill) s.fill.setSolidColor(p.fill); else s.fill.clear(); line(s,p.c2,p.w,p.dash); made.push(s); if(!full) arcs.push({s,a0:p.a0,a1:p.a1}); }
       else if(p.t==='pie'){ const s=shapes.addGeometricShape('Pie',{left:X(p.c[0]-p.r),top:Y(p.c[1]-p.r),width:2*p.r*sc,height:2*p.r*sc}); s.fill.setSolidColor(p.fill); s.lineFormat.visible=false; made.push(s); arcs.push({s,a0:p.a0,a1:p.a1}); }
       else if(p.t==='poly'){ for(let i=1;i<p.pts.length-1;i++) tri(p.pts[0],p.pts[i],p.pts[i+1],p.fill); }
-      else if(p.t==='dot'){ const s=shapes.addGeometricShape('Ellipse',{left:X(p.p[0]-p.r),top:Y(p.p[1]-p.r),width:2*p.r*sc,height:2*p.r*sc}); s.fill.setSolidColor(p.c); s.lineFormat.visible=false; made.push(s); }
+      else if(p.t==='dot'){ const s=shapes.addGeometricShape('Ellipse',{left:X(p.p[0]-p.r),top:Y(p.p[1]-p.r),width:2*p.r*sc,height:2*p.r*sc});
+        if(p.fill===false){ s.fill.setSolidColor('#ffffff'); line(s,p.c,p.w,false); } else { s.fill.setSolidColor(p.c); s.lineFormat.visible=false; } made.push(s); }
       else if(p.t==='txt'){ const w=p.fs*(.62*Math.max(1,p.s.length)+1.2), h=p.fs*1.5;
         const s=shapes.addTextBox(p.s,{left:X(p.p[0])-w/2,top:Y(p.p[1])-h/2,width:w,height:h}); const tf=s.textFrame;
         tf.wordWrap=false; tf.autoSizeSetting='AutoSizeNone'; tf.leftMargin=0; tf.rightMargin=0; tf.topMargin=0; tf.bottomMargin=0; tf.verticalAlignment='Middle';
