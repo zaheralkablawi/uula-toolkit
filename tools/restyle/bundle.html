@@ -4196,12 +4196,27 @@ async function insertTemplate(tid) {
         if (p.h != null && p.h > 0 && r.built.shapes[k].t !== 'text') s.height = p.h / PT;
       });
       await ctx.sync();
+      // a template that has its own place at the top of the page (the lesson title): what is already on the slide
+      // moves down as one piece, under the title with one page-grid line between them — nothing is restyled
+      if (URT.spec(tid, pkg.slideW).fixed) {
+        const mine = new Set(Object.keys(map).filter(i => +i >= r.first && +i < r.first + r.count).map(i => map[i].id));
+        const sh = ctx.presentation.slides.getItem(newId).shapes;
+        sh.load('items/id,items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
+        const W = pkg.slideW / PT, H = pkg.slideH / PT;
+        const rest = sh.items.filter(x => !mine.has(x.id) && !/^UULA (Footer|Watermark)|^CustomPageNumber_/.test((x.name || '').replace(/ #ur\d+$/, '')) && !(x.width > W * 0.85 && x.height > H * 0.6) && x.top < H - 54);
+        const onPage = rest.filter(x => x.left < W && x.left + x.width > 0);
+        if (onPage.length) {
+          const ROWE = 13.39, Y0 = 22.58, want = Y0 + Math.ceil((pl.bottom / PT + ROWE - Y0 - 0.3) / (ROWE / 2)) * (ROWE / 2);
+          const dy = want - Math.min(...onPage.map(x => x.top));
+          if (dy > 0.3) { rest.forEach(x => { x.top = x.top + dy; }); r.pushed = true; r.pushOver = Math.max(...onPage.map(x => x.top + x.height)) > H - 54 + 1; await ctx.sync(); }
+        }
+      }
       r.fitsReal = pl.bottom <= pkg.slideH - UR.FOOT;
       ctx.presentation.setSelectedSlides([newId]); await ctx.sync();
       try { ctx.presentation.slides.getItem(newId).setSelectedShapes([]); await ctx.sync(); } catch (e) {}
     });
     await unmark(newId);
-    const nm = tplName(tid); tsay(r.fitsReal === false ? L('تمت إضافة «' + nm[0] + '»، لكنه تجاوز أسفل الصفحة.', '«' + nm[1] + '» was added, but it goes past the bottom of the page.') : L('تمت إضافة «' + nm[0] + '» في الأسفل.', '«' + nm[1] + '» was added at the bottom.'));
+    const nm = tplName(tid); tsay(r.fitsReal === false ? L('تمت إضافة «' + nm[0] + '»، لكنه تجاوز أسفل الصفحة.', '«' + nm[1] + '» was added, but it goes past the bottom of the page.') : r.pushed ? (r.pushOver ? L('تمت إضافة «' + nm[0] + '» أعلى الصفحة ونزل المحتوى تحته، لكن المحتوى تجاوز أسفل الصفحة.', '«' + nm[1] + '» was added at the top and the content moved down, but it now goes past the bottom of the page.') : L('تمت إضافة «' + nm[0] + '» أعلى الصفحة، ونزل المحتوى تحته.', '«' + nm[1] + '» was added at the top; the content moved down under it.')) : L('تمت إضافة «' + nm[0] + '» في الأسفل.', '«' + nm[1] + '» was added at the bottom.'));
   } catch (e) { tsay(L('تعذّرت الإضافة: ', 'Could not insert: ') + errText(e)); }
   finally { busy = false; lock(); }
 }
