@@ -11,7 +11,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.6}
 [hidden]{display:none!important}
-.wrap{padding:8px 10px 12px;display:grid;gap:8px}
+.wrap{padding:8px 10px 12px;display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
 header{display:flex;align-items:center;gap:8px}
 h1{margin:0;display:flex;align-items:center;gap:7px;font-weight:500;direction:ltr;margin-left:auto}
 h1 svg{width:30px;height:30px;flex:none}
@@ -56,8 +56,32 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 .res .ok{color:var(--ok)}.res .warn{color:var(--warn)}.res .err{color:var(--err)}
 .res a{color:var(--accent);cursor:pointer;text-decoration:underline;unicode-bidi:isolate}
 .note{font-size:.74rem;color:var(--muted)}
-.tgroup{display:grid;gap:3px}
-.tgroup .gt{font-size:.7rem;color:var(--muted);font-weight:600;margin-top:1px}
+/* one card per group: the title on the side, then rows of 4 buttons that only get narrower (never move to another row);
+   when a button is too narrow for its words, only its sign stays */
+.tgroup{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:6px;border:1px solid var(--line);border-radius:9px;padding:6px 7px;background:#fafbfc}
+.tgroup .gt{font-size:.7rem;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:5px;white-space:nowrap;min-height:24px}
+.tgroup .tgrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.tgroup .subrows{display:grid;gap:4px;min-width:0}
+.subrow{display:grid;grid-template-columns:38px minmax(0,1fr);gap:4px;align-items:center}
+.sublab{font-size:.66rem;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden}
+.dirseg{width:auto!important;margin:0!important;height:24px;min-width:0}
+.dirseg button{height:22px;min-width:0}
+.dirseg svg{max-width:100%}
+.tgroup .tbtn{white-space:nowrap!important;min-width:0;container-type:inline-size}
+.tgroup .tbtn span{text-overflow:ellipsis!important;min-width:0}
+@container (max-width: 62px){ .tbtn span{display:none} .tbtn i{margin-inline:auto} }
+.tgroup .gt .bar{flex:none;width:3px;height:12px;border-radius:2px}
+#roles{display:grid;gap:6px}
+.sec.ico{width:32px;padding:0}
+.icoseg{width:96px!important;margin-inline-start:auto}
+.icoseg button{display:grid;place-items:center;padding:0}
+.selhint{font-size:.76rem;color:var(--muted);background:#f3f5f8;border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+.selhint b{color:#9aa3ad;font-weight:400}
+.selhint[data-on="1"]{color:#1f71de;background:#e7effc;border-color:#b9d0f5}
+.selhint[data-on="1"] b{color:#1f71de}
+.selhint[data-on="need"]{color:#b4541a;background:#fff4e5;border-color:#f3c58f}
+.selhint[data-on="need"] b{color:#b4541a;font-weight:700}
+.tbtn[style*="background"]:hover{filter:brightness(.95)}
 .tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
 .tbtn{font:inherit;font-size:.72rem;min-height:24px;padding:1px 5px;white-space:nowrap;overflow:hidden;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);cursor:pointer;text-align:start;display:flex;align-items:center;gap:4px;line-height:1.2}
 .drop{display:flex;align-items:center;gap:7px;width:100%;padding:0;border:0;background:none;color:var(--ink);font:inherit;font-size:.95rem;cursor:pointer;text-align:start}
@@ -68,6 +92,11 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 .tbtn:disabled{opacity:.5;cursor:default}
 .tbtn span{overflow:hidden;text-overflow:ellipsis}
 .tbtn i{flex:none;width:10px;height:10px;border-radius:2px;border:1px solid rgb(0 0 0 / .12)}
+.tbtn i.ic{width:16px;height:14px;border:0;border-radius:0;display:inline-flex;align-items:center;justify-content:center;font:700 11px/1 "UULA Sans",-apple-system,sans-serif;font-style:normal}
+.tbtn i.ic img{max-width:14px;max-height:14px}
+.tbtn i.ic b{display:block;border-radius:3px}
+#solRoles .tbtn{white-space:normal}
+#solRoles .tbtn span{text-overflow:clip}
 .modal{position:fixed;inset:0;z-index:60;background:rgb(0 0 0 / .35);display:grid;place-items:center;padding:16px}
 .mbox{background:var(--panel);border-radius:12px;max-width:420px;width:100%;max-height:80vh;overflow:auto;padding:14px 16px;box-shadow:0 16px 40px rgb(0 0 0 / .3)}
 .mbox h3{margin:0 0 8px;font-size:1rem}.mbox p{margin:6px 0}.mbox ul{margin:6px 0;padding-inline-start:1.2em}
@@ -115,9 +144,9 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
   </header>
 
   <nav class="tabs" id="tabs" role="tablist">
-    <button type="button" role="tab" data-tab="obj" aria-selected="true"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 3l11 6-5 1.5L8 16z"/></svg><span data-en="Format">تنسيق</span></button>
-    <button type="button" role="tab" data-tab="ins" aria-selected="false"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="14" height="5" rx="1.2"/><rect x="3" y="10" width="6" height="7" rx="1.2"/><rect x="11" y="10" width="6" height="7" rx="1.2"/></svg><span data-en="Insert">إدراج</span></button>
-    <button type="button" role="tab" data-tab="set" aria-selected="false"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2.2M10 15.3v2.2M2.5 10h2.2M15.3 10h2.2M4.7 4.7l1.6 1.6M13.7 13.7l1.6 1.6M4.7 15.3l1.6-1.6M13.7 6.3l1.6-1.6"/></svg><span data-en="Options">الخيارات</span></button>
+    <button type="button" role="tab" data-tab="obj" aria-selected="true"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 3l11 6-5 1.5L8 16z"/></svg><span data-en="Format &amp; insert">تنسيق وإدراج</span></button>
+    <button type="button" role="tab" data-tab="set" aria-selected="false"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 10s3-5.5 8-5.5S18 10 18 10s-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.4"/></svg><span data-en="Solutions">الحلول</span></button>
+    <button type="button" role="tab" data-tab="ins" aria-selected="false"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 3.5a3.5 3.5 0 00-3.3 4.6L3.6 13.7a1.4 1.4 0 002 2l5.6-5.6a3.5 3.5 0 004.6-3.3l-2 2-2.2-.6-.6-2.2z"/></svg><span data-en="Tools">أدوات</span></button>
   </nav>
   <nav class="tabs" id="wtabs" role="tablist" hidden style="grid-template-columns:1fr 1fr">
     <button type="button" role="tab" data-tab="wtag" aria-selected="true"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="14" height="12" rx="1.5" stroke-dasharray="3 2"/><path d="M6.5 8h7M6.5 11h5" stroke-linecap="round"/></svg><span data-en="Tag">تمييز</span></button>
@@ -131,23 +160,21 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
       <button type="button" data-v="cur" aria-pressed="true" data-en="Current slide">الشريحة الحالية</button>
       <button type="button" data-v="all" aria-pressed="false" data-en="All slides">كل الشرائح</button>
     </div>
-    <span class="gt2" data-en="Convert the font">تحويل الخط</span>
-    <span class="note" data-en="Converts the font to the UULA font">تحويل الخط إلى خط علا</span>
-    <button type="button" class="big" id="goBtn" data-en="Convert">تحويل</button>
+    <div class="sprow2" style="justify-content:space-between;grid-template-columns:auto auto"><span class="gt2" data-en="Restyle the slide">تحويل الشريحة لستايل علا</span><button type="button" class="big" id="goBtn" style="min-width:90px;padding:0 16px" data-en="Convert" data-ar-title="يحوّل الشريحة كلها إلى ستايل مذكرة علا: الخط والأحجام والألوان وترتيب المربعات." data-en-title="Restyles the whole slide to the UULA booklet: font, sizes, colours and the order of the boxes." title="يحوّل الشريحة كلها إلى ستايل مذكرة علا: الخط والأحجام والألوان وترتيب المربعات.">تحويل</button></div>
     <div class="sep"></div>
-    <span class="note" data-en="Select a box on the slide, then pick what it is.">حدّد مربعًا في الشريحة، ثم اختر نوعه.</span>
+    <div id="selHint" class="selhint"></div>
     <div id="roles" style="display:grid;gap:4px"></div>
     <div class="sep"></div>
-    <div class="sprow"><span class="splab gt2" data-en="Spacing">تنسيق المسافات</span>
-      <button type="button" class="sec" id="spV" data-ar-title="ضبط المسافات بين الكائنات من الأعلى والأسفل" data-en-title="Fix the vertical gaps between objects"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 2v12M5 4.5 8 1.8l3 2.7M5 11.5 8 14.2l3-2.7"/></svg><span data-en="Vertical">رأسي</span></button>
-      <button type="button" class="sec" id="spH" data-ar-title="محاذاة الكائنات إلى اليمين أو اليسار" data-en-title="Align objects to the right or left"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 8h12M4.5 5 1.8 8l2.7 3M11.5 5l2.7 3-2.7 3"/></svg><span data-en="Horizontal">أفقي</span></button>
-      <button type="button" class="sec" id="spD" data-ar-title="توزيع الكائنات على الشريحة كاملة: المساحة الفارغة تُقسم تحت الأسئلة ليكتب الطالب (إن وُجدت مساحة)" data-en-title="Spread the objects over the whole slide: the free space is shared under the questions for the student to write (if there is room)"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 2h10M3 14h10"/><rect x="5" y="5" width="6" height="2" rx=".5"/><rect x="5" y="9" width="6" height="2" rx=".5"/></svg><span data-en="Distribute">توزيع</span></button>
+    <div class="sprow" style="display:flex;gap:6px;align-items:center"><span class="splab gt2" style="white-space:nowrap" data-en="Spacing">تنسيق المسافات</span>
+      <button type="button" class="sec ico" id="spD" title="توزيع الكائنات على الشريحة كاملة: المساحة الفارغة تُقسم تحت الأسئلة ليكتب الطالب (إن وُجدت مساحة)" data-ar-title="توزيع الكائنات على الشريحة كاملة: المساحة الفارغة تُقسم تحت الأسئلة ليكتب الطالب (إن وُجدت مساحة)" data-en-title="Spread the objects over the whole slide: the free space is shared under the questions for the student to write (if there is room)"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 2h10M3 14h10"/><rect x="5" y="5" width="6" height="2" rx=".5"/><rect x="5" y="9" width="6" height="2" rx=".5"/></svg></button>
+      <button type="button" class="sec ico" id="spV" title="ضبط المسافات بين الكائنات من الأعلى والأسفل" data-ar-title="ضبط المسافات بين الكائنات من الأعلى والأسفل" data-en-title="Fix the vertical gaps between objects"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 2v12M5 4.5 8 1.8l3 2.7M5 11.5 8 14.2l3-2.7"/></svg></button>
+      <button type="button" class="sec ico" id="spH" title="محاذاة الكائنات إلى اليمين أو اليسار" data-ar-title="محاذاة الكائنات إلى اليمين أو اليسار" data-en-title="Align objects to the right or left"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 8h12M4.5 5 1.8 8l2.7 3M11.5 5l2.7 3-2.7 3"/></svg></button>
+      <div class="seg seg3 icoseg" id="hAlign">
+        <button type="button" data-v="auto" aria-pressed="true" title="محاذاة تلقائية" data-ar-title="محاذاة تلقائية" data-en-title="Automatic alignment"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 2.5l1.3 3.2 3.2 1.3-3.2 1.3L8 11.5 6.7 8.3 3.5 7l3.2-1.3z"/><path d="M12.5 11.5l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" stroke-width="1"/></svg></button>
+        <button type="button" data-v="right" aria-pressed="false" title="محاذاة لليمين" data-ar-title="محاذاة لليمين" data-en-title="Align right"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M14 3H4M14 6.5H7M14 10H4M14 13.5H7"/></svg></button>
+        <button type="button" data-v="left" aria-pressed="false" title="محاذاة لليسار" data-ar-title="محاذاة لليسار" data-en-title="Align left"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 3h10M2 6.5h7M2 10h10M2 13.5h7"/></svg></button>
+      </div>
     </div>
-    <div class="sprow2"><span class="splab" data-en="Alignment">المحاذاة الأفقية</span><div class="seg seg3" id="hAlign">
-      <button type="button" data-v="auto" aria-pressed="true" data-en="Auto">تلقائي</button>
-      <button type="button" data-v="right" aria-pressed="false" data-en="Right">يمين</button>
-      <button type="button" data-v="left" aria-pressed="false" data-en="Left">يسار</button>
-    </div></div>
   </section>
 
 
@@ -155,8 +182,11 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
     <button type="button" class="sec" id="docxBtn" data-ar-title="كل جزء مميز في ملف الوورد يصبح مربعًا مستقلًا بستايل علا" data-en-title="Every tagged part of the Word file becomes its own UULA box"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 1.5h6l3 3v10h-9z"/><path d="M5.5 7.5l1 4 1.5-3 1.5 3 1-4" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-en="Insert a Word file…">إدراج ملف وورد…</span></button>
     <input type="file" id="docxFile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
     <div class="sep"></div>
-    <span class="note" data-en="Added under the last object on the current slide.">يُضاف تحت آخر عنصر في الشريحة الحالية.</span>
-    <div id="tpls" style="display:grid;gap:4px"></div>
+    <span class="gt2" data-en="Page numbers">أرقام الصفحات</span>
+    <label class="chk"><input type="checkbox" id="numChk" checked> <span data-en="Number the pages after each conversion">ترقيم الصفحات بعد كل تحويل</span></label>
+    <div class="row" id="numRow"><span style="font-size:.82rem" data-en="Numbering starts at slide">يبدأ الترقيم من الشريحة</span><span style="display:flex;gap:6px;align-items:center"><input type="number" min="1" class="num" id="numStart" value="1"><button type="button" class="mini" id="numHere" data-en="Current">الحالية</button></span></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="mini" id="numAll" data-en="Update page numbers now">تحديث أرقام الصفحات الآن</button><button type="button" class="mini" id="numDel" data-en="Delete page numbers">حذف أرقام الصفحات</button></div>
+    <span class="note" data-en="The background, watermark and footer come from the slide layout; the tool leaves them as they are.">الخلفية والعلامة المائية والتذييل تأتي من تخطيط الشريحة (Layout)، والأداة لا تغيّرها.</span>
   </section>
 
   <section class="panel" data-pane="set" hidden>
@@ -169,11 +199,9 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
       <button type="button" data-v="0" aria-pressed="true" data-en="No lines">بدون سطور</button>
       <button type="button" data-v="1" aria-pressed="false" data-en="Lines">سطور للكتابة</button>
     </div></div>
-    <div class="sep"></div>
-    <label class="chk"><input type="checkbox" id="numChk" checked> <span data-en="Page numbers">ترقيم الصفحات</span></label>
-    <div class="row" id="numRow"><span style="font-size:.82rem" data-en="Numbering starts at slide">يبدأ الترقيم من الشريحة</span><span style="display:flex;gap:6px;align-items:center"><input type="number" min="1" class="num" id="numStart" value="1"><button type="button" class="mini" id="numHere" data-en="Current">الحالية</button></span></div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="mini" id="numAll" data-en="Update page numbers now">تحديث أرقام الصفحات الآن</button><button type="button" class="mini" id="numDel" data-en="Delete page numbers">حذف أرقام الصفحات</button></div>
-    <span class="note" data-en="The background, watermark and footer come from the slide layout; the tool leaves them as they are.">الخلفية والعلامة المائية والتذييل تأتي من تخطيط الشريحة (Layout)، والأداة لا تغيّرها.</span>
+    <span class="note" data-en="Before hiding, mark what the tool should treat differently: select it on the slide, then press its type.">قبل الإخفاء، ميّز ما تريد أن تعامله الأداة بشكل خاص: حدّده في الشريحة ثم اضغط نوعه.</span>
+    <div class="tgrid" id="solRoles"></div>
+    <div style="display:flex;gap:6px;margin-top:6px"><button type="button" class="ib" id="undoBtn" data-ar-title="تراجع عن آخر تمييز" data-en-title="Undo the last mark" title="تراجع عن آخر تمييز"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5L3.5 8.5 7 12"/><path d="M3.5 8.5H12a4.5 4.5 0 010 9H9"/></svg></button><button type="button" class="ib" id="redoBtn" data-ar-title="إعادة التمييز" data-en-title="Redo the mark" title="إعادة التمييز"><svg style="transform:scaleX(-1)" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5L3.5 8.5 7 12"/><path d="M3.5 8.5H12a4.5 4.5 0 010 9H9"/></svg></button></div>
   </section>
 
   <section class="panel" data-pane="wtag" hidden>
@@ -374,6 +402,12 @@ async function openPackage(b64) {
   const slidePath = names.find(n => /^ppt\/slides\/slide\d+\.xml$/.test(n));
   const relsPath = slidePath.replace('slides/', 'slides/_rels/') + '.rels';
   const files = { slide: await zip.file(slidePath).async('string') };
+  // the review marks drawn on the slide («Show marks») are never part of the work: they go before anything reads the slide
+  if (/name="UULA Mark/.test(files.slide)) {
+    const d = parseXml(files.slide);
+    for (const n of [...desc(d, 'p', 'cNvPr')].filter(n => /^UULA Mark/.test(n.getAttribute('name') || ''))) { const sp = n.parentNode && n.parentNode.parentNode; if (sp && sp.parentNode) sp.parentNode.removeChild(sp); }
+    files.slide = serialize(d);
+  }
   files.rels = zip.file(relsPath) ? await zip.file(relsPath).async('string')
     : '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="' + NS.rel + '"/>';
   let slideW = 6858000, slideH = 9899650;
@@ -853,6 +887,7 @@ function styleText(it, ctx, pkg, forcedRole) {
   for (const pr of roles) {
     const st = STY[pr.role] || STY.body;
     let ar = pr.text ? AR.test(pr.text) : arAll;
+    if (pr.role === 'choice' && ctx.choiceDir) { ar = ctx.choiceDir === 'rtl'; choiceLetterDir(pr.p, ar); }
     // an equation line inside an Arabic box stays on the right with the text around it
     if (!ar && arAll && pr.role !== 'question' && desc(pr.p, 'm', 'oMath').length && !desc(pr.p, 'a', 't').some(x => /[A-Za-z]{3,}/.test(x.textContent))) ar = true;
     let bullet = null, marL = 0, indent = 0;
@@ -916,10 +951,12 @@ function styleTable(it, ctx, W) {
   const cellText = tc => textOf(tc).trim();
   // the answer table at the end of the objective exercises: a cell reading exactly "الحل"
   const sol = rows.some(r => kids(r, 'tc', 'a').some(tc => /^(الحل|الإجابة|الاجابة)$/.test(cellText(tc)))) && !/شرط الحل/.test(textOf(tbl));
-  const firstColHead = rows.length > 1 && rows.every(r => { const t = kids(r, 'tc', 'a')[0]; return t && cellText(t); }) && grid.length > 2 && !sol
-    ? false : false;
+  // chosen by hand (Format → Tables): with a main column (labels column DAE0E9) / without a header row
+  const opt = it.tableOpt || {};
+  const firstColHead = !!opt.mainCol && !sol;
   // a header row has short labels; a table of statements (true / false, sentences) has none
-  const headRow = rows.length > 1 && kids(rows[0], 'tc', 'a').every(tc => cellText(tc).length <= 25 && !/[.؟?]\s*$/.test(cellText(tc)));
+  const headRow = opt.head === false ? false : opt.head === true ? rows.length > 1
+    : rows.length > 1 && kids(rows[0], 'tc', 'a').every(tc => cellText(tc).length <= 25 && !/[.؟?]\s*$/.test(cellText(tc)));
   rows.forEach((tr, ri) => {
     tr.setAttribute('h', '254000');
     kids(tr, 'tc', 'a').forEach((tc, ci) => {
@@ -1604,10 +1641,11 @@ function markNames(doc) {
 // ---------- one object at a time ----------
 // the user picks what a selected object is; its name keeps the choice ("UULA:answer …") so a later
 // full conversion respects it. Selected shapes carry " #ursel" at the end of their name.
-function applyRole(pkg, role) {
+function applyRole(pkg, role, opt) {
   const W = pkg.slideW, H = pkg.slideH, CW = W - 2 * M;
   const doc = parseXml(pkg.files.slide);
   const ctx = { scheme: readTheme(pkg.files), bodySz: 1100 };
+  opt = opt || {};
   const rels = makeRels(pkg);
   NEXT = maxId(doc) + 1;
   const spTree = spTreeOf(doc);
@@ -1622,12 +1660,39 @@ function applyRole(pkg, role) {
   let shift = 0;
   for (const t of sel.sort((a, b) => a.g.y - b.g.y)) {
     t.g = Object.assign({}, t.g, { y: t.g.y + shift });
-    if (t.kind === 'table') { t.fullW = false; styleTable(t, ctx, W); rename(t, 'table'); out.push({ idx: t.i, kind: 'table' }); continue; }
-    if (['given', 'correct'].includes(role)) { rename(t, role); continue; }       // marks only: no styling, no moving
+    if (t.kind === 'table') {
+      t.fullW = false;
+      t.tableOpt = role === 'tableMain' ? { head: true, mainCol: true } : role === 'tablePlain' ? { head: false } : role === 'table' ? { head: true } : {};
+      styleTable(t, ctx, W); rename(t, 'table'); out.push({ idx: t.i, kind: 'table' }); continue;
+    }
+    if (/^table/.test(role)) continue;                                        // a table style chosen for something that is not a table
+    if (role === 'given') { rename(t, role); continue; }                       // a mark only: never hidden as a solution, no styling, no moving
+    if (role === 'correct') {
+      // the correct choice: its text bold 2070DF (the skill), the box stays where it is
+      for (const c of allCores(t.el)) for (const pr of [...desc(c, 'a', 'rPr'), ...desc(c, 'a', 'endParaRPr')]) {
+        removeKids(pr, ['noFill', 'solidFill', 'gradFill', 'blipFill', 'pattFill', 'grpFill']);
+        placeChild(pr, solid(doc, C.answerOk), RPR_ORDER); pr.setAttribute('b', '1');
+      }
+      rename(t, role); continue;
+    }
     if (t.kind === 'pic' || t.kind === 'grpSp') { stylePic(t, false); rename(t, role === 'answer' ? 'answer' : 'pic'); out.push({ idx: t.i, kind: 'pic' }); continue; }
     if (t.kind !== 'text') { rename(t, role); continue; }
     const isBox = BOX_ROLES.includes(role);
+    // multiple-choice options: right-to-left (ⓐ on the right) or left-to-right (ⓐ on the left, as in English).
+    // «auto»: Arabic options, or an Arabic question above them → right-to-left; otherwise left-to-right
+    if (role === 'choice') {
+      let dir = opt.dir || 'auto';
+      if (dir === 'auto') {
+        if (AR.test(t.text || '')) dir = 'rtl';
+        else {
+          const above = items.filter(o => o !== t && o.kind === 'text' && o.g.y + o.g.h <= t.g.y + 2 * PT && (o.text || '').trim()).sort((a, b) => (b.g.y + b.g.h) - (a.g.y + a.g.h))[0];
+          dir = above ? (AR.test(above.text) ? 'rtl' : 'ltr') : 'rtl';
+        }
+      }
+      ctx.choiceDir = dir;
+    }
     styleText(t, ctx, pkg, isBox ? 'body' : role);
+    ctx.choiceDir = null;
     setBody(t.c, {});
     plainShape(t.c, false);
     rename(t, role);
@@ -1636,12 +1701,12 @@ function applyRole(pkg, role) {
     else if (role === 'lesson') setGeom(t.el, { x: M, y: 42.7 * PT, w: CW });
     else if (isBox) {
       const B = BOX[role];
-      const iconW = B.icon ? 15 * PT : 0;
+      const iconGap = B.icon ? 15 * PT : 0;
       // something beside the text (a graph …): the container covers only the text's side
       const beside = items.some(o => o !== t && o.g.w && !/^UULA (Footer|Watermark)|^CustomPageNumber_/.test(o.name)
         && Math.min(o.g.y + o.g.h, t.g.y + t.g.h) - Math.max(o.g.y, t.g.y) > 4 * PT && (o.g.x + o.g.w <= t.g.x + 2 * PT || o.g.x >= t.g.x + t.g.w - 2 * PT));
       const narrow = role === 'other' || beside;
-      const tx = narrow ? t.g.x : M, tw = role === 'other' ? t.g.w - 24 * PT : narrow ? Math.min(t.g.w, W - M - iconW - t.g.x) : CW - iconW;
+      const tx = narrow ? t.g.x : M, tw = role === 'other' ? t.g.w - 24 * PT : narrow ? Math.min(t.g.w, W - M - iconGap - t.g.x) : CW - iconGap;
       const est = estimateText(t.c, tw);
       const top = role === 'other' ? t.g.y - 4 * PT : t.g.y - ROW;
       const boxH = role === 'other' ? est + 8 * PT : est + 3 * ROW;
@@ -1844,7 +1909,73 @@ function align(rects, W, mode, only) {
 // ---------- a container around the selected objects ----------
 // the selected objects (" #ursel" at the end of their name) get the container behind them: full width, one line
 // above and two below the content, the icon on the right and the content kept clear of it. Their text keeps its roles.
-const WRAP = { note: 'note', quote: 'quote', formula: 'formula', activity: 'activity', mars: 'mars', other: 'other', cancelled: 'cancelled', practice: 'practice' };
+const WRAP = { note: 'note', quote: 'quote', formula: 'formula', activity: 'activity', mars: 'mars', other: 'other', cancelled: 'cancelled' };   // «Practice» is the end of the lesson: always its own box under the last object
+// the selected pictures (graphs …) give their place to the UULA empty grid, cut to each picture's size
+// (lines A0A8B4, 0.75pt, clear in print, every two page-grid steps, running off the edges, the cut centred on the picture)
+function gridCutX(id, name, g) {
+  const w = Math.max(1, Math.round(g.w)), h = Math.max(1, Math.round(g.h)), step = ROW * 1.75;
+  const ox = (w / 2) % step, oy = (h / 2) % step;
+  let path = '';
+  for (let x = ox; x <= w + 1; x += step) { const v = Math.min(w, Math.round(x)); path += '<a:moveTo><a:pt x="' + v + '" y="0"/></a:moveTo><a:lnTo><a:pt x="' + v + '" y="' + h + '"/></a:lnTo>'; }
+  for (let y = oy; y <= h + 1; y += step) { const v = Math.min(h, Math.round(y)); path += '<a:moveTo><a:pt x="0" y="' + v + '"/></a:moveTo><a:lnTo><a:pt x="' + w + '" y="' + v + '"/></a:lnTo>'; }
+  return '<p:sp><p:nvSpPr><p:cNvPr id="' + id + '" name="' + name + '"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="' + Math.round(g.x) + '" y="' + Math.round(g.y) + '"/><a:ext cx="' + w + '" cy="' + h + '"/></a:xfrm>'
+    + '<a:custGeom><a:avLst/><a:gdLst/><a:ahLst/><a:cxnLst/><a:rect l="0" t="0" r="r" b="b"/><a:pathLst><a:path w="' + w + '" h="' + h + '" fill="none">' + path + '</a:path></a:pathLst></a:custGeom>'
+    + '<a:noFill/><a:ln w="9525"><a:solidFill><a:srgbClr val="A0A8B4"/></a:solidFill></a:ln></p:spPr></p:sp>';
+}
+function gridOver(pkg) {
+  const doc = parseXml(pkg.files.slide);
+  NEXT = maxId(doc) + 1;
+  const all = topItems(doc).map(el => { const c = core(el), n = cnvOf(c); return { el, c, name: n ? n.getAttribute('name') || '' : '', g: geomOf(el, pkg) }; });
+  const sel = all.filter(t => / #ursel$/.test(t.name));
+  for (const t of sel) for (const c of allCores(t.el)) { const n = cnvOf(c); if (n) n.setAttribute('name', (n.getAttribute('name') || '').replace(/ #ursel$/, '')); }
+  // a picture, a group (a graph drawn from shapes) or a chart; not a text box or a table
+  const pics = sel.filter(t => t.g && t.g.w > 0 && t.g.h > 0 && (t.c.localName === 'pic' || t.el.localName === 'grpSp' || (t.c.localName === 'graphicFrame' && !desc(t.c, 'a', 'tbl').length)));
+  // the picture stays, parked aside as the hidden original; the grid is its view (as a hidden graph solution)
+  for (const t of pics) {
+    const base = (cnvOf(t.c) && cnvOf(t.c).getAttribute('name') || 'Graph').replace(/^UULA:[a-z]+\s*/, '') || 'Graph';
+    const sp = frag(doc, gridCutX(NEXT++, 'UULA SolView UULA:graph ' + base + ' #ursel', t.g));
+    t.el.parentNode.insertBefore(sp, t.el.nextSibling);
+    for (const c of allCores(t.el)) { const n = cnvOf(c); if (n) n.setAttribute('name', 'UULA SolHidden UULA:graph ' + (n.getAttribute('name') || '').replace(/^UULA:[a-z]+\s*/, '')); }
+    setGeom(t.el, { x: t.g.x + PARK * pkg.slideW });
+  }
+  return { xml: serialize(doc), count: pics.length, sel: sel.length };
+}
+// the letter of an option (ⓐ … or a) …) counts as left-to-right text: in a right-to-left line followed by English it would
+// stay on the left. An invisible right-to-left mark (U+200F) after the letter puts it on the right; left-to-right drops it.
+function choiceLetterDir(p, rtl) {
+  const t = desc(p, 'a', 't').find(x => x.textContent.trim());
+  if (!t) return;
+  const m = t.textContent.match(/^(\s*(?:[ⓐ-ⓩⒶ-Ⓩ]|\(?[A-Da-d][).]))‏?/);
+  if (!m) return;
+  t.textContent = m[1] + (rtl ? '‏' : '') + t.textContent.slice(m[0].length);
+}
+// the selected multiple-choice options turned to the other direction: every paragraph right-to-left (algn r) or
+// left-to-right (algn l), and options standing side by side swap places so ⓐ is on the right (rtl) or the left (ltr)
+function flipChoices(pkg, dir) {
+  const doc = parseXml(pkg.files.slide);
+  const items = topItems(doc).map(el => { const c = core(el), n = cnvOf(c); return { el, c, n, name: n ? n.getAttribute('name') || '' : '', g: geomOf(el, pkg), text: textOf(c).trim() }; });
+  const sel = items.filter(t => / #ursel$/.test(t.name));
+  // the selected ones keep their mark: the pane selects them again afterwards (to turn them again at once)
+  const texts = sel.filter(t => t.c.localName === 'sp' && kid(t.c, 'txBody', 'p'));
+  const rtl = dir === 'rtl';
+  for (const t of texts) for (const p of kids(kid(t.c, 'txBody', 'p'), 'p', 'a')) {
+    let pPr = kid(p, 'pPr', 'a'); if (!pPr) { pPr = mk(doc, 'a', 'pPr'); p.insertBefore(pPr, p.firstChild); }
+    pPr.setAttribute('algn', rtl ? 'r' : 'l'); pPr.setAttribute('rtl', rtl ? '1' : '0');
+    choiceLetterDir(p, rtl);
+  }
+  // side by side (the same line): the places are kept, the order of the options turns
+  const letter = t => { const m = t.text.match(/[ⓐ-ⓩⒶ-Ⓩ]|^\(?([A-Da-dأبجد])[).]/); if (!m) return null; const ch = m[1] || m[0]; return 'ⓐⓑⓒⓓⒶⒷⒸⒹabcdABCDأبجد'.indexOf(ch) % 4; };
+  const rows = [];
+  for (const t of texts.filter(t => t.g)) { const r = rows.find(r => Math.abs(r[0].g.y - t.g.y) < 4 * PT); if (r) r.push(t); else rows.push([t]); }
+  let moved = 0;
+  for (const r of rows.filter(r => r.length > 1)) {
+    const slots = r.map(t => t.g.x).sort((a, b) => a - b);
+    const known = r.every(t => letter(t) != null);
+    const order = known ? [...r].sort((a, b) => letter(a) - letter(b)) : [...r].sort((a, b) => b.g.x - a.g.x);
+    (rtl ? [...slots].reverse() : slots).forEach((x, k) => { const t = order[k]; if (t.g.x !== x) { setGeom(t.el, { x }); moved++; } });
+  }
+  return { xml: serialize(doc), count: texts.length, moved };
+}
 function wrapBox(pkg, type) {
   const W = pkg.slideW, H = pkg.slideH;
   const doc = parseXml(pkg.files.slide);
@@ -1925,6 +2056,32 @@ const NEG = c => { const p = c.codePointAt(0);
   return c; };
 const hasSolutions = xml => /name="UULA SolHidden /.test(xml);
 // what would be hidden on this slide; pics that need an empty-grid image are listed with their media path
+// blue text inside a table is a solution, in any cell (header and labels too): only the black text stays
+function tableBlueRuns(tbl) {
+  const out = [];
+  for (const tc of desc(tbl, 'a', 'tc')) {
+    for (const r of desc(tc, 'a', 'rPr')) {
+      const c = desc(r, 'a', 'srgbClr')[0], v = c ? (c.getAttribute('val') || '') : '';
+      if (/^[0-9A-F]{6}$/i.test(v) && isBlue(rgb(v.toUpperCase()))) out.push(r);
+    }
+  }
+  return out;
+}
+
+// small circles filled in blue (a chosen answer: ⓐ ⓑ … coloured in), on their own, with their letter, or inside a group
+function blueDots(el, ctx) {
+  const out = [];
+  for (const sp of [el, ...el.getElementsByTagName('*')].filter(n => n.localName === 'sp')) {
+    const pg = desc(sp, 'a', 'prstGeom')[0];
+    if (!pg || !/ellipse|flowChartConnector/.test(pg.getAttribute('prst') || '')) continue;
+    const spPr = kid(sp, 'spPr', 'p'), ext = spPr && desc(spPr, 'a', 'ext')[0];
+    if (!ext || +ext.getAttribute('cx') > 40 * PT || +ext.getAttribute('cy') > 40 * PT) continue;
+    const c = colorOf(kid(spPr, 'solidFill', 'a'), ctx);
+    if (c && isBlue(rgb(c))) out.push(sp);
+  }
+  return out;
+}
+
 function findSolutions(pkg) {
   const W = pkg.slideW, H = pkg.slideH;
   const doc = parseXml(pkg.files.slide);
@@ -1940,10 +2097,13 @@ function findSolutions(pkg) {
     const pin = PIN.exec(t.name);
     if (pin && pin[1] === 'given') continue;                                   // part of the question: never touched
     if (pin && pin[1] === 'correct') { found.push({ i: t.i, how: 'copy', correct: true }); continue; }
+    // marked by hand as a graph solution: on hiding, the empty graph grid of the same size takes its place
+    if (pin && pin[1] === 'graph') { found.push({ i: t.i, how: 'grid', pinned: true, w: t.g.w / PT, h: t.g.h / PT }); continue; }
+    // marked as a solution: hidden whole (a drawing of a triangle … gets no grid)
     if (pin && pin[1] === 'answer') {
-      if (t.kind === 'pic') { const blip = desc(t.c, 'a', 'blip')[0], rid = blip && blip.getAttributeNS(NS.r, 'embed'), target = rid && relT(rid); if (target) { found.push({ i: t.i, how: 'grid', pinned: true, media: 'ppt/media/' + target.split('/').pop() }); continue; } }
       found.push({ i: t.i, how: 'hide' }); continue;
     }
+    if (blueDots(t.el, ctx).length) { found.push({ i: t.i, how: 'copy', dots: true }); continue; }
     if (t.kind === 'text') {
       if (['lesson', 'chapter'].includes(t.role) || t.fill) continue;
       const roles = paraRoles(t, ctx, pkg).filter(r => r.text);
@@ -1954,13 +2114,19 @@ function findSolutions(pkg) {
       const neg = /[❶-❿⓫-⓴]|\uD83C[\uDD50-\uDD69]/.test(t.text);
       // answers written inside the question's line (marked from Word: bmk="UULA:answer" / "UULA:correct")
       if (desc(t.c, 'a', 'rPr').some(pr => /^UULA:(answer|correct)$/.test(pr.getAttribute('bmk') || ''))) { found.push({ i: t.i, how: 'copy' }); continue; }
+      // a box written all in blue (text and equations) is a solution, wherever it stands
+      const runs = [...desc(t.c, 'a', 'r'), ...desc(t.c, 'm', 'r')].filter(r => /\S/.test(desc(r, 'a', 't').concat(desc(r, 'm', 't')).map(x => x.textContent).join('')));
+      const blueRun = r => { const pr = kid(r, 'rPr', 'a'); const c = pr && colorOf(kid(pr, 'solidFill', 'a'), ctx); return !!c && isBlue(rgb(c)); };
+      const realChoice = roles.some(r => r.role === 'choice' || /[①-⓿❶-➓]/.test(bulletChar(r.p) || '')) || (roles.length === 1 && roles[0].text.length < 25);
+      if (runs.length && runs.every(blueRun) && !realChoice) { found.push({ i: t.i, how: 'hide' }); continue; }
       if (ans.length === roles.length && !blueChoice.length) found.push({ i: t.i, how: 'hide' });
       else if (ans.length || blueChoice.length || neg) found.push({ i: t.i, how: 'copy' });
       continue;
     }
     if (t.kind === 'table') {
       if (desc(t.c, 'a', 'tc').some(tc => /^(الحل|الإجابة|الاجابة)$/.test(textOf(tc).trim()))
-        || desc(t.c, 'a', 'rPr').some(pr => /^UULA:(answer|correct)$/.test(pr.getAttribute('bmk') || ''))) found.push({ i: t.i, how: 'copy' });
+        || desc(t.c, 'a', 'rPr').some(pr => /^UULA:(answer|correct)$/.test(pr.getAttribute('bmk') || ''))
+        || tableBlueRuns(t.c).length) found.push({ i: t.i, how: 'copy' });
       continue;
     }
     if (t.kind === 'shape' && /ellipse|flowChartConnector/.test((desc(t.c, 'a', 'prstGeom')[0] || { getAttribute: () => '' }).getAttribute('prst')) && t.g.w < 34 * PT && t.g.h < 34 * PT && t.fill && lum(t.fill) < 250) { found.push({ i: t.i, how: 'copy' }); continue; }
@@ -1978,7 +2144,8 @@ function findSolutions(pkg) {
       if (!given && (qs.length || above.length || besideAns)) {
         const blip = desc(t.c, 'a', 'blip')[0], rid = blip && blip.getAttributeNS(NS.r, 'embed');
         const target = rid && relT(rid);
-        if (target) found.push({ i: t.i, how: 'grid', media: 'ppt/media/' + target.split('/').pop() });
+        // graphs are marked by hand («حل بياني»): an unmarked picture is never swapped for a grid
+        void target;
       }
     }
   }
@@ -2046,10 +2213,17 @@ function hideSolutions(pkg, grids, opts) {
   let n = 0;
   for (const f of list) {
     const t = items.find(x => x.i === f.i); if (!t) continue;
-    if (f.how === 'grid' && !grids[f.i]) { if (!f.pinned) continue; f.how = 'hide'; }   // no drawing found: hide it (marked) or leave it
+    if (f.how === 'grid' && !grids[f.i]) { if (!f.pinned) continue; f.how = 'hide'; }   // no grid picture: hide it (marked) or leave it
     n++;
-    const view = f.how === 'hide' ? null : t.el.cloneNode(true);
+    let view = f.how === 'hide' ? null : t.el.cloneNode(true);
+    // a graph that is not a picture (drawn shapes, a chart): its view is a new picture of the grid at its place and size
+    if (f.how === 'grid' && t.kind !== 'pic') {
+      const id = rels.image('grid' + f.i + '_' + Date.now().toString(36), grids[f.i]);
+      view = frag(doc, picX(t.name.replace(/^UULA:[a-z]+\s*/, '') || 'Graph', id, t.g.x, t.g.y, t.g.w, t.g.h));
+    }
     for (const c of allCores(t.el)) { const nv = cnvOf(c); if (nv) { nv.setAttribute('hidden', '1'); nv.setAttribute('name', 'UULA SolHidden ' + (nv.getAttribute('name') || '')); } }
+    // the original also waits off the slide (PowerPoint does not always keep "hidden" on shapes with equations)
+    setGeom(t.el, { x: t.g.x + PARK * W });
     if (!view && opts.lines && t.kind === 'text') {
       // one line under every text line: counted from the text itself (the box can be shorter than its text)
       const ps = kids(kid(t.c, 'txBody', 'p'), 'p', 'a');
@@ -2063,9 +2237,17 @@ function hideSolutions(pkg, grids, opts) {
     if (!view) continue;
     for (const c of allCores(view)) { const nv = cnvOf(c); if (nv) { nv.setAttribute('id', String(NEXT++)); nv.setAttribute('name', 'UULA SolView ' + (nv.getAttribute('name') || '')); nv.removeAttribute('hidden'); } }
     const vt = { c: core(view), el: view, text: t.text, g: t.g, box: null, ph: null };
+    if (f.dots) {
+      // the coloured-in circles lose their colour (the circle, its outline and its letter stay)
+      for (const sp of blueDots(view, ctx)) { const spPr = kid(sp, 'spPr', 'p'); removeKids(spPr, FILLS); placeChild(spPr, mk(doc, 'a', 'noFill'), SPPR_ORDER); for (const pr of desc(sp, 'a', 'rPr')) { removeKids(pr, FILLS); placeChild(pr, solid(doc, '000000'), RPR_ORDER); } }
+      t.el.parentNode.insertBefore(view, t.el.nextSibling);
+      continue;
+    }
     if (f.how === 'grid') {
       const id = rels.image('grid' + f.i + '_' + Date.now().toString(36), grids[f.i]);
       for (const b of desc(view, 'a', 'blip')) { b.setAttributeNS(NS.r, 'r:embed', id); for (const e of [...b.children]) b.removeChild(e); }
+      // the empty grid is drawn at the picture's own size: no crop of the old picture on it
+      for (const s of desc(view, 'a', 'srcRect')) s.parentNode.removeChild(s);
     } else if (t.kind === 'text') {
       const roles = paraRoles(vt, ctx, pkg);
       const W45 = W * 0.45;
@@ -2106,6 +2288,8 @@ function hideSolutions(pkg, grids, opts) {
         if (!tcs.some(tc => /^(الحل|الإجابة|الاجابة)$/.test(textOf(tc).trim()))) continue;
         for (const tc of tcs) { if (/^(الحل|الإجابة|الاجابة)$/.test(textOf(tc).trim())) continue; for (const pr of [...desc(tc, 'a', 'rPr'), ...desc(tc, 'a', 'endParaRPr')]) { removeKids(pr, FILLS); placeChild(pr, frag(doc, '<a:solidFill><a:srgbClr val="FFFFFF"><a:alpha val="0"/></a:srgbClr></a:solidFill>'), RPR_ORDER); } }
       }
+      // blue text in the cells is the filled-in answer: it disappears (black text and the header stay)
+      for (const pr of tableBlueRuns(view)) { removeKids(pr, FILLS); placeChild(pr, frag(doc, '<a:solidFill><a:srgbClr val="FFFFFF"><a:alpha val="0"/></a:srgbClr></a:solidFill>'), RPR_ORDER); }
       // answers marked inside cells (from Word): blank to fill / the correct choice turns black
       for (const pr of desc(view, 'a', 'rPr')) {
         const m = /^UULA:(answer|correct)$/.exec(pr.getAttribute('bmk') || ''); if (!m) continue;
@@ -2122,6 +2306,7 @@ function hideSolutions(pkg, grids, opts) {
   }
   return { xml: serialize(doc), rels, count: n };
 }
+const PARK = 3;   // hidden originals stand this many slide widths to the right
 function showSolutions(pkg) {
   const doc = parseXml(pkg.files.slide);
   let n = 0;
@@ -2131,6 +2316,8 @@ function showSolutions(pkg) {
     if (/^UULA SolView /.test(name)) { el.parentNode.removeChild(el); continue; }
     if (/^UULA SolHidden /.test(name)) {
       n++;
+      const g = geomOf(el, pkg);
+      if (g && g.x >= (PARK - 0.5) * pkg.slideW) setGeom(el, { x: g.x - PARK * pkg.slideW });
       for (const c of allCores(el)) { const v = cnvOf(c); if (v) { v.removeAttribute('hidden'); v.setAttribute('name', (v.getAttribute('name') || '').replace(/^UULA SolHidden /, '')); } }
     }
   }
@@ -2196,9 +2383,9 @@ function splitPoint(plan, lay) {
 
 return {
   questionFlags,
-  NS, PT, ROW, M, FOOT, C, STY, BOX, openPackage, buildPackage, parseXml, serialize, restyle, layout, applyLayout, splitParts, splitPoint, markNames, MARK, applyRole, wrapBox, WRAP, reflow, spacing, align, findSolutions, hideSolutions, showSolutions, hasSolutions, TEXT_ROLES, BOX_ROLES, G, Y0, snapUp, snapX,
+  NS, PT, ROW, M, FOOT, C, STY, BOX, openPackage, buildPackage, parseXml, serialize, restyle, layout, applyLayout, splitParts, splitPoint, markNames, MARK, applyRole, wrapBox, gridOver, flipChoices, WRAP, reflow, spacing, align, findSolutions, hideSolutions, showSolutions, hasSolutions, TEXT_ROLES, BOX_ROLES, G, Y0, snapUp, snapX,
   // used by the templates module
-  util: { pX, txX, boxX, gradBoxX, picX, pillX, pillW, lineX, tableX, makeRels, frag, topItems, core, cnvOf, maxId, spTreeOf, kid, kids, desc, xfrmOf, geomOf, setNext: n => { NEXT = n; }, yearText, pageNumX, estimateText, iconW, iconH }
+  util: { pX, txX, boxX, gradBoxX, picX, pillX, pillW, lineX, tableX, makeRels, frag, topItems, core, cnvOf, maxId, spTreeOf, kid, kids, desc, xfrmOf, geomOf, setNext: n => { NEXT = n; }, snapUp, yearText, pageNumX, estimateText, iconW, iconH }
 };
 })();
 if (typeof module !== 'undefined') module.exports = UR;
@@ -2228,30 +2415,33 @@ const P = {
 // ---------- the list shown in the pane ----------
 // group: section title in the pane; id; name; spec(W)
 const LIST = [
-  { g: 'عناوين', id: 'header', name: 'اسم الدرس', en: 'Lesson' },
-  { g: 'عناوين', id: 'topic', name: 'موضوع', en: 'Topic', full: 'عنوان موضوع' },
-  { g: 'نصوص', id: 'body', name: 'فقرة', en: 'Paragraph' },
-  { g: 'نصوص', id: 'bullets', name: 'نقاط', en: 'Bullets' },
-  { g: 'نصوص', id: 'cols', name: 'أعمدة نقاط', en: 'Columns', full: 'نقاط قصيرة بأعمدة' },
-  { g: 'نصوص', id: 'pill', name: 'كبسولة', en: 'Term pill', full: 'كبسولة تعريف' },
-  { g: 'أسئلة', id: 'qhead', name: 'عنوان أسئلة', en: 'Q head' },
+  { g: 'عناوين', id: 'header', name: 'عنوان الدرس', en: 'Lesson title' },
+  { g: 'عناوين', id: 'topic', name: 'عنوان موضوع', en: 'Topic heading', full: 'عنوان موضوع' },
+  { g: 'نصوص', id: 'body', name: 'فقرة شرح', en: 'Paragraph' },
+  { g: 'نصوص', id: 'bullets', name: 'نقاط مرقّمة', en: 'Bullet list' },
+  { g: 'نصوص', id: 'cols', name: 'نقاط بأعمدة', en: 'Bullet columns', full: 'نقاط قصيرة بأعمدة' },
+  { g: 'نصوص', id: 'pill', name: 'كبسولة تعريف', en: 'Term pill', full: 'كبسولة تعريف' },
+  { g: 'أسئلة', id: 'qhead', name: 'عنوان الأسئلة', en: 'Questions heading' },
   { g: 'أسئلة', id: 'question', name: 'سؤال', en: 'Question' },
-  { g: 'أسئلة', id: 'qa', name: 'سؤال وجواب', en: 'Q + A' },
-  { g: 'أسئلة', id: 'answer', name: 'جواب', en: 'Answer' },
-  { g: 'أسئلة', id: 'qqr', name: 'سؤال مع QR', en: 'Q + QR' },
+  { g: 'أسئلة', id: 'qa', name: 'سؤال وحله', en: 'Question + solution' },
+  { g: 'أسئلة', id: 'answer', name: 'حل السؤال', en: 'Solution' },
+  { g: 'أسئلة', id: 'qqr', name: 'سؤال مع QR', en: 'Question + QR' },
   { g: 'أسئلة', id: 'mcq', name: 'اختيار متعدد', en: 'Choices', full: 'اختيار من متعدد' },
+  { g: 'أسئلة', id: 'mcqV', name: 'خيارات عمودية', en: 'Options in a column' },
   { g: 'أسئلة', id: 'problem', name: 'مسألة', en: 'Problem', full: 'مسألة: معطيات وقانون وحل' },
   { g: 'أسئلة', id: 'other', name: 'صيغة أخرى', en: 'Other form', full: 'السؤال بصيغة أخرى' },
   { g: 'إطارات', id: 'note', name: 'ملاحظة', en: 'Note', full: 'ملاحظة مهمة' },
   { g: 'إطارات', id: 'quote', name: 'نص مقتطف', en: 'Quote' },
+  { g: 'إطارات', id: 'def', name: 'تعريف', en: 'Definition' },
   { g: 'إطارات', id: 'formula', name: 'قوانين', en: 'Formulas', full: 'معادلات وقوانين' },
   { g: 'إطارات', id: 'activity', name: 'نشاط', en: 'Activity' },
-  { g: 'إطارات', id: 'mars', name: 'من المريخ', en: 'Challenge', full: 'أسئلة من المريخ' },
+  { g: 'إطارات', id: 'mars', name: 'من المريخ', en: 'From Mars', full: 'أسئلة من المريخ' },
   { g: 'إطارات', id: 'cancelled', name: 'محتوى معلّق', en: 'Suspended' },
-  { g: 'جداول', id: 'table', name: 'جدول', en: 'Table' },
-  { g: 'جداول', id: 'tableMain', name: 'جدول رئيسي', en: 'Main table', full: 'جدول بعمود رئيسي' },
-  { g: 'جداول', id: 'solTable', name: 'جدول الحل', en: 'Answers', full: 'جدول حل التمارين الموضوعية' },
-  { g: 'نهاية الدرس', id: 'practice', name: 'تدرب وتفوق', en: 'Practice' }
+  { g: 'جداول', id: 'table', name: 'جدول برأس', en: 'Table with header' },
+  { g: 'جداول', id: 'tableMain', name: 'رأس وعمود رئيسي', en: 'Header + main column', full: 'جدول بعمود رئيسي' },
+  { g: 'جداول', id: 'solTable', name: 'جدول الحل', en: 'Answer table', full: 'جدول حل التمارين الموضوعية' },
+  { g: 'جداول', id: 'grid', name: 'شبكة بيانية', en: 'Graph grid', full: 'شبكة بيانية فارغة' },
+  { g: 'نهاية الدرس', id: 'practice', name: 'تدرب وتفوق', en: 'Practice & excel' }
 ];
 
 // ---------- specs ----------
@@ -2283,10 +2473,17 @@ function spec(id, W) {
     ] }] };
     case 'mcq': {
       const w = CW / 4, L = ['ⓐ', 'ⓑ', 'ⓒ', 'ⓓ'];
-      return { gap: 1, rows: [
-        { cells: [txt(P.q('اكتب نص السؤال هنا؟'))] },
-        { gap: 0, side: true, cells: L.map((l, k) => txt(P.runs([T(l + ' '), T(k === 0 ? 'الإجابة الصحيحة' : 'خيار', k === 0 ? { b: 1, c: C.answerOk } : {})], { marL: 182880 }), { x: R - (k + 1) * w, w })) }
+      // the options only (the question has its own button), under the last object;
+      // right-to-left: ⓐ on the right … ⓓ on the left; left-to-right (English): ⓐ on the left … ⓓ on the right
+      const ltr = OPT.dirNow === 'ltr';
+      return { gap: 0, rows: [
+        { side: true, cells: L.map((l, k) => txt(P.runs([T(l + ' '), T(ltr ? 'Option' : 'خيار')], { marL: 182880, ar: !ltr }), { x: ltr ? M + k * w : R - (k + 1) * w, w })) }
       ] };
+    }
+    // the options one under the other: ⓐ on the first line … ⓓ on the fourth, each line its own text box
+    case 'mcqV': {
+      const L = ['ⓐ', 'ⓑ', 'ⓒ', 'ⓓ'], ltr = OPT.dirNow === 'ltr';
+      return { gap: 0, snap: true, rows: L.map((l, k) => ({ gap: 0, cells: [txt(P.runs([T(l + ' '), T(ltr ? 'Option' : 'خيار')], { marL: 182880, ar: !ltr }))] })) };
     }
     case 'problem': return { gap: 1, rows: [
       { cells: [txt(P.q('اكتب نص المسألة هنا؟'))] },
@@ -2303,6 +2500,11 @@ function spec(id, W) {
     case 'quote': return { gap: 1, box: { fill: 'E2F0D9', icon: 'book', line: '2AB672', name: 'Quote' }, rows: [
       { cells: [txt(P.body('اكتب النص المقتطف هنا (آية، حديث، بيت شعر، اقتباس من كتاب).') + P.body('السطر الثاني من النص.') + P.body('السطر الثالث من النص.'), { w: CW - 15 * PT })] },
       { gap: 0, cells: [txt(P.src('المصدر'), { w: CW - 15 * PT })] }
+    ] };
+    // a definition: the same green box, book and line as a quote; the term in bold, then its meaning
+    case 'def': return { gap: 1, box: { fill: 'E2F0D9', icon: 'book', line: '2AB672', name: 'Definition' }, rows: [
+      { cells: [txt(P.bold('المصطلح'), { w: CW - 15 * PT })] },
+      { gap: 0, cells: [txt(P.body('اكتب نص التعريف هنا.'), { w: CW - 15 * PT })] }
     ] };
     case 'formula': return { gap: 1, box: { fill: 'D3E4F5', name: 'Formula' }, rows: [
       { side: true, cells: [{ t: 'pill', term: 'اسم القانون' }, txt(P.body(''), { pillText: true })] },
@@ -2328,13 +2530,17 @@ function spec(id, W) {
       const ans = Array.from({ length: n }, () => 'ⓐ'); ans.push('الحل');
       return { gap: 1, rows: [{ cells: [{ t: 'table', rows: [head, ans], o: { sol: true, name: 'UULA Solution Table', widths: [...Array(n).fill(0.8 / n), 0.2] } }] }] };
     }
-    case 'practice': return { gap: 1, box: { grad: true, name: 'Practice', h: 68 * PT }, rows: [
-      { side: true, cells: [
-        { t: 'pic', key: 'trophy', w: 44.7 * PT, h: 44.7 * PT, x: W - M - 50 * PT, dy: 4 * PT, name: 'Trophy' },
-        txt(U.pX('تـــــدرب وتــــفـــوق', { sz: 1400, b: 1, c: '6666FF' }), { x: 160 * PT, w: W - M - 60 * PT - 160 * PT, dy: 13 * PT }),
-        { t: 'pic', key: 'qr', w: 40.4 * PT, h: 46.7 * PT, x: M, dy: 10 * PT, name: 'QR' }
-      ] },
-      { gap: 0, cells: [txt(U.pX('جاوب على أهم أسئلة الدرس واثبت لنا قوتك في هذا الدرس!', { c: '180230' }), { x: 160 * PT, w: W - M - 60 * PT - 160 * PT })] }
+    // the UULA empty graph grid (the same as a hidden solution graph): cells of two page-grid steps, lines A0A8B4 0.75pt (clear in print)
+    case 'grid': return { gap: 1, rows: [{ cells: [{ t: 'grid', cols: 8, rows: 7 }] }] };
+    // the same as in the booklet: box 75pt, the tall trophy rising above the box on the right, the title and the line
+    // close together, the QR on the left (measured from the booklet page)
+    case 'practice': return { gap: 2, box: { grad: true, name: 'Practice', h: 75 * PT, exact: true }, rows: [
+      { cells: [
+        { t: 'pic', key: 'trophy', w: 88.8 * PT, h: 88.8 * PT, x: W - 122.4 * PT, dy: -22.3 * PT, name: 'Trophy' },
+        txt(U.pX('تــدرب وتــفـوق', { sz: 1400, b: 1, c: '6666FF' }), { x: 100 * PT, w: W - 120 * PT - 100 * PT, dy: 15 * PT }),
+        txt(U.pX('جاوب على أهم أسئلة الدرس واثبت لنا قوتك في هذا الدرس!', { c: '180230' }), { x: 100 * PT, w: W - 120 * PT - 100 * PT, dy: 40 * PT }),
+        { t: 'pic', key: 'qr', w: 44 * PT, h: 51 * PT, x: 40 * PT, dy: 12 * PT, name: 'QR' }
+      ] }
     ] };
   }
   return null;
@@ -2349,7 +2555,7 @@ function build(id, W, top, rels) {
   const add = (x, meta) => { xml += x; shapes.push(meta); };
   if (s.box) {
     const b = s.box;
-    if (b.grad) add(U.gradBoxX(b.name, top, 68 * PT, W), { role: 'box' });
+    if (b.grad) add(U.gradBoxX(b.name, top, b.h || 68 * PT, W), { role: 'box' });
     else if (b.frame) add('<p:sp><p:nvSpPr><p:cNvPr id="' + nid() + '" name="UULA Cancelled Container"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="0" y="' + Math.round(top) + '"/><a:ext cx="' + W + '" cy="' + ROW * 4 + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill><a:ln w="19050"><a:solidFill><a:srgbClr val="FFC000"/></a:solidFill></a:ln></p:spPr><p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/><a:p><a:endParaRPr lang="ar-KW" dirty="0"/></a:p></p:txBody></p:sp>', { role: 'box' });
     else if (b.small) add('<p:sp><p:nvSpPr><p:cNvPr id="' + nid() + '" name="UULA Other Form Container"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="' + M + '" y="' + Math.round(top) + '"/><a:ext cx="' + CW + '" cy="' + ROW * 2 + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:solidFill><a:srgbClr val="FBEBD3"/></a:solidFill><a:ln><a:noFill/></a:ln></p:spPr><p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/><a:p><a:endParaRPr lang="ar-KW" dirty="0"/></a:p></p:txBody></p:sp>', { role: 'box' });
     else add(U.boxX(b.name, top, ROW * 4, b.fill, W), { role: 'box' });
@@ -2365,8 +2571,19 @@ function build(id, W, top, rels) {
     else if (c.t === 'pic') add(U.picX('UULA ' + (c.name || c.key), rels.image(c.key), c.x != null ? c.x : M, 0, c.w, c.h), meta);
     else if (c.t === 'pill') add(U.pillX(c.term, 0, 0, U.pillW(c.term)), meta);
     else if (c.t === 'table') add(U.tableX(c.rows, W, c.o), meta);
+    else if (c.t === 'grid') add(gridX(c.cols, c.rows), meta);
   }));
   return { xml, shapes, spec: s };
+}
+// one shape drawing all the lines; they run half a cell past the outer lines, as a grid cut from a sheet
+function gridX(cols, rows) {
+  const S = Math.round(ROW * 1.75), w = (cols + 1) * S, h = (rows + 1) * S, half = Math.round(S / 2);   // 75% wider than the page grid step: room to draw
+  let path = '';
+  for (let k = 0; k <= cols; k++) { const x = Math.round(half + k * S); path += '<a:moveTo><a:pt x="' + x + '" y="0"/></a:moveTo><a:lnTo><a:pt x="' + x + '" y="' + h + '"/></a:lnTo>'; }
+  for (let k = 0; k <= rows; k++) { const y = Math.round(half + k * S); path += '<a:moveTo><a:pt x="0" y="' + y + '"/></a:moveTo><a:lnTo><a:pt x="' + w + '" y="' + y + '"/></a:lnTo>'; }
+  return '<p:sp><p:nvSpPr><p:cNvPr id="' + nid() + '" name="UULA Graph Grid"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + w + '" cy="' + h + '"/></a:xfrm>'
+    + '<a:custGeom><a:avLst/><a:gdLst/><a:ahLst/><a:cxnLst/><a:rect l="0" t="0" r="r" b="b"/><a:pathLst><a:path w="' + w + '" h="' + h + '" fill="none">' + path + '</a:path></a:pathLst></a:custGeom>'
+    + '<a:noFill/><a:ln w="9525"><a:solidFill><a:srgbClr val="A0A8B4"/></a:solidFill></a:ln></p:spPr></p:sp>';
 }
 let NID = 5000;
 function nid() { return String(NID++); }
@@ -2378,13 +2595,14 @@ function place(id, W, top, built, heights) {
   const hOf = (k, def) => heights && heights[k] != null ? heights[k] : def;
   const box = s.box;
   const boxK = built.shapes.findIndex(x => x.role === 'box');
-  let y = top + (box && !box.small ? ROW : 0);
+  let y = top + (box && !box.small && !box.exact ? ROW : 0);
+  if (s.snap) y = U.snapUp(y);
   if (box && box.small) y = top + 4 * PT;
   const x1 = box && box.icon && !box.small ? W - M - 15 * PT : W - M;
   let bottom = y;
   s.rows.forEach((r, ri) => {
     if (s.fixed) y = r.y;
-    else if (ri > 0) y = bottom + (r.gap != null ? r.gap : 1) * ROW;
+    else if (ri > 0) { y = bottom + (r.gap != null ? r.gap : 1) * ROW; if (s.snap) y = U.snapUp(y); }   // on the page grid, as the UULA spacing rules
     let rb = y;
     let pillW = 0;
     r.cells.forEach((c, ci) => {
@@ -2403,6 +2621,10 @@ function place(id, W, top, built, heights) {
       } else if (c.t === 'pic') {
         out[k] = { x: c.x != null ? c.x : M, y: yy, w: c.w, h: c.h };
         rb = Math.max(rb, yy + c.h);
+      } else if (c.t === 'grid') {
+        const gw = (c.cols + 1) * ROW, gh = (c.rows + 1) * ROW;
+        out[k] = { x: Math.round((W - gw) / 2), y: yy, w: gw, h: gh };
+        rb = Math.max(rb, yy + gh);
       } else if (c.t === 'table') {
         out[k] = { x: M, y: yy };
         rb = Math.max(rb, yy + c.rows.length * 254000);
@@ -2413,7 +2635,7 @@ function place(id, W, top, built, heights) {
   if (box) {
     const bk = boxK;
     let h = box.small ? (bottom - top + 4 * PT) : (bottom + 2 * ROW - top);
-    if (box.h) h = Math.max(box.h, h);
+    if (box.h) h = box.exact ? box.h : Math.max(box.h, h);
     out[bk] = box.small ? { x: M, y: top, w: CW, h } : { x: 0, y: top, w: W, h };
     const ik = built.shapes.findIndex(x => x.role === 'icon');
     if (ik >= 0) out[ik] = box.small ? { x: W - M - 18 * PT, y: top + 2 * PT } : { x: W - 47 * PT, y: top + ROW - 2 * PT };
@@ -2446,7 +2668,25 @@ function freeTop(pkg, gapRows, fixed) {
 }
 
 // put a template on a slide package; returns the new slide XML + what is needed to refine it later
+// settings from the pane: the direction of multiple-choice options ('auto' | 'rtl' | 'ltr')
+const OPT = { mcqDir: 'auto', dirNow: 'rtl' };
+function setOpt(o) { Object.assign(OPT, o); }
+// «auto»: the question above (the lowest text on the slide) decides: Arabic → right-to-left, otherwise left-to-right
+function dirFor(pkg) {
+  if (OPT.mcqDir === 'rtl' || OPT.mcqDir === 'ltr') return OPT.mcqDir;
+  const doc = UR.parseXml(pkg.files.slide);
+  let low = null;
+  for (const el of U.topItems(doc)) {
+    const c = U.core(el), n = U.cnvOf(c), name = n ? n.getAttribute('name') || '' : '';
+    if (/^UULA (Footer|Watermark)|^CustomPageNumber_/.test(name)) continue;
+    const t = U.desc(c, 'a', 't').map(x => x.textContent).join('').trim(); if (!t) continue;
+    const g = U.geomOf(el, pkg); if (!g || g.y >= pkg.slideH - UR.FOOT * 0.6) continue;
+    if (!low || g.y + g.h > low.b) low = { b: g.y + g.h, t };
+  }
+  return low && !/[\u0600-\u06FF]/.test(low.t) ? 'ltr' : 'rtl';
+}
 function apply(pkg, id) {
+  if (id === 'mcq' || id === 'mcqV') OPT.dirNow = dirFor(pkg);
   const s = spec(id, pkg.slideW); if (!s) throw new Error('template?');
   const doc = UR.parseXml(pkg.files.slide);
   const mx = U.maxId(doc);
@@ -2481,9 +2721,261 @@ function apply(pkg, id) {
 }
 
 const GROUP_EN = { 'عناوين': 'Headings', 'نصوص': 'Text', 'أسئلة': 'Questions', 'إطارات': 'Frames', 'جداول': 'Tables', 'نهاية الدرس': 'Lesson end' };
-return { LIST, GROUP_EN, spec, build, place, freeTop, apply };
+return { LIST, GROUP_EN, spec, build, place, freeTop, apply, setOpt };
 })();
 if (typeof module !== 'undefined') module.exports = URT;
+</script>
+<script>// UQ — apply a computed slide change to the objects in place (no new slide, nothing moves on screen).
+// The engine computes the new slide XML as before; here only the differences are applied with the PowerPoint API,
+// then the slide is read back and compared with what was computed. Any difference → the caller takes the full way.
+const UQ = (() => {
+let why = '';
+const no = r => { why = r; return null; };
+const NS = UR.NS, PT = UR.PT, U = UR.util;
+const A = NS.a, P = NS.p;
+const kid = (el, n, ns) => el ? [...el.children].find(c => c.localName === n && (!ns || c.namespaceURI === ns)) || null : null;
+const kids = (el, n) => el ? [...el.children].filter(c => c.localName === n) : [];
+const desc = (el, ns, n) => el ? [...el.getElementsByTagNameNS(ns, n)] : [];
+
+// ---------- a comparable picture of one object ----------
+function colorOf(fillParent) {
+  if (!fillParent) return 'inherit';
+  if (kid(fillParent, 'noFill', A)) return 'none';
+  const sf = kid(fillParent, 'solidFill', A);
+  if (sf) { const c = kid(sf, 'srgbClr', A); return c && !c.children.length ? c.getAttribute('val').toUpperCase() : 'other'; }
+  if ([...fillParent.children].some(c => /Fill$/.test(c.localName))) return 'other';
+  return 'inherit';
+}
+function lineOf(spPr) {
+  const ln = kid(spPr, 'ln', A); if (!ln) return 'inherit';
+  const f = colorOf(ln); if (f === 'none') return 'none';
+  return f + '/' + (ln.getAttribute('w') || '') + '/' + ((kid(ln, 'prstDash', A) || { getAttribute: () => 'solid' }).getAttribute('val') || 'solid');
+}
+const pct = (el, n, def) => { const x = kid(el, n, A); if (!x) return def; const p = kid(x, 'spcPct', A), s = kid(x, 'spcPts', A); return p ? 'p' + p.getAttribute('val') : s ? 's' + s.getAttribute('val') : def; };
+function paraSig(p, txBox) {
+  const pr = kid(p, 'pPr', A);
+  const g = (a, d) => (pr && pr.getAttribute(a)) || d;
+  const bu = pr ? (kid(pr, 'buNone', A) ? 'none' : kid(pr, 'buChar', A) ? 'char:' + kid(pr, 'buChar', A).getAttribute('char') : kid(pr, 'buAutoNum', A) ? 'num' : txBox ? 'none' : 'inherit') : (txBox ? 'none' : 'inherit');
+  return [g('algn', 'l'), g('rtl', '0'), g('marL', '0'), g('indent', '0'), g('lvl', '0'), pct(pr, 'lnSpc', 'p100000'), pct(pr, 'spcBef', 's0'), pct(pr, 'spcAft', 's0'), bu].join(',');
+}
+// the text of a paragraph, character by character with its look
+function runChars(p) {
+  const out = [];
+  for (const c of p.children) {
+    if (c.localName === 'r') {
+      const pr = kid(c, 'rPr', A), t = (kid(c, 't', A) || {}).textContent || '';
+      const look = pr ? [pr.getAttribute('sz') || '', pr.getAttribute('b') === '1' ? 'b' : '', pr.getAttribute('i') === '1' ? 'i' : '', colorOf(pr), (kid(pr, 'latin', A) || { getAttribute: () => '' }).getAttribute('typeface'), (kid(pr, 'cs', A) || { getAttribute: () => '' }).getAttribute('typeface')].join('|') : '||||';
+      for (const ch of t) out.push([ch, look]);
+    } else if (c.localName === 'br') out.push(['\v', '']);
+    else if (c.localName === 'fld' || c.localName === 'AlternateContent') return null;   // fields and equations: not here
+  }
+  return out;
+}
+function textSig(txBody, txBox) {
+  if (!txBody) return null;
+  const bp = kid(txBody, 'bodyPr', A);
+  const g = (a, d) => (bp && bp.getAttribute(a)) || d;
+  const fit = bp ? (kid(bp, 'spAutoFit', A) ? 'shape' : kid(bp, 'normAutofit', A) ? 'text' : 'none') : 'none';
+  const body = [g('lIns', '91440'), g('tIns', '45720'), g('rIns', '91440'), g('bIns', '45720'), g('wrap', 'square'), g('anchor', 't'), fit].join(',');
+  const paras = kids(txBody, 'p').map(p => ({ pr: paraSig(p, txBox), chars: runChars(p) }));
+  if (paras.some(p => !p.chars)) return null;
+  return { body, paras };
+}
+function geomOf(el) {
+  const c = U.core(el);
+  const x = c.localName === 'graphicFrame' ? kid(c, 'xfrm', P) : kid(kid(c, 'spPr', P) || kid(c, 'grpSpPr', P), 'xfrm', A);
+  const off = kid(x, 'off', A), ext = kid(x, 'ext', A);
+  return off && ext ? { x: +off.getAttribute('x'), y: +off.getAttribute('y'), w: +ext.getAttribute('cx'), h: +ext.getAttribute('cy'), rot: x.getAttribute('rot') || '0', flip: (x.getAttribute('flipH') || '') + (x.getAttribute('flipV') || '') } : null;
+}
+// everything of an object that matters for its look, without its name and id
+function sigOf(el) {
+  const c = U.core(el), kind = el.localName === 'AlternateContent' ? 'mc' : c.localName;
+  const s = { kind, g: geomOf(el) };
+  if (kind === 'sp') {
+    const spPr = kid(c, 'spPr', P), nv = kid(c, 'nvSpPr', P);
+    s.ph = !!desc(nv, P, 'ph').length;
+    s.geo = (kid(spPr, 'prstGeom', A) || { getAttribute: () => 'cust' }).getAttribute('prst');
+    s.fill = colorOf(spPr); s.line = lineOf(spPr);
+    // no theme style on the shape: an unset fill or line is no fill / no line
+    if (!kid(c, 'style', P)) { if (s.fill === 'inherit') s.fill = 'none'; if (s.line === 'inherit') s.line = 'none'; }
+    s.fx = !!kid(spPr, 'effectLst', A) && !!kid(spPr, 'effectLst', A).children.length;
+    const txBox = (kid(nv, 'cNvSpPr', P) || { getAttribute: () => '' }).getAttribute('txBox') === '1';
+    s.text = textSig(kid(c, 'txBody', P), txBox);
+    s.badText = !!kid(c, 'txBody', P) && !s.text;
+  } else if (kind === 'graphicFrame') {
+    const tbl = desc(c, A, 'tbl')[0];
+    if (tbl) {
+      s.style = (kid(kid(tbl, 'tblPr', A), 'tableStyleId', A) || {}).textContent || '';
+      s.cols = kids(kid(tbl, 'tblGrid', A), 'gridCol').map(x => x.getAttribute('w'));
+      s.rows = kids(tbl, 'tr').map(tr => ({ h: tr.getAttribute('h'), cells: kids(tr, 'tc').map(tc => {
+        const pr = kid(tc, 'tcPr', A);
+        const bd = ['lnL', 'lnR', 'lnT', 'lnB'].map(n => { const l = kid(pr, n, A); return l ? colorOf(l) + '/' + (l.getAttribute('w') || '') : 'inherit'; }).join(';');
+        return { fill: colorOf(pr), bd, text: textSig(kid(tc, 'txBody', A), true), span: (tc.getAttribute('gridSpan') || '') + (tc.getAttribute('rowSpan') || '') + (tc.getAttribute('hMerge') || '') + (tc.getAttribute('vMerge') || '') };
+      }) }));
+    } else s.other = true;
+  } else s.raw = new XMLSerializer().serializeToString(c).replace(/ (id|name)="[^"]*"/g, '');
+  return s;
+}
+const near = (a, b) => Math.abs(a - b) <= 1.2 * PT;
+function sameGeom(a, b, fitH) { return !!a && !!b && near(a.x, b.x) && near(a.y, b.y) && near(a.w, b.w) && (fitH || near(a.h, b.h)) && a.rot === b.rot && a.flip === b.flip; }
+function sameText(a, b) {
+  if (!a || !b) return a === b;
+  if (a.body !== b.body || a.paras.length !== b.paras.length) return false;
+  return a.paras.every((p, k) => p.pr === b.paras[k].pr && p.chars.length === b.paras[k].chars.length && p.chars.every((c, j) => c[0] === b.paras[k].chars[j][0] && c[1] === b.paras[k].chars[j][1]));
+}
+// looks the same (geometry with a little tolerance: points are rounded on the way)
+function sameLook(a, b, withGeom) {
+  if (a.kind !== b.kind) return false;
+  // a text that sizes its box to the text: PowerPoint sets the height itself
+  const fitH = a.kind === 'sp' && b.text && /,shape$/.test(b.text.body);
+  if (withGeom && !sameGeom(a.g, b.g, fitH)) return false;
+  if (a.kind === 'sp') return a.ph === b.ph && a.geo === b.geo && a.fill === b.fill && a.line === b.line && a.fx === b.fx && sameText(a.text, b.text);
+  if (a.kind === 'graphicFrame') {
+    if (a.other || b.other || a.style !== b.style || a.cols.join() !== b.cols.join() || a.rows.length !== b.rows.length) return false;
+    return a.rows.every((r, i) => near(+r.h, +b.rows[i].h) && r.cells.length === b.rows[i].cells.length && r.cells.every((c, j) => { const d = b.rows[i].cells[j]; return c.fill === d.fill && c.bd === d.bd && c.span === d.span && sameText(c.text, d.text); }));
+  }
+  return a.raw === b.raw;
+}
+
+// ---------- plan: what changes, and can it be done in place ----------
+function itemsOf(xml) {
+  const doc = UR.parseXml(xml);
+  return U.topItems(doc).map(el => { const n = U.cnvOf(U.core(el)); return { el, id: n ? n.getAttribute('id') : '', name: n ? n.getAttribute('name') || '' : '', sig: sigOf(el) }; });
+}
+const plainChars = t => t ? t.paras.map(p => p.chars.map(c => c[0]).join('')).join('\n') : '';
+function plan(beforeXml, afterXml) {
+  const B = itemsOf(beforeXml), Af = itemsOf(afterXml);
+  if (B.length !== Af.length || B.some((b, k) => b.id !== Af[k].id)) return no('plan: if B length Af length B some b k b id Af k id retu');    // something added, removed or reordered
+  const changes = [];
+  for (let k = 0; k < B.length; k++) {
+    const b = B[k], a = Af[k];
+    if (b.name === a.name && sameLook(b.sig, a.sig, true)) continue;
+    const s0 = b.sig, s1 = a.sig;
+    if (s0.kind !== s1.kind) return no('plan: if s0 kind s1 kind return null ');
+    if (s0.kind === 'sp') {
+      if (s0.ph || s0.badText || s1.badText || s0.geo !== s1.geo || s0.fx !== s1.fx) return no('plan: if s0 ph s0 badText s1 badText s0 geo s1 geo s0 fx');
+      if (/other/.test(s1.fill + s1.line)) return no('plan: if other test s1 fill s1 line return null ');
+      if (plainChars(s0.text) !== plainChars(s1.text)) return no('plan: if plainChars s0 text plainChars s1 text return nu');                    // the text itself changed
+      if (s1.text && s1.text.paras.some((p, i) => { const q = s0.text.paras[i]; return p.pr.split(',').slice(1, 8).join() !== q.pr.split(',').slice(1, 8).join() || (p.pr.split(',')[8] !== q.pr.split(',')[8] && !/^(none|char:.*)$/.test(p.pr.split(',')[8])); })) return no('plan: if s1 text s1 text paras some p i const q s0 text ');
+    } else if (s0.kind === 'graphicFrame') {
+      if (s0.other || s0.style || s1.style || s0.cols.join() !== s1.cols.join() || s0.rows.length !== s1.rows.length) return no('plan: if s0 other s0 style s1 style s0 cols join s1 cols');
+      if (s0.rows.some((r, i) => r.cells.length !== s1.rows[i].cells.length || r.cells.some((c, j) => c.span !== s1.rows[i].cells[j].span || plainChars(c.text) !== plainChars(s1.rows[i].cells[j].text) || /other/.test(s1.rows[i].cells[j].fill)))) return no('plan: if s0 rows some r i r cells length s1 rows i cells');
+    } else if (s0.kind === 'pic' || s0.kind === 'grpSp') {
+      if (s0.raw.replace(/<a:off[^>]*>|<a:ext [^>]*>/g, '') !== s1.raw.replace(/<a:off[^>]*>|<a:ext [^>]*>/g, '')) return no('plan: if s0 raw replace a off a ext g s1 raw replace a o');   // only moved or sized
+    } else return no('plan:  else return null ');
+    changes.push({ k, before: b, after: a });
+  }
+  return { changes, after: Af };
+}
+
+// ---------- applying ----------
+const ALIGN = { l: 'Left', r: 'Right', ctr: 'Center', just: 'Justify', dist: 'Distributed' };
+const ANCHOR = { t: 'Top', ctr: 'Middle', b: 'Bottom' };
+function applyFont(f, look) {
+  const [sz, b, i, col, latin] = look.split('|');
+  if (sz) f.size = +sz / 100;
+  f.bold = b === 'b'; f.italic = i === 'i';
+  if (/^[0-9A-F]{6}$/.test(col)) f.color = '#' + col;
+  if (latin) f.name = latin;
+}
+// text: runs of the same look get the look together
+function applyText(tf, tr, sig) {
+  const b = sig.body.split(',');
+  tf.leftMargin = +b[0] / PT; tf.topMargin = +b[1] / PT; tf.rightMargin = +b[2] / PT; tf.bottomMargin = +b[3] / PT;
+  tf.wordWrap = b[4] !== 'none';
+  if (ANCHOR[b[5]]) tf.verticalAlignment = ANCHOR[b[5]];
+  tf.autoSizeSetting = b[6] === 'shape' ? 'AutoSizeShapeToFitText' : b[6] === 'text' ? 'AutoSizeTextToFitShape' : 'AutoSizeNone';
+  let pos = 0;
+  sig.paras.forEach((p, pi) => {
+    const pr = p.pr.split(','), len = p.chars.length;
+    if (len) {
+      const pr0 = tr.getSubstring(pos, len).paragraphFormat;
+      if (ALIGN[pr[0]]) pr0.horizontalAlignment = ALIGN[pr[0]];
+      pr0.bulletFormat.visible = /^char:/.test(pr[8]);
+    }
+    let j = 0;
+    while (j < len) {
+      let e = j; while (e < len && p.chars[e][1] === p.chars[j][1]) e++;
+      if (p.chars[j][1]) applyFont(tr.getSubstring(pos + j, e - j).font, p.chars[j][1]);
+      j = e;
+    }
+    pos += len + (pi < sig.paras.length - 1 ? 1 : 0);
+  });
+}
+function applyFill(fill, col) { if (col === 'none') fill.clear(); else if (/^[0-9A-F]{6}$/.test(col)) fill.setSolidColor('#' + col); }
+function applyLine(lf, line) {
+  if (line === 'none') { lf.visible = false; return; }
+  const [col, w, dash] = line.split('/');
+  if (/^[0-9A-F]{6}$/.test(col)) { lf.visible = true; lf.color = '#' + col; }
+  if (w) lf.weight = +w / PT;
+  if (dash && dash !== 'solid') lf.dashStyle = { dash: 'Dash', sysDash: 'RoundDot', sysDot: 'RoundDot', lgDash: 'LongDash', dashDot: 'DashDot' }[dash] || 'Solid';
+}
+
+// returns true when done in place and checked; false = take the full way (nothing is left half-done that matters:
+// the full way starts again from the slide as it was computed)
+async function apply(slideId, beforeXml, afterXml, exportSlide) {
+  const pl = plan(beforeXml, afterXml);
+  if (!pl) return false;
+  why = '';
+  if (!pl.changes.length) return true;
+  const totalText = t => t.paras.reduce((n, p) => n + p.chars.length, 0) + Math.max(0, t.paras.length - 1);
+  const ok = await PowerPoint.run(async ctx => {
+    const sh = ctx.presentation.slides.getItem(slideId).shapes;
+    sh.load('items/name,items/left,items/top,items/width,items/height,items/type'); await ctx.sync();
+    const used = new Set(), jobs = [];
+    for (const ch of pl.changes) {
+      const g = ch.before.sig.g; if (!g) return false;
+      const s = sh.items.find(x => !used.has(x) && (x.name || '') === ch.before.name && Math.abs(x.left - g.x / PT) < 1.5 && Math.abs(x.top - g.y / PT) < 1.5);
+      if (!s) { why = 'no match ' + ch.before.name; return false; }
+      used.add(s); jobs.push({ s, ch });
+    }
+    // the text has to be the same as PowerPoint sees it (so the character positions are right)
+    const trs = jobs.map(j => j.ch.after.sig.kind === 'sp' && j.ch.after.sig.text ? j.s.textFrame.textRange : null);
+    trs.forEach(t => t && t.load('text')); await ctx.sync();
+    for (let k = 0; k < jobs.length; k++) if (trs[k] && trs[k].text.length !== totalText(jobs[k].ch.after.sig.text)) { why = 'text length ' + trs[k].text.length + ' vs ' + totalText(jobs[k].ch.after.sig.text); return false; }
+    for (let k = 0; k < jobs.length; k++) {
+      const { s, ch } = jobs[k], a = ch.after.sig;
+      s.name = ch.after.name;
+      if (a.kind === 'sp') {
+        if (a.fill !== ch.before.sig.fill && a.fill !== 'inherit') applyFill(s.fill, a.fill);
+        if (a.line !== ch.before.sig.line && a.line !== 'inherit') applyLine(s.lineFormat, a.line);
+        if (a.text) applyText(s.textFrame, trs[k], a.text);
+      }
+      if (a.g) { s.left = a.g.x / PT; s.top = a.g.y / PT; s.width = a.g.w / PT; if (!(a.kind === 'sp' && a.text && /,shape$/.test(a.text.body))) s.height = a.g.h / PT; } else if (a.kind === 'graphicFrame') {
+        const tbl = s.getTable();
+        a.rows.forEach((r, i) => r.cells.forEach((c, j) => {
+          const b0 = ch.before.sig.rows[i].cells[j];
+          const cell = tbl.getCellOrNullObject(i, j);
+          if (c.fill !== b0.fill) { if (c.fill === 'none') cell.fill.clear(); else if (/^[0-9A-F]{6}$/.test(c.fill)) cell.fill.setSolidColor('#' + c.fill); }
+          if (c.bd !== b0.bd) c.bd.split(';').forEach((v, q) => {
+            if (v === 'inherit') return;
+            const side = cell.borders[['left', 'right', 'top', 'bottom'][q]], [col, w] = v.split('/');
+            if (col === 'none') side.transparency = 1; else if (/^[0-9A-F]{6}$/.test(col)) { side.color = '#' + col; side.transparency = 0; if (w) side.weight = +w / PT; }
+          });
+          const chars = c.text ? c.text.paras.flatMap(p => p.chars) : [];
+          if (chars.length && chars.every(x => x[1] === chars[0][1])) applyFont(cell.font, chars[0][1]);
+          else if (chars.length) throw new Error('mixed');
+          const al = c.text && c.text.paras[0] && c.text.paras[0].pr.split(',')[0];
+          if (ALIGN[al]) cell.horizontalAlignment = ALIGN[al];
+        }));
+        a.rows.forEach((r, i) => { if (!near(+r.h, +ch.before.sig.rows[i].h)) tbl.rows.getItemAt(i).height = +r.h / PT; });
+      }
+    }
+    await ctx.sync();
+    return true;
+  }).catch(e => { why = 'api: ' + (e && e.message); return false; });
+  if (!ok) return false;
+  // read it back: it must look exactly as computed
+  const pkg = await UR.openPackage(await exportSlide(slideId));
+  const now = itemsOf(pkg.files.slide);
+  for (const ch of pl.changes) {
+    const it = now.find(x => x.id === ch.after.id) || now.find(x => x.name === ch.after.name);
+    if (!it || !sameLook(it.sig, ch.after.sig, true)) { why = 'check ' + ch.after.name + ' ' + JSON.stringify([it && it.sig, ch.after.sig]).slice(0, 3000); return false; }
+  }
+  return true;
+}
+return { apply, plan, get why() { return why; } };
+})();
 </script>
 <script>// UULA Restyle — Word side
 // 1) the types a Word user can tag (shared by the Word pane and the PowerPoint import)
@@ -2502,16 +2994,18 @@ const PT = 12700;
 // ---------- the types ----------
 // id, Arabic, English, frame colour in Word (and the swatch in the pane)
 const TYPES = [
+  { g: 'عناوين', ge: 'Headings', items: [
+    ['chapter', 'عنوان الوحدة', 'Unit title', 'A6A6A6'], ['lesson', 'عنوان الدرس', 'Lesson title', '1F71DD'], ['topic', 'عنوان موضوع', 'Topic heading', '404040']] },
   { g: 'نصوص', ge: 'Text', items: [
-    ['chapter', 'اسم الوحدة', 'Unit', 'A6A6A6'], ['lesson', 'اسم الدرس', 'Lesson', '1F71DD'], ['topic', 'موضوع', 'Topic', '404040'],
-    ['body', 'فقرة', 'Paragraph', '8C8C8C'], ['bullets', 'نقاط', 'Bullets', '8C8C8C'], ['qhead', 'عنوان أسئلة', 'Q head', 'C00000'],
-    ['question', 'سؤال', 'Question', 'FF0000'], ['choice', 'خيارات', 'Choices', '7030A0'], ['answer', 'حل', 'Solution', '1F71DE'],
-    ['correct', 'الخيار الصحيح', 'Correct choice', '2070DF']] },
+    ['body', 'فقرة شرح', 'Paragraph', '8C8C8C'], ['bullets', 'نقاط مرقّمة', 'Bullet list', '8C8C8C']] },
+  { g: 'أسئلة', ge: 'Questions', items: [
+    ['qhead', 'عنوان الأسئلة', 'Questions heading', 'C00000'], ['question', 'نص السؤال', 'Question text', 'FF0000'], ['choice', 'خيارات السؤال', 'Choices', '7030A0'],
+    ['answer', 'حل السؤال', 'Solution', '1F71DE'], ['correct', 'الخيار الصحيح', 'Correct choice', '2070DF']] },
   { g: 'إطارات', ge: 'Frames', items: [
     ['note', 'ملاحظة', 'Note', 'E69138'], ['def', 'تعريف', 'Definition', '2AB672'], ['quote', 'نص مقتطف', 'Quote', '2AB672'],
     ['formula', 'قوانين', 'Formulas', '5B9BD5'], ['other', 'صيغة أخرى', 'Other form', 'C45A11'], ['activity', 'نشاط', 'Activity', '7F7F7F'],
-    ['mars', 'من المريخ', 'Challenge', '595959']] },
-  { g: 'أخرى', ge: 'Other', items: [['table', 'جدول', 'Table', '44546A'], ['figure', 'شكل', 'Figure', '00B050'], ['given', 'شكل من السؤال', 'Part of question', 'A6A6A6']] }
+    ['mars', 'من المريخ', 'From Mars', '595959']] },
+  { g: 'أخرى', ge: 'Other', items: [['table', 'جدول', 'Table', '44546A'], ['figure', 'صورة أو شكل', 'Picture / figure', '00B050'], ['given', 'جزء من السؤال', 'Part of question', 'A6A6A6']] }
 ];
 const TYPE = {};
 TYPES.forEach(g => g.items.forEach(([id, ar, en, col]) => { TYPE[id] = { id, ar, en, col }; }));
@@ -3411,24 +3905,142 @@ $('numAll').addEventListener('click', async () => {
 
 // ---------- templates ----------
 const SW = { header: '1F71DD', topic: '000000', body: 'FFFFFF', bullets: 'FFFFFF', cols: 'FFFFFF', pill: '1F71DC', qhead: 'FF0000', question: 'FF0000', qa: '1F71DE', answer: '1F71DE', qqr: 'FF0000', mcq: 'FF0000', problem: '00B050', other: 'FBEBD3',
-  note: 'FBEBD3', quote: 'E2F0D9', formula: 'D3E4F5', activity: 'F1F1F1', mars: 'F1F1F1', cancelled: 'FFC000', table: 'CAD0D8', tableMain: 'DAE0E9', solTable: 'CAD0D8', practice: 'EBE6FE' };
+  note: 'FBEBD3', quote: 'E2F0D9', formula: 'D3E4F5', activity: 'F1F1F1', mars: 'F1F1F1', cancelled: 'FFC000', table: 'CAD0D8', tableMain: 'DAE0E9', solTable: 'CAD0D8', grid: 'D3D8E0', practice: 'EBE6FE' };
+// frame buttons wear the frame's own colours, as it looks in the booklet
+const TINT = { note: ['FBEBD3', 'E9C79A'], quote: ['E2F0D9', '2AB672'], def: ['E2F0D9', '2AB672'], formula: ['D3E4F5', '9DC3E6'], other: ['FBEBD3', 'E9C79A'],
+  activity: ['F1F1F1', 'C9CDD2'], mars: ['F1F1F1', 'C9CDD2'], cancelled: ['FFFFFF', 'FFC000'], practice: ['F2F2F2', 'C9BFF5'] };
+function tint(b, id) {
+  const t = TINT[id]; if (!t) return;
+  b.style.background = id === 'practice' ? 'radial-gradient(circle, #F2F2F2, #EBE6FE)' : '#' + t[0];
+  b.style.borderColor = '#' + t[1];
+}
+// a small sign on every button, like the booklet's own: the red Q of a question, the bulb of a note …
+function iconHtml(id, col) {
+  const img = k => typeof UR_ASSETS !== 'undefined' && UR_ASSETS[k] ? '<i class="ic"><img alt="" src="data:image/png;base64,' + UR_ASSETS[k] + '"></i>' : null;
+  const g = (t, c, extra) => '<i class="ic" style="color:#' + c + (extra || '') + '">' + t + '</i>';
+  const box = (fill, line, t) => '<i class="ic"><b style="width:13px;height:11px;background:#' + fill + ';border:1px solid #' + line + ';font-size:8px;line-height:10px;color:#555">' + (t || '') + '</b></i>';
+  const tbl = (head, col1) => '<i class="ic"><svg viewBox="0 0 14 12" width="14" height="12"><rect x=".5" y=".5" width="13" height="11" fill="#fff" stroke="#9aa3ad"/>' + (head ? '<rect x=".5" y=".5" width="13" height="3.5" fill="#' + head + '"/>' : '') + (col1 ? '<rect x="9.5" y="4" width="4" height="7.5" fill="#' + col1 + '"/>' : '') + '<path d="M.5 4h13M.5 7.7h13M5 .5v11M9.5 .5v11" stroke="#9aa3ad" stroke-width=".6"/></svg></i>';
+  switch (id) {
+    case 'chapter': return g('Aa', 'A6A6A6', ';font-size:9px');
+    case 'lesson': case 'header': return g('Aa', '1F71DD', ';font-size:12px');
+    case 'topic': return g('Aa', '000000', ';font-size:11px');
+    case 'body': return g('≡', '8C8C8C', ';font-size:14px');
+    case 'bullets': return g('•≡', '595959', ';font-size:11px');
+    case 'cols': return g('••', '595959', ';font-size:11px;letter-spacing:2px');
+    case 'pill': return '<i class="ic"><b style="width:14px;height:8px;border-radius:5px;background:#1F71DC"></b></i>';
+    case 'qhead': return g('Q≡', 'FF0000', ';font-size:10px');
+    case 'question': case 'qqr': return g('Q', 'FF0000', ';font-size:13px');
+    case 'qa': return g('Q<span style="color:#1F71DE">✓</span>', 'FF0000', ';font-size:11px');
+    case 'mcqV': return '<i class="ic"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="#FF0000" stroke-width="1.1"><circle cx="11" cy="2.5" r="1.8"/><circle cx="11" cy="7" r="1.8"/><circle cx="11" cy="11.5" r="1.8"/><path d="M1.5 2.5h6M1.5 7h6M1.5 11.5h6" stroke="#595959"/></svg></i>';
+    case 'mcq': case 'choice': return g('ⓐ', id === 'mcq' ? 'FF0000' : '595959', ';font-size:13px;font-weight:400');
+    case 'answer': return g('✓', '1F71DE', ';font-size:13px');
+    case 'correct': return '<i class="ic"><svg viewBox="0 0 14 14" width="15" height="15"><circle cx="7" cy="7" r="6.6" fill="#2070DF"/><text x="7" y="10" text-anchor="middle" font-family="-apple-system,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#fff">a</text></svg></i>';
+    case 'figure': return '<i class="ic"><svg viewBox="0 0 14 12" width="14" height="12"><rect x=".5" y=".5" width="13" height="11" rx="1.5" fill="#fff" stroke="#00B050"/><circle cx="4.5" cy="4" r="1.4" fill="#00B050"/><path d="M1 11l4-4 3 3 2-2 3 3" fill="none" stroke="#00B050"/></svg></i>';
+    case 'given': return '<i class="ic"><b style="width:12px;height:10px;border:1.5px dashed #808080"></b></i>';
+    case 'problem': return g('Q', 'FF0000', ';font-size:13px');
+    case 'note': return img('bulb') || box('FBEBD3', 'E69138');
+    case 'quote': case 'def': return img('book') || box('E2F0D9', '2AB672');
+    case 'other': return img('star') || box('FBEBD3', 'C45A11');
+    case 'activity': return img('palette') || box('F1F1F1', 'A6A6A6');
+    case 'mars': return img('target') || box('F1F1F1', '595959');
+    case 'formula': return '<i class="ic"><svg viewBox="0 0 14 14" width="15" height="15"><rect x=".3" y=".3" width="13.4" height="13.4" rx="3" fill="#2E75B6"/><path d="M10 3.4H4.2l3.2 3.6-3.2 3.6H10" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></i>';
+    case 'practice': return img('trophy') || box('EBE6FE', '7030A0');
+    case 'cancelled': return '<i class="ic"><svg viewBox="0 0 16 14" width="16" height="14"><path d="M8 1.2L15 13H1z" fill="#FFC000" stroke="#E0A800" stroke-width=".8" stroke-linejoin="round"/><path d="M8 5.2v3.9" stroke="#1a1a1a" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.1" r=".95" fill="#1a1a1a"/></svg></i>';
+    case 'table': return tbl('CAD0D8');
+    case 'tableMain': return tbl('CAD0D8', 'DAE0E9');
+    case 'tablePlain': return tbl(null);
+    case 'solTable': return tbl('CAD0D8', null);
+    case 'graph': return '<i class="ic"><svg viewBox="0 0 14 12" width="14" height="12"><path d="M1 0v12M4.5 0v12M8 0v12M11.5 0v12M0 1.5h14M0 5h14M0 8.5h14M0 11.5h14" stroke="#c5ccd6" stroke-width=".6"/><path d="M1 10.5C4 10 5 2 8 2s3.5 5 5 6" fill="none" stroke="#1F71DE" stroke-width="1.4" stroke-linecap="round"/></svg></i>';
+    case 'grid': return '<i class="ic"><svg viewBox="0 0 14 12" width="14" height="12"><path d="M1 0v12M4.5 0v12M8 0v12M11.5 0v12M0 1.5h14M0 5h14M0 8.5h14M0 11.5h14" stroke="#9aa3ad" stroke-width=".7"/><path d="M8 0v12M0 5h14" stroke="#333" stroke-width=".9"/></svg></i>';
+  }
+  return '<i style="background:#' + (col || 'FFFFFF') + '"></i>';
+}
+// one card per group: a coloured strip and the title; every group always open
+const GROUP_COL = { 'عناوين': '1F71DD', 'نصوص': '8C8C8C', 'أسئلة': 'FF0000', 'الحلول': '1F71DE', 'إطارات': 'E69138', 'إطارات حول المحدد': 'E69138', 'جداول': '44546A', 'تنسيق جدول محدد': '44546A', 'نهاية الدرس': '7030A0', 'أخرى': '00B050' };
+function groupCard(where, key, title) {
+  const d = document.createElement('div'); d.className = 'tgroup';
+  d.innerHTML = '<div class="gt"><span class="bar" style="background:#' + (GROUP_COL[key] || '9aa3ad') + '"></span><span>' + title + '</span></div>';
+  const grid = document.createElement('div'); grid.className = 'tgrid'; d.appendChild(grid);
+  return { d, grid };
+}
+try { localStorage.removeItem('ur-closed'); } catch (e) {}
 function buildTemplateList() {
   const host = $('tpls'); host.innerHTML = '';
   const groups = [];
   for (const t of URT.LIST) { let g = groups.find(x => x.name === t.g); if (!g) groups.push(g = { name: t.g, items: [] }); g.items.push(t); }
   for (const g of groups) {
-    const d = document.createElement('div'); d.className = 'tgroup';
-    d.innerHTML = '<div class="gt">' + L(g.name, URT.GROUP_EN[g.name] || g.name) + '</div>';
-    const grid = document.createElement('div'); grid.className = 'tgrid';
+    const { d, grid } = groupCard('ins', g.name, L(g.name, URT.GROUP_EN[g.name] || g.name));
     for (const t of g.items) {
       const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; b.dataset.id = t.id;
-      b.title = L(t.full || t.name, t.en); b.innerHTML = '<i style="background:#' + (SW[t.id] || 'FFFFFF') + '"></i><span>' + L(t.name, t.en) + '</span>';
+      b.title = L(t.full || t.name, t.en); b.innerHTML = iconHtml(t.id, SW[t.id]) + '<span>' + L(t.name, t.en) + '</span>'; tint(b, t.id);
       grid.appendChild(b);
     }
     d.appendChild(grid); host.appendChild(d);
   }
 }
-$('tpls').addEventListener('click', e => { const b = e.target.closest('.tbtn'); if (b) insertTemplate(b.dataset.id); });
+
+// the graph grid chosen while pictures are selected: the grid takes each picture's place and size
+// the empty grid drawn over one object (thin filled rectangles grouped), the object parked aside as its hidden original:
+// the pair behaves like a solution («إظهار الحلول» → the object, «إخفاء الحلول» → the grid)
+async function gridOverShape(ctx, sh, p, W, made) {
+  const base = (p.name || '').replace(/ #ursel$/, '').replace(/^UULA Sol(Hidden|View) /, '').replace(/^UULA:[a-z]+\s*/, '') || 'Graph';
+  const x0 = p.left, y0 = p.top, w = p.width, h = p.height, step = 13.39 * 1.75, T = 0.75;
+  const lines = [];
+  // each line a very thin filled rectangle (a zero-wide line is tilted by PowerPoint for Mac)
+  const add = (l, t, ww, hh) => { const ln = sh.addGeometricShape('Rectangle', { left: l, top: t, width: ww, height: hh }); ln.fill.setSolidColor('#A0A8B4'); ln.lineFormat.visible = false; ln.name = 'UULA Graph Grid Line'; lines.push(ln); made.push(ln); };
+  for (let x = (w / 2) % step; x <= w + 0.01; x += step) add(x0 + Math.min(x, w - T), y0, T, h);
+  for (let y = (h / 2) % step; y <= h + 0.01; y += step) add(x0, y0 + Math.min(y, h - T), w, T);
+  lines.forEach(l => l.load('id')); await ctx.sync();
+  const g = sh.addGroup(lines.map(l => l.id)); g.name = 'UULA SolView UULA:graph ' + base; g.load('id');
+  await ctx.sync();
+  p.name = 'UULA SolHidden UULA:graph ' + base; p.left = x0 + 3 * W;
+  await ctx.sync();
+  return g;
+}
+async function gridSelected(id) {
+  const n = await run(async ctx => {
+    const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/name,items/type'); await ctx.sync();
+    const pics = shapes.items.filter(s => !['TextBox', 'GeometricShape', 'Table', 'Line'].includes(s.type));
+    if (!pics.length) return 0;
+    pics.forEach(s => { s.name = (s.name || '').replace(/ #ursel$/, '') + ' #ursel'; });
+    await ctx.sync();
+    return pics.length;
+  }).catch(() => 0);
+  if (!n) return 0;
+  // in place: the grid drawn from lines and grouped; the picture is kept, linked to the grid as a hidden solution
+  // («إظهار الحلول» brings the picture back, «إخفاء الحلول» shows the grid again)
+  const W = (await getSize()).W;
+  const quick = await run(async ctx => {
+    const sh = ctx.presentation.slides.getItem(id).shapes;
+    sh.load('items/id,items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
+    const pics = sh.items.filter(s => / #ursel$/.test(s.name || ''));
+    const made = [];
+    try {
+      const sel = [];
+      for (const p of pics) { const g = await gridOverShape(ctx, sh, p, W, made); sel.push(g); }
+      try { ctx.presentation.slides.getItem(id).setSelectedShapes(sel.map(g => g.id)); await ctx.sync(); } catch (e) {}
+      return pics.length;
+    } catch (e) {
+      made.forEach(l => { try { l.delete(); } catch (x) {} }); await ctx.sync().catch(() => {});
+      return null;
+    }
+  }).catch(() => null);
+  if (quick) return quick;
+  const pkg = await UR.openPackage(await exportSlide(id));
+  const r = UR.gridOver(pkg);
+  if (!r.count) { await clearSel(id); return 0; }
+  const newId = await insertAfter(await UR.buildPackage(pkg, r.xml, null), id);
+  await deleteSlide(id);
+  await run(async ctx => {
+    ctx.presentation.setSelectedSlides([newId]); await ctx.sync();
+    const sh = ctx.presentation.slides.getItem(newId).shapes; sh.load('items/id,items/name'); await ctx.sync();
+    const sel = sh.items.filter(s => / #ursel$/.test(s.name || ''));
+    sel.forEach(s => { s.name = s.name.replace(/ #ursel$/, ''); });
+    await ctx.sync();
+    try { ctx.presentation.slides.getItem(newId).setSelectedShapes(sel.map(s => s.id)); await ctx.sync(); } catch (e) {}
+  }).catch(() => {});
+  return r.count;
+}
 // a container chosen while objects are selected: it goes around them (without the template's own text)
 async function wrapSelected(id, tid) {
   const n = await run(async ctx => {
@@ -3478,6 +4090,11 @@ async function insertTemplate(tid) {
   try {
     const id = await currentId();
     if (!id) { tsay(L('حدّد شريحة أولًا.', 'Select a slide first.')); return; }
+    if (tid === 'cancelled') {
+      const r = await suspendSelected().catch(() => ({ n: 0 }));
+      if (r.n) { tsay(suspendSay(r)); return; }
+    }
+    if (tid === 'grid') { const n = await gridSelected(id); if (n) { tsay(n > 1 ? L('وُضعت الشبكة البيانية مكان ' + n + ' صور، كلٌّ بمقاسها.', 'The graph grid replaced ' + n + ' pictures, each at its size.') : L('وُضعت الشبكة البيانية مكان الصورة وبمقاسها.', 'The graph grid replaced the picture, at its size.')); return; } }
     if (UR.WRAP[tid] && await wrapSelected(id, tid)) { tsay(L('وُضعت الحاوية حول العناصر المحددة.', 'The container was put around the selected objects.')); return; }
     const pkg = await UR.openPackage(await exportSlide(id));
     const r = URT.apply(pkg, tid);
@@ -3503,42 +4120,263 @@ async function insertTemplate(tid) {
       await ctx.sync();
       r.fitsReal = pl.bottom <= pkg.slideH - UR.FOOT;
       ctx.presentation.setSelectedSlides([newId]); await ctx.sync();
-      try {
-        const sel = idx.map(i => map[i]).filter(Boolean).map(s => s.id);
-        ctx.presentation.slides.getItem(newId).setSelectedShapes(sel); await ctx.sync();
-      } catch (e) {}
+      try { ctx.presentation.slides.getItem(newId).setSelectedShapes([]); await ctx.sync(); } catch (e) {}
     });
     await unmark(newId);
-    tsay(r.fitsReal === false ? L('أُضيف القالب، لكنه تجاوز أسفل الصفحة.', 'Inserted, but it goes past the bottom of the page.') : L('أُضيف القالب.', 'Inserted.'));
+    const nm = tplName(tid); tsay(r.fitsReal === false ? L('تمت إضافة «' + nm[0] + '»، لكنه تجاوز أسفل الصفحة.', '«' + nm[1] + '» was added, but it goes past the bottom of the page.') : L('تمت إضافة «' + nm[0] + '» في الأسفل.', '«' + nm[1] + '» was added at the bottom.'));
   } catch (e) { tsay(L('تعذّرت الإضافة: ', 'Could not insert: ') + errText(e)); }
   finally { busy = false; lock(); }
 }
 
 // ---------- one object at a time ----------
 const ROLES = [
-  { g: 'نصوص', ge: 'Text', items: [['chapter', 'اسم الوحدة', 'A6A6A6'], ['lesson', 'اسم الدرس', '1F71DD'], ['topic', 'موضوع', '000000'], ['body', 'فقرة', 'FFFFFF'], ['bullets', 'نقاط', 'FFFFFF'], ['qhead', 'عنوان أسئلة', 'FF0000'], ['question', 'سؤال', 'FF0000'], ['choice', 'خيارات', 'FFFFFF']] },
-  { g: 'للحلول', ge: 'For solutions', items: [['answer', 'حل', '1F71DE'], ['correct', 'الخيار الصحيح', '2070DF'], ['given', 'شكل من السؤال', 'A6A6A6']] },
-  { g: 'إطارات', ge: 'Frames', items: [['note', 'ملاحظة', 'FBEBD3'], ['quote', 'نص مقتطف', 'E2F0D9'], ['def', 'تعريف', 'E2F0D9'], ['formula', 'قوانين', 'D3E4F5'], ['other', 'صيغة أخرى', 'FBEBD3'], ['activity', 'نشاط', 'F1F1F1'], ['mars', 'من المريخ', 'F1F1F1']] }
+  { g: 'عناوين', ge: 'Headings', items: [['chapter', 'عنوان الوحدة', 'A6A6A6'], ['lesson', 'عنوان الدرس', '1F71DD'], ['topic', 'عنوان موضوع', '000000']] },
+  { g: 'نصوص', ge: 'Text', items: [['body', 'فقرة شرح', 'FFFFFF'], ['bullets', 'نقاط مرقّمة', 'FFFFFF']] },
+  { g: 'أسئلة', ge: 'Questions', items: [['qhead', 'عنوان الأسئلة', 'FF0000'], ['question', 'نص السؤال', 'FF0000'], ['choice', 'خيارات السؤال', 'FFFFFF']] },
+  { g: 'الحلول', ge: 'Solutions', items: [['answer', 'حل السؤال', '1F71DE'], ['correct', 'الخيار الصحيح', '2070DF']] },
+  { g: 'إطارات حول المحدد', ge: 'Frames around the selection', items: [['note', 'ملاحظة', 'FBEBD3'], ['quote', 'نص مقتطف', 'E2F0D9'], ['def', 'تعريف', 'E2F0D9'], ['formula', 'قوانين', 'D3E4F5'], ['other', 'صيغة أخرى', 'FBEBD3'], ['activity', 'نشاط', 'F1F1F1'], ['mars', 'من المريخ', 'F1F1F1'], ['cancelled', 'معلّق', 'FFFFFF']] },
+  { g: 'تنسيق جدول محدد', ge: 'Selected table', items: [['table', 'جدول برأس', 'CAD0D8'], ['tableMain', 'رأس وعمود رئيسي', 'DAE0E9'], ['tablePlain', 'جدول بلا رأس', 'F1F1F1']] }
 ];
+// the same buttons beside «Hide solutions» only mark: the colour stays as it is (colours are set in «Format»)
+const SOL_TIP = {
+  answer: ['يعلّم المحدد كحل فيُخفى عند «إخفاء الحلول». لا يغيّر اللون ولا يتحرك شيء.', 'Marks the selection as a solution, so «Hide solutions» hides it. The colour stays and nothing moves.'],
+  correct: ['يعلّم المحدد كخيار صحيح، فيتحول للأسود عند «إخفاء الحلول». لا يغيّر اللون.', 'Marks the selection as the correct choice; it turns black when solutions are hidden. The colour stays.'],
+  given: ['شكل أو نص من السؤال نفسه: يبقى ظاهرًا عند «إخفاء الحلول» حتى لو كان أزرق.', 'A shape or text that belongs to the question: it stays when solutions are hidden, even if blue.'],
+  graph: ['تمثيل بياني هو حل: عند «إخفاء الحلول» تحل مكانه شبكة بيانية فارغة بنفس مقاسه، ويرجع عند «إظهار الحلول». (أي رسم آخر كالمثلث ميّزه «حل السؤال» فيُخفى بلا شبكة)', 'A graph that is a solution: on «Hide solutions» an empty graph grid of the same size takes its place; it comes back on «Show solutions». (Other drawings, like a triangle: mark them «Solution» to hide them without a grid)']
+};
+// what each button does (shown when the pointer rests on it)
+const ROLE_TIP = {
+  chapter: ['اسم الوحدة أعلى الصفحة (رمادي صغير)', 'Unit name at the top (small gray)'],
+  lesson: ['اسم الدرس أعلى الصفحة (أزرق كبير)', 'Lesson name at the top (large blue)'],
+  topic: ['عنوان موضوع داخل الدرس (أسود عريض)', 'A topic heading inside the lesson (bold black)'],
+  body: ['فقرة شرح عادية بخط المذكرة', 'A normal paragraph in the booklet font'],
+  bullets: ['قائمة نقاط، كل سطر نقطة', 'A bullet list, one point per line'],
+  qhead: ['عنوان قسم الأسئلة (أحمر عريض)', 'Heading of a questions section (bold red)'],
+  question: ['نص السؤال مع علامة السؤال الحمراء', 'Question text with the red question mark'],
+  choice: ['يحوّل المحدد إلى خيارات سؤال اختيار من متعدد (ⓐ ⓑ ⓒ ⓓ)', 'Turns the selection into the options of a multiple-choice question (ⓐ ⓑ ⓒ ⓓ)'],
+  answer: ['يعلّم المحدد كحل ويلوّن نصه بالأزرق، فيُخفى عند «إخفاء الحلول». لا يتحرك شيء في الشريحة.', 'Marks the selection as a solution and colours its text blue, so «Hide solutions» hides it. Nothing on the slide moves.'],
+  correct: ['الخيار الصحيح بالأزرق العريض، ويتحول للأسود عند «إخفاء الحلول»', 'The correct choice in bold blue, turns black when solutions are hidden'],
+  given: ['شكل أو نص من السؤال نفسه: يبقى ظاهرًا عند «إخفاء الحلول» حتى لو كان أزرق', 'A shape or text that belongs to the question: it stays when solutions are hidden, even if blue'],
+  note: ['إطار ملاحظة حول ما حددته (مربع أو أكثر)', 'A note frame around the selection'],
+  quote: ['إطار نص مقتطف حول ما حددته', 'A quote frame around the selection'],
+  def: ['إطار تعريف حول ما حددته', 'A definition frame around the selection'],
+  formula: ['إطار قوانين حول ما حددته', 'A formulas frame around the selection'],
+  other: ['إطار صغير «صيغة أخرى» حول ما حددته', 'A small «other form» frame around the selection'],
+  activity: ['إطار نشاط حول ما حددته', 'An activity frame around the selection'],
+  mars: ['إطار «من المريخ» حول ما حددته', 'A «from Mars» frame around the selection'],
+  cancelled: ['إطار «معلّق» حول ما حددته: إطار أصفر، والمحتوى تحته باهت، وفي وسطه «مـعـلـق» مع مثلث التحذير.', 'A «suspended» frame around the selection: yellow frame, the content faded under it, «suspended» with the warning triangle in the middle.'],
+  table: ['حدّد جدولًا: صف رأس رمادي وصفوف متبادلة', 'Select a table: gray header row, alternating rows'],
+  tableMain: ['حدّد جدولًا: صف رأس وعمود أول رئيسي', 'Select a table: header row and a main first column'],
+  tablePlain: ['حدّد جدولًا: بلا صف رأس، صفوف متبادلة', 'Select a table: no header row, alternating rows']
+};
 const FRAME_ROLES = ['note', 'quote', 'def', 'formula', 'other', 'activity', 'mars'];
-const ROLE_EN = { chapter: 'Unit', lesson: 'Lesson', topic: 'Topic', body: 'Paragraph', bullets: 'Bullets', qhead: 'Q head', question: 'Question', answer: 'Solution', choice: 'Choices',
-  correct: 'Correct choice', given: 'Part of question', note: 'Note', quote: 'Quote', def: 'Definition', formula: 'Formulas', other: 'Other form', activity: 'Activity', mars: 'Challenge' };
+const ROLE_EN = { chapter: 'Unit title', lesson: 'Lesson title', topic: 'Topic heading', body: 'Paragraph', bullets: 'Bullet list', qhead: 'Questions heading', question: 'Question text', answer: 'Solution', choice: 'Choices',
+  correct: 'Correct choice', given: 'Part of question', graph: 'Graph solution', note: 'Note', quote: 'Quote', def: 'Definition', formula: 'Formulas', other: 'Other form', activity: 'Activity', mars: 'From Mars', cancelled: 'Suspended', table: 'With header', tableMain: 'Header + main column', tablePlain: 'No header' };
+function mergedBtn(it) {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; b.dataset.item = it.id;
+  if (it.role) b.dataset.role = it.role; if (it.tpl) b.dataset.id = it.tpl;
+  b.title = mergedTip(it); b.innerHTML = iconHtml(it.tpl === 'header' ? 'lesson' : it.id, it.col) + '<span>' + L(it.ar, it.en) + '</span>';
+  tint(b, it.id); return b;
+}
+// direction of multiple-choice options: auto / right-to-left / left-to-right (kept in the file)
+let mcqDir = 'auto';
+function dirSeg() {
+  const d = document.createElement('div'); d.className = 'seg seg3 icoseg dirseg';
+  const ic = { auto: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5l1.3 3.2 3.2 1.3-3.2 1.3L8 11.5 6.7 8.3 3.5 7l3.2-1.3z"/></svg>',
+    rtl: '<svg viewBox="0 0 18 14" width="17" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="7" r="3"/><path d="M9 7H2M4.5 4.5L2 7l2.5 2.5"/></svg>',
+    ltr: '<svg viewBox="0 0 18 14" width="17" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="4" cy="7" r="3"/><path d="M9 7h7M13.5 4.5L16 7l-2.5 2.5"/></svg>' };
+  const tip = { auto: ['اتجاه الخيارات تلقائي: سؤال عربي ← الخيارات من اليمين، سؤال إنجليزي → من اليسار', 'Options direction automatic: Arabic question → from the right, English question → from the left'],
+    rtl: ['الخيارات من اليمين إلى اليسار: ⓐ في اليمين', 'Options right-to-left: ⓐ on the right'], ltr: ['الخيارات من اليسار إلى اليمين: ⓐ في اليسار (كالإنجليزي)', 'Options left-to-right: ⓐ on the left (as in English)'] };
+  for (const v of ['auto', 'rtl', 'ltr']) {
+    const b = document.createElement('button'); b.type = 'button'; b.dataset.v = v; b.title = L(tip[v][0], tip[v][1]);
+    b.setAttribute('aria-pressed', String(v === mcqDir)); b.innerHTML = ic[v]; d.appendChild(b);
+  }
+  d.addEventListener('click', async e => {
+    e.stopPropagation(); const b = e.target.closest('button'); if (!b) return;
+    setMcqDir(b.dataset.v, true);
+    // options selected on the slide: they turn to this direction now (the same button for inserting and for formatting)
+    if (b.dataset.v !== 'auto') { await selCheck(); if (selNow) flipSelected(b.dataset.v); }
+  });
+  return d;
+}
+async function flipSelected(dir) {
+  if (busy || !supported) return;
+  busy = true; lock();
+  let slideId = null;
+  try {
+    slideId = await run(async ctx => {
+      const slides = ctx.presentation.getSelectedSlides(); slides.load('items/id');
+      const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/name'); await ctx.sync();
+      if (!slides.items.length || !shapes.items.length) return null;
+      shapes.items.forEach(x => { x.name = (x.name || '').replace(/ #ursel$/, '') + ' #ursel'; });
+      await ctx.sync(); return slides.items[0].id;
+    });
+    if (!slideId) return;
+    const pkg = await UR.openPackage(await exportSlide(slideId));
+    const r = UR.flipChoices(pkg, dir);
+    let newId = slideId;
+    if (!(await UQ.apply(slideId, pkg.files.slide, r.xml, exportSlide).catch(() => false))) {
+      newId = await insertAfter(await UR.buildPackage(pkg, r.xml, null), slideId);
+      await deleteSlide(slideId);
+    }
+    // the same options stay selected, so the other direction can be pressed again right away
+    await run(async ctx => {
+      ctx.presentation.setSelectedSlides([newId]); await ctx.sync();
+      const sh = ctx.presentation.slides.getItem(newId).shapes; sh.load('items/id,items/name'); await ctx.sync();
+      const sel = sh.items.filter(x => / #ursel$/.test(x.name || ''));
+      sel.forEach(x => { x.name = x.name.replace(/ #ursel$/, ''); }); await ctx.sync();
+      try { ctx.presentation.slides.getItem(newId).setSelectedShapes(sel.map(x => x.id)); await ctx.sync(); } catch (e) {}
+    }).catch(() => {});
+    slideId = null;
+    say(dir === 'rtl' ? L('حُوِّلت الخيارات المحددة إلى الاتجاه من اليمين لليسار.', 'The selected options now run right-to-left.') : L('حُوِّلت الخيارات المحددة إلى الاتجاه من اليسار لليمين.', 'The selected options now run left-to-right.'));
+  } catch (e) { if (slideId) await clearSel(slideId); say(L('تعذّر تحويل الاتجاه: ', 'Could not change the direction: ') + errText(e)); }
+  finally { busy = false; lock(); }
+}
+function setMcqDir(v, store) {
+  mcqDir = v; URT.setOpt({ mcqDir: v });
+  document.querySelectorAll('.dirseg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+  if (store) { const st = docSettings(); if (st) { st.set('urMcqDir', v); st.saveAsync(); } }
+}
 function buildRoleList() {
   const host = $('roles'); host.innerHTML = '';
-  for (const g of ROLES) {
-    const d = document.createElement('div'); d.className = 'tgroup';
-    d.innerHTML = '<div class="gt">' + L(g.g, g.ge) + '</div>';
-    const grid = document.createElement('div'); grid.className = 'tgrid';
-    for (const [id, nameAr, col] of g.items) {
-      const name = L(nameAr, ROLE_EN[id]);
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; b.dataset.role = id;
-      b.title = name === 'موضوع' ? 'عنوان موضوع' : name; b.innerHTML = '<i style="background:#' + col + '"></i><span>' + name + '</span>';
-      grid.appendChild(b);
+  for (const g of MERGED) {
+    const { d, grid } = groupCard('obj', g.g, L(g.g, g.ge));
+    if (g.items) g.items.forEach(it => grid.appendChild(mergedBtn(it)));
+    else {
+      grid.className = 'subrows';
+      for (const r of g.rows) {
+        const row = document.createElement('div'); row.className = 'subrow';
+        const lab = document.createElement('span'); lab.className = 'sublab'; lab.textContent = r.label ? L(r.label, r.le) : '';
+        const tg = document.createElement('div'); tg.className = 'tgrid';
+        r.items.forEach(it => tg.appendChild(mergedBtn(it)));
+        if (r.dir) tg.appendChild(dirSeg());
+        row.appendChild(lab); row.appendChild(tg); grid.appendChild(row);
+      }
     }
     d.appendChild(grid); host.appendChild(d);
   }
+  selPaint();
 }
-$('roles').addEventListener('click', e => { const b = e.target.closest('.tbtn'); if (b) pinRole(b.dataset.role); });
+// ---------- Format & Insert in one list ----------
+// a box selected → it becomes the type pressed (role); nothing selected → a new one is added at the bottom (template)
+const MERGED = [
+  { g: 'عناوين', ge: 'Headings', items: [
+    { id: 'lesson', ar: 'عنوان الدرس', en: 'Lesson title', col: '1F71DD', role: 'lesson', tpl: 'header' },
+    { id: 'topic', ar: 'عنوان موضوع', en: 'Topic heading', col: '000000', role: 'topic', tpl: 'topic' }] },
+  { g: 'نصوص', ge: 'Text', items: [
+    { id: 'body', ar: 'فقرة شرح', en: 'Paragraph', col: 'FFFFFF', role: 'body', tpl: 'body' },
+    { id: 'bullets', ar: 'نقاط مرقّمة', en: 'Bullet list', col: 'FFFFFF', role: 'bullets', tpl: 'bullets' },
+    { id: 'cols', ar: 'نقاط بأعمدة', en: 'Bullet columns', col: 'FFFFFF', tpl: 'cols' },
+    { id: 'pill', ar: 'كبسولة تعريف', en: 'Term pill', col: '1F71DC', tpl: 'pill' }] },
+  // one card for questions: the general ones, then written (essay) questions with their solution,
+  // then multiple choice with the correct choice and the direction of the options
+  { g: 'أسئلة', ge: 'Questions', rows: [
+    { items: [
+      { id: 'qhead', ar: 'عنوان الأسئلة', en: 'Questions heading', col: 'FF0000', role: 'qhead', tpl: 'qhead' },
+      { id: 'question', ar: 'سؤال', en: 'Question', col: 'FF0000', role: 'question', tpl: 'question' }] },
+    { label: 'مقالي', le: 'Essay', items: [
+      { id: 'problem', ar: 'مسألة', en: 'Problem', col: '00B050', tpl: 'problem' },
+      { id: 'qqr', ar: 'سؤال مع QR', en: 'Question + QR', col: 'FF0000', tpl: 'qqr' },
+      { id: 'answer', ar: 'حل السؤال', en: 'Solution', col: '1F71DE', role: 'answer', tpl: 'answer' },
+      { id: 'graph', ar: 'حل بياني', en: 'Graph solution', col: 'A0A8B4', role: 'graph' }] },
+    { label: 'اختياري', le: 'Choice', dir: true, items: [
+      { id: 'mcq', ar: 'خيارات أفقية', en: 'Options in a row', col: 'FF0000', role: 'choice', tpl: 'mcq' },
+      { id: 'mcqV', ar: 'خيارات عمودية', en: 'Options in a column', col: 'FF0000', tpl: 'mcqV' },
+      { id: 'correct', ar: 'الخيار الصحيح', en: 'Correct choice', col: '2070DF', role: 'correct' }] }] },
+  { g: 'إطارات', ge: 'Frames', items: [
+    { id: 'note', ar: 'ملاحظة', en: 'Note', role: 'note', tpl: 'note' },
+    { id: 'quote', ar: 'نص مقتطف', en: 'Quote', role: 'quote', tpl: 'quote' },
+    { id: 'def', ar: 'تعريف', en: 'Definition', role: 'def', tpl: 'def' },
+    { id: 'formula', ar: 'قوانين', en: 'Formulas', role: 'formula', tpl: 'formula' },
+    { id: 'other', ar: 'صيغة أخرى', en: 'Other form', role: 'other', tpl: 'other' },
+    { id: 'activity', ar: 'نشاط', en: 'Activity', role: 'activity', tpl: 'activity' },
+    { id: 'mars', ar: 'من المريخ', en: 'From Mars', role: 'mars', tpl: 'mars' },
+    { id: 'cancelled', ar: 'معلّق', en: 'Suspended', role: 'cancelled', tpl: 'cancelled' }] },
+  { g: 'جداول', ge: 'Tables', items: [
+    { id: 'table', ar: 'جدول برأس', en: 'Table with header', col: 'CAD0D8', role: 'table', tpl: 'table' },
+    { id: 'tableMain', ar: 'رأس وعمود رئيسي', en: 'Header + main column', col: 'DAE0E9', role: 'tableMain', tpl: 'tableMain' },
+    { id: 'tablePlain', ar: 'جدول بلا رأس', en: 'No header', col: 'F1F1F1', role: 'tablePlain' },
+    { id: 'solTable', ar: 'جدول الحل', en: 'Answer table', col: 'CAD0D8', tpl: 'solTable' },
+    { id: 'grid', ar: 'شبكة بيانية', en: 'Graph grid', col: 'D3D8E0', tpl: 'grid' }] },
+  { g: 'نهاية الدرس', ge: 'End of lesson', items: [
+    { id: 'practice', ar: 'تدرب وتفوق', en: 'Practice & excel', col: 'EBE6FE', tpl: 'practice' }] }
+];
+const ALL_ITEMS = MERGED.flatMap(g => g.items || g.rows.flatMap(r => r.items));
+const ITEM = Object.fromEntries(ALL_ITEMS.map(x => [x.id, x]));
+function tplName(tid) { const it = ALL_ITEMS.find(x => x.tpl === tid); return it ? [it.ar, it.en] : ['قالب', 'block']; }
+function mergedTip(it) {
+  const own = ROLE_TIP[it.role || it.id];
+  const parts = [];
+  if (it.role && own) parts.push(L('مع تحديد: ', 'With a selection: ') + L(own[0], own[1]));
+  else if (it.role) parts.push(L('حدّد مربعًا ثم اضغط ليتحوّل إلى «' + it.ar + '».', 'Select a box, then press to turn it into «' + it.en + '».'));
+  if (it.tpl === 'grid') parts.push(L('مع تحديد صور: توضع الشبكة مكان كل صورة وبمقاسها. بدون تحديد: تُضاف شبكة جديدة في الأسفل.', 'With pictures selected: the grid takes each picture\'s place and size. Nothing selected: a new grid is added at the bottom.'));
+  else if (it.tpl && it.role) parts.push(L('بدون تحديد: يُضاف «' + it.ar + '» جديد في الأسفل.', 'Nothing selected: a new «' + it.en + '» is added at the bottom.'));
+  else if (it.tpl) parts.push(L('يُضاف «' + it.ar + '» جديد في الأسفل.', 'A new «' + it.en + '» is added at the bottom.'));
+  else parts.push(L('يحتاج تحديد مربع أولًا.', 'Needs a selected box first.'));
+  return parts.join('\n');
+}
+// what is selected now, shown above the list: the next press converts it, or adds a new one
+let selNow = 0;
+function selPaint() {
+  const h = $('selHint'); if (!h) return;
+  h.dataset.on = selNow ? '1' : '';
+  h.innerHTML = selNow
+    ? '<b>●</b> ' + L('محدد ' + (selNow > 1 ? selNow + ' عناصر' : 'عنصر') + ' — الضغط سيحوّله', (selNow > 1 ? selNow + ' objects' : 'One object') + ' selected — pressing converts it')
+    : '<b>○</b> ' + L('لا شيء محدد — الضغط سيضيف جديدًا في الأسفل', 'Nothing selected — pressing adds a new one at the bottom');
+}
+async function selCheck() {
+  if (!supported || isWord) return;
+  const n = await run(async ctx => { const s = ctx.presentation.getSelectedShapes(); s.load('items/name'); await ctx.sync(); return s.items.filter(x => !/^UULA (Footer|Watermark)/.test(x.name || '')).length; }).catch(() => 0);
+  selNow = n; selPaint();
+}
+async function mergedPress(id) {
+  const it = ITEM[id]; if (!it || busy || !supported) return;
+  await selCheck();
+  if (id === 'cancelled') {
+    if (busy) return; busy = true; lock();
+    try { say(suspendSay(await suspendSelected())); } catch (e) { say(L('تعذّر: ', 'Could not: ') + errText(e)); }
+    finally { busy = false; lock(); }
+    return;
+  }
+  if (it.tpl === 'grid' || it.tpl === 'practice' || !it.role) {
+    if (it.tpl) return insertTemplate(it.tpl);
+  }
+  if (selNow && it.role) return pinRole(it.role);
+  if (it.tpl) return insertTemplate(it.tpl);
+  needSel(it);
+}
+// a button that needs a selection, pressed with nothing selected: the line above the list says so, clearly, for a moment
+let needTimer = 0;
+function needSel(it) {
+  const msg = L('حدّد أولًا الكائن الذي تريد تحويله إلى «' + it.ar + '»', 'First select the object to turn into «' + it.en + '»');
+  say(msg + '.');
+  const h = $('selHint'); if (!h) return;
+  h.dataset.on = 'need'; h.innerHTML = '<b>!</b> ' + msg;
+  clearTimeout(needTimer); needTimer = setTimeout(selPaint, 3500);
+}
+$('roles').addEventListener('click', e => { const b = e.target.closest('.tbtn'); if (b) mergedPress(b.dataset.item); });
+// the same solution buttons beside «Hide solutions»
+function buildSolRoles() {
+  const host = $('solRoles'); if (!host) return; host.innerHTML = '';
+  for (const [id, nameAr, col] of [['answer', 'حل السؤال', '1F71DE'], ['graph', 'حل بياني', 'A0A8B4'], ['correct', 'الخيار الصحيح', '2070DF'], ['given', 'جزء من السؤال', 'A6A6A6']]) {
+    const name = L(nameAr, ROLE_EN[id]);
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; b.dataset.role = id;
+    b.title = L(SOL_TIP[id][0], SOL_TIP[id][1]); b.innerHTML = iconHtml(id, col) + '<span>' + name + '</span>'; tint(b, id);
+    host.appendChild(b);
+  }
+}
+async function undoRedo(dir) {
+  if (busy || !supported || !(dir < 0 ? undoStack : redoStack).length) return;
+  busy = true; lock();
+  try {
+    const n = await stepMark(dir);
+    say(n ? (dir < 0 ? L('تم التراجع عن آخر تمييز.', 'The last mark was undone.') : L('تمت إعادة التمييز.', 'The mark was done again.')) : L('لم أجد العنصر.', 'The object was not found.'));
+  } catch (e) { say(L('تعذّر: ', 'Could not: ') + errText(e)); }
+  finally { busy = false; lock(); }
+}
+$('undoBtn').addEventListener('click', () => undoRedo(-1));
+$('redoBtn').addEventListener('click', () => undoRedo(1));
+$('solRoles').addEventListener('click', e => { const b = e.target.closest('.tbtn'); if (b) pinRole(b.dataset.role, true); });
 const rsay = m => say(m);
 async function clearSel(slideId) {
   await run(async ctx => {
@@ -3547,9 +4385,149 @@ async function clearSel(slideId) {
     await ctx.sync();
   }).catch(() => {});
 }
-async function pinRole(role) {
+// solution marks change only the selected objects, in place: no slide is rebuilt, nothing moves
+const QUIET = { answer: '1F71DE', correct: '2070DF', given: null, graph: null };
+// «Undo» / «Redo» of the marks given with the solution buttons (name, text colour, place), in place
+const undoStack = [], redoStack = [];
+function undoPaint() {
+  const u = $('undoBtn'), r = $('redoBtn');
+  if (u) u.disabled = busy || !supported || !undoStack.length;
+  if (r) r.disabled = busy || !supported || !redoStack.length;
+}
+// how the objects are now, to go back to it from the other side
+async function snapState(ctx, slide, ids) {
+  const sh = ctx.presentation.slides.getItem(slide).shapes; sh.load('items/id,items/name,items/left,items/type'); await ctx.sync();
+  const list = ids.map(id => sh.items.find(x => x.id === id)).filter(Boolean);
+  const fonts = list.map(x => { if (!['TextBox', 'GeometricShape'].includes(x.type)) return null; try { const f = x.textFrame.textRange.font; f.load('color,bold'); return f; } catch (e) { return null; } });
+  await ctx.sync();
+  return { slide, items: list.map((x, k) => ({ id: x.id, name: x.name, left: x.left, color: fonts[k] ? fonts[k].color : null, bold: fonts[k] ? fonts[k].bold : null })) };
+}
+async function stepMark(dir) {
+  const from = dir < 0 ? undoStack : redoStack, to = dir < 0 ? redoStack : undoStack;
+  const u = from.pop(); undoPaint(); if (!u) return 0;
+  const n = await run(async ctx => {
+    to.push(await snapState(ctx, u.slide, u.items.map(i => i.id)));
+    const sh = ctx.presentation.slides.getItem(u.slide).shapes; sh.load('items/id'); await ctx.sync();
+    let n = 0;
+    for (const it of u.items) {
+      const s = sh.items.find(x => x.id === it.id); if (!s) continue;
+      s.name = it.name; s.left = it.left; n++;
+      if (it.color || it.bold != null) { try { const f = s.textFrame.textRange.font; if (it.color) f.color = it.color; if (it.bold != null) f.bold = it.bold; } catch (e) {} }
+    }
+    await ctx.sync(); return n;
+  });
+  undoPaint(); return n;
+}
+async function quietMark(role, keepColour) {
+  const id = await currentId();
+  const hiddenNow = (role === 'answer' || role === 'graph') && await slideSolHidden(id);
+  const W = hiddenNow ? (await getSize()).W : 0;
+  return run(async ctx => {
+    const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/name,items/type,items/left,items/top,items/width,items/height'); await ctx.sync();
+    const sel = shapes.items;
+    if (!sel.length) return 0;
+    // what they were, for «Undo»
+    const fonts = sel.map(x => { if (!['TextBox', 'GeometricShape'].includes(x.type)) return null; try { const f = x.textFrame.textRange.font; f.load('color,bold'); return f; } catch (e) { return null; } });
+    sel.forEach(x => x.load('id')); await ctx.sync();
+    undoStack.push({ slide: id, items: sel.map((x, k) => ({ id: x.id, name: x.name, left: x.left, color: fonts[k] ? fonts[k].color : null, bold: fonts[k] ? fonts[k].bold : null })) });
+    if (undoStack.length > 30) undoStack.shift();
+    redoStack.length = 0;
+    undoPaint();
+    let all = null;
+    if (hiddenNow) { all = ctx.presentation.slides.getItem(id).shapes; all.load('items/name,items/left'); await ctx.sync(); }
+    const base = n => (n || '').replace(/ #ursel$/, '').replace(/^UULA Sol(Hidden|View) /, '').replace(/^UULA:[a-z]+\s*/, '');
+    for (const s of sel) {
+      if (hiddenNow && /^UULA SolView /.test(s.name || '')) {
+        // the student's copy of a question still showing part of a solution: the copy goes, its original (kept aside) is now a solution
+        const b = base(s.name), orig = all.items.find(x => /^UULA SolHidden /.test(x.name || '') && base(x.name) === b);
+        if (orig) orig.name = 'UULA SolHidden UULA:answer ' + b;
+        s.delete(); continue;
+      }
+      s.name = 'UULA:' + role + ' ' + base(s.name);
+      if (QUIET[role] && !keepColour && ['TextBox', 'GeometricShape'].includes(s.type)) {
+        try { const f = s.textFrame.textRange.font; f.color = '#' + QUIET[role]; if (role === 'correct') f.bold = true; } catch (e) {}
+      }
+      // the solutions of this slide are hidden now: this one goes aside too, and «Show solutions» brings it back
+      // (a graph leaves the empty grid in its place)
+      if (hiddenNow && role === 'graph') { await ctx.sync(); await gridOverShape(ctx, ctx.presentation.slides.getItem(id).shapes, s, W, []); continue; }
+      if (hiddenNow) { s.name = 'UULA SolHidden ' + s.name; s.left = s.left + 3 * W; }
+    }
+    await ctx.sync();
+    return hiddenNow ? -sel.length : sel.length;
+  });
+}
+// «Suspended»: a yellow frame over the selection, the content faded under it, and «مـعـلـق» with the warning
+// triangle in the middle — drawn in place and grouped (the content itself stays as it is, under it)
+function suspendSay(r) {
+  if (!r.n) return L('تعذّر رسم إطار «معلّق».', 'Could not draw the «suspended» frame.');
+  return (r.n < 0 ? L('تمت إضافة «معلّق» في الأسفل.', '«Suspended» was added at the bottom.') : L('وُضع إطار «معلّق» حول المحدد.', 'The «suspended» frame was put around the selection.')) + (r.failed && r.failed.length ? L(' لم يقبل الباوربوينت: ', ' PowerPoint refused: ') + r.failed.join('، ') : '');
+}
+async function suspendSelected() {
+  return run(async ctx => {
+    const slides = ctx.presentation.getSelectedSlides(); slides.load('items/id');
+    const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/left,items/top,items/width,items/height');
+    await ctx.sync();
+    if (!slides.items.length) return { n: 0 };
+    const sid = slides.items[0].id;
+    const sh = ctx.presentation.slides.getItem(sid).shapes;
+    let X, Y, Wd, Ht, n = shapes.items.length;
+    if (n) {
+      const x0 = Math.min(...shapes.items.map(s => s.left)), y0 = Math.min(...shapes.items.map(s => s.top));
+      const x1 = Math.max(...shapes.items.map(s => s.left + s.width)), y1 = Math.max(...shapes.items.map(s => s.top + s.height));
+      const pad = 6; X = x0 - pad; Y = y0 - pad; Wd = x1 - x0 + 2 * pad; Ht = y1 - y0 + 2 * pad;
+    } else {
+      // nothing selected: the same box on its own, under the last object, as big as the booklet's «suspended» box
+      // (the full width of the page, about 74pt high)
+      const pkg = await UR.openPackage(await exportSlide(sid));
+      const ft = URT.freeTop(pkg, 1);
+      X = 0; Wd = pkg.slideW / PT; Y = ft.top / PT; Ht = 5.5 * UR.ROW / PT; n = -1;
+    }
+    const failed = [];
+    // each step on its own: one refusal does not stop the rest
+    const step = async (what, fn) => { try { fn(); await ctx.sync(); return true; } catch (e) { failed.push(what); return false; } };
+    let box = null;
+    if (!(await step('frame', () => { box = sh.addGeometricShape('RoundRectangle', { left: X, top: Y, width: Wd, height: Ht }); })))
+      await step('frame2', () => { box = sh.addGeometricShape('Rectangle', { left: X, top: Y, width: Wd, height: Ht }); });
+    if (!box) return { n: 0, failed };
+    await step('name', () => { box.name = 'UULA Suspended'; });
+    // white, 40% see-through: the content shows faded under it; the yellow line is solid
+    await step('fill', () => { box.fill.setSolidColor('#FFFFFF'); });
+    await step('see-through', () => { box.fill.transparency = 0.4; });
+    await step('line', () => { box.lineFormat.visible = true; box.lineFormat.color = '#F5C242'; box.lineFormat.weight = 1.5; });
+    await step('corners', () => { box.adjustments.set(0, Math.min(0.5, 5 / Math.min(Wd, Ht))); });
+    // the words written inside the rectangle itself, in its middle
+    await step('words', () => {
+      const tf = box.textFrame; tf.wordWrap = true; tf.autoSizeSetting = 'AutoSizeNone'; tf.verticalAlignment = 'Middle';
+      tf.textRange.text = '⚠️ معلق';
+      const f = tf.textRange.font; f.name = 'UULA Sans'; f.size = 20; f.bold = true; f.color = '#F5C242';
+      tf.textRange.paragraphFormat.horizontalAlignment = 'Center';
+    });
+    return { n, failed: failed.filter(f => f !== 'frame' && f !== 'corners') };
+  });
+}
+async function pinRole(role, keepColour) {
   if (busy || !supported) return;
   busy = true; lock(); rsay('');
+  if (role === 'cancelled') {
+    try { rsay(suspendSay(await suspendSelected())); }
+    catch (e) { rsay(L('تعذّر: ', 'Could not: ') + errText(e)); }
+    finally { busy = false; lock(); }
+    return;
+  }
+  if (role in QUIET) {
+    try {
+      const n = await quietMark(role, keepColour);
+      if (n < 0 && role === 'graph') { rsay(L('عُلِّم كحل بياني ووُضعت مكانه الشبكة الفارغة، لأن حلول الشريحة مخفية الآن. يرجع مع «إظهار الحلول».', 'Marked as a graph solution and replaced by the empty grid, since the slide\'s solutions are hidden now. «Show solutions» brings it back.')); return; }
+      if (n < 0) { rsay(L('عُلِّم كحل وأُخفي، لأن حلول الشريحة مخفية الآن. يظهر مع «إظهار الحلول».', 'Marked as a solution and hidden, since the slide\'s solutions are hidden now. «Show solutions» brings it back.')); return; }
+      rsay(!n ? L('حدّد أولًا الكائن الذي تريد تمييزه.', 'First select the object to mark.')
+        : role === 'given' ? L('عُلِّم كجزء من السؤال: يبقى ظاهرًا عند إخفاء الحلول.', 'Marked as part of the question: it stays when solutions are hidden.')
+        : role === 'correct' ? (keepColour ? L('عُلِّم كخيار صحيح: يتحول للأسود عند إخفاء الحلول.', 'Marked as the correct choice: it turns black when solutions are hidden.') : L('عُلِّم كخيار صحيح (أزرق عريض): يتحول للأسود عند إخفاء الحلول.', 'Marked as the correct choice (bold blue): it turns black when solutions are hidden.'))
+        : role === 'graph' ? L('عُلِّم كحل بياني: تحل مكانه شبكة فارغة عند إخفاء الحلول.', 'Marked as a graph solution: an empty grid takes its place when solutions are hidden.')
+        : keepColour ? L('عُلِّم كحل: يُخفى عند إخفاء الحلول.', 'Marked as a solution: it is hidden when solutions are hidden.') : L('عُلِّم كحل (أزرق): يُخفى عند إخفاء الحلول.', 'Marked as a solution (blue): it is hidden when solutions are hidden.'));
+    } catch (e) { rsay(L('تعذّر التمييز: ', 'Could not mark: ') + errText(e)); }
+    finally { busy = false; lock(); }
+    return;
+  }
   let slideId = null;
   try {
     const got = await run(async ctx => {
@@ -3573,10 +4551,15 @@ async function pinRole(role) {
     slideId = got.id;
     const pkg = await UR.openPackage(await exportSlide(slideId));
     let r;
-    try { r = UR.applyRole(pkg, role); if (['given', 'correct'].includes(role)) r.targets = []; }
+    try { r = UR.applyRole(pkg, role, { dir: mcqDir }); if (['given', 'correct'].includes(role)) r.targets = []; }
     catch (e) { await clearSel(slideId); rsay(e.message === 'nosel' ? L('حدّد مربعًا في الشريحة أولًا.', 'Select a box on the slide first.') : L('تعذّر التحويل: ', 'Could not restyle: ') + errText(e)); return; }
-    const newId = await insertAfter(await UR.buildPackage(pkg, r.xml, r.rels), slideId);
-    await deleteSlide(slideId); slideId = null;
+    // in place when it can be done exactly (nothing moves on screen); otherwise the slide is rebuilt
+    let newId = slideId;
+    if (!(await UQ.apply(slideId, pkg.files.slide, r.xml, exportSlide).catch(() => false))) {
+      newId = await insertAfter(await UR.buildPackage(pkg, r.xml, r.rels), slideId);
+      await deleteSlide(slideId);
+    }
+    slideId = null;
     // real text heights: fit the container around the text
     await run(async ctx => {
       const { map } = await shapesByMark(ctx, newId);
@@ -3616,7 +4599,10 @@ async function pinRole(role) {
       try { const ids = r.targets.map(t => map[t.idx]).filter(Boolean).map(s => s.id); ctx.presentation.slides.getItem(newId).setSelectedShapes(ids); await ctx.sync(); } catch (e) {}
     });
     await unmark(newId);
-    rsay(L('تم.', 'Done.'));
+    rsay(role === 'given' ? L('عُلِّم كشكل من السؤال: يبقى ظاهرًا عند إخفاء الحلول.', 'Marked as part of the question: it stays when solutions are hidden.')
+      : role === 'correct' ? L('عُلِّم كخيار صحيح (أزرق عريض): يتحول للأسود عند إخفاء الحلول.', 'Marked as the correct choice (bold blue): it turns black when solutions are hidden.')
+      : role === 'choice' ? L('حُوِّل إلى خيارات.', 'Turned into options.')
+      : ITEM[role] ? L('حُوِّل إلى «' + ITEM[role].ar + '».', 'Turned into «' + ITEM[role].en + '».') : L('تم.', 'Done.'));
   } catch (e) { if (slideId) await clearSel(slideId); rsay(L('تعذّر التحويل: ', 'Could not restyle: ') + errText(e)); }
   finally { busy = false; lock(); }
 }
@@ -3749,6 +4735,21 @@ $('spD').addEventListener('click', () => spacingRun('d'));
 
 // ---------- hide / show the solutions ----------
 // an empty grid from a graph picture: the coloured drawing is removed and the grid lines / axes it covered are drawn again
+// the UULA empty grid (lines A0A8B4, clear in print, on a clear background, cells of two page-grid steps), cut to w×h points
+function gridPicture(wPt, hPt) {
+  const S = 4, cell = 13.39 * 1.75, cv = document.createElement('canvas');
+  cv.width = Math.max(4, Math.round(wPt * S)); cv.height = Math.max(4, Math.round(hPt * S));
+  const g = cv.getContext('2d');
+  g.strokeStyle = '#A0A8B4'; g.lineWidth = 0.75 * S;
+  const step = cell * S;
+  // the lines run off the edges, as a grid cut out of a bigger sheet; the cut is centred on the picture
+  const ox = ((cv.width / 2) % step), oy = ((cv.height / 2) % step);
+  g.beginPath();
+  for (let x = ox; x <= cv.width; x += step) { g.moveTo(Math.round(x) + 0.5, 0); g.lineTo(Math.round(x) + 0.5, cv.height); }
+  for (let y = oy; y <= cv.height; y += step) { g.moveTo(0, Math.round(y) + 0.5); g.lineTo(cv.width, Math.round(y) + 0.5); }
+  g.stroke();
+  return cv.toDataURL('image/png').split(',')[1];
+}
 async function emptyGrid(b64, ext) {
   const mime = /jpe?g/i.test(ext) ? 'image/jpeg' : 'image/png';
   const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = 'data:' + mime + ';base64,' + b64; });
@@ -3792,10 +4793,78 @@ let solLines = !!load('ur-sollines', false);
 function paintSolLines() { document.querySelectorAll('#solLines button').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.v === '1') === solLines))); }
 document.getElementById('solLines').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; solLines = b.dataset.v === '1'; save('ur-sollines', solLines); paintSolLines(); });
 paintSolLines();
-function solHidden() { const s = docSettings(); return !!(s && s.get('urSolHidden')); }
-function solLabel() { const h = solHidden(); $('solLbl').textContent = h ? L('إظهار الحلول', 'Show solutions') : L('إخفاء الحلول', 'Hide solutions'); $('solSlash').style.display = h ? 'none' : ''; }
+// the button follows the slide on screen: its solutions hidden → «Show solutions», shown → «Hide solutions»
+let solState = false;
+async function slideSolHidden(id) {
+  if (!id) return false;
+  return run(async ctx => { const sh = ctx.presentation.slides.getItem(id).shapes; sh.load('items/name'); await ctx.sync(); return sh.items.some(x => /^UULA Sol(Hidden|View) /.test(x.name || '')); }).catch(() => false);
+}
+function solHidden() { return solState; }
+function solPaint() { const h = solState; $('solLbl').textContent = h ? L('إظهار الحلول', 'Show solutions') : L('إخفاء الحلول', 'Hide solutions'); $('solSlash').style.display = h ? 'none' : ''; }
+async function solLabel() {
+  solPaint();
+  if (!supported) return;
+  try { solState = await slideSolHidden(await currentId()); } catch (e) {}
+  solPaint();
+}
+// another slide chosen: the button is checked again
+let solTimer = 0, solSlideId = null;
+let solWatching = false;
+function solWatch() {
+  if (solWatching) return; solWatching = true;
+  try {
+    Office.context.document.addHandlerAsync(Office.EventType.DocumentSelectionChanged, () => {
+      clearTimeout(solTimer); solTimer = setTimeout(async () => {
+        if (busy || isWord) return;
+        const id = await currentId().catch(() => null);
+        if (id && id !== solSlideId) { solSlideId = id; solLabel(); }
+        selCheck();
+      }, 300);
+    });
+  } catch (e) {}
+  window.addEventListener('focus', () => { if (!busy && !isWord) solLabel(); });
+}
+// hide / show without rebuilding the slide (nothing moves on screen) when only whole objects go aside or come back;
+// returns null when the slide needs the full way (copies, empty grids, writing lines, or objects PowerPoint keeps hidden)
+async function solInPlace(id, mode, pkg) {
+  const U = UR.util, W = pkg.slideW / PT;
+  const doc = UR.parseXml(pkg.files.slide);
+  const tops = U.topItems(doc).map(el => { const c = U.core(el), n = U.cnvOf(c); return { el, n, name: n ? n.getAttribute('name') || '' : '', g: U.geomOf(el, pkg) }; });
+  if (mode === 'show') {
+    if (tops.some(t => /^UULA SolHidden /.test(t.name) && [...t.el.getElementsByTagNameNS(UR.NS.p, 'cNvPr')].some(n => n.getAttribute('hidden') === '1'))) return null;
+    return run(async ctx => {
+      const sh = ctx.presentation.slides.getItem(id).shapes; sh.load('items/name,items/left'); await ctx.sync();
+      let n = 0;
+      for (const s of sh.items) {
+        if (/^UULA SolView /.test(s.name || '')) s.delete();
+        else if (/^UULA SolHidden /.test(s.name || '')) { s.name = s.name.replace(/^UULA SolHidden /, ''); if (s.left >= 2.5 * W) s.left = s.left - 3 * W; n++; }
+      }
+      await ctx.sync(); return n;
+    });
+  }
+  if (solLines) return null;
+  const found = UR.findSolutions(pkg);
+  if (!found.length || found.some(f => f.how !== 'hide')) return null;
+  const want = found.map(f => tops[f.i]).filter(Boolean);
+  if (want.length !== found.length || want.some(t => !t.g)) return null;
+  return run(async ctx => {
+    const sh = ctx.presentation.slides.getItem(id).shapes; sh.load('items/name,items/left,items/top'); await ctx.sync();
+    const used = new Set(), match = [];
+    for (const t of want) {
+      const s = sh.items.find(x => !used.has(x) && (x.name || '') === t.name && Math.abs(x.left - t.g.x / PT) < 1.5 && Math.abs(x.top - t.g.y / PT) < 1.5);
+      if (!s) return null;                                  // not sure which object it is: the full way
+      used.add(s); match.push(s);
+    }
+    match.forEach(s => { s.name = 'UULA SolHidden ' + s.name; s.left = s.left + 3 * W; });
+    await ctx.sync(); return match.length;
+  });
+}
 async function solSlide(id, mode) {
   const pkg = await UR.openPackage(await exportSlide(id));
+  if (mode === 'show' ? UR.hasSolutions(pkg.files.slide) : !UR.hasSolutions(pkg.files.slide)) {
+    const quick = await solInPlace(id, mode, pkg).catch(() => null);
+    if (quick != null) return quick;
+  }
   let r;
   if (mode === 'show') { if (!UR.hasSolutions(pkg.files.slide)) return 0; r = UR.showSolutions(pkg); r.rels = null; }
   else {
@@ -3804,8 +4873,14 @@ async function solSlide(id, mode) {
     if (!found.length) return 0;
     const grids = {};
     for (const f of found.filter(x => x.how === 'grid')) {
-      const file = pkg.zip.file(f.media); if (!file || !/\.(png|jpe?g)$/i.test(f.media)) continue;
-      try { const png = await emptyGrid(await file.async('base64'), f.media); if (png) grids[f.i] = png; } catch (e) {}
+      // marked «حل بياني»: the empty grid at its size, whatever the object is
+      if (f.pinned && f.w && f.h) { grids[f.i] = gridPicture(f.w, f.h); continue; }
+      const file = f.media && pkg.zip.file(f.media); if (!file || !/\.(png|jpe?g)$/i.test(f.media)) continue;
+      try {
+        // a graph that is part of a solution: in its place the UULA empty grid, cut to the picture's size
+        const drawn = await emptyGrid(await file.async('base64'), f.media);
+        if (drawn) grids[f.i] = f.w && f.h ? gridPicture(f.w, f.h) : drawn;
+      } catch (e) {}
     }
     r = UR.hideSolutions(pkg, grids, { lines: solLines });
   }
@@ -3818,7 +4893,8 @@ async function solSlide(id, mode) {
 $('solBtn').addEventListener('click', async () => {
   if (busy || !supported) return;
   busy = true; lock(); res.innerHTML = '';
-  const mode = solHidden() ? 'show' : 'hide';
+  solState = await slideSolHidden(await currentId().catch(() => null));
+  const mode = solState ? 'show' : 'hide';
   try {
     const ids = await targetIds();
     if (!ids.length) { say(L('حدّد شريحة أولًا.', 'Select a slide first.')); return; }
@@ -3829,8 +4905,7 @@ $('solBtn').addEventListener('click', async () => {
       catch (e) { line('err', '✗ ' + esc(errText(e))); }
     }
     prog(null);
-    const s = docSettings(); if (s) { s.set('urSolHidden', mode === 'hide'); s.saveAsync(); }
-    solLabel();
+    await solLabel();
     say(total ? (mode === 'hide' ? L('أُخفيت الحلول في ', 'Solutions hidden in ') : L('ظهرت الحلول في ', 'Solutions shown in ')) + cnt(slides) + '.' : (mode === 'hide' ? L('لم أجد حلولًا لإخفائها.', 'No solutions found to hide.') : L('لا توجد حلول مخفية.', 'No hidden solutions.')));
   } catch (e) { prog(null); say(L('حدث خطأ: ', 'Error: ') + errText(e)); }
   finally { busy = false; lock(); }
@@ -3929,12 +5004,10 @@ const wname = id => { const t = wtype(id); return t ? L(t.ar, t.en) : id; };
 function buildWordRoles() {
   const host = $('wroles'); host.innerHTML = '';
   for (const g of UW.TYPES) {
-    const d = document.createElement('div'); d.className = 'tgroup';
-    d.innerHTML = '<div class="gt">' + L(g.g, g.ge) + '</div>';
-    const grid = document.createElement('div'); grid.className = 'tgrid';
+    const { d, grid } = groupCard('word', g.g, L(g.g, g.ge));
     for (const [id, ar, en, col] of g.items) {
       const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; b.dataset.wrole = id;
-      b.title = L(ar, en); b.innerHTML = '<i style="background:#' + col + '"></i><span>' + L(ar, en) + '</span>';
+      b.title = L(ar, en); b.innerHTML = iconHtml(id, col) + '<span>' + L(ar, en) + '</span>'; tint(b, id);
       grid.appendChild(b);
     }
     d.appendChild(grid); host.appendChild(d);
@@ -4190,6 +5263,7 @@ function lock() {
   $('solBtn').disabled = busy || !supported;
   $('spV').disabled = busy || !supported; $('spH').disabled = busy || !supported;
   document.querySelectorAll('.tbtn').forEach(b => { b.disabled = busy || !supported; });
+  undoPaint();
   ['docxBtn', 'numDel', 'wAuto', 'wUntag', 'wClear', 'wMark', 'wUnmark'].forEach(k => { if ($(k)) $(k).disabled = busy || !supported; });
 }
 $('goBtn').addEventListener('click', async () => {
@@ -4218,7 +5292,7 @@ function applyLang() {
   document.querySelectorAll('[data-en]').forEach(el => { if (el.dataset.ar == null) el.dataset.ar = el.textContent; el.textContent = lang === 'en' ? el.dataset.en : el.dataset.ar; });
   document.querySelectorAll('[data-en-title]').forEach(el => { el.title = lang === 'en' ? el.dataset.enTitle : el.dataset.arTitle; });
   $('langBtn').textContent = lang === 'en' ? 'ع' : 'EN';
-  buildTemplateList(); buildRoleList(); buildWordRoles(); solLabel(); lock();
+  buildRoleList(); buildSolRoles(); buildWordRoles(); solLabel(); lock(); if (!isWord) solWatch();
   if (isWord && supported && !$('wlist').closest('[data-pane]').hidden) reviewList().catch(() => {});
 }
 $('langBtn').addEventListener('click', () => { lang = lang === 'en' ? 'ar' : 'en'; save('ur-lang', lang); applyLang(); say(''); });
@@ -4279,6 +5353,7 @@ ready.then(info => {
   const s = docSettings();
   if (s) {
     const st = s.get('urNumStart'); if (st) $('numStart').value = st;
+    const md = s.get('urMcqDir'); if (md) setMcqDir(md);
     const on = s.get('urNum'); if (on === false) $('numChk').checked = false;
   }
   $('numRow').style.opacity = $('numChk').checked ? '' : '.5';

@@ -160,7 +160,7 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
       <div class="menu" id="appMenu" role="menu" hidden>
         <button type="button" role="menuitem" id="loadSelItem" data-act="edit" data-i="loadSel">تعديل الشكل المحدد</button>
         <button type="button" role="menuitem" id="fromPicItem" data-act="pic" data-i="fromPic">تحويل الصورة المحددة إلى شكل</button>
-        <button type="button" role="menuitem" id="snapItem"><span data-i="snap">الالتصاق بالدوائر</span> <b id="snapMark">✓</b></button>
+        <button type="button" role="menuitem" id="snapItem"><span data-i="snap">الالتصاق</span> <b id="snapMark">✓</b></button>
         <button type="button" role="menuitem" id="chkUpd" data-i="chkUpd">التحقق من التحديثات</button>
         <button type="button" role="menuitem" id="langItem">English</button>
         <button type="button" role="menuitem" id="aboutBtn" data-i="about">حول الأداة</button>
@@ -189,6 +189,7 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
       <button type="button" class="ib" id="editBtn" data-ti="loadSel" title="تعديل الشكل المحدد"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>
       <button type="button" class="ib" id="picSlideBtn" data-ti="picSlide" title="تحويل كل صور الأشكال في هذه الشريحة"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15l3-4 3 3 2-2 3 3"/><circle cx="16" cy="9" r="1.3" fill="currentColor"/></svg></button>
       <button type="button" class="ib" id="picAllBtn" data-ti="picAll" title="تحويل كل صور الأشكال في كل الشرائح"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="6" y="3" width="15" height="12" rx="2"/><path d="M3 7v12a2 2 0 0 0 2 2h12"/><path d="M9 12l2.5-3 2.5 2.5 1.5-1.5 2.5 2"/></svg></button>
+      <button type="button" class="ib" id="escBtn" data-ti="escSel" title="إلغاء التحديد"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3l12 8-5.5 1.2L16 19l-2.5 1.2-3.3-6.6L6 17z"/></svg></button>
       <button type="button" class="ib" id="undoBtn" data-ti="undo" title="تراجع"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
       <button type="button" class="ib" id="rotBtn" data-ti="rot" title="تدوير"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5L15 9l-6 4.5z" transform="rotate(-20 12 9)"/><path d="M5 17a8 8 0 0 0 14 0"/><path d="M19 13v4h-4"/></svg></button>
       <button type="button" class="ib" id="flipBtn" data-ti="flip" title="انعكاس"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3v18M9 7L3 17h6zM15 7l6 10h-6z"/></svg></button>
@@ -262,7 +263,7 @@ const T={
   editing:['تعديل شكل محدد','Editing a selected shape'], cancel:['إلغاء','Cancel'],
   insert:['إدراج','Insert'], update:['تحديث','Update'], onShape:['على الشكل','On the shape'], onSolid:['على المجسم','On the solid'], onCircle:['على الدائرة','On the circle'],
   style:['التنسيق','Style'], noColor:['بلا لون','No color'], booklet:['ألوان المذكرة','Booklet colors'], more:['ألوان أخرى','More colors'], custom:['لون آخر…','More…'], close:['إغلاق','Close'],
-  upd:['تحديث جديد','New update'], menu:['القائمة','Menu'], undo:['تراجع','Undo'], rot:['تدوير','Rotate'], flip:['انعكاس','Flip'], reset:['الشكل الأصلي','Original shape'], clear:['مسح الرسم','Clear the drawing'], emptyHint:['الرسم فارغ: اختر شكلًا من الأعلى','Empty: choose a shape above'],
+  upd:['تحديث جديد','New update'], menu:['القائمة','Menu'], undo:['تراجع','Undo'], escSel:['إلغاء التحديد والعودة للتحريك (Esc)','Deselect all and back to Move (Esc)'], rot:['تدوير','Rotate'], flip:['انعكاس','Flip'], reset:['الشكل الأصلي','Original shape'], clear:['مسح الرسم','Clear the drawing'], emptyHint:['الرسم فارغ: اختر شكلًا من الأعلى','Empty: choose a shape above'],
   cLine:['لون الخط','Line color'], width:['سماكة الخط','Line width'], solid:['خط متصل','Solid line'], dash:['خط متقطع','Dashed line'], cFill:['التعبئة','Fill'], cText:['لون الكتابة','Text color'], cMark:['لون العلامات','Marks color'], fs:['حجم الكتابة','Text size'], ptShow:['النقاط على الرؤوس','Points on vertices'], nmText:['الأسماء حروف عادية','Names as normal letters'], scAr:['الوضع العربي: س، ص، ع، أ، ب، ج','Arabic mode: س ص ع أ ب ج'], scEn:['الوضع اللاتيني: 𝒙، 𝒚، 𝜶، 𝑨، 𝑩','Latin mode: 𝒙 𝒚 𝜶 𝑨 𝑩'], dgAr:['أرقام هندية ١٢٣','Arabic-Indic digits ١٢٣'], dgEn:['أرقام إنجليزية 123','Western digits 123'], nmSym:['الأسماء رموزًا (خط Mazeri)','Names as math symbols (Mazeri font)'], cPt:['لون النقاط','Points color'], ptR:['حجم النقطة','Point size'], ptFull:['نقطة مغلقة','Filled point'], ptHollow:['نقطة مفرغة','Hollow point'], ptS:['صغيرة','Small'], ptM:['متوسطة','Medium'], ptL:['كبيرة','Large'],
   sca:['مختلف','Scalene'], iso:['متساوي الساقين','Isosceles'], equ:['متطابق','Equilateral'], rt:['قائم','Right'],
   hdash:['متقطعة','Dashed'], hhide:['مخفية','Hidden'], hsolid:['متصلة','Solid'],
@@ -285,10 +286,10 @@ const T={
   kCin:['الدائرة الداخلية لمثلث','Incircle of a triangle'], hcin:['انقر رؤوس المثلث الثلاثة: تُرسم دائرته الداخلية ومركزها.','Click the three vertices: its incircle and center are drawn.'],
   kCen:['مركز الدائرة','Circle center'], hcen:['انقر دائرة لإضافة مركزها كنقطة (سحب المركز يحرك الدائرة).','Click a circle to add its center as a point (dragging it moves the circle).'],
   kEq:['وتر مساوٍ لوتر','Equal chord'], heq:['انقر وترًا ثم نقطة على الدائرة نفسها: يُرسم منها وتر مساوٍ له يبقى مساويًا عند السحب.','Click a chord, then a point on the same circle: an equal chord is drawn from it and stays equal when dragging.'], kEqNeed:['الوتر والنقطة يجب أن يكونا على الدائرة نفسها.','The chord and the point must be on the same circle.'],
-  diag3:['القطر الفراغي وقطر القاعدة','Space diagonal and base diagonal'], sec:['مقطع موازٍ للقاعدة (اسحب مقبضه لتغيير ارتفاعه)','Section parallel to the base (drag its handle to change its height)'], degIns:['رمز الدرجة °','Degree sign °'], snap:['الالتصاق بالدوائر','Snap to circles'], snapOn:['الالتصاق مفعّل','Snapping on'], snapOff:['الالتصاق معطّل','Snapping off'], mselN:['محدد: % نقاط (اسحب إحداها لتحريكها معًا، أو احذفها)','Selected: % points (drag one to move them together, or delete)'],
+  diag3:['القطر الفراغي وقطر القاعدة','Space diagonal and base diagonal'], sec:['مقطع موازٍ للقاعدة (اسحب مقبضه لتغيير ارتفاعه)','Section parallel to the base (drag its handle to change its height)'], degIns:['رمز الدرجة °','Degree sign °'], snap:['الالتصاق (بالدوائر، وبالزوايا 90° و180° مع إشارة زرقاء)','Snapping (to circles and to 90° / 180° angles)'], snapOn:['الالتصاق مفعّل','Snapping on'], snapOff:['الالتصاق معطّل','Snapping off'], mselN:['محدد: % نقاط (اسحب إحداها لتحريكها معًا، أو احذفها)','Selected: % points (drag one to move them together, or delete)'],
   recent:['الأخيرة','Recent'], favs:['المفضلة','Favorites'], favT:['حفظ الشكل الحالي في المفضلة (أو إزالته)','Save the current figure to favorites (or remove it)'], favAdd:['حُفظ في المفضلة','Saved to favorites'], favDel:['أُزيل من المفضلة','Removed from favorites'],
   lockLen:['تثبيت الطول (الطول المكتوب يضبط الرسم)','Fix the length (a typed length sets the drawing)'], lockAng:['تثبيت القياس (القياس المكتوب يضبط الرسم)','Fix the measure (a typed measure sets the drawing)'], pinPt:['تثبيت النقطة','Pin the point'], lockNo:['لا يمكن التثبيت: طرفا العنصر مقيدان بعلاقة أخرى.','Cannot fix: both ends already have another relation.'], kPar:['مستقيم موازٍ','Parallel line'], hpar:['انقر قطعة ثم نقطة: يُرسم منها مستقيم موازٍ (ومن نقطة على الدائرة وتر موازٍ).','Click a segment, then a point: a parallel line is drawn from it (a parallel chord from a point on the circle).'],
-  kArc:['تمييز قوس','Highlight an arc'], arcW:['القوس','Arc'], arcLab:['قياس القوس أو تعبير (مثل 80° أو 2x+1)','Arc measure or expression (e.g. 80° or 2x+1)'], arcBig:['القوس الأكبر','Major arc'], harc:['انقر نقطتين على الدائرة: يُميَّز القوس الأصغر، وتكرار ذلك يحوّله للأكبر ثم يزيله.','Click two points on the circle: the minor arc is highlighted; repeating switches to the major arc, then removes it.'],
+  kArc:['تمييز قوس','Highlight an arc'], arcW:['القوس','Arc'], arcLab:['قياس القوس أو تعبير (مثل 80° أو 2x+1)','Arc measure or expression (e.g. 80° or 2x+1)'], arcBig:['القوس الأكبر','Major arc'], arcTicks:['علامات تساوي الأقواس','Equal-arc marks'], arcHl:['تلوين القوس (أطفئه لتبقى العلامات فقط)','Highlight the arc (turn off to keep only the marks)'], harc:['انقر نقطتين على الدائرة: يُميَّز القوس الأصغر. ثم انقر القوس لكتابة قياسه أو وضع علامات التساوي عليه.','Click two points on the circle: the minor arc is highlighted; repeating switches to the major arc, then removes it.'],
   kNone:['لا يوجد تقاطع.','No intersection.'], kInside:['النقطة داخل الدائرة: لا يمكن رسم مماس منها.','The point is inside the circle: no tangent from it.'], kCollinear:['النقاط على استقامة واحدة.','The points are collinear.'], kArcNeed:['النقطتان يجب أن تكونا على الدائرة نفسها.','Both points must be on the same circle.'],
   ftSeg:['قطعة مستقيمة: انقر بدايتها ثم نهايتها في أي مكان','Segment: click its start, then its end, anywhere'], hintSeg:['انقر بداية القطعة ثم نهايتها (في أي مكان أو على نقطة موجودة).','Click the start of the segment, then its end (anywhere or on an existing point).'],
   names:['أسماء الرؤوس','Vertex names'], free:['شكل مركب','Composite shape'], tools:['أدوات','Tools'], ftMove:['تحريك','Move'], ftLink:['وصل نقطتين','Connect'], ftAdd:['نقطة على قطعة','Point on segment'], ftDel:['حذف','Delete'], hintFree:['اسحب النقاط لتغيير الشكل، وانقر نقطة لتسميتها ووضع علامات زواياها، وانقر قطعة لعلاماتها وطولها.','Drag points to reshape; click a point for its name and angle marks; click a segment for its marks and length.'], hintLink:['انقر نقطة ثم نقطة أخرى لرسم قطعة بينهما.','Click a point, then another to draw a segment.'], hintAdd:['انقر على قطعة أو دائرة لتضع نقطة عليها (تبقى عليها عند السحب)، أو في مكان فارغ لنقطة حرة. لتحريك النقاط أو تسميتها عُد إلى أداة التحريك ✥.','Click a segment or a circle to put a point on it (it stays there when dragging), or empty space for a free point. To move or name points, go back to the Move tool ✥.'],
@@ -301,7 +302,7 @@ const T={
   typeName:['اكتب الاسم…','Type the name…'], typeLen:['اكتب الطول…','Type the length…'],
   dotted:['منقط','Dotted'], defColor:['اللون الافتراضي','Default color'],
   deleted:['حُذف. للتراجع اضغط زر التراجع','Deleted. Press Undo to bring it back'], delSel:['حذف (Delete)','Delete (Delete key)'],
-  side:['الضلع','Side'], vertex:['الرأس','Vertex'], showLen:['إظهار الطول','Show length'], showAng:['إظهار القياس','Show measure'], ticks:['شرطات التساوي','Equal marks'], par:['رمز التوازي //','Parallel //'], dashed:['متقطع','Dashed'],
+  side:['الضلع','Side'], vertex:['الرأس','Vertex'], showLen:['إظهار الطول','Show length'], showAng:['إظهار القياس','Show measure'], ticks:['شرطات التساوي','Equal marks'], par:['علامة التوازي: سهم أو سهمان في منتصف القطعة','Parallel mark: one or two arrowheads in the middle of the segment'], dashed:['متقطع','Dashed'],
   vname:['اسم الرأس','Vertex name'], rightM:['علامة الزاوية القائمة','Right-angle mark'], arcs:['أقواس تساوي الزوايا','Equal-angle arcs'], fromV:['من هذا الرأس','From this vertex'],
   wL:['الطول','Length'], wW:['العرض','Width'], wH:['الارتفاع','Height'], wE:['الحرف','Edge'], wR:['نصف القطر','Radius'], wR2:['نصف قطر القاعدة الصغرى','Small radius'], wS:['الراسم','Slant'],
   inserting:['جارٍ الإدراج…','Inserting…'], inserted:['تم الإدراج','Inserted'], updated:['تم التحديث','Updated'], asPic:['أُدرج صورةً (إصدار Office لا يدعم الأشكال القابلة للتعديل)','Inserted as a picture (this Office version can\'t insert editable shapes)'],
@@ -434,8 +435,9 @@ function rightMark(P,A,B,s){ s=s||11; const u=mul(nrm(sub(A,P)),s), v=mul(nrm(su
 function sideTicks(a,b,k,shift){ if(!k) return; const d=nrm(sub(b,a)), n=perp(d), m=add(mid(a,b),mul(d,shift||0)), h=6;
   for(let i=0;i<k;i++){ const o=add(m,mul(d,(i-(k-1)/2)*4.5)); mk(add(o,mul(n,h)),sub(o,mul(n,h))); } }
 function parMarks(a,b,k,shift){ if(!k) return; let d=nrm(sub(b,a)); if(d[0]<0||(Math.abs(d[0])<1e-6&&d[1]>0)) d=mul(d,-1);
-  const m=add(mid(a,b),mul(d,shift||0)), cnt=k+1, s=rot(d,[0,0],-60), h=6.5;   // شكل // مائل
-  for(let i=0;i<cnt;i++){ const o=add(m,mul(d,(i-(cnt-1)/2)*5)); mk(add(o,mul(s,h)),sub(o,mul(s,h))); } }
+  // سهم أو سهمان (>، >>) في منتصف القطعة، وكل القطع المتوازية تشير إلى الجهة نفسها
+  const m=add(mid(a,b),mul(d,shift||0)), nv=perp(d), h=4.2, gap=4.5;
+  for(let i=0;i<k;i++){ const o=add(m,mul(d,(i-(k-1)/2)*gap)), tip=add(o,mul(d,h*.6)), back=sub(o,mul(d,h*.6)); mk(add(back,mul(nv,h)),tip); mk(sub(back,mul(nv,h)),tip); } }
 function outward(P,i){ const n=P.length, a=P[(i-1+n)%n], b=P[(i+1)%n], u=nrm(sub(a,P[i])), v=nrm(sub(b,P[i])); let d=mul(add(u,v),-1); if(len(d)<1e-3) d=sub(P[i],cen(P)); return nrm(d); }
 
 /* ---------- الأشكال المستوية ---------- */
@@ -444,7 +446,8 @@ function buildFree(){
   // دوائر الشكل المركب (من صورة دائرة فيها أوتار ومماسات وقواطع)
   (G.circles||[]).forEach(o=>{ if(o.bad||o.hide) return; PR.push({t:'ell',c:o.c,rx:o.r,ry:o.r,a0:0,a1:360,c2:o.col||LK().line,w:o.w||LK().w,dash:!!o.dash});
     (o.arcs||[]).forEach(z=>{ if(!P[z.a]||!P[z.b]) return; let a0=ang(sub(P[z.a],o.c)), a1=ang(sub(P[z.b],o.c)); let sw=((a1-a0)%360+360)%360; if((sw>180)!==!!z.big){ const t=a0; a0=a1; a1=t; sw=360-sw; }
-      PR.push({t:'ell',c:o.c,rx:o.r,ry:o.r,a0,a1:a0+sw,c2:z.c||'#1f71de',w:(o.w||LK().w)*2.2,dash:false});
+      if(!z.plain) PR.push({t:'ell',c:o.c,rx:o.r,ry:o.r,a0,a1:a0+sw,c2:z.c||'#1f71de',w:(o.w||LK().w)*2.2,dash:false});
+      if(z.ticks){ const n=z.ticks, gap=5/Math.max(o.r,1); for(let j=0;j<n;j++){ const t=rad(a0+sw/2)+(j-(n-1)/2)*gap, u=[Math.cos(t),Math.sin(t)]; seg(add(o.c,mul(u,o.r-6)),add(o.c,mul(u,o.r+6)),{c:LK().mark||LK().line,w:o.w||LK().w}); } }   // علامات تساوي الأقواس
       if(z.show){ const am=rad(a0+sw/2), u=[Math.cos(am),Math.sin(am)], tx=z.lab||fmtAng(sw), hw=fs*.3*Math.max(1,String(tx).length), D=o.r+hw*Math.abs(u[0])+fs*.5*Math.abs(u[1])+5; lbl(add(o.c,mul(u,D)),tx,{fs:fs*.9,from:add(o.c,mul(u,o.r)),deg:1}); } }); });
   G.sides.forEach(sd=>{ seg(P[sd.a],P[sd.b],{c:sd.c,w:sd.w,dash:segDash(sd)}); segArrows(P[sd.a],P[sd.b],sd.arr,sd.c); });
   G.sides.forEach(sd=>{ const a=P[sd.a], b=P[sd.b], both=sd.ticks&&sd.par; sideTicks(a,b,sd.ticks,both?-9:0); parMarks(a,b,sd.par,both?9:0);
@@ -742,6 +745,7 @@ function draw(){
   const hs=[...h.matchAll(/data-h="sz"[^>]*cx="([\d.-]+)" cy="([\d.-]+)"/g)].map(m=>[+m[1],+m[2]]);
   REG.forEach(r=>{ if(own.has(r.key)||hs.some(q=>len(sub(q,r.p))<4)) return; h+=`<circle class="hv hp" data-h="pt" data-i="${esc(r.key)}" cx="${f2(r.p[0])}" cy="${f2(r.p[1])}" r="4.5"/>`; });
   if(S.empty) h+=`<text x="160" y="125" text-anchor="middle" dominant-baseline="central" font-family="UULA Sans" font-size="13" fill="#9aa3b0">${esc(L('emptyHint'))}</text>`;
+  h+=snapFxSVG();
   if(ZOOM.k!==1) h+=`<g class="zchip" data-z="reset"><rect x="${f2(VB.x+VB.w-44/ZOOM.k)}" y="${f2(VB.y+4/ZOOM.k)}" width="${f2(40/ZOOM.k)}" height="${f2(17/ZOOM.k)}" rx="${f2(8/ZOOM.k)}"/><text x="${f2(VB.x+VB.w-24/ZOOM.k)}" y="${f2(VB.y+12.5/ZOOM.k)}" font-size="${f2(10/ZOOM.k)}" text-anchor="middle" dominant-baseline="central">${Math.round(ZOOM.k*100)}%</text></g>`;
   $('fig').innerHTML=h+'</g>';
 }
@@ -764,7 +768,7 @@ function setVertex(i,p){
     if(G.lk&&G.lk[i]){ G.lk[i].ang=ang(sub(p,P[G.lk[i].a])); solve(G,null); return; }   // طول مثبت: النقطة تدور حول الطرف الآخر
     const oc=G.onc&&G.onc[i]&&(G.circles||[])[G.onc[i][0]];
     if(oc){ G.onc[i][1]=ang(sub(p,oc.c)); P[i]=circAt(oc,G.onc[i][1]); }
-    else if(on[i]){ const [a,b]=on[i], A=P[a], B=P[b], d=sub(B,A), tt=Math.max(.03,Math.min(.97,dot(sub(p,A),d)/(dot(d,d)||1))); on[i][2]=tt; P[i]=add(A,mul(d,tt)); } else P[i]=p;
+    else if(on[i]){ const [a,b]=on[i], A=P[a], B=P[b], d=sub(B,A), tt=Math.max(.03,Math.min(.97,dot(sub(p,A),d)/(dot(d,d)||1))); on[i][2]=tt; P[i]=add(A,mul(d,tt)); } else P[i]=angSnap(G,i,p);
     solve(G,['p'+i]); return; }
   if(k==='tri'){
     if(G.sub==='sca') P[i]=p;
@@ -882,6 +886,32 @@ function circPin(G,k,ci){ const o=G.circles[ci], a=ang(sub(G.pts[k],o.c)); (G.on
 function circSync(G,ci){ solve(G,ci==null?null:['c'+ci]); }
 function circRepin(G){ Object.entries(G.onc||{}).forEach(([k,[ci,a]])=>{ const o=(G.circles||[])[ci]; if(o&&G.pts[+k]) G.onc[k][1]=ang(sub(G.pts[+k],o.c)); }); }
 let SNAP=true; try{ SNAP=localStorage.getItem('uula-geometry-snap')!=='0'; }catch(e){}
+// التقاط الزوايا عند السحب: إذا قاربت الزاوية بين قطعتين 180° أو 90° (بفارق 1.5° أو أقل) تصبح كذلك تمامًا
+const SNAP_DEG=2;
+let SNAPFX=null;   // إشارة مرئية أثناء السحب عند الالتقاط: {t:'line'|'right', v, a, b} (لا تُدرج في الشريحة)
+function angSnap(G,i,p){ SNAPFX=null; if(!SNAP) return p; const P=G.pts, nb=freeNb(G,i); let best=null;
+  const consider=(q,err,fx)=>{ if(err<=SNAP_DEG&&(!best||err<best.err)) best={q,err,fx}; };
+  const rotv=(v,deg)=>{ const t=rad(deg); return [v[0]*Math.cos(t)-v[1]*Math.sin(t),v[0]*Math.sin(t)+v[1]*Math.cos(t)]; };
+  // 1) النقطة المسحوبة طرف قطعة VP: الزاوية عند V بين VP وقطعة أخرى VW
+  nb.forEach(v=>{ const V=P[v], d=len(sub(p,V)); if(d<4) return; freeNb(G,v).forEach(w=>{ if(w===i) return; const u=sub(P[w],V); if(len(u)<1e-6) return;
+    const a=Math.atan2(crs(u,sub(p,V)),dot(u,sub(p,V)))*180/Math.PI;   // من -180 إلى 180
+    [180,-180,90,-90].forEach(t=>{ const err=Math.abs(a-t); if(err<=SNAP_DEG) consider(add(V,mul(rotv(nrm(u),t),d)),err,{t:Math.abs(t)===180?'line':'right',v,a:w,b:i}); }); }); });
+  // 2) النقطة المسحوبة رأس بين قطعتين AP و PC: على استقامة واحدة (على المستقيم AC) أو قائمة (على الدائرة التي قطرها AC)
+  for(let x=0;x<nb.length;x++) for(let y=x+1;y<nb.length;y++){ const A=P[nb[x]], C=P[nb[y]], u=sub(A,p), w=sub(C,p); if(len(u)<4||len(w)<4) continue;
+    const a=Math.abs(Math.atan2(crs(u,w),dot(u,w))*180/Math.PI);
+    if(180-a<=SNAP_DEG){ const f=footOn(p,A,C); if(f) consider(f,180-a,{t:'line',v:i,a:nb[x],b:nb[y]}); }
+    if(Math.abs(a-90)<=SNAP_DEG){ const m=mid(A,C), r=len(sub(C,A))/2, dv=sub(p,m); if(len(dv)>1e-6) consider(add(m,mul(nrm(dv),r)),Math.abs(a-90),{t:'right',v:i,a:nb[x],b:nb[y]}); } }
+  if(best){ SNAPFX=best.fx; return best.q; } return p; }
+// الإشارة المرئية للالتقاط: خط أزرق متقطع على الاستقامة أو مربع قائمة ملوّن، مع شارة 180° أو 90°
+function snapFxSVG(){ const G=S.p; if(!SNAPFX||!DRAG||S.tab!=='p'||!G||G.kind!=='free') return ''; const P=G.pts, f=SNAPFX, V=P[f.v], A=P[f.a], B=P[f.b]; if(!V||!A||!B) return '';
+  const k=1/Math.max(1,ZOOM.k), col='#1f71de'; let h='<g class="snapfx" pointer-events="none">', lab, at;
+  if(f.t==='line'){ const ends=[A,B].map(q=>add(q,mul(nrm(sub(q,V)),14*k))); h+=`<path d="M${f2(ends[0][0])} ${f2(ends[0][1])}L${f2(V[0])} ${f2(V[1])}L${f2(ends[1][0])} ${f2(ends[1][1])}" stroke="${col}" stroke-width="${f2(5*k)}" stroke-opacity=".22" fill="none" stroke-linecap="round"/><path d="M${f2(ends[0][0])} ${f2(ends[0][1])}L${f2(ends[1][0])} ${f2(ends[1][1])}" stroke="${col}" stroke-width="${f2(1.6*k)}" stroke-dasharray="${f2(5*k)} ${f2(3.5*k)}" fill="none"/>`;
+    lab='180°'; const n=perp(nrm(sub(B,A))); at=add(V,mul(n,-18*k)); }
+  else { const u=nrm(sub(A,V)), w=nrm(sub(B,V)), s0=13*k, q1=add(V,mul(u,s0)), q2=add(add(V,mul(u,s0)),mul(w,s0)), q3=add(V,mul(w,s0));
+    h+=`<path d="M${f2(V[0])} ${f2(V[1])}L${f2(q1[0])} ${f2(q1[1])}L${f2(q2[0])} ${f2(q2[1])}L${f2(q3[0])} ${f2(q3[1])}Z" fill="${col}" fill-opacity=".28" stroke="${col}" stroke-width="${f2(1.6*k)}"/>`;
+    lab='90°'; at=sub(V,mul(nrm(add(u,w)),20*k)); }
+  const bw=30*k, bh=15*k; h+=`<rect x="${f2(at[0]-bw/2)}" y="${f2(at[1]-bh/2)}" width="${f2(bw)}" height="${f2(bh)}" rx="${f2(7.5*k)}" fill="${col}"/><text x="${f2(at[0])}" y="${f2(at[1])}" font-size="${f2(10*k)}" font-family="UULA Sans" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="central" direction="ltr">${lab}</text></g>`;
+  return h; }
 function nearCirc(G,q){ if(!SNAP) return -1; let best=-1, bd=9; (G.circles||[]).forEach((o,ci)=>{ const d=Math.abs(len(sub(q,o.c))-o.r); if(d<bd){ bd=d; best=ci; } }); return best; }
 // حذف نقطة: العلاقات التي تعتمد عليها تتحول إلى نقاط حرة في مكانها (لا يُحذف شيء آخر بصمت)
 function engDropPoint(G,k){ const f=x=>x>k?x-1:x;
@@ -1087,7 +1117,7 @@ function dragFrame(){ DRAG_RAF=0; const e=DRAG_EV; if(!DRAG||!e) return;
     else if(key==='r') z.r=cl(oz.r+d[0],20,140); }
   draw();
 }
-const endDrag=e=>{ if(!DRAG) return; if(DRAG_RAF){ cancelAnimationFrame(DRAG_RAF); dragFrame(); } DRAG_EV=null; const D=DRAG; DRAG=null;
+const endDrag=e=>{ if(!DRAG) return; if(DRAG_RAF){ cancelAnimationFrame(DRAG_RAF); dragFrame(); } DRAG_EV=null; const D=DRAG; DRAG=null; if(SNAPFX){ SNAPFX=null; draw(); }
   if(D.h==='pan') return;
   if(D.moved){ HIST.push(D.st); if(HIST.length>60) HIST.shift(); save(); return; }
   if(D.h==='vert'){ openPop('vert',+D.i,D.cx,D.cy); }
@@ -1107,8 +1137,8 @@ $('fig').addEventListener('pointerup',endDrag); $('fig').addEventListener('point
 const ICO={ cw:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M4 20L15 6"/><path d="M15 20a11 11 0 0 0-4.5-8.8"/><path d="M13.2 17.4L15 20l2.4-1.8"/></svg>', ccw:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M4 20L15 6"/><path d="M15 20a11 11 0 0 0-4.5-8.8"/><path d="M8 12.6l2.5-1.4.6 2.9"/></svg>', ae:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h17"/><path d="M15 7l5 5-5 5"/></svg>', as:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h17"/><path d="M9 7l-5 5 5 5"/></svg>', star:'<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M6 8.5l12 7M18 8.5l-12 7"/></svg>', dotI:'<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5" fill="currentColor"/></svg>', t1:'<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14"/></svg>',
   t2:'<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M9 5v14M15 5v14"/></svg>',
   t3:'<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M6 5v14M12 5v14M18 5v14"/></svg>',
-  p1:'<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M6 19L11 5M13 19L18 5"/></svg>',
-  p2:'<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M3 19L8 5M10 19L15 5M17 19L22 5"/></svg>',
+  p1:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5l7 7-7 7"/></svg>',
+  p2:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5l7 7-7 7M12 5l7 7-7 7"/></svg>',
   dash:'<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-dasharray="3 2.5"><path d="M2 12h20"/></svg>',
   len:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M3 8v8M21 8v8"/></svg>',
   ang:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19h16M4 19L16 5"/><path d="M11 19a7 7 0 0 0-2-5"/></svg>',
@@ -1123,7 +1153,7 @@ const ICO={ cw:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stro
   med:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 4L3 20h18z"/><path d="M8 4l4 16" stroke-dasharray="3 2"/></svg>',
   bis:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4L3 20h18z"/><path d="M12 4l-1 16" stroke-dasharray="3 2"/><path d="M10 9a3 3 0 0 0 4 0"/></svg>' };
 function openPop(k,i,cx,cy,ak){
-  SEL={k,i}; if(ak) SEL.ak=ak; draw(); const pop=$('pop'), G=S.p, n=G.pts.length;
+  SEL={k,i}; if(ak!=null) SEL.ak=ak; draw(); const pop=$('pop'), G=S.p, n=G.pts.length;
   const name=j=>G.verts[(j+n)%n].name;
   const qb=(act,ico,on,tip)=>`<button type="button" class="q" data-a="${act}" aria-pressed="${!!on}" title="${tip}">${ico}</button>`;
   let h;
@@ -1131,7 +1161,7 @@ function openPop(k,i,cx,cy,ak){
     pop.innerHTML=`<div class="ph"><span>${L('point')}</span><input id="pPt" class="w1" value="${esc(cur)}" title="${L('vname')}">${qb('pnm','<b>أ</b>',!S.hide[i],L('showName'))}<button type="button" data-a="x">✕</button></div>`;
     pop.hidden=false; placePop(pop,cx,cy); nameReady(); return; }
   if(k==='arc'){ const z=((G.circles[i]||{}).arcs||[])[ak]; if(!z){ closePop(); return; } const o=G.circles[i]; let a0=ang(sub(G.pts[z.a],o.c)), a1=ang(sub(G.pts[z.b],o.c)), sw=((a1-a0)%360+360)%360; if((sw>180)!==!!z.big) sw=360-sw;
-    pop.style.width=''; pop.innerHTML=`<div class="ph"><span>${L('arcW')} <bdi>${esc(G.verts[z.a].name)}${esc(G.verts[z.b].name)}</bdi></span><input id="pArc" class="w2" placeholder="${esc(fmtAng(sw))}" value="${esc(z.lab||'')}" title="${L('arcLab')}"><button type="button" class="q degb" data-deg="1" title="${L('degIns')}">°</button>${qb('sm',ICO.len,z.show,L('showAng'))}${qb('big',SVI('<circle cx="12" cy="12" r="8.5" stroke-width="1"/><path d="M4 9a8.5 8.5 0 1 0 16 0" stroke-width="3"/>'),z.big,L('arcBig'))}${qb('dela',CXI.del,false,L('delSel'))}<button type="button" data-a="x">✕</button></div>`;
+    pop.style.width=''; pop.innerHTML=`<div class="ph"><span>${L('arcW')} <bdi>${esc(G.verts[z.a].name)}${esc(G.verts[z.b].name)}</bdi></span><input id="pArc" class="w2" placeholder="${esc(fmtAng(sw))}" value="${esc(z.lab||'')}" title="${L('arcLab')}"><button type="button" class="q degb" data-deg="1" title="${L('degIns')}">°</button>${qb('sm',ICO.len,z.show,L('showAng'))}${qb('big',SVI('<circle cx="12" cy="12" r="8.5" stroke-width="1"/><path d="M4 9a8.5 8.5 0 1 0 16 0" stroke-width="3"/>'),z.big,L('arcBig'))}<span class="sep2"></span>${qb('t1',ICO.t1,z.ticks===1,L('arcTicks'))}${qb('t2',ICO.t2,z.ticks===2,L('arcTicks'))}${qb('t3',ICO.t3,z.ticks===3,L('arcTicks'))}${qb('hl',SVI('<circle cx="12" cy="12" r="8.5" stroke-width="1"/><path d="M3.5 12a8.5 8.5 0 0 1 8.5-8.5" stroke-width="3.4"/>'),!z.plain,L('arcHl'))}${qb('dela',CXI.del,false,L('delSel'))}<button type="button" data-a="x">✕</button></div>`;
     pop.hidden=false; placePop(pop,cx,cy); nameReady($('pArc')); return; }
   if(k==='side'){ const sd=G.sides[i], ia=G.kind==='free'?sd.a:i, ib=G.kind==='free'?sd.b:(i+1)%n;
     h=`<div class="ph"><span>${L('side')} <bdi>${esc(G.verts[ia].name)} ${esc(G.verts[ib].name)}</bdi></span><input id="pLen" class="w2" placeholder="${esc(fmtLen(len(sub(G.pts[ib],G.pts[ia]))/40))}" value="${esc(sd.len)}">${qb('show',ICO.len,sd.show,L('showLen'))}<span class="sep2"></span>${qb('t1',ICO.t1,sd.ticks===1,L('ticks'))}${qb('t2',ICO.t2,sd.ticks===2,L('ticks'))}${qb('t3',ICO.t3,sd.ticks===3,L('ticks'))}${qb('dash',ICO.dash,sd.dash,L('dashed'))}<span class="sep2"></span>${qb('p1',ICO.p1,sd.par===1,L('par'))}${qb('p2',ICO.p2,sd.par===2,L('par'))}<span class="sep2"></span>${qb('ar1',ICO.ae,(sd.arr||0)&1,L('arrEnd'))}${qb('ar2',ICO.as,(sd.arr||0)&2,L('arrStart'))}${G.kind==='free'?qb('lk',ICO.lock,sideLocked(G,sd),L('lockLen')):''}${qb('delo',CXI.del,false,L('delSel'))}<button type="button" data-a="x">✕</button></div>`;
@@ -1190,7 +1220,7 @@ $('pop').addEventListener('click',e=>{ const b0=e.target.closest('[data-a="delo"
   if(a==='x'){ closePop(); return; }
   push(); const G=S.p;
   if(SEL.k==='arc'){ const o=G.circles[SEL.i], z=o.arcs[SEL.ak];
-    if(a==='sm') z.show=!z.show; else if(a==='big') z.big=!z.big; else if(a==='dela'){ o.arcs.splice(SEL.ak,1); closePop(); draw(); save(); return; }
+    if(a==='sm') z.show=!z.show; else if(a==='big') z.big=!z.big; else if(a[0]==='t'&&a.length===2){ const v=+a[1]; z.ticks=z.ticks===v?0:v; } else if(a==='hl') z.plain=!z.plain; else if(a==='dela'){ o.arcs.splice(SEL.ak,1); closePop(); draw(); save(); return; }
     const keep=SEL; draw(); save(); openPop('arc',keep.i,0,0,keep.ak); return; }
   if(SEL.k==='pt'){ if(a==='pnm'){ if(S.hide[SEL.i]) delete S.hide[SEL.i]; else S.hide[SEL.i]=true; } }
   else if(SEL.k==='side'){ const sd=G.sides[SEL.i];
@@ -1418,7 +1448,10 @@ document.addEventListener('keydown',e=>{ if((e.key==='Delete'||e.key==='Backspac
 document.addEventListener('keydown',e=>{ if((e.key==='Delete'||e.key==='Backspace')&&SEL&&SEL.k==='circ'&&!(e.target&&e.target.closest&&e.target.closest('input'))){ e.preventDefault(); push(); engDropCircle(S.p,SEL.i); SEL=null; draw(); save(); return; }
   if((e.key==='Delete'||e.key==='Backspace')&&SEL&&!$('pop').hidden&&(SEL.k==='side'||SEL.k==='vert')){ const t=e.target, inInp=t&&t.closest&&t.closest('input');
     if(!inInp||t.dataset.fresh){ e.preventDefault(); delObj(SEL.k,SEL.i); return; } } });
-document.addEventListener('keydown',e=>{ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'&&!e.target.closest('input')){ e.preventDefault(); undo(); } if(e.key==='Escape'){ closePop(); $('pal').hidden=true; if(PICK.length||LINK!=null||CIRC0||MSEL.size){ PICK=[]; LINK=null; CIRC0=null; MSEL.clear(); draw(); } else if(FT!=='move'&&S.tab==='p'){ FT='move'; syncUI(); draw(); } } });
+document.addEventListener('keydown',e=>{ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'&&!e.target.closest('input')){ e.preventDefault(); undo(); } if(e.key==='Escape') escAll(); });
+// إلغاء كل ما هو محدد والعودة لأداة التحريك (مثل زر Escape)
+function escAll(){ closePop(); ctxClose(); $('pal').hidden=true; const had=PICK.length||LINK!=null||CIRC0||MSEL.size||SEL; PICK=[]; LINK=null; CIRC0=null; MSEL.clear(); SEL=null; if(FT!=='move'&&S.tab==='p'){ FT='move'; syncUI(); } draw(); }
+$('escBtn').onclick=escAll;
 
 /* ---------- واجهة ---------- */
 function setP(el,on){ el.setAttribute('aria-pressed',on?'true':'false'); }
@@ -2169,6 +2202,9 @@ async function pictureToShape(src,ed){
   msg(ed&&!ed.word?L('picDone'):L('picDoneW'),'good');
   return r;
 }
+// أشكال Geometry التي حُوِّلت من صورة أخرى (وسم UULA_GEO_FROM): لا يحل محلها تحويل هذه الصورة
+async function otherOwned(ctx,sh,picId){ const out=new Set(); try{ const L0=sh.items.filter(x=>x.name===TITLE).map(x=>({x,t:x.tags.getItemOrNullObject('UULA_GEO_FROM')})); L0.forEach(o=>o.t.load('value')); await ctx.sync();
+  L0.forEach(o=>{ if(!o.t.isNullObject&&o.t.value!==String(picId)) out.add(o.x.id); }); }catch(e){ console.error(e); } return out; }
 async function selectedPicture(){
   if(HOST==='PowerPoint'){ let out=null;
     await PowerPoint.run(async ctx=>{ const ss=ctx.presentation.getSelectedShapes(); ss.load('items/id,items/left,items/top,items/width,items/height'); await ctx.sync();
@@ -2180,12 +2216,14 @@ async function selectedPicture(){
         if(o&&o.left!=null){ out.ed.left=o.left; out.ed.top=o.top; out.ed.redo=true;
           // شكل سابق بلا وسم المصدر (تحويل قديم): أقرب شكل Geometry إلى المكان الأصلي يحل محله الشكل الجديد
           const sh=ctx.presentation.getSelectedSlides().getItemAt(0).shapes; sh.load('items/id,items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
+          const other=await otherOwned(ctx,sh,s.id);
           const cx=o.left+s.width/2, cy=o.top+s.height/2; let best=null;
-          sh.items.forEach(x=>{ if(x.name!==TITLE||x.left<0) return; const d=Math.hypot(x.left+x.width/2-cx,x.top+x.height/2-cy); if(d<Math.max(s.width,s.height)*.6&&(!best||d<best.d)) best={x,d}; });
+          sh.items.forEach(x=>{ if(x.name!==TITLE||x.left<0||other.has(x.id)) return; const d=Math.hypot(x.left+x.width/2-cx,x.top+x.height/2-cy); if(d<Math.max(s.width,s.height)*.6&&(!best||d<best.d)) best={x,d}; });
           if(best) out.ed.near=best.x.id; }
         else { // تحويل قديم بلا موضع محفوظ: الشكل السابق على نفس الارتفاع يدل على المكان
           const sh=ctx.presentation.getSelectedSlides().getItemAt(0).shapes; sh.load('items/id,items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
-          const cy=s.top+s.height/2; let best=null; sh.items.forEach(x=>{ if(x.name!==TITLE||x.left<0) return; const d=Math.abs(x.top+x.height/2-cy); if(d<s.height*.6&&(!best||d<best.d)) best={x,d}; });
+          const other=await otherOwned(ctx,sh,s.id);
+          const cy=s.top+s.height/2; let best=null; sh.items.forEach(x=>{ if(x.name!==TITLE||x.left<0||other.has(x.id)) return; const d=Math.abs(x.top+x.height/2-cy); if(d<s.height*.6&&(!best||d<best.d)) best={x,d}; });
           if(best){ const x=best.x; out.ed.left=x.left+x.width/2-s.width/2; out.ed.top=x.top+x.height/2-s.height/2; out.ed.redo=true; out.ed.legacy=x.id; } } } });
     return out; }
   let out=null;
