@@ -1183,8 +1183,13 @@ function recognize(im){
   if(sd/m<.05&&Math.abs(area/(Math.PI*m*m)-1)<.15){ const CF=circleFig(W,H,lab,comps,F,stroke,res,C,m-stroke/2,dark); if(CF&&CF.G.pts.length) return CF; return Object.assign(res,{type:'circle',c:C,r:m-stroke/2}); }
   // المجسمات أولًا: أحرف الصندوق أو الأسطوانة قد تشبه دائرة بمماس
   // دائرة (بحث عشوائي على كل الحبر): قبل المجسمات، فالأشعة والأوتار الخارجة منها تفسد الصورة الظلية
-  { const anyInk=i=>{ if(dark[i]) return true; const r0=D[4*i], g0=D[4*i+1], b0=D[4*i+2]; return r0>140&&r0-g0>70&&r0-b0>70; };   // الحبر + الأحمر (قوس ملوّن على الدائرة)
-    const IP=[]; comps.forEach(c=>{ if(c.d<F.d*.25) return; }); for(let i=0;i<N;i++) if(lab[i]>=0&&comps.find(c=>c.id===lab[i]).d>=F.d*.25) IP.push(i);
+  { // الحبر الفاتح الملون (دائرة زرقاء فاتحة في الكتب) يدخل في البحث عن الدائرة فقط
+    // خط رفيع لا تعبئة: على جانبيه بياض قريب
+    const wht=(x,y)=>{ if(x<0||y<0||x>=W||y>=H) return true; const j=y*W+x, r0=D[4*j], g0=D[4*j+1], b0=D[4*j+2]; return gray[j]>238&&Math.max(r0,g0,b0)-Math.min(r0,g0,b0)<30; };
+    const lite=i=>{ const r0=D[4*i], g0=D[4*i+1], b0=D[4*i+2], mx=Math.max(r0,g0,b0), mn=Math.min(r0,g0,b0); if(!(gray[i]<238&&mx-mn>38)) return false;
+      const x=i%W, y=(i-x)/W, k=Math.max(3,stroke+1); return (wht(x-k,y)&&wht(x+k,y))||(wht(x,y-k)&&wht(x,y+k))||(wht(x-k,y-k)&&wht(x+k,y+k))||(wht(x-k,y+k)&&wht(x+k,y-k)); };
+    const anyInk=i=>{ if(dark[i]) return true; const r0=D[4*i], g0=D[4*i+1], b0=D[4*i+2]; return (r0>140&&r0-g0>70&&r0-b0>70)||lite(i); };   // الحبر + الأحمر (قوس ملوّن على الدائرة)
+    const IP=[]; const bigC=new Set(comps.filter(c=>c.d>=F.d*.25).map(c=>c.id)); for(let i=0;i<N;i++) if(lab[i]>=0?bigC.has(lab[i]):lite(i)) IP.push(i);
     const cv=(c,r)=>{ let n=0; for(let k=0;k<120;k++){ const a=k*Math.PI/60, x=c[0]+Math.cos(a)*r, y=c[1]+Math.sin(a)*r; let on=false;
       for(let o=-stroke-1;o<=stroke+1&&!on;o++){ const X=Math.round(x+Math.cos(a)*o), Y=Math.round(y+Math.sin(a)*o); if(X>=0&&Y>=0&&X<W&&Y<H&&anyInk(Y*W+X)) on=true; } if(on) n++; } return n/120; };
     let bc=null, bs=0, seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
