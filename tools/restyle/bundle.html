@@ -4965,7 +4965,9 @@ function makeDot(ctx, shapes, d) {
 // the place of the letter is measured, not guessed: a hidden sample box with the same letters, font and size is written
 // off the slide and PowerPoint's own width of it gives where the letter ends (from the start side of the line).
 // Returns null when the letter can't be placed for sure (then the caller highlights the letter in the text instead).
+let dotMeasure = '';
 async function dotCorrect(ctx, shapes, s) {
+  dotMeasure = '';
   if (!['TextBox', 'GeometricShape'].includes(s.type)) return null;
   const tf = s.textFrame, tr = tf.textRange;
   tr.load('text'); try { tf.load('leftMargin,rightMargin,topMargin,bottomMargin,verticalAlignment'); } catch (e) {} try { tr.paragraphFormat.load('horizontalAlignment'); } catch (e) {}
@@ -4988,31 +4990,30 @@ async function dotCorrect(ctx, shapes, s) {
   const fs = sub.font.size || 12, fname = sub.font.name || null;
   // the two samples: the line up to the letter (included), and the letter alone
   const sample = str => {
-    const t = shapes.addTextBox(str, { left: -3000, top: -3000, width: 400, height: 40 });
+    const t = shapes.addTextBox(str, { left: -3000, top: -3000, width: 10, height: 10 });
     try { const f = t.textFrame; f.wordWrap = false; f.autoSizeSetting = 'AutoSizeShapeToFitText'; f.leftMargin = 0; f.rightMargin = 0; f.topMargin = 0; f.bottomMargin = 0; const ft = f.textRange.font; ft.size = fs; if (fname) ft.name = fname; } catch (e) {}
     return t;
   };
-  // PowerPoint adds its own room around a sample (a minimum size / padding): it is taken out by difference —
-  // one letter vs the letter twice (width), one line vs two lines (height)
-  const L1 = first[idx];
-  const pre = sample(first.slice(0, idx + 1)), one = sample(L1), two = sample(L1 + L1), rows = sample(L1 + '\n' + L1);
+  // PowerPoint keeps a sample box at a minimum size and adds room around it: every sample is made long (ten more
+  // letters after it) and the sizes are taken by difference — ten letters vs eleven (one letter), two lines vs three
+  const L1 = first[idx], TEN = L1.repeat(10);
+  const pre = sample(first.slice(0, idx + 1) + TEN), ten = sample(TEN), eleven = sample(TEN + L1), r2 = sample(TEN + '\n' + TEN), r3 = sample(TEN + '\n' + TEN + '\n' + TEN);
   await ctx.sync();
-  [pre, one, two, rows].forEach(x => x.load('width,height')); await ctx.sync();
-  const w1 = one.width, w2 = two.width, h1 = one.height, h2 = rows.height;
-  const g = w2 - w1, pad = w1 - g, lh = h2 - h1, padV = h1 - lh;
-  const wPre = pre.width - pad;
-  [pre, one, two, rows].forEach(x => x.delete()); await ctx.sync();
+  [pre, ten, eleven, r2, r3].forEach(x => x.load('width,height')); await ctx.sync();
+  const g = eleven.width - ten.width, lh = r3.height - r2.height;
+  const wPre = pre.width - ten.width;                  // the line up to the letter (included)
+  [pre, ten, eleven, r2, r3].forEach(x => x.delete()); await ctx.sync();
   // the sizes did not follow the text: not sure → the other way
+  dotMeasure = 'g=' + g.toFixed(1) + ' lh=' + lh.toFixed(1) + ' pre=' + wPre.toFixed(1) + ' fs=' + fs;
   if (!(g > fs * 0.4 && g < fs * 1.6 && lh > fs * 0.6 && lh < fs * 3 && wPre >= g - 0.5)) return null;
-  const gw = g;
-  void padV;
+  const gw = g, pad = 0;
   // the start side of the line: right for Arabic text (or a right-to-left mark), left otherwise
   const rtl = /^[\s]*‏/.test(first) || (/[؀-ۿ]/.test(text) && !/^[\s]*‎/.test(first));
   const al = tr.paragraphFormat.horizontalAlignment;
   const lm = tf.leftMargin || 0, rm = tf.rightMargin || 0, tm = tf.topMargin || 0, bm = tf.bottomMargin || 0;
   let cx;
   if (al === 'Center') {
-    const all = sample(first); await ctx.sync(); all.load('width'); await ctx.sync(); const wl = all.width - pad; all.delete(); await ctx.sync();
+    const all = sample(first + TEN), t2 = sample(TEN); await ctx.sync(); all.load('width'); t2.load('width'); await ctx.sync(); const wl = all.width - t2.width - pad; all.delete(); t2.delete(); await ctx.sync();
     const start = rtl ? s.left + s.width / 2 + wl / 2 : s.left + s.width / 2 - wl / 2;
     cx = rtl ? start - (wPre - gw / 2) : start + (wPre - gw / 2);
   } else cx = rtl ? s.left + s.width - rm - (wPre - gw / 2) : s.left + lm + (wPre - gw / 2);
@@ -5194,6 +5195,7 @@ async function pinRole(role, keepColour) {
     try {
       let n = await quietMark(role, keepColour);
       if (fillAfter) { const id0 = await currentId().catch(() => null); if (id0) { await fillSlide(id0, false).catch(() => null); undoStack.length = 0; redoStack.length = 0; undoPaint(); } }
+      if (fillAfter) { rsay(L('تعذّر قياس مكان الحرف، فظُلّل بدل الدائرة.', 'The letter could not be measured, so it was highlighted instead.') + (dotMeasure ? ' [' + dotMeasure + ']' : '')); return; }
       if (n < 0 && role === 'graph') { rsay(L('عُلِّم كحل بياني ووُضعت مكانه الشبكة الفارغة، لأن حلول الشريحة مخفية الآن. يرجع مع «إظهار الحلول».', 'Marked as a graph solution and replaced by the empty grid, since the slide\'s solutions are hidden now. «Show solutions» brings it back.')); return; }
       if (n < 0) { rsay(L('عُلِّم كحل وأُخفي، لأن حلول الشريحة مخفية الآن. يظهر مع «إظهار الحلول».', 'Marked as a solution and hidden, since the slide\'s solutions are hidden now. «Show solutions» brings it back.')); return; }
       rsay(!n ? L('حدّد أولًا الكائن الذي تريد تمييزه.', 'First select the object to mark.')
