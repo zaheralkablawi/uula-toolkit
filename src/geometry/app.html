@@ -1435,7 +1435,9 @@ async function pictureToShape(src,ed){
       for(let i=0;i<n;i++){ G.verts[i].showName=near(P0[i],r.fd*.13); const a=P0[i], b=P0[(i+1)%n], m=mid(a,b); G.sides[i].show=T2.some(x=>{ const dm=len(sub(x.c,m)); return dm<Math.max(r.fd*.12,len(sub(b,a))*.25)&&dm<len(sub(x.c,a))&&dm<len(sub(x.c,b)); }); } }
     S.tab='p'; S.p=G; }
   // يُدرج الشكل بلا أسماء ولا أطوال ولا قياسات: الأداة لا تقرأ الكتابة، فيضيفها المستخدم بنفسه
-  if(S.tab==='p'){ S.p.verts.forEach(v=>{ v.showName=false; v.showAng=false; v.ang=''; }); S.p.sides.forEach(sd=>{ sd.show=false; sd.len=''; }); Object.values(S.p.angs||{}).forEach(A=>{ A.showAng=false; }); }
+  // الصورة المحوَّلة: الخطوط والنقاط فقط، بلا أي علامة (المستخدم يضيف العلامات بنفسه)
+  if(S.tab==='p'){ S.p.verts.forEach(v=>{ Object.assign(v,{showName:false,showAng:false,ang:'',arc:false,arcs:0,right:false,sym:'',num:'',dir:'',alt:false,med:false,bis:false}); });
+    S.p.sides.forEach(sd=>{ Object.assign(sd,{show:false,len:'',ticks:0,par:0}); }); if(S.p.angs) S.p.angs={}; }
   else if(S.tab==='c'){ S.c.show.names=false; S.c.show.meas=false; }
   if(ed){ const e=Object.assign({},ed,{pic:true}); if(A&&!ed.word){ const a=A/fit.s; e.place={a, bx:ed.left+(fit.cx-160/fit.s)*A, by:ed.top+(fit.cy-(S.tab==='c'?125:122)/fit.s)*A}; } setEdit(e); }
   syncUI(); draw(); save();
