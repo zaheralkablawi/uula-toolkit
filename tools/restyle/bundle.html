@@ -4420,7 +4420,7 @@ const ROLES = [
 // the same buttons beside «Hide solutions» only mark: the colour stays as it is (colours are set in «Format»)
 const SOL_TIP = {
   answer: ['● ← حل يُخفى مع «إخفاء الحلول» · الجدول يصير أزرق', '● → a solution hidden by «Hide solutions» · a table turns blue'],
-  correct: ['● ← حرف الإجابة مظلّل ⓑ · ○ ← كل الصحيحة دفعة واحدة', '● → answer letter highlighted ⓑ · ○ → every correct one at once'],
+  correct: ['● حدّد الخيار الصحيح ← حرفه مظلّل ⓑ', '● Select the correct choice → its letter highlighted ⓑ'],
   given: ['● ← جزء من السؤال: يبقى ظاهرًا', '● → part of the question: stays visible'],
   graph: ['● ← حل بياني: شبكة فارغة مكانه عند الإخفاء', '● → graph solution: an empty grid in its place when hidden']
 };
@@ -4804,7 +4804,7 @@ async function mergedPress(id) {
   if (it.tpl === 'grid' || it.tpl === 'practice' || !it.role) {
     if (it.tpl) return insertTemplate(it.tpl);
   }
-  if (id === 'correct' && !selNow) return correctAll();
+  if (id === 'correct' && !selNow) return needCorrect();
   if (selNow && it.role) return pinRole(it.role);
   if (it.tpl) return insertTemplate(it.tpl);
   needSel(it);
@@ -5093,7 +5093,15 @@ async function fillSlide(id, all) {
   await run(async ctx => { ctx.presentation.setSelectedSlides([newId]); await ctx.sync(); }).catch(() => {});
   return Object.assign(r, { id: newId });
 }
-// «الخيار الصحيح» with nothing selected: every choice marked correct before (or whose circled letter is blue) on the
+// «الخيار الصحيح» with nothing selected: a clear message (the hint line above the list too)
+function needCorrect() {
+  const msg = L('حدّد الخيار الصحيح أولًا', 'Select the correct choice first');
+  say(msg + '.');
+  const h = $('selHint'); if (!h) return;
+  h.dataset.on = 'need'; h.innerHTML = '<b>!</b> ' + msg;
+  clearTimeout(needTimer); needTimer = setTimeout(selPaint, 3500);
+}
+// (kept, not on a button now) every choice marked correct before (or whose circled letter is blue) on the
 // selected slides gets its filled circle, all at once
 async function correctAll() {
   if (busy || !supported) return;
@@ -5123,7 +5131,7 @@ async function pinRole(role, keepColour) {
   if (busy || !supported) return;
   if (role === 'correct') {
     const n = await run(async ctx => { const ss = ctx.presentation.getSelectedShapes(); ss.load('items'); await ctx.sync(); return ss.items.length; }).catch(() => 0);
-    if (!n) return correctAll();
+    if (!n) return needCorrect();
   }
   busy = true; lock(); rsay('');
   await snapOp([await currentId().catch(() => null)].filter(Boolean));
