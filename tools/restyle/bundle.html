@@ -476,6 +476,7 @@ async function buildPackage(pkg, slideXml, rels) {
 // gives the plain ⓐ back. Targets: the objects named with " #urfill" (just marked), or — all = true — every choice
 // marked correct before, or whose circled letter is blue. A box with several circled letters fills the blue one only.
 const FILLED = c => { const p = c.codePointAt(0); return p >= 0x24D0 && p <= 0x24E9 ? String.fromCodePoint(0x1F150 + p - 0x24D0) : c; };
+const FILL_SCALE = 1.4;
 const FILLED_BACK = c => { const p = c.codePointAt(0); return p >= 0x1F150 && p <= 0x1F169 ? String.fromCodePoint(0x24D0 + p - 0x1F150) : c; };
 function fillCorrect(pkg, all) {
   const doc = parseXml(pkg.files.slide);
@@ -491,6 +492,10 @@ function fillCorrect(pkg, all) {
     if (tagged) for (const x of allCores(el)) { const v = cnvOf(x); if (v) v.setAttribute('name', (v.getAttribute('name') || '').replace(/ #urfill$/, '')); }
     if (!all && !tagged) continue;
     const pinned = /^UULA:correct/.test(name);
+    // letters filled by the first version (same size as ⓐ): they get the bigger size now
+    let grown = false;
+    for (const r of desc(c, 'a', 'r')) { const pr = kid(r, 'rPr', 'a'); if (pr && pr.getAttribute('bmk') === 'UULA:fill') { const sz0 = +(pr.getAttribute('sz') || 0) || 1200; pr.setAttribute('bmk', 'UULA:fill:' + sz0); pr.setAttribute('sz', String(Math.round(sz0 * FILL_SCALE / 50) * 50)); grown = true; } }
+    if (grown) { n++; continue; }
     const runs = desc(c, 'a', 'r').filter(r => /[ⓐ-ⓩ]/.test(desc(r, 'a', 't').map(t => t.textContent).join('')));
     if (!runs.length) continue;
     const colour = r => { const pr = kid(r, 'rPr', 'a'); return pr ? colorOf(kid(pr, 'solidFill', 'a'), ctx) : null; };
@@ -500,10 +505,22 @@ function fillCorrect(pkg, all) {
     // one letter per box: the blue / white one; a single-letter run list with several letters in one run is ambiguous
     pick = pick.filter(r => [...desc(r, 'a', 't').map(t => t.textContent).join('')].filter(ch => /[ⓐ-ⓩ]/.test(ch)).length === 1);
     if (!pick.length) { if (pinned || tagged) skipped++; continue; }
-    for (const r of pick.slice(0, 1)) {
-      for (const t of desc(r, 'a', 't')) t.textContent = [...t.textContent].map(FILLED).join('');
+    for (const r0 of pick.slice(0, 1)) {
+      // the letter gets a run of its own (the text before / after it keeps its run), so only the letter changes size
+      const t0 = kid(r0, 't', 'a'), txt = t0 ? t0.textContent : '';
+      const chars = [...txt], at = chars.findIndex(ch => /[\u24D0-\u24E9]/.test(ch));
+      if (at < 0) continue;
+      const piece = str => { const x = r0.cloneNode(true); kid(x, 't', 'a').textContent = str; return x; };
+      const before = chars.slice(0, at).join(''), after = chars.slice(at + 1).join('');
+      if (before) r0.parentNode.insertBefore(piece(before), r0);
+      if (after) r0.parentNode.insertBefore(piece(after), r0.nextSibling);
+      t0.textContent = FILLED(chars[at]);
+      const r = r0;
       const pr = kid(r, 'rPr', 'a') || r.insertBefore(mk(doc, 'a', 'rPr'), r.firstChild);
-      pr.setAttribute('bmk', 'UULA:fill');
+      // the filled letter is drawn smaller than ⓐ in the fonts: a bigger size makes the two circles match
+      const sz0 = +(pr.getAttribute('sz') || 0) || 1200;
+      pr.setAttribute('bmk', 'UULA:fill:' + sz0);
+      pr.setAttribute('sz', String(Math.round(sz0 * FILL_SCALE / 50) * 50));
       const k = colour(r);
       if (!k || lum(k) > 240) { removeKids(pr, FILLS); placeChild(pr, solid(doc, C.answerOk || '2070DF'), RPR_ORDER); }
     }
@@ -2469,8 +2486,8 @@ function hideSolutions(pkg, grids, opts) {
       }
       // a correct choice filled by the tool (🅐…): back to the plain circled letter of the other options (ⓐ…)
       for (const r of desc(view, 'a', 'r')) {
-        const pr = kid(r, 'rPr', 'a'); if (!pr || pr.getAttribute('bmk') !== 'UULA:fill') continue;
-        pr.removeAttribute('bmk'); removeKids(pr, FILLS); placeChild(pr, solid(doc, '000000'), RPR_ORDER); pr.setAttribute('b', '0');
+        const pr = kid(r, 'rPr', 'a'); const bm = pr && /^UULA:fill(?::(\d+))?$/.exec(pr.getAttribute('bmk') || ''); if (!bm) continue;
+        pr.removeAttribute('bmk'); if (bm[1]) pr.setAttribute('sz', bm[1]); removeKids(pr, FILLS); placeChild(pr, solid(doc, '000000'), RPR_ORDER); pr.setAttribute('b', '0');
         for (const tn of desc(r, 'a', 't')) tn.textContent = [...tn.textContent].map(FILLED_BACK).join('');
       }
       for (const tn of [...desc(view, 'a', 't'), ...desc(view, 'm', 't')]) tn.textContent = [...tn.textContent].map(NEG).join('');
