@@ -3814,6 +3814,8 @@ async function targetIds() {
     return scope === 'cur' ? ids.slice(0, 1) : ids;
   });
 }
+// every selected slide (the solutions work on all of them at once)
+async function selIds() { return run(async ctx => { const s = ctx.presentation.getSelectedSlides(); s.load('items/id'); await ctx.sync(); return s.items.map(x => x.id); }); }
 async function allIds() { return run(async ctx => { const s = ctx.presentation.slides; s.load('items/id'); await ctx.sync(); return s.items.map(x => x.id); }); }
 async function currentId() { return run(async ctx => { const s = ctx.presentation.getSelectedSlides(); s.load('items/id'); await ctx.sync(); return s.items.length ? s.items[0].id : null; }); }
 async function exportSlide(id) { return run(async ctx => { const r = ctx.presentation.slides.getItem(id).exportAsBase64(); await ctx.sync(); return r.value; }); }
@@ -5372,17 +5374,20 @@ async function solSlide(id, mode) {
   if (!r.count) return 0;
   const newId = await insertAfter(await UR.buildPackage(pkg, r.xml, r.rels), id);
   await deleteSlide(id);
-  if (scope === 'cur') await run(async ctx => { ctx.presentation.setSelectedSlides([newId]); await ctx.sync(); }).catch(() => {});
+  solNew[id] = newId;
   return r.count;
 }
+let solNew = {};
 $('solBtn').addEventListener('click', async () => {
   if (busy || !supported) return;
   busy = true; lock(); res.innerHTML = '';
-  await snapOp(await targetIds().catch(() => []));
+  const ids0 = await selIds().catch(() => []);
+  await snapOp(ids0);
   solState = await slideSolHidden(await currentId().catch(() => null));
   const mode = solState ? 'show' : 'hide';
+  solNew = {};
   try {
-    const ids = await targetIds();
+    const ids = ids0;
     if (!ids.length) { say(L('حدّد شريحة أولًا.', 'Select a slide first.')); return; }
     let total = 0, slides = 0;
     for (let k = 0; k < ids.length; k++) {
@@ -5391,6 +5396,9 @@ $('solBtn').addEventListener('click', async () => {
       catch (e) { line('err', '✗ ' + esc(errText(e))); }
     }
     prog(null);
+    // the same slides stay selected (a rebuilt slide in place of the old one)
+    const keep = ids.map(i => solNew[i] || i);
+    await run(async ctx => { ctx.presentation.setSelectedSlides(keep); await ctx.sync(); }).catch(() => {});
     await solLabel();
     say(total ? (mode === 'hide' ? L('أُخفيت الحلول في ', 'Solutions hidden in ') : L('ظهرت الحلول في ', 'Solutions shown in ')) + cnt(slides) + '.' : (mode === 'hide' ? L('لم أجد حلولًا لإخفائها.', 'No solutions found to hide.') : L('لا توجد حلول مخفية.', 'No hidden solutions.')));
   } catch (e) { prog(null); say(L('حدث خطأ: ', 'Error: ') + errText(e)); }
