@@ -657,7 +657,7 @@ $('fig').addEventListener('pointerdown',e=>{
   const t=sideUnder(e.target.closest('[data-h]'),e);
   if(S.tab==='p'&&S.p.kind==='free'&&FT==='circ'){ const G=S.p, q=(t&&t.dataset.h==='vert')?G.pts[+t.dataset.i].slice():svgPt(e);   // دائرة: المركز ثم نقطة على المحيط
     if(!CIRC0){ CIRC0=q; draw(); return; } const r=len(sub(q,CIRC0)); if(r>3){ push(); (G.circles||(G.circles=[])).push({c:CIRC0,r}); } CIRC0=null; draw(); save(); return; }
-  if(!t&&S.tab==='p'&&S.p.kind==='free'&&FT==='addpt'){ const G=S.p; let q=svgPt(e); (G.circles||[]).forEach(o=>{ const d=len(sub(q,o.c)); if(Math.abs(d-o.r)<9&&d>0) q=add(o.c,mul(sub(q,o.c),o.r/d)); });   // نقطة حرة، وتلتصق بالدائرة إن كانت قريبة
+  if((!t||t.dataset.h==='circ')&&S.tab==='p'&&S.p.kind==='free'&&FT==='addpt'){   // النقر على الدائرة نفسها يضع نقطة عليها const G=S.p; let q=svgPt(e); (G.circles||[]).forEach(o=>{ const d=len(sub(q,o.c)); if(Math.abs(d-o.r)<9&&d>0) q=add(o.c,mul(sub(q,o.c),o.r/d)); });   // نقطة حرة، وتلتصق بالدائرة إن كانت قريبة
     push(); G.pts.push(q); G.verts.push({name:NAMES.find(x=>!G.verts.some(v=>v.name===x))||'',showName:false}); G.n=G.pts.length; draw(); save(); return; }
   if(!t) { closePop(); if(LINK!=null){ LINK=null; draw(); } return; }
   if(S.tab==='p'&&S.p.kind==='free'&&FT!=='move'){ e.preventDefault(); closePop(); freeTool(t,e); return; }
