@@ -1061,7 +1061,8 @@ async function insertNative(pr,json,bb,slideId){
       if(!old.isNullObject){ if(EDIT.pic){
           if(EDIT.legacy){ const lg=shapes.getItemOrNullObject(EDIT.legacy); await ctx.sync(); if(!lg.isNullObject) lg.delete(); old.tags.add('UULA_GEO_SRC',JSON.stringify({left:EDIT.left,top:EDIT.top})); }
           if(EDIT.redo){ shapes.load('items/id'); await ctx.sync(); const prev=shapes.items.map(x=>({x,t:x.tags.getItemOrNullObject('UULA_GEO_FROM')})); prev.forEach(o=>o.t.load('value')); await ctx.sync();
-            prev.forEach(o=>{ if(!o.t.isNullObject&&o.t.value===String(EDIT.id)&&o.x.id!==g.id) o.x.delete(); }); }
+            let hit=false; prev.forEach(o=>{ if(!o.t.isNullObject&&o.t.value===String(EDIT.id)&&o.x.id!==g.id){ o.x.delete(); hit=true; } });
+            if(!hit&&EDIT.near&&EDIT.near!==g.id){ const nr=shapes.getItemOrNullObject(EDIT.near); await ctx.sync(); if(!nr.isNullObject) nr.delete(); } }
           else { old.load('width'); await ctx.sync(); old.tags.add('UULA_GEO_SRC',JSON.stringify({left:EDIT.left,top:EDIT.top})); old.left=-old.width-20; }
           g.tags.add('UULA_GEO_FROM',String(EDIT.id)); }
         else old.delete(); await ctx.sync(); }
@@ -1675,7 +1676,12 @@ async function selectedPicture(){
       out={src:'data:image/png;base64,'+img.value, ed:{id:s.id,left:s.left,top:s.top,width:s.width,height:s.height}};
       // صورة أصلية نُقلت سابقًا إلى يسار الشريحة: الشكل يعود إلى مكانها الأصلي ويحل محل الشكل السابق
       if(!tg.isNullObject){ let o=null; try{ o=JSON.parse(tg.value); }catch(e){}
-        if(o&&o.left!=null){ out.ed.left=o.left; out.ed.top=o.top; out.ed.redo=true; }
+        if(o&&o.left!=null){ out.ed.left=o.left; out.ed.top=o.top; out.ed.redo=true;
+          // شكل سابق بلا وسم المصدر (تحويل قديم): أقرب شكل Geometry إلى المكان الأصلي يحل محله الشكل الجديد
+          const sh=ctx.presentation.getSelectedSlides().getItemAt(0).shapes; sh.load('items/id,items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
+          const cx=o.left+s.width/2, cy=o.top+s.height/2; let best=null;
+          sh.items.forEach(x=>{ if(x.name!==TITLE||x.left<0) return; const d=Math.hypot(x.left+x.width/2-cx,x.top+x.height/2-cy); if(d<Math.max(s.width,s.height)*.6&&(!best||d<best.d)) best={x,d}; });
+          if(best) out.ed.near=best.x.id; }
         else { // تحويل قديم بلا موضع محفوظ: الشكل السابق على نفس الارتفاع يدل على المكان
           const sh=ctx.presentation.getSelectedSlides().getItemAt(0).shapes; sh.load('items/id,items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
           const cy=s.top+s.height/2; let best=null; sh.items.forEach(x=>{ if(x.name!==TITLE||x.left<0) return; const d=Math.abs(x.top+x.height/2-cy); if(d<s.height*.6&&(!best||d<best.d)) best={x,d}; });
