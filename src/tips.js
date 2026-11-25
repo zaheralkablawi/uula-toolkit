@@ -147,6 +147,7 @@
       ['#pop [data-a="dt"], #pop [data-a$="|dt"]', E('نقطة مغلقة ● داخل الزاوية: الزوايا التي عليها النقطة متساوية.', 'A filled dot ● inside the angle: angles with the dot are equal.', 'نقطة', 'Dot')],
       ['#pAng, .pAngF', E('قياس الزاوية أو اسمها، مثل ٥٥ أو س. انقر داخل الزاوية في الرسم واكتب مباشرة.', 'The angle measure or label, like 55 or x. Click inside the angle on the drawing and just type.', 'قياس الزاوية', 'Angle measure')],
       ['#pLen', E('طول الضلع أو اسمه، مثل ٦ أو س. انقر الضلع في الرسم واكتب مباشرة.', 'The side length or label, like 6 or x. Click the side on the drawing and just type.', 'طول الضلع', 'Side length')],
+      ['#pop [data-a="delo"]', E('حذف الضلع أو الرأس المحدد. أو اضغط Delete بعد النقر عليه.', 'Delete the selected side or vertex. Or press Delete after clicking it.', 'حذف', 'Delete')],
       ['#fig .ha', E('انقر داخل الزاوية ثم اكتب قياسها أو اسمها مباشرة.', 'Click inside the angle, then type its measure or label.', 'الزاوية', 'Angle')],
       ['#pNum, .pNumF', E('رقم يُكتب داخل الزاوية اسمًا لها، مثل ١ و٢.', 'A number written inside the angle as its name, like 1 and 2.', 'رقم الزاوية', 'Angle number')],
       ['#pop [data-a="dcw"], #pop [data-a$="|dcw"]', E('زاوية موجهة: قوس عليه سهم مع عقارب الساعة.', 'Directed angle: an arc with a clockwise arrow.', 'زاوية موجهة', 'Directed angle')],

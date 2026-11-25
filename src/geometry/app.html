@@ -92,7 +92,8 @@ header .bt .root:only-child{color:var(--fg);font-size:15px;letter-spacing:0}
 .pop .ph{font-weight:600;color:var(--muted);font-size:11.5px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .pop .ph>span{margin-inline-end:2px}
 .pop .ph input{font-weight:400}
-.pop .ph>[data-a="x"]{margin-inline-start:auto}
+.pop .ph>[data-a="delo"]{margin-inline-start:auto}
+.pop .ph>[data-a="delo"]:hover{color:#c00000;border-color:#e3a0a0;background:#fff3f3}
 .pop .ph>[data-a="x"]{border:0;background:none;cursor:pointer;color:var(--muted);font-size:13px;padding:0 2px}
 .pop .r{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 .pop input{flex:1;min-width:0;height:26px;border:1px solid var(--line);border-radius:6px;font-size:12.5px;padding:0 6px;text-align:center}
@@ -254,6 +255,7 @@ const T={
   hintS:['اسحب المقابض الزرقاء لتغيير أبعاد المجسم.','Drag the blue handles to change the size.'],
   typeName:['اكتب الاسم…','Type the name…'], typeLen:['اكتب الطول…','Type the length…'],
   dotted:['منقط','Dotted'], defColor:['اللون الافتراضي','Default color'],
+  deleted:['حُذف. للتراجع اضغط زر التراجع','Deleted. Press Undo to bring it back'], delSel:['حذف (Delete)','Delete (Delete key)'],
   side:['الضلع','Side'], vertex:['الرأس','Vertex'], showLen:['إظهار الطول','Show length'], showAng:['إظهار القياس','Show measure'], ticks:['شرطات التساوي','Equal marks'], par:['رمز التوازي //','Parallel //'], dashed:['متقطع','Dashed'],
   vname:['اسم الرأس','Vertex name'], rightM:['علامة الزاوية القائمة','Right-angle mark'], arcs:['أقواس تساوي الزوايا','Equal-angle arcs'], fromV:['من هذا الرأس','From this vertex'],
   wL:['الطول','Length'], wW:['العرض','Width'], wH:['الارتفاع','Height'], wE:['الحرف','Edge'], wR:['نصف القطر','Radius'], wS:['الراسم','Slant'],
@@ -686,13 +688,13 @@ function openPop(k,i,cx,cy,ak){
     pop.innerHTML=`<div class="ph"><span>${L('point')}</span><input id="pPt" class="w1" value="${esc(cur)}" title="${L('vname')}">${qb('pnm','<b>أ</b>',!S.hide[i],L('showName'))}<button type="button" data-a="x">✕</button></div>`;
     pop.hidden=false; placePop(pop,cx,cy); nameReady(); return; }
   if(k==='side'){ const sd=G.sides[i], ia=G.kind==='free'?sd.a:i, ib=G.kind==='free'?sd.b:(i+1)%n;
-    h=`<div class="ph"><span>${L('side')} <bdi>${esc(G.verts[ia].name)} ${esc(G.verts[ib].name)}</bdi></span><input id="pLen" class="w2" placeholder="${esc(fmtLen(len(sub(G.pts[ib],G.pts[ia]))/40))}" value="${esc(sd.len)}">${qb('show',ICO.len,sd.show,L('showLen'))}<span class="sep2"></span>${qb('t1',ICO.t1,sd.ticks===1,L('ticks'))}${qb('t2',ICO.t2,sd.ticks===2,L('ticks'))}${qb('t3',ICO.t3,sd.ticks===3,L('ticks'))}${qb('dash',ICO.dash,sd.dash,L('dashed'))}<span class="sep2"></span>${qb('p1',ICO.p1,sd.par===1,L('par'))}${qb('p2',ICO.p2,sd.par===2,L('par'))}<span class="sep2"></span>${qb('ar1',ICO.ae,(sd.arr||0)&1,L('arrEnd'))}${qb('ar2',ICO.as,(sd.arr||0)&2,L('arrStart'))}<button type="button" data-a="x">✕</button></div>`;
+    h=`<div class="ph"><span>${L('side')} <bdi>${esc(G.verts[ia].name)} ${esc(G.verts[ib].name)}</bdi></span><input id="pLen" class="w2" placeholder="${esc(fmtLen(len(sub(G.pts[ib],G.pts[ia]))/40))}" value="${esc(sd.len)}">${qb('show',ICO.len,sd.show,L('showLen'))}<span class="sep2"></span>${qb('t1',ICO.t1,sd.ticks===1,L('ticks'))}${qb('t2',ICO.t2,sd.ticks===2,L('ticks'))}${qb('t3',ICO.t3,sd.ticks===3,L('ticks'))}${qb('dash',ICO.dash,sd.dash,L('dashed'))}<span class="sep2"></span>${qb('p1',ICO.p1,sd.par===1,L('par'))}${qb('p2',ICO.p2,sd.par===2,L('par'))}<span class="sep2"></span>${qb('ar1',ICO.ae,(sd.arr||0)&1,L('arrEnd'))}${qb('ar2',ICO.as,(sd.arr||0)&2,L('arrStart'))}${qb('delo',CXI.del,false,L('delSel'))}<button type="button" data-a="x">✕</button></div>`;
   } else if(G.kind==='free'){ const V=G.verts[i];
     const rows=freeAngles(G,i).map(([a,b])=>{ const key=angKey(i,a,b), A=G.angs[key]||{};
       return `<div class="r" style="border-top:1px solid var(--line);padding-top:4px"><span class="note angico" style="font-size:12px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 20H4L16 5"/></svg><bdi>${esc(G.verts[a].name)} ${esc(V.name)} ${esc(G.verts[b].name)}</bdi></span><input class="pAngF w2" data-key="${key}" value="${esc(A.ang||'')}" placeholder="${esc(fmtAng(angSpan(G.pts[i],G.pts[a],G.pts[b]).sw))}" title="${L('showAng')}"><input class="pNumF w1" data-key="${key}" value="${esc(A.num||'')}" placeholder="${L('angNum')}" title="${L('angNumT')}">${qb('fa|'+key+'|arc',ICO.a1,A.arc,L('arcOnly'))}${qb('fa|'+key+'|a1',ICO.a1e,A.arcs===1,L('arcs'))}${qb('fa|'+key+'|rt',ICO.rt,A.right,L('rightM'))}${qb('fa|'+key+'|st',ICO.star,A.sym==='*',L('symStar'))}${qb('fa|'+key+'|dt',ICO.dotI,A.sym==='•',L('symDot'))}${qb('fa|'+key+'|dcw',ICO.cw,A.dir==='cw',L('dirCw'))}${qb('fa|'+key+'|dccw',ICO.ccw,A.dir==='ccw',L('dirCcw'))}${qb('fa|'+key+'|sa',ICO.ang,A.showAng,L('showAng'))}</div>`; }).join('');
-    h=`<div class="ph"><span>${L('vertex')}</span><input id="pName" class="w1" value="${esc(V.name)}" title="${L('vname')}">${qb('nm','<b>أ</b>',V.showName,L('vname'))}<button type="button" data-a="x">✕</button></div>${rows}`;
+    h=`<div class="ph"><span>${L('vertex')}</span><input id="pName" class="w1" value="${esc(V.name)}" title="${L('vname')}">${qb('nm','<b>أ</b>',V.showName,L('vname'))}${qb('delo',CXI.del,false,L('delSel'))}<button type="button" data-a="x">✕</button></div>${rows}`;
   } else { const V=G.verts[i], s=angSpan(G.pts[i],G.pts[(i-1+n)%n],G.pts[(i+1)%n]);
-    h=`<div class="ph"><span>${L('vertex')}</span><input id="pName" class="w1" value="${esc(V.name)}" title="${L('vname')}">${qb('nm','<b>أ</b>',V.showName,L('vname'))}<span class="sep2"></span><input id="pAng" class="w2" placeholder="${esc(fmtAng(s.sw))}" value="${esc(V.ang)}" title="${L('showAng')}">${qb('sa',ICO.ang,V.showAng,L('showAng'))}<span class="sep2"></span><input id="pNum" class="w1" value="${esc(V.num||'')}" placeholder="${L('angNum')}" title="${L('angNumT')}"><button type="button" data-a="x">✕</button></div>
+    h=`<div class="ph"><span>${L('vertex')}</span><input id="pName" class="w1" value="${esc(V.name)}" title="${L('vname')}">${qb('nm','<b>أ</b>',V.showName,L('vname'))}<span class="sep2"></span><input id="pAng" class="w2" placeholder="${esc(fmtAng(s.sw))}" value="${esc(V.ang)}" title="${L('showAng')}">${qb('sa',ICO.ang,V.showAng,L('showAng'))}<span class="sep2"></span><input id="pNum" class="w1" value="${esc(V.num||'')}" placeholder="${L('angNum')}" title="${L('angNumT')}">${qb('delo',CXI.del,false,L('delSel'))}<button type="button" data-a="x">✕</button></div>
       <div class="r">${qb('arc',ICO.a1,V.arc,L('arcOnly'))}${qb('rt',ICO.rt,V.right,L('rightM'))}<span class="sep2"></span>${qb('a1',ICO.a1e,V.arcs===1,L('arcs'))}${qb('a2',ICO.a2,V.arcs===2,L('arcs'))}${qb('a3',ICO.a3,V.arcs===3,L('arcs'))}${qb('st',ICO.star,V.sym==='*',L('symStar'))}${qb('dt',ICO.dotI,V.sym==='•',L('symDot'))}<span class="sep2"></span>${qb('dcw',ICO.cw,V.dir==='cw',L('dirCw'))}${qb('dccw',ICO.ccw,V.dir==='ccw',L('dirCcw'))}${n===3||(n===4&&i===0)?'<span class="sep2"></span>'+qb('alt',ICO.alt,V.alt,L('alt'))+(n===3?qb('med',ICO.med,V.med,L('med'))+qb('bis',ICO.bis,V.bis,L('bis')):''):''}</div>`;
   }
   if(!(G.kind==='free'&&k==='vert')) pop.style.width='';
@@ -703,7 +705,12 @@ function openPop(k,i,cx,cy,ak){
   else if(k==='vert') nameReady();
 }
 // بعد النقر على نقطة: أي حرف يُكتب يصبح اسمها مباشرة
-function nameReady(el){ const inp=el||$('pName')||$('pPt'); if(!inp) return; inp.focus({preventScroll:true}); inp.select(); }
+function nameReady(el){ const inp=el||$('pName')||$('pPt'); if(!inp) return; inp.focus({preventScroll:true}); inp.select(); inp.dataset.fresh='1'; inp.addEventListener('input',()=>{ delete inp.dataset.fresh; },{once:true}); }
+// حذف ضلع أو رأس: الشكل الجاهز يتحول أولًا إلى شكل مركب بنفس النقاط والعلامات
+function delObj(k,i){ if(S.tab!=='p'||(k!=='side'&&k!=='vert')) return; let F=S.p; push();
+  if(F.kind!=='free'){ F=toFree(F); S.p=F; FT='move'; }
+  if(k==='side') F.sides.splice(i,1); else if(F.pts.length>2) freeDelPoint(F,i);
+  closePop(); SEL=null; syncUI(); draw(); save(); syncChips(); msg(L('deleted'),''); }
 function placePop(pop,cx,cy){
   // اللوحة تحت الرسم مباشرة فلا تغطي الشكل
   try{ pop.scrollIntoView({block:'nearest'}); }catch(e){}
@@ -725,7 +732,7 @@ $('pop').addEventListener('input',e=>{ if(!SEL) return; const G=S.p, t=e.target;
   if(t.classList.contains('pNumF')){ const k=t.dataset.key; (G.angs[k]||(G.angs[k]={})).num=t.value; }
   draw(); save(); syncChips(); });
 $('pop').addEventListener('focusin',e=>{ if(e.target.tagName==='INPUT'&&!e.target.dataset.h){ e.target.dataset.h=1; push(); } });
-$('pop').addEventListener('click',e=>{ const b=e.target.closest('[data-a]'); if(!b||!SEL) return; const a=b.dataset.a;
+$('pop').addEventListener('click',e=>{ const b0=e.target.closest('[data-a="delo"]'); if(b0&&SEL){ delObj(SEL.k,SEL.i); return; } const b=e.target.closest('[data-a]'); if(!b||!SEL) return; const a=b.dataset.a;
   if(a==='x'){ closePop(); return; }
   push(); const G=S.p;
   if(SEL.k==='pt'){ if(a==='pnm'){ if(S.hide[SEL.i]) delete S.hide[SEL.i]; else S.hide[SEL.i]=true; } }
@@ -779,7 +786,7 @@ const CI={
 };
 $('segTri').innerHTML=['sca','iso','equ','rt'].map(k=>`<button type="button" data-k="${k}" data-ti="${k}" title="${L(k)}">${CI[k]}</button>`).join('');
 $('segN').innerHTML=[5,6,7,8,9,10].map(n=>`<button type="button" data-k="${n}">${arNum(n)}</button>`).join('');
-$('segFree').innerHTML=[['move','ftMove'],['link','ftLink'],['addpt','ftAdd'],['del','ftDel']].map(([k,t2])=>`<button type="button" data-k="${k}" data-ti="${t2}" title="${L(t2)}">${CI[k]}</button>`).join('');
+$('segFree').innerHTML=[['move','ftMove'],['link','ftLink'],['addpt','ftAdd']].map(([k,t2])=>`<button type="button" data-k="${k}" data-ti="${t2}" title="${L(t2)}">${CI[k]}</button>`).join('');
 $('segFree').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; FT=b.dataset.k; LINK=null; closePop(); syncUI(); draw(); });
 $('segHid').innerHTML=[['dash','hdash'],['hide','hhide'],['solid','hsolid']].map(([k,t])=>`<button type="button" data-k="${k}" data-ti="${t}" title="${L(t)}">${CI[k]}</button>`).join('');
 
@@ -908,9 +915,7 @@ $('ctx').addEventListener('click',e=>{ const b=e.target.closest('[data-x]'); if(
   if(x.startsWith('btn|')){ ctxClose(); $(x.slice(4)).click(); return; }
   if(x==='col'){ const tgt=c.k==='side'?G.sides[c.i]:G.verts[c.i], key=c.k==='side'?'c':'pc'; $('ctx').hidden=true; openPal(b,col=>{ if(col) tgt[key]=col; else delete tgt[key]; }); const r=b.getBoundingClientRect(), p=$('pal'); p.style.left=Math.max(4,Math.min(innerWidth-p.offsetWidth-4,r.left))+'px'; p.style.top=Math.min(innerHeight-p.offsetHeight-4,r.bottom+4)+'px'; return; }
   push();
-  if(x==='del'){ let F=G; if(F.kind!=='free'){ F=toFree(G); S.p=F; FT='move'; }
-    if(c.k==='side') F.sides.splice(c.i,1); else if(F.pts.length>2) freeDelPoint(F,c.i);
-    ctxClose(); SEL=null; syncUI(); draw(); save(); return; }
+  if(x==='del'){ HIST.pop(); ctxClose(); delObj(c.k,c.i); return; }   /* delObj يحفظ للتراجع بنفسه */
   if(c.k==='side'){ const sd=G.sides[c.i];
     if(x.startsWith('ls|')){ sd.ls=x.slice(3); sd.dash=sd.ls==='dash'; } else if(x.startsWith('w|')) sd.w=+x.slice(2); else if(x==='show') sd.show=!sd.show; }
   else if(c.k==='vert'){ const V=G.verts[c.i], on=V.pt!=null?V.pt:LK().ptShow;
@@ -922,6 +927,8 @@ $('ctx').addEventListener('click',e=>{ const b=e.target.closest('[data-x]'); if(
 document.addEventListener('pointerdown',e=>{ if(!$('ctx').hidden&&!e.target.closest('#ctx')) ctxClose(); },true);
 addEventListener('blur',ctxClose); addEventListener('resize',ctxClose); document.addEventListener('scroll',ctxClose,true);
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') ctxClose(); });
+document.addEventListener('keydown',e=>{ if((e.key==='Delete'||e.key==='Backspace')&&SEL&&!$('pop').hidden&&(SEL.k==='side'||SEL.k==='vert')){ const t=e.target, inInp=t&&t.closest&&t.closest('input');
+    if(!inInp||t.dataset.fresh){ e.preventDefault(); delObj(SEL.k,SEL.i); return; } } });
 document.addEventListener('keydown',e=>{ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'&&!e.target.closest('input')){ e.preventDefault(); undo(); } if(e.key==='Escape'){ closePop(); $('pal').hidden=true; } });
 
 /* ---------- واجهة ---------- */
