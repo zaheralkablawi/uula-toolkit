@@ -172,6 +172,8 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
     <svg id="fig" viewBox="0 0 320 250" xmlns="http://www.w3.org/2000/svg"></svg>
     <div class="pvt">
       <button type="button" class="ib" id="picBtn" data-ti="fromPic" title="تحويل الصورة المحددة إلى شكل"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><rect x="3" y="4" width="10" height="9" rx="1.5"/><path d="M3 11l3-3 3 3"/><path d="M15 9h3l-1.5-1.5M18 9l-1.5 1.5"/><path d="M14 20l3.5-6 3.5 6z"/></svg></button>
+      <button type="button" class="ib" id="picSlideBtn" data-ti="picSlide" title="تحويل كل صور الأشكال في هذه الشريحة"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15l3-4 3 3 2-2 3 3"/><circle cx="16" cy="9" r="1.3" fill="currentColor"/></svg></button>
+      <button type="button" class="ib" id="picAllBtn" data-ti="picAll" title="تحويل كل صور الأشكال في كل الشرائح"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="6" y="3" width="15" height="12" rx="2"/><path d="M3 7v12a2 2 0 0 0 2 2h12"/><path d="M9 12l2.5-3 2.5 2.5 1.5-1.5 2.5 2"/></svg></button>
       <button type="button" class="ib" id="undoBtn" data-ti="undo" title="تراجع"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
       <button type="button" class="ib" id="rotBtn" data-ti="rot" title="تدوير"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5L15 9l-6 4.5z" transform="rotate(-20 12 9)"/><path d="M5 17a8 8 0 0 0 14 0"/><path d="M19 13v4h-4"/></svg></button>
       <button type="button" class="ib" id="flipBtn" data-ti="flip" title="انعكاس"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3v18M9 7L3 17h6zM15 7l6 10h-6z"/></svg></button>
@@ -235,6 +237,7 @@ const TITLE='UULA Geometry', TAG='UULA_GEOMETRY';
 
 /* ---------- اللغة ---------- */
 const T={
+  picSlide:['تحويل كل صور الأشكال في هذه الشريحة','Convert every figure picture on this slide'], picAll:['تحويل كل صور الأشكال في كل الشرائح','Convert every figure picture on all slides'], picBatch:['جارٍ التحويل','Converting'], picBatchDone:['تم: حُوِّلت {n} صورة، ونُقلت الأصلية إلى يسار الشرائح. لم يُحوَّل {k}.','Done: {n} pictures converted, originals moved left of the slides. {k} skipped.'],
   loadSel:['تعديل الشكل المحدد','Edit selected shape'], fromPic:['تحويل الصورة المحددة إلى شكل','Convert the selected picture to a shape'], picReading:['جارٍ قراءة الصورة…','Reading the picture…'], picDone:['تم التعرف على الشكل. راجعه ثم اضغط «إدراج» ليحل محل الصورة.','Shape recognized. Check it, then click Insert to replace the picture.'], picDoneW:['تم التعرف على الشكل. راجعه ثم اضغط «إدراج».','Shape recognized. Check it, then click Insert.'], picFail:['لم أتعرف على شكل واضح في الصورة','No clear shape found in the picture'], picSel:['حدّد صورة الشكل أولاً','Select the picture of the shape first'], picEdit:['سيحل الشكل محل الصورة المحددة','The shape will replace the selected picture'], chkUpd:['التحقق من التحديثات','Check for updates'], about:['حول الأداة','About'],
   tabP:['مستوية','Plane'], tabC:['الدائرة','Circle'], tabS:['مجسمات','Solids'],
   type:['النوع','Type'], sides:['الأضلاع','Sides'], hidden:['الأحرف المخفية','Hidden edges'],
@@ -988,9 +991,9 @@ const canNative=()=>{ try{ return Office.context.requirements.isSetSupported('Po
 function normA(a){ return ((a%360)+360)%360; }
 
 // يبني الشكل في الشريحة أشكالاً عادية مجمّعة
-async function insertNative(pr,json,bb){
+async function insertNative(pr,json,bb,slideId){
   await PowerPoint.run(async ctx=>{
-    const shapes=ctx.presentation.getSelectedSlides().getItemAt(0).shapes;
+    const shapes=slideId?ctx.presentation.slides.getItem(slideId).shapes:ctx.presentation.getSelectedSlides().getItemAt(0).shapes;
     let ox=60, oy=60, sc=1;
     let PL=null;
     if(EDIT&&EDIT.place){ PL=EDIT.place; sc=PL.a; }
@@ -1039,7 +1042,10 @@ async function insertNative(pr,json,bb){
     if(tris.length){ const v=tris[0].s.adjustments.get(0); await ctx.sync(); const k=(v.value||.5)/.5; tris.forEach(o=>o.s.adjustments.set(0,o.t*k)); }
     made.forEach(s=>s.load('id')); await ctx.sync();
     const g=shapes.addGroup(made.map(s=>s.id)); g.name=TITLE; g.tags.add(TAG,json); await ctx.sync();
-    if(EDIT){ const old=shapes.getItemOrNullObject(EDIT.id); await ctx.sync(); if(!old.isNullObject){ old.delete(); await ctx.sync(); } g.load('id'); await ctx.sync(); EDIT.id=g.id; }
+    if(EDIT){ const old=shapes.getItemOrNullObject(EDIT.id); await ctx.sync();
+      // الصورة الأصلية لا تُحذف: تُنقل خارج الشريحة إلى يسارها للمراجعة
+      if(!old.isNullObject){ if(EDIT.pic){ old.load('width'); await ctx.sync(); old.left=-old.width-20; try{ old.tags.add('UULA_GEO_SRC','1'); }catch(e){} } else old.delete(); await ctx.sync(); }
+      g.load('id'); await ctx.sync(); EDIT.id=g.id; }
   });
 }
 async function insertPicPPT(svg,json){
@@ -1582,7 +1588,7 @@ function classify(r){
 async function pictureToShape(src,ed){
   msg(L('picReading'));
   const im=await loadImg(src), r0=recognize(im), r=(r0&&r0.type==='solid')?r0:(recognizeMulti(im)||r0);   // المجسم يبقى شكلًا واحدًا
-  if(!r){ msg(L('picFail'),'bad'); return; }
+  if(!r){ msg(L('picFail'),'bad'); return false; }
   push(); closePop(); S.empty=false;
   const A=ed&&ed.width?ed.width/r.W:0;   // من بكسلات الصورة إلى نقاط الشريحة
   let fit;
@@ -1631,6 +1637,7 @@ async function pictureToShape(src,ed){
   if(ed){ const e=Object.assign({},ed,{pic:true}); if(A&&!ed.word){ const a=A/fit.s; e.place={a, bx:ed.left+(fit.cx-160/fit.s)*A, by:ed.top+(fit.cy-(S.tab==='p'?122:125)/fit.s)*A}; } setEdit(e); }
   syncUI(); draw(); save();
   msg(ed&&!ed.word?L('picDone'):L('picDoneW'),'good');
+  return r;
 }
 async function selectedPicture(){
   if(HOST==='PowerPoint'){ let out=null;
@@ -1646,6 +1653,22 @@ async function selectedPicture(){
 const fromPic=async()=>{ if(!HOST){ $('picFile').value=''; $('picFile').click(); return; }
   try{ const s=await selectedPicture(); await pictureToShape(s.src,s.ed); }catch(e){ console.error(e); msg(typeof e==='string'?e:L('picFail'),'bad'); } };
 $('fromPicItem').addEventListener('click',fromPic); $('picBtn').addEventListener('click',fromPic);
+// تحويل دفعة: كل صور الأشكال في الشريحة أو العرض، والأصل يُنقل إلى يسار الشريحة
+async function convertPictures(all){ if(HOST!=='PowerPoint') return; let list=[], SH=540;
+  await PowerPoint.run(async ctx=>{ try{ const ps=ctx.presentation.pageSetup; ps.load('slideHeight'); await ctx.sync(); if(ps.slideHeight) SH=ps.slideHeight; }catch(e){}
+    const sl=all?ctx.presentation.slides:ctx.presentation.getSelectedSlides(); sl.load('items/id'); await ctx.sync();
+    const shs=sl.items.map(x=>{ const c=x.shapes; c.load('items/id,items/type,items/left,items/top,items/width,items/height'); return c; }); await ctx.sync();
+    sl.items.forEach((x,i)=>shs[i].items.forEach(sh=>{ if(String(sh.type).toLowerCase()!=='image') return; if(sh.left<0||sh.width<45||sh.height<40||sh.top>SH*.86||sh.width/sh.height>7||sh.height/sh.width>7) return; list.push({slide:x.id,id:sh.id,left:sh.left,top:sh.top,width:sh.width,height:sh.height}); })); });
+  let n=0, k=0;
+  for(let i=0;i<list.length;i++){ const it=list[i]; msg(L('picBatch')+' '+(i+1)+'/'+list.length+'…');
+    try{ let src=null; await PowerPoint.run(async ctx=>{ const sh=ctx.presentation.slides.getItem(it.slide).shapes.getItem(it.id), img=sh.getImageAsBase64({format:'Png'}); await ctx.sync(); src='data:image/png;base64,'+img.value; });
+      const r=await pictureToShape(src,{id:it.id,left:it.left,top:it.top,width:it.width,height:it.height});
+      const okShape=r&&(r.type==='solid'||r.type==='circle'||r.type==='poly'||(r.type==='lines'&&(((S.p.circles||[]).length&&S.p.pts.length+S.p.sides.length>=1)||S.p.sides.length>=2)));
+      if(!okShape){ k++; setEdit(null); continue; }
+      const pr=build(), bb=bboxPrims(pr), json=JSON.stringify({s:S,w:bb.w}); await insertNative(pr,json,bb,it.slide); n++; setEdit(null);
+    }catch(e){ console.error(e); k++; setEdit(null); } }
+  msg(L('picBatchDone').replace('{n}',n).replace('{k}',k),'good'); }
+$('picSlideBtn').addEventListener('click',()=>convertPictures(false)); $('picAllBtn').addEventListener('click',()=>convertPictures(true));
 $('picFile').addEventListener('change',()=>{ const f=$('picFile').files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>pictureToShape(rd.result,null); rd.readAsDataURL(f); });
 
 /* ---------- التحديثات: نفس طريقة UULA Arabic Math ---------- */
