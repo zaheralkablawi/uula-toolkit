@@ -471,12 +471,17 @@ async function buildPackage(pkg, slideXml, rels) {
 }
 
 // ---------- the correct choice, filled ----------
-// the circled letter of the correct choice (ⓐ…ⓩ) becomes the filled one (🅐…🅩) in the text itself, so it stays exactly
+// the circled letter of the correct choice (ⓐ…ⓩ) turns white on a blue highlight in the text itself, so it stays exactly
 // where it was and reads even in black-and-white print; its run is tagged (bmk="UULA:fill") so that «Hide solutions»
-// gives the plain ⓐ back. Targets: the objects named with " #urfill" (just marked), or — all = true — every choice
+// gives the plain black ⓐ back. Targets: the objects named with " #urfill" (just marked), or — all = true — every choice
 // marked correct before, or whose circled letter is blue. A box with several circled letters fills the blue one only.
 const FILLED = c => { const p = c.codePointAt(0); return p >= 0x24D0 && p <= 0x24E9 ? String.fromCodePoint(0x1F150 + p - 0x24D0) : c; };
-const FILL_SCALE = 1.4;
+// the correct letter: white on a blue highlight, in the text itself (the run is tagged for «Hide solutions»)
+function highlightLetter(doc, pr) {
+  pr.setAttribute('bmk', 'UULA:fill:hl');
+  removeKids(pr, FILLS); placeChild(pr, solid(doc, 'FFFFFF'), RPR_ORDER);
+  removeKids(pr, ['highlight']); placeChild(pr, frag(doc, '<a:highlight><a:srgbClr val="1F71DE"/></a:highlight>'), RPR_ORDER);
+}
 const FILLED_BACK = c => { const p = c.codePointAt(0); return p >= 0x1F150 && p <= 0x1F169 ? String.fromCodePoint(0x24D0 + p - 0x1F150) : c; };
 function fillCorrect(pkg, all) {
   const doc = parseXml(pkg.files.slide);
@@ -494,8 +499,16 @@ function fillCorrect(pkg, all) {
     const pinned = /^UULA:correct/.test(name);
     // letters filled by the first version (same size as ⓐ): they get the bigger size now
     let grown = false;
-    for (const r of desc(c, 'a', 'r')) { const pr = kid(r, 'rPr', 'a'); if (pr && pr.getAttribute('bmk') === 'UULA:fill') { const sz0 = +(pr.getAttribute('sz') || 0) || 1200; pr.setAttribute('bmk', 'UULA:fill:' + sz0); pr.setAttribute('sz', String(Math.round(sz0 * FILL_SCALE / 50) * 50)); grown = true; } }
+    for (const r of desc(c, 'a', 'r')) {
+      const pr = kid(r, 'rPr', 'a'), bm = pr && /^UULA:fill(?::(\d+))?$/.exec(pr.getAttribute('bmk') || '');
+      if (!bm) continue;
+      if (bm[1]) pr.setAttribute('sz', bm[1]);
+      for (const t of desc(r, 'a', 't')) t.textContent = [...t.textContent].map(FILLED_BACK).join('');
+      highlightLetter(doc, pr); grown = true;
+    }
     if (grown) { n++; continue; }
+    // already done: nothing more
+    if (desc(c, 'a', 'rPr').some(pr => pr.getAttribute('bmk') === 'UULA:fill:hl')) continue;
     const runs = desc(c, 'a', 'r').filter(r => /[ⓐ-ⓩ]/.test(desc(r, 'a', 't').map(t => t.textContent).join('')));
     if (!runs.length) continue;
     const colour = r => { const pr = kid(r, 'rPr', 'a'); return pr ? colorOf(kid(pr, 'solidFill', 'a'), ctx) : null; };
@@ -514,15 +527,9 @@ function fillCorrect(pkg, all) {
       const before = chars.slice(0, at).join(''), after = chars.slice(at + 1).join('');
       if (before) r0.parentNode.insertBefore(piece(before), r0);
       if (after) r0.parentNode.insertBefore(piece(after), r0.nextSibling);
-      t0.textContent = FILLED(chars[at]);
-      const r = r0;
-      const pr = kid(r, 'rPr', 'a') || r.insertBefore(mk(doc, 'a', 'rPr'), r.firstChild);
-      // the filled letter is drawn smaller than ⓐ in the fonts: a bigger size makes the two circles match
-      const sz0 = +(pr.getAttribute('sz') || 0) || 1200;
-      pr.setAttribute('bmk', 'UULA:fill:' + sz0);
-      pr.setAttribute('sz', String(Math.round(sz0 * FILL_SCALE / 50) * 50));
-      const k = colour(r);
-      if (!k || lum(k) > 240) { removeKids(pr, FILLS); placeChild(pr, solid(doc, C.answerOk || '2070DF'), RPR_ORDER); }
+      t0.textContent = chars[at];
+      const pr = kid(r0, 'rPr', 'a') || r0.insertBefore(mk(doc, 'a', 'rPr'), r0.firstChild);
+      highlightLetter(doc, pr);
     }
     if (!pinned) for (const x of allCores(el)) { const v = cnvOf(x); if (v) v.setAttribute('name', 'UULA:correct ' + (v.getAttribute('name') || '').replace(/^UULA:[a-z]+\s*/, '')); }
     n++;
@@ -2486,8 +2493,8 @@ function hideSolutions(pkg, grids, opts) {
       }
       // a correct choice filled by the tool (🅐…): back to the plain circled letter of the other options (ⓐ…)
       for (const r of desc(view, 'a', 'r')) {
-        const pr = kid(r, 'rPr', 'a'); const bm = pr && /^UULA:fill(?::(\d+))?$/.exec(pr.getAttribute('bmk') || ''); if (!bm) continue;
-        pr.removeAttribute('bmk'); if (bm[1]) pr.setAttribute('sz', bm[1]); removeKids(pr, FILLS); placeChild(pr, solid(doc, '000000'), RPR_ORDER); pr.setAttribute('b', '0');
+        const pr = kid(r, 'rPr', 'a'); const bm = pr && /^UULA:fill(?::(\d+|hl))?$/.exec(pr.getAttribute('bmk') || ''); if (!bm) continue;
+        pr.removeAttribute('bmk'); if (bm[1] && bm[1] !== 'hl') pr.setAttribute('sz', bm[1]); removeKids(pr, ['highlight']); removeKids(pr, FILLS); placeChild(pr, solid(doc, '000000'), RPR_ORDER); pr.setAttribute('b', '0');
         for (const tn of desc(r, 'a', 't')) tn.textContent = [...tn.textContent].map(FILLED_BACK).join('');
       }
       for (const tn of [...desc(view, 'a', 't'), ...desc(view, 'm', 't')]) tn.textContent = [...tn.textContent].map(NEG).join('');
@@ -4413,7 +4420,7 @@ const ROLES = [
 // the same buttons beside «Hide solutions» only mark: the colour stays as it is (colours are set in «Format»)
 const SOL_TIP = {
   answer: ['يعلّم المحدد كحل فيُخفى عند «إخفاء الحلول». لا يغيّر اللون ولا يتحرك شيء، إلا الجدول: تصير كتابته زرقاء مباشرة.', 'Marks the selection as a solution, so «Hide solutions» hides it. The colour stays and nothing moves — except a table: its text turns blue at once.'],
-  correct: ['حرف الخيار الصحيح يصير مملوءًا في مكانه 🅑 (واضح حتى في الطباعة بالأبيض والأسود)، ويعود حرفًا عاديًا عند «إخفاء الحلول». مع تحديد مربع: هذا المربع فقط. بدون تحديد: كل الخيارات المميزة سابقًا كصحيحة (أو حرفها أزرق) في الشرائح المحددة دفعة واحدة.', 'The correct choice\'s letter becomes filled in place, 🅑 (clear even in black-and-white print) and turns back to a plain letter when solutions are hidden. With a box selected: that box only. Nothing selected: every choice marked correct before (or with a blue letter) on the selected slides, at once.'],
+  correct: ['حرف الخيار الصحيح يصير أبيض على تظليل أزرق في مكانه (واضح حتى في الطباعة بالأبيض والأسود)، ويعود حرفًا عاديًا عند «إخفاء الحلول». مع تحديد مربع: هذا المربع فقط. بدون تحديد: كل الخيارات المميزة سابقًا كصحيحة (أو حرفها أزرق) في الشرائح المحددة دفعة واحدة.', 'The correct choice\'s letter turns white on a blue highlight in place (clear even in black-and-white print) and turns back to a plain letter when solutions are hidden. With a box selected: that box only. Nothing selected: every choice marked correct before (or with a blue letter) on the selected slides, at once.'],
   given: ['شكل أو نص من السؤال نفسه: يبقى ظاهرًا عند «إخفاء الحلول» حتى لو كان أزرق.', 'A shape or text that belongs to the question: it stays when solutions are hidden, even if blue.'],
   graph: ['تمثيل بياني هو حل: عند «إخفاء الحلول» تحل مكانه شبكة بيانية فارغة بنفس مقاسه، ويرجع عند «إظهار الحلول». (أي رسم آخر كالمثلث ميّزه «حل السؤال» فيُخفى بلا شبكة)', 'A graph that is a solution: on «Hide solutions» an empty graph grid of the same size takes its place; it comes back on «Show solutions». (Other drawings, like a triangle: mark them «Solution» to hide them without a grid)']
 };
@@ -4428,7 +4435,7 @@ const ROLE_TIP = {
   question: ['نص السؤال مع علامة السؤال الحمراء', 'Question text with the red question mark'],
   choice: ['يحوّل المحدد إلى خيارات سؤال اختيار من متعدد (ⓐ ⓑ ⓒ ⓓ)', 'Turns the selection into the options of a multiple-choice question (ⓐ ⓑ ⓒ ⓓ)'],
   answer: ['يعلّم المحدد كحل ويلوّن نصه بالأزرق، فيُخفى عند «إخفاء الحلول». لا يتحرك شيء في الشريحة.', 'Marks the selection as a solution and colours its text blue, so «Hide solutions» hides it. Nothing on the slide moves.'],
-  correct: ['حرف الخيار الصحيح يصير مملوءًا في مكانه 🅑 (واضح حتى في الطباعة بالأبيض والأسود)، ويعود حرفًا عاديًا عند «إخفاء الحلول». مع تحديد مربع: هذا المربع فقط. بدون تحديد: كل الخيارات المميزة سابقًا كصحيحة (أو حرفها أزرق) في الشرائح المحددة دفعة واحدة.', 'The correct choice\'s letter becomes filled in place, 🅑 (clear even in black-and-white print) and turns back to a plain letter when solutions are hidden. With a box selected: that box only. Nothing selected: every choice marked correct before (or with a blue letter) on the selected slides, at once.'],
+  correct: ['حرف الخيار الصحيح يصير أبيض على تظليل أزرق في مكانه (واضح حتى في الطباعة بالأبيض والأسود)، ويعود حرفًا عاديًا عند «إخفاء الحلول». مع تحديد مربع: هذا المربع فقط. بدون تحديد: كل الخيارات المميزة سابقًا كصحيحة (أو حرفها أزرق) في الشرائح المحددة دفعة واحدة.', 'The correct choice\'s letter turns white on a blue highlight in place (clear even in black-and-white print) and turns back to a plain letter when solutions are hidden. With a box selected: that box only. Nothing selected: every choice marked correct before (or with a blue letter) on the selected slides, at once.'],
   given: ['شكل أو نص من السؤال نفسه: يبقى ظاهرًا عند «إخفاء الحلول» حتى لو كان أزرق', 'A shape or text that belongs to the question: it stays when solutions are hidden, even if blue'],
   note: ['إطار ملاحظة حول ما حددته (مربع أو أكثر)', 'A note frame around the selection'],
   quote: ['إطار نص مقتطف حول ما حددته', 'A quote frame around the selection'],
@@ -5076,11 +5083,10 @@ async function fillSlide(id, all) {
   const pkg = await UR.openPackage(await exportSlide(id));
   const r = UR.fillCorrect(pkg, all);
   if (!r.count && !r.dots && !/ #urfill/.test(pkg.files.slide)) return Object.assign(r, { id });
-  let newId = id;
-  if (!(await UQ.apply(id, pkg.files.slide, r.xml, exportSlide).catch(() => false))) {
-    newId = await insertAfter(await UR.buildPackage(pkg, r.xml, null), id);
-    await deleteSlide(id);
-  }
+  // the highlight behind a letter can't be set in place by the PowerPoint API: the slide is rebuilt
+  const newId = await insertAfter(await UR.buildPackage(pkg, r.xml, null), id);
+  await deleteSlide(id);
+  await run(async ctx => { ctx.presentation.setSelectedSlides([newId]); await ctx.sync(); }).catch(() => {});
   return Object.assign(r, { id: newId });
 }
 // «الخيار الصحيح» with nothing selected: every choice marked correct before (or whose circled letter is blue) on the
@@ -5104,8 +5110,8 @@ async function correctAll() {
     await run(async ctx => { ctx.presentation.setSelectedSlides(keep); await ctx.sync(); }).catch(() => {});
     if (skipped) line('warn', L('• خيارات مميزة كصحيحة لم أعرف أي حرف فيها هو الصحيح (أكثر من حرف بنفس اللون): ', '• Choices marked correct where the right letter is unclear (several letters of one colour): ') + skipped + '.');
     const q = done === 1 ? 'سؤال واحد' : done === 2 ? 'سؤالين' : done <= 10 ? done + ' أسئلة' : done + ' سؤالًا';
-    say(done ? L('مُلئ حرف الإجابة الصحيحة في ' + q + (ids.length > 1 ? '، في ' + (slides === 2 ? 'شريحتين' : cnt(slides)) : '') + '.', 'The correct letter was filled in ' + done + ' questions' + (ids.length > 1 ? ', in ' + cnt(slides) : '') + '.')
-      : L('لم أجد خيارات مميزة كصحيحة (أو حرفها أزرق) بحرف غير مملوء. لتمييز خيار: حدّده ثم اضغط الزر.', 'No choice marked correct (or with a blue letter) left unfilled. To mark one: select it, then press the button.'));
+    say(done ? L('ظُلّل حرف الإجابة الصحيحة في ' + q + (ids.length > 1 ? '، في ' + (slides === 2 ? 'شريحتين' : cnt(slides)) : '') + '.', 'The correct letter was highlighted in ' + done + ' questions' + (ids.length > 1 ? ', in ' + cnt(slides) : '') + '.')
+      : L('لم أجد خيارات مميزة كصحيحة (أو حرفها أزرق) بحرف غير مظلّل. لتمييز خيار: حدّده ثم اضغط الزر.', 'No choice marked correct (or with a blue letter) left unhighlighted. To mark one: select it, then press the button.'));
   } catch (e) { say(L('تعذّر: ', 'Could not: ') + errText(e)); }
   finally { busy = false; lock(); }
 }
@@ -5131,7 +5137,7 @@ async function pinRole(role, keepColour) {
       if (n < 0) { rsay(L('عُلِّم كحل وأُخفي، لأن حلول الشريحة مخفية الآن. يظهر مع «إظهار الحلول».', 'Marked as a solution and hidden, since the slide\'s solutions are hidden now. «Show solutions» brings it back.')); return; }
       rsay(!n ? L('حدّد أولًا الكائن الذي تريد تمييزه.', 'First select the object to mark.')
         : role === 'given' ? L('عُلِّم كجزء من السؤال: يبقى ظاهرًا عند إخفاء الحلول.', 'Marked as part of the question: it stays when solutions are hidden.')
-        : role === 'correct' ? L('عُلِّم كخيار صحيح: صار حرفه مملوءًا (🅑) فيظهر حتى في الطباعة بالأبيض والأسود، ويعود حرفًا عاديًا (ⓑ) عند إخفاء الحلول.', 'Marked as the correct choice: its letter is now filled (🅑), clear even in black-and-white print; it turns back to a plain letter (ⓑ) when solutions are hidden.')
+        : role === 'correct' ? L('عُلِّم كخيار صحيح: صار حرفه أبيض على تظليل أزرق، فيظهر حتى في الطباعة بالأبيض والأسود، ويعود حرفًا عاديًا عند إخفاء الحلول.', 'Marked as the correct choice: its letter is now white on a blue highlight, clear even in black-and-white print; it turns back to a plain letter when solutions are hidden.')
         : role === 'graph' ? L('عُلِّم كحل بياني: تحل مكانه شبكة فارغة عند إخفاء الحلول.', 'Marked as a graph solution: an empty grid takes its place when solutions are hidden.')
         : keepColour ? L('عُلِّم كحل: يُخفى عند إخفاء الحلول.', 'Marked as a solution: it is hidden when solutions are hidden.') : L('عُلِّم كحل (أزرق): يُخفى عند إخفاء الحلول.', 'Marked as a solution (blue): it is hidden when solutions are hidden.'));
     } catch (e) { rsay(L('تعذّر التمييز: ', 'Could not mark: ') + errText(e)); }
