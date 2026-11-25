@@ -4976,14 +4976,14 @@ async function dotCorrect(ctx, shapes, s) {
   const first = text.split(/[\r\n\v]/)[0];
   // the circled letters of the first line; several → the blue one
   const at = []; for (let i = 0; i < first.length; i++) if (/[ⓐ-ⓩ]/.test(first[i])) at.push(i);
-  if (!at.length) return null;
+  if (!at.length) { dotMeasure = 'no letter: ' + JSON.stringify(first.slice(0, 12)); return null; }
   let idx = at[0];
   if (at.length > 1) {
     const subs = at.map(i => { const x = tr.getSubstring(i, 1); try { x.font.load('color'); } catch (e) {} return x; });
     await ctx.sync();
     const blue = c => { const h = /^#?([0-9a-f]{6})$/i.exec(c || ''); if (!h) return false; const v = parseInt(h[1], 16), r = v >> 16, b = v & 255; return b > 150 && r < 120 && b - r > 60; };
     const k = subs.findIndex(x => { try { return blue(x.font.color); } catch (e) { return false; } });
-    if (k < 0) return null;
+    if (k < 0) { dotMeasure = 'no blue letter'; return null; }
     idx = at[k];
   }
   const sub = tr.getSubstring(idx, 1); try { sub.font.load('size,name'); } catch (e) {} await ctx.sync();
@@ -5069,7 +5069,7 @@ async function quietMark(role, keepColour) {
       // the correct choice: its circled letter is filled in the text itself right after (see fillSlide)
       if (role === 'correct' && ['TextBox', 'GeometricShape'].includes(s.type)) {
         await ctx.sync();
-        const dot = await dotCorrect(ctx, ctx.presentation.slides.getItem(id).shapes, s).catch(() => null);
+        const dot = await dotCorrect(ctx, ctx.presentation.slides.getItem(id).shapes, s).catch(e => { dotMeasure = (dotMeasure ? dotMeasure + ' ' : '') + 'err: ' + errText(e); return null; });
         if (dot && dot.id) (undoStack[undoStack.length - 1].added = undoStack[undoStack.length - 1].added || []).push(dot);
         // the place could not be measured: the letter is highlighted in the text instead (see fillSlide)
         if (!dot) { s.name = s.name + ' #urfill'; fillAfter = true; }
