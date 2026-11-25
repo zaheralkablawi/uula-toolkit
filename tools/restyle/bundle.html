@@ -1842,7 +1842,29 @@ function spacing(rects, W, H) {
 // mode: 'auto' (an object on the right half goes to the right margin, on the left half to the left margin),
 // 'right' or 'left' (all to that side). Objects side by side move as one group, so they never overlap.
 // Inside a container with an icon, the right margin is the 488.8 guide.
-function align(rects, W, mode, only) {
+function align(rects0, W, mode, only) {
+  // a full-width frame (note, formulas…) that was pushed sideways goes back to its place (the full page width,
+  // from the left edge), and everything inside it moves with it, so the frame and its content stay together
+  const pre = {};
+  const rects = rects0.map(r => Object.assign({}, r));
+  const insideR0 = (o, b) => { const cx = o.x + o.w / 2, cy = o.y + o.h / 2; return cx >= b.x && cx <= b.x + b.w && cy >= b.y && cy <= b.y + b.h; };
+  for (const b of rects0) {
+    if (!b.box || b.fixed || b.w < W * 0.85 || (only && only.length && !only.includes(b.key))) continue;
+    const dx = -b.x;
+    if (Math.abs(dx) <= 0.3 * PT && Math.abs(b.w - W) <= 0.3 * PT) continue;
+    const rb = rects.find(r => r.key === b.key); rb.x = 0; rb.w = W;
+    pre[b.key] = { x: 0, w: Math.round(W) };
+    if (Math.abs(dx) > 0.3 * PT) for (const o of rects0) {
+      if (o === b || o.fixed || (o.box && o.w >= W * 0.85) || !insideR0(o, b)) continue;
+      const ro = rects.find(r => r.key === o.key); ro.x = o.x + dx;
+      pre[o.key] = { x: Math.round(ro.x) };
+    }
+  }
+  const res = align0(rects, W, mode, only);
+  for (const [k, m] of Object.entries(pre)) res[k] = Object.assign({}, m, res[k] || {});
+  return res;
+}
+function align0(rects, W, mode, only) {
   const insideR = (o, b) => { const cx = o.x + o.w / 2, cy = o.y + o.h / 2; return cx >= b.x && cx <= b.x + b.w && cy >= b.y && cy <= b.y + b.h; };
   const boxes = rects.filter(r => r.box && r.w > W * 0.9);
   const L = M, R0 = W - M;
@@ -4991,7 +5013,7 @@ async function alignSlide(id, mode, useSel) {
     });
     const only = selIds.length ? sh.items.map((s, k) => selIds.includes(s.id) ? k : -1).filter(k => k >= 0) : null;
     const mv = UR.align(rects, W * PT, mode, only);
-    for (const [k, m] of Object.entries(mv)) sh.items[+k].left = m.x / PT;
+    for (const [k, m] of Object.entries(mv)) { if (m.w != null) sh.items[+k].width = m.w / PT; if (m.x != null) sh.items[+k].left = m.x / PT; }
     await ctx.sync();
     return Object.keys(mv).length;
   });
