@@ -4957,7 +4957,7 @@ function makeDot(ctx, shapes, d) {
     const tf = c.textFrame; tf.wordWrap = false; tf.autoSizeSetting = 'AutoSizeNone';
     tf.leftMargin = 0; tf.rightMargin = 0; tf.topMargin = 0; tf.bottomMargin = 0; tf.verticalAlignment = 'Middle';
     tf.textRange.text = d.letter;
-    const f = tf.textRange.font; f.color = '#FFFFFF'; f.size = d.font; f.bold = false; if (d.name) f.name = d.name;
+    const f = tf.textRange.font; f.color = '#FFFFFF'; f.size = d.font; f.bold = true; if (d.name) f.name = d.name;
     tf.textRange.paragraphFormat.horizontalAlignment = 'Center';
   } catch (e) {}
   return c;
@@ -5034,12 +5034,15 @@ async function dotCorrect(ctx, shapes, s, slideId) {
   const inStart = geo ? geo.marL + geo.indent : 0;
   const atStart = geo ? (RTL ? geo.algn !== 'l' && geo.algn !== 'ctr' : geo.algn !== 'r' && geo.algn !== 'ctr') : al !== 'Center';
   let cx;
-  if (atStart) cx = RTL ? s.left + s.width - R0 - inStart - (wPre - gw / 2) : s.left + L0 + inStart + (wPre - gw / 2);
+  // the circle of the glyph sits at the start of its advance (the rest of the advance is room after it):
+  // its centre is half a font size after the text before it
+  const off = (wPre - gw) + fs * 0.55;
+  if (atStart) cx = RTL ? s.left + s.width - R0 - inStart - off : s.left + L0 + inStart + off;
   else {
     const all = sample(first + TEN), t2 = sample(TEN); await ctx.sync(); all.load('width'); t2.load('width'); await ctx.sync(); const wl = all.width - t2.width; all.delete(); t2.delete(); await ctx.sync();
     const inner0 = s.left + L0 + (RTL ? 0 : inStart), inner1 = s.left + s.width - R0 - (RTL ? inStart : 0);
     const lineL = (geo ? geo.algn === 'ctr' : al === 'Center') ? (inner0 + inner1) / 2 - wl / 2 : RTL ? inner0 : inner1 - wl;
-    cx = RTL ? lineL + wl - (wPre - gw / 2) : lineL + (wPre - gw / 2);
+    cx = RTL ? lineL + wl - off : lineL + off;
   }
   const lines0 = text.split(/[\r\n\v]/).length;
   // one line in its box: the line is the box minus its insets (exact); otherwise the measured line height
@@ -5049,12 +5052,12 @@ async function dotCorrect(ctx, shapes, s, slideId) {
   const cyM = top0 + lineH * 0.5;
   const cy = cyM;
   // the circle drawn in the glyph is about the size of the font (its advance has room on both sides)
-  const dia = Math.round(Math.min(gw * 0.92, fs * 0.98) * 10) / 10;
+  const dia = Math.round(fs * 1.02 * 10) / 10;
   // already done (pressed twice): one circle is enough
   const all = shapes; all.load('items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
   if (all.items.some(x => /UULA CorrectDot/.test(x.name || '') && Math.abs(x.left + x.width / 2 - cx) < dia / 2 && Math.abs(x.top + x.height / 2 - cy) < dia / 2)) return { id: null };
   sub.font.color = '#FFFFFF';
-  const d = { left: Math.round((cx - dia / 2) * 10) / 10, top: Math.round((cy - dia / 2) * 10) / 10, size: dia, font: Math.round(fs * 0.8 * 2) / 2, letter: String.fromCharCode(first.charCodeAt(idx) - 0x24D0 + 97), name: null };
+  const d = { left: Math.round((cx - dia / 2) * 10) / 10, top: Math.round((cy - dia / 2) * 10) / 10, size: dia, font: Math.round(fs * 0.95 * 2) / 2, letter: String.fromCharCode(first.charCodeAt(idx) - 0x24D0 + 97), name: null };
   const c = makeDot(ctx, shapes, d);
   c.load('id'); await ctx.sync();
   return { id: c.id, d };
