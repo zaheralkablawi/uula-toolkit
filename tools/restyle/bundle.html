@@ -156,13 +156,17 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 
 
   <section class="panel" data-pane="obj">
+    <div class="seg scopeSeg">
+      <button type="button" data-v="cur" aria-pressed="true" data-en="Current slide">الشريحة الحالية</button>
+      <button type="button" data-v="all" aria-pressed="false" data-en="All slides">كل الشرائح</button>
+    </div>
     <div class="sprow2" style="justify-content:space-between;grid-template-columns:auto auto"><span class="gt2" data-en="Restyle the slide">تحويل الشريحة لستايل علا</span><button type="button" class="big" id="goBtn" style="min-width:90px;padding:0 16px" data-en="Convert" data-ar-title="يحوّل الشريحة كلها إلى ستايل مذكرة علا: الخط والأحجام والألوان وترتيب المربعات." data-en-title="Restyles the whole slide to the UULA booklet: font, sizes, colours and the order of the boxes." title="يحوّل الشريحة كلها إلى ستايل مذكرة علا: الخط والأحجام والألوان وترتيب المربعات.">تحويل</button></div>
     <div class="sep"></div>
-    <div style="display:flex;gap:6px;align-items:stretch"><div id="selHint" class="selhint" style="flex:1;min-width:0"></div><button type="button" class="ib" id="opUndo" style="flex:none;width:32px" data-ar-title="تراجع عن آخر عملية دفعة واحدة" data-en-title="Undo the last operation at once" title="تراجع عن آخر عملية دفعة واحدة"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5L3.5 8.5 7 12"/><path d="M3.5 8.5H12a4.5 4.5 0 010 9H9"/></svg></button></div>
+    <div id="selHint" class="selhint"></div>
     <div id="roles" style="display:grid;gap:4px"></div>
     <div class="sep"></div>
     <div class="sprow" style="display:flex;gap:6px;align-items:center"><span class="splab gt2" style="white-space:nowrap" data-en="Spacing">تنسيق المسافات</span>
-      <button type="button" class="sec ico" id="spD" title="توزيع المحتوى على الشريحة كاملة: المساحة الفارغة (أعلى ووسط وأسفل) تُقسم بالتساوي دون تغيير التنسيق" data-ar-title="توزيع المحتوى على الشريحة كاملة: المساحة الفارغة (أعلى ووسط وأسفل) تُقسم بالتساوي دون تغيير التنسيق" data-en-title="Spread the content over the whole slide: the free space (top, middle, bottom) is shared out evenly, formatting unchanged"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 2h10M3 14h10"/><rect x="5" y="5" width="6" height="2" rx=".5"/><rect x="5" y="9" width="6" height="2" rx=".5"/></svg></button>
+      <button type="button" class="sec ico" id="spD" title="توزيع الكائنات على الشريحة كاملة: المساحة الفارغة تُقسم تحت الأسئلة ليكتب الطالب (إن وُجدت مساحة)" data-ar-title="توزيع الكائنات على الشريحة كاملة: المساحة الفارغة تُقسم تحت الأسئلة ليكتب الطالب (إن وُجدت مساحة)" data-en-title="Spread the objects over the whole slide: the free space is shared under the questions for the student to write (if there is room)"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 2h10M3 14h10"/><rect x="5" y="5" width="6" height="2" rx=".5"/><rect x="5" y="9" width="6" height="2" rx=".5"/></svg></button>
       <button type="button" class="sec ico" id="spV" title="ضبط المسافات بين الكائنات من الأعلى والأسفل" data-ar-title="ضبط المسافات بين الكائنات من الأعلى والأسفل" data-en-title="Fix the vertical gaps between objects"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 2v12M5 4.5 8 1.8l3 2.7M5 11.5 8 14.2l3-2.7"/></svg></button>
       <button type="button" class="sec ico" id="spH" title="محاذاة الكائنات إلى اليمين أو اليسار" data-ar-title="محاذاة الكائنات إلى اليمين أو اليسار" data-en-title="Align objects to the right or left"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 8h12M4.5 5 1.8 8l2.7 3M11.5 5l2.7 3-2.7 3"/></svg></button>
       <div class="seg seg3 icoseg" id="hAlign">
@@ -171,13 +175,13 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
         <button type="button" data-v="left" aria-pressed="false" title="محاذاة لليسار" data-ar-title="محاذاة لليسار" data-en-title="Align left"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 3h10M2 6.5h7M2 10h10M2 13.5h7"/></svg></button>
       </div>
     </div>
-    <div class="sep"></div>
-    <button type="button" class="sec" id="docxBtn" data-ar-title="كل جزء مميز في ملف الوورد يصبح مربعًا مستقلًا بستايل علا" data-en-title="Every tagged part of the Word file becomes its own UULA box"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 1.5h6l3 3v10h-9z"/><path d="M5.5 7.5l1 4 1.5-3 1.5 3 1-4" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-en="Insert a Word file…">إدراج ملف وورد…</span></button>
-    <input type="file" id="docxFile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
   </section>
 
 
   <section class="panel" data-pane="ins" hidden>
+    <button type="button" class="sec" id="docxBtn" data-ar-title="كل جزء مميز في ملف الوورد يصبح مربعًا مستقلًا بستايل علا" data-en-title="Every tagged part of the Word file becomes its own UULA box"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 1.5h6l3 3v10h-9z"/><path d="M5.5 7.5l1 4 1.5-3 1.5 3 1-4" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-en="Insert a Word file…">إدراج ملف وورد…</span></button>
+    <input type="file" id="docxFile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+    <div class="sep"></div>
     <span class="gt2" data-en="Page numbers">أرقام الصفحات</span>
     <label class="chk"><input type="checkbox" id="numChk" checked> <span data-en="Number the pages after each conversion">ترقيم الصفحات بعد كل تحويل</span></label>
     <div class="row" id="numRow"><span style="font-size:.82rem" data-en="Numbering starts at slide">يبدأ الترقيم من الشريحة</span><span style="display:flex;gap:6px;align-items:center"><input type="number" min="1" class="num" id="numStart" value="1"><button type="button" class="mini" id="numHere" data-en="Current">الحالية</button></span></div>
@@ -186,6 +190,10 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
   </section>
 
   <section class="panel" data-pane="set" hidden>
+    <div class="seg scopeSeg">
+      <button type="button" data-v="cur" aria-pressed="true" data-en="Current slide">الشريحة الحالية</button>
+      <button type="button" data-v="all" aria-pressed="false" data-en="All slides">كل الشرائح</button>
+    </div>
     <button type="button" class="sec" id="solBtn"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/><path id="solSlash" d="M2.5 13.5l11-11"/></svg><span id="solLbl">إخفاء الحلول</span></button>
     <div class="sprow2"><span class="splab" data-en="Solution space">مكان الحل</span><div class="seg" id="solLines" style="width:186px">
       <button type="button" data-v="0" aria-pressed="true" data-en="No lines">بدون سطور</button>
@@ -881,7 +889,7 @@ function styleText(it, ctx, pkg, forcedRole) {
     let ar = pr.text ? AR.test(pr.text) : arAll;
     if (pr.role === 'choice' && ctx.choiceDir) { ar = ctx.choiceDir === 'rtl'; choiceLetterDir(pr.p, ar); }
     // an equation line inside an Arabic box stays on the right with the text around it
-    if (!ar && arAll && !(pr.role === 'choice' && ctx.choiceDir) && pr.role !== 'question' && desc(pr.p, 'm', 'oMath').length && !desc(pr.p, 'a', 't').some(x => /[A-Za-z]{3,}/.test(x.textContent))) ar = true;
+    if (!ar && arAll && pr.role !== 'question' && desc(pr.p, 'm', 'oMath').length && !desc(pr.p, 'a', 't').some(x => /[A-Za-z]{3,}/.test(x.textContent))) ar = true;
     let bullet = null, marL = 0, indent = 0;
     if (st.q) {
       bullet = 'Q'; marL = 182880; indent = -182880;
@@ -1820,9 +1828,7 @@ function spacing(rects, W, H) {
         if (boxes.includes(u)) {
           const ks = kidsOf(u);
           if (ks.length) {
-            // a frame stretched up to the top edge of the page: its content still starts where a frame on the
-            // first grid line would have it
-            const inner = level(ks, ny <= 2 * PT ? snapUp(Y0) + ROW : snapUp(ny) + ROW, false);
+            const inner = level(ks, snapUp(ny) + ROW, false);
             const nh = snapUp(inner) + ROW - ny;
             out[u.key].h = Math.round(nh); ub = ny + nh;
           }
@@ -1844,29 +1850,7 @@ function spacing(rects, W, H) {
 // mode: 'auto' (an object on the right half goes to the right margin, on the left half to the left margin),
 // 'right' or 'left' (all to that side). Objects side by side move as one group, so they never overlap.
 // Inside a container with an icon, the right margin is the 488.8 guide.
-function align(rects0, W, mode, only) {
-  // a full-width frame (note, formulas…) that was pushed sideways goes back to its place (the full page width,
-  // from the left edge), and everything inside it moves with it, so the frame and its content stay together
-  const pre = {};
-  const rects = rects0.map(r => Object.assign({}, r));
-  const insideR0 = (o, b) => { const cx = o.x + o.w / 2, cy = o.y + o.h / 2; return cx >= b.x && cx <= b.x + b.w && cy >= b.y && cy <= b.y + b.h; };
-  for (const b of rects0) {
-    if (!b.box || b.fixed || b.w < W * 0.85 || (only && only.length && !only.includes(b.key))) continue;
-    const dx = -b.x;
-    if (Math.abs(dx) <= 0.3 * PT && Math.abs(b.w - W) <= 0.3 * PT) continue;
-    const rb = rects.find(r => r.key === b.key); rb.x = 0; rb.w = W;
-    pre[b.key] = { x: 0, w: Math.round(W) };
-    if (Math.abs(dx) > 0.3 * PT) for (const o of rects0) {
-      if (o === b || o.fixed || (o.box && o.w >= W * 0.85) || !insideR0(o, b)) continue;
-      const ro = rects.find(r => r.key === o.key); ro.x = o.x + dx;
-      pre[o.key] = { x: Math.round(ro.x) };
-    }
-  }
-  const res = align0(rects, W, mode, only);
-  for (const [k, m] of Object.entries(pre)) res[k] = Object.assign({}, m, res[k] || {});
-  return res;
-}
-function align0(rects, W, mode, only) {
+function align(rects, W, mode, only) {
   const insideR = (o, b) => { const cx = o.x + o.w / 2, cy = o.y + o.h / 2; return cx >= b.x && cx <= b.x + b.w && cy >= b.y && cy <= b.y + b.h; };
   const boxes = rects.filter(r => r.box && r.w > W * 0.9);
   const L = M, R0 = W - M;
@@ -1961,85 +1945,9 @@ function gridOver(pkg) {
 function choiceLetterDir(p, rtl) {
   const t = desc(p, 'a', 't').find(x => x.textContent.trim());
   if (!t) return;
-  const m = t.textContent.match(/^(\s*(?:[ⓐ-ⓩⒶ-Ⓩ]|\(?[A-Da-d][).]))[‎‏]?/);
+  const m = t.textContent.match(/^(\s*(?:[ⓐ-ⓩⒶ-Ⓩ]|\(?[A-Da-d][).]))‏?/);
   if (!m) return;
-  // right-to-left: U+200F keeps the letter on the right; left-to-right: U+200E keeps it on the left, even before Arabic
-  t.textContent = m[1] + (rtl ? '‏' : '‎') + t.textContent.slice(m[0].length);
-}
-// several selected text boxes become multiple-choice options: in one row (each a quarter … of the width) or one under
-// the other on the page grid. The order: their letters if they have them, otherwise reading order. Each gets its letter
-// (ⓐ ⓑ …) and the choice style; the direction: as chosen, or «auto» (Arabic text or an Arabic question above → right-to-left)
-function arrangeChoices(pkg, layout, dirOpt) {
-  const W = pkg.slideW, CW = W - 2 * M;
-  const doc = parseXml(pkg.files.slide);
-  const ctx = { scheme: readTheme(pkg.files), bodySz: 1100 };
-  const items = topItems(doc).map((el, i) => { const c = core(el), n = cnvOf(c); return { i, el, c, n, name: n ? n.getAttribute('name') || '' : '', g: geomOf(el, pkg) || { x: 0, y: 0, w: 0, h: 0 }, kind: c.localName === 'sp' && kid(c, 'txBody', 'p') ? 'text' : c.localName, text: textOf(c).trim() }; });
-  const sel = items.filter(t => / #ursel$/.test(t.name) && t.kind === 'text');
-  if (sel.length < 2) return { count: 0 };
-  const L = 'ⓐⓑⓒⓓⓔⓕⓖⓗ';
-  const letterOf = t => { const m = t.text.match(/^\s*([ⓐ-ⓩ])/); return m ? L.indexOf(m[1]) : -1; };
-  let dir = dirOpt || 'auto';
-  if (dir === 'auto') {
-    if (sel.some(t => AR.test(t.text.replace(/[ⓐ-ⓩ]/g, '')))) dir = 'rtl';
-    else {
-      const top = Math.min(...sel.map(t => t.g.y));
-      const above = items.filter(o => !sel.includes(o) && o.kind === 'text' && o.text && o.g.y + o.g.h <= top + 2 * PT).sort((a, b) => (b.g.y + b.g.h) - (a.g.y + a.g.h))[0];
-      dir = above ? (AR.test(above.text) ? 'rtl' : 'ltr') : 'rtl';
-    }
-  }
-  const rtl = dir === 'rtl';
-  // the order
-  const known = sel.every(t => letterOf(t) >= 0);
-  // reading order: boxes that overlap in height are one line (a taller fraction starts a little higher than the
-  // options beside it), lines from top to bottom, and in a line from right to left (rtl) or left to right (ltr)
-  let order;
-  if (known) order = [...sel].sort((a, b) => letterOf(a) - letterOf(b));
-  else {
-    const lines = [];
-    for (const t of [...sel].sort((a, b) => (a.g.y + a.g.h / 2) - (b.g.y + b.g.h / 2))) {
-      const ln = lines.find(l => l.some(o => Math.min(o.g.y + o.g.h, t.g.y + t.g.h) - Math.max(o.g.y, t.g.y) > Math.min(o.g.h, t.g.h) * 0.3));
-      if (ln) ln.push(t); else lines.push([t]);
-    }
-    order = lines.flatMap(l => l.sort((a, b) => rtl ? b.g.x - a.g.x : a.g.x - b.g.x));
-  }
-  // each gets its letter and the choice look
-  order.forEach((t, k) => {
-    // the letter: in front of the first text; a box with only an equation gets a small run before the equation
-    // (outside it: the equation itself is not touched), in the equation shape and in its plain-text copy alike
-    for (const c of allCores(t.el)) {
-      const ps = kids(kid(c, 'txBody', 'p'), 'p', 'a');
-      const p0 = ps.find(p => textOf(p).trim()) || ps[0];
-      if (!p0) continue;
-      const first = [...p0.children].find(x => x.localName !== 'pPr');
-      const tt = first && first.localName === 'r' ? kid(first, 't', 'a') : null;
-      if (tt) { tt.textContent = L[k] + ' ' + tt.textContent.replace(/^\s*[ⓐ-ⓩ]‏?\s*/, ''); continue; }
-      const r = frag(doc, '<a:r><a:rPr lang="en-US" sz="1100" dirty="0"/><a:t>' + L[k] + ' </a:t></a:r>');
-      p0.insertBefore(r, first || null);
-    }
-    t.text = textOf(t.c).trim();
-    ctx.choiceDir = dir;
-    styleText(t, ctx, pkg, 'choice');
-    plainShape(t.c); setBody(t.c, {});
-    for (const c of allCores(t.el)) if (c !== t.c) for (const p of kids(kid(c, 'txBody', 'p'), 'p', 'a')) {
-      let pPr = kid(p, 'pPr', 'a'); if (!pPr) { pPr = mk(doc, 'a', 'pPr'); p.insertBefore(pPr, p.firstChild); }
-      pPr.setAttribute('algn', dir === 'rtl' ? 'r' : 'l'); pPr.setAttribute('rtl', dir === 'rtl' ? '1' : '0'); choiceLetterDir(p, dir === 'rtl');
-    }
-  });
-  ctx.choiceDir = null;
-  const y0 = snapUp(Math.min(...sel.map(t => t.g.y)));
-  if (layout === 'row') {
-    const w = Math.round(CW / order.length);
-    order.forEach((t, k) => setGeom(t.el, { x: rtl ? M + CW - (k + 1) * w : M + k * w, y: y0, w, h: ROW }));
-  } else {
-    // all the boxes the same width: the widest text and a little more; on the right edge (rtl) or the left edge (ltr)
-    const fit = t => { const full = estimateText(t.c, CW); let lo = 20 * PT, hi = CW; for (let n = 0; n < 14; n++) { const mid = (lo + hi) / 2; if (estimateText(t.c, mid) <= full + PT) hi = mid; else lo = mid; } return hi; };
-    const w = Math.min(CW, Math.round(Math.max(...order.map(fit)) + 8 * PT));
-    order.forEach((t, k) => {
-      for (const c of allCores(t.el)) { const bp = kid(kid(c, 'txBody', 'p'), 'bodyPr', 'a'); if (bp) bp.setAttribute('wrap', 'square'); }
-      setGeom(t.el, { x: rtl ? M + CW - w : M, y: y0 + k * ROW, w, h: ROW });
-    });
-  }
-  return { xml: serialize(doc), count: order.length, dir };
+  t.textContent = m[1] + (rtl ? '‏' : '') + t.textContent.slice(m[0].length);
 }
 // the selected multiple-choice options turned to the other direction: every paragraph right-to-left (algn r) or
 // left-to-right (algn l), and options standing side by side swap places so ⓐ is on the right (rtl) or the left (ltr)
@@ -2050,7 +1958,7 @@ function flipChoices(pkg, dir) {
   // the selected ones keep their mark: the pane selects them again afterwards (to turn them again at once)
   const texts = sel.filter(t => t.c.localName === 'sp' && kid(t.c, 'txBody', 'p'));
   const rtl = dir === 'rtl';
-  for (const t of texts) for (const c of allCores(t.el)) for (const p of kids(kid(c, 'txBody', 'p'), 'p', 'a')) {
+  for (const t of texts) for (const p of kids(kid(t.c, 'txBody', 'p'), 'p', 'a')) {
     let pPr = kid(p, 'pPr', 'a'); if (!pPr) { pPr = mk(doc, 'a', 'pPr'); p.insertBefore(pPr, p.firstChild); }
     pPr.setAttribute('algn', rtl ? 'r' : 'l'); pPr.setAttribute('rtl', rtl ? '1' : '0');
     choiceLetterDir(p, rtl);
@@ -2475,7 +2383,7 @@ function splitPoint(plan, lay) {
 
 return {
   questionFlags,
-  NS, PT, ROW, M, FOOT, C, STY, BOX, openPackage, buildPackage, parseXml, serialize, restyle, layout, applyLayout, splitParts, splitPoint, markNames, MARK, applyRole, wrapBox, gridOver, flipChoices, arrangeChoices, WRAP, reflow, spacing, align, findSolutions, hideSolutions, showSolutions, hasSolutions, TEXT_ROLES, BOX_ROLES, G, Y0, snapUp, snapX,
+  NS, PT, ROW, M, FOOT, C, STY, BOX, openPackage, buildPackage, parseXml, serialize, restyle, layout, applyLayout, splitParts, splitPoint, markNames, MARK, applyRole, wrapBox, gridOver, flipChoices, WRAP, reflow, spacing, align, findSolutions, hideSolutions, showSolutions, hasSolutions, TEXT_ROLES, BOX_ROLES, G, Y0, snapUp, snapX,
   // used by the templates module
   util: { pX, txX, boxX, gradBoxX, picX, pillX, pillW, lineX, tableX, makeRels, frag, topItems, core, cnvOf, maxId, spTreeOf, kid, kids, desc, xfrmOf, geomOf, setNext: n => { NEXT = n; }, snapUp, yearText, pageNumX, estimateText, iconW, iconH }
 };
@@ -2575,9 +2483,7 @@ function spec(id, W) {
     // the options one under the other: ⓐ on the first line … ⓓ on the fourth, each line its own text box
     case 'mcqV': {
       const L = ['ⓐ', 'ⓑ', 'ⓒ', 'ⓓ'], ltr = OPT.dirNow === 'ltr';
-      // each box as wide as its text and a little more, growing as the answer is typed (no wrapping)
-      const bw = 72 * PT;
-      return { gap: 0, snap: true, rows: L.map((l, k) => ({ gap: 0, cells: [txt(P.runs([T(l + ' '), T(ltr ? 'Option' : 'خيار')], { marL: 182880, ar: !ltr }), { x: ltr ? M : R - bw, w: bw, nowrap: true })] })) };
+      return { gap: 0, snap: true, rows: L.map((l, k) => ({ gap: 0, cells: [txt(P.runs([T(l + ' '), T(ltr ? 'Option' : 'خيار')], { marL: 182880, ar: !ltr }))] })) };
     }
     case 'problem': return { gap: 1, rows: [
       { cells: [txt(P.q('اكتب نص المسألة هنا؟'))] },
@@ -2661,11 +2567,7 @@ function build(id, W, top, rels) {
   }
   s.rows.forEach((r, ri) => r.cells.forEach((c, ci) => {
     const meta = { role: 'cell', row: ri, cell: ci, t: c.t };
-    if (c.t === 'text') {
-      let x = U.txX('UULA ' + id, c.x != null ? c.x : M, 0, c.w != null ? c.w : CW, ROW, c.xml);
-      if (c.nowrap) x = /wrap="[a-z]+"/.test(x) ? x.replace(/wrap="[a-z]+"/, 'wrap="none"') : x.replace('<a:bodyPr', '<a:bodyPr wrap="none"');   // grows with its text
-      add(x, meta);
-    }
+    if (c.t === 'text') add(U.txX('UULA ' + id, c.x != null ? c.x : M, 0, c.w != null ? c.w : CW, ROW, c.xml), meta);
     else if (c.t === 'pic') add(U.picX('UULA ' + (c.name || c.key), rels.image(c.key), c.x != null ? c.x : M, 0, c.w, c.h), meta);
     else if (c.t === 'pill') add(U.pillX(c.term, 0, 0, U.pillW(c.term)), meta);
     else if (c.t === 'table') add(U.tableX(c.rows, W, c.o), meta);
@@ -3723,8 +3625,7 @@ const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } cat
 const load = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
 let lang = load('ur-lang', 'ar');
 const L = (ar, en) => lang === 'en' ? en : ar;
-// the tool works on the current slide only (all slides at once was slow and risky)
-let scope = 'cur';
+let scope = load('ur-scope', 'cur'); if (scope !== 'all') scope = 'cur';
 let busy = false, supported = false;
 
 // ---------- status / results ----------
@@ -3819,35 +3720,10 @@ async function refine(slideId, plan) {
 }
 // remove the " #ur<n>" marks
 async function unmark(slideId) {
-  await run(async ctx => {
+  return run(async ctx => {
     const shapes = ctx.presentation.slides.getItem(slideId).shapes;
     shapes.load('items/name'); await ctx.sync();
     for (const s of shapes.items) if (/ #ur\d+$/.test(s.name || '')) s.name = s.name.replace(/ #ur\d+$/, '');
-    await ctx.sync();
-  }).catch(() => {});
-  await frameTop(slideId);
-}
-// a frame (note, formulas, definition…) that is the first thing on the page, near the top: its top edge goes up to the
-// top edge of the slide (its bottom and everything inside it stay where they are)
-async function frameTop(slideId) {
-  const { W, H } = await getSize().catch(() => ({ W: 0, H: 0 }));
-  if (!W) return;
-  return run(async ctx => {
-    const sh = ctx.presentation.slides.getItem(slideId).shapes;
-    sh.load('items/id,items/name,items/type,items/left,items/top,items/width,items/height'); await ctx.sync();
-    const fixed = x => /^UULA (Footer|Watermark)|^CustomPageNumber_/.test(x.name || '') || x.top >= H - 54 || x.left + x.width <= 0 || x.left >= W || (x.width > W * 0.85 && x.height > H * 0.6);
-    const cand = sh.items.filter(x => x.type === 'GeometricShape' && x.width >= W * 0.85 && x.top > 0.3 && x.top <= 50 && !fixed(x) && !/Line$/.test(x.name || ''));
-    if (!cand.length) return;
-    const fills = cand.map(x => { try { x.fill.load('type'); return x.fill; } catch (e) { return null; } });
-    await ctx.sync();
-    cand.forEach((b, k) => {
-      let solid = false; try { solid = fills[k] && (fills[k].type === 'Solid' || fills[k].type === 'Gradient'); } catch (e) {}
-      if (!solid && !/Container$/.test(b.name || '')) return;
-      // nothing above it (its own content sits inside it, below its top)
-      const above = sh.items.some(o => o !== b && !fixed(o) && o.top + o.height <= b.top + 1 && o.height > 1);
-      if (above) return;
-      const bottom = b.top + b.height; b.top = 0; b.height = bottom;
-    });
     await ctx.sync();
   }).catch(() => {});
 }
@@ -4074,7 +3950,6 @@ function iconHtml(id, col) {
     case 'tableMain': return tbl('CAD0D8', 'DAE0E9');
     case 'tablePlain': return tbl(null);
     case 'solTable': return tbl('CAD0D8', null);
-    case 'ab': return '';   // the name itself is the sign: «ⓐ ⓑ»
     case 'graph': return '<i class="ic"><svg viewBox="0 0 14 12" width="14" height="12"><path d="M1 0v12M4.5 0v12M8 0v12M11.5 0v12M0 1.5h14M0 5h14M0 8.5h14M0 11.5h14" stroke="#c5ccd6" stroke-width=".6"/><path d="M1 10.5C4 10 5 2 8 2s3.5 5 5 6" fill="none" stroke="#1F71DE" stroke-width="1.4" stroke-linecap="round"/></svg></i>';
     case 'grid': return '<i class="ic"><svg viewBox="0 0 14 12" width="14" height="12"><path d="M1 0v12M4.5 0v12M8 0v12M11.5 0v12M0 1.5h14M0 5h14M0 8.5h14M0 11.5h14" stroke="#9aa3ad" stroke-width=".7"/><path d="M8 0v12M0 5h14" stroke="#333" stroke-width=".9"/></svg></i>';
   }
@@ -4212,7 +4087,6 @@ async function wrapSelected(id, tid) {
 async function insertTemplate(tid) {
   if (busy || !supported) return;
   busy = true; lock(); tsay('');
-  await snapOp([await currentId().catch(() => null)].filter(Boolean));
   try {
     const id = await currentId();
     if (!id) { tsay(L('حدّد شريحة أولًا.', 'Select a slide first.')); return; }
@@ -4231,8 +4105,7 @@ async function insertTemplate(tid) {
       const { map } = await shapesByMark(ctx, newId);
       const idx = Array.from({ length: r.count }, (_, k) => r.first + k);
       const texts = idx.filter((i, k) => r.built.shapes[k].t === 'text' && map[i]);
-      // (vertical options keep «no wrapping»: each box grows with its own answer)
-      texts.forEach(i => { try { map[i].textFrame.autoSizeSetting = 'AutoSizeShapeToFitText'; if (tid !== 'mcqV') map[i].textFrame.wordWrap = true; } catch (e) {} });
+      texts.forEach(i => { try { map[i].textFrame.autoSizeSetting = 'AutoSizeShapeToFitText'; map[i].textFrame.wordWrap = true; } catch (e) {} });
       await ctx.sync();
       texts.forEach(i => map[i].load('height'));
       await ctx.sync();
@@ -4245,27 +4118,12 @@ async function insertTemplate(tid) {
         if (p.h != null && p.h > 0 && r.built.shapes[k].t !== 'text') s.height = p.h / PT;
       });
       await ctx.sync();
-      // a template that has its own place at the top of the page (the lesson title): what is already on the slide
-      // moves down as one piece, under the title with one page-grid line between them — nothing is restyled
-      if (URT.spec(tid, pkg.slideW).fixed) {
-        const mine = new Set(Object.keys(map).filter(i => +i >= r.first && +i < r.first + r.count).map(i => map[i].id));
-        const sh = ctx.presentation.slides.getItem(newId).shapes;
-        sh.load('items/id,items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
-        const W = pkg.slideW / PT, H = pkg.slideH / PT;
-        const rest = sh.items.filter(x => !mine.has(x.id) && !/^UULA (Footer|Watermark)|^CustomPageNumber_/.test((x.name || '').replace(/ #ur\d+$/, '')) && !(x.width > W * 0.85 && x.height > H * 0.6) && x.top < H - 54);
-        const onPage = rest.filter(x => x.left < W && x.left + x.width > 0);
-        if (onPage.length) {
-          const ROWE = 13.39, Y0 = 22.58, want = Y0 + Math.ceil((pl.bottom / PT + ROWE - Y0 - 0.3) / (ROWE / 2)) * (ROWE / 2);
-          const dy = want - Math.min(...onPage.map(x => x.top));
-          if (dy > 0.3) { rest.forEach(x => { x.top = x.top + dy; }); r.pushed = true; r.pushOver = Math.max(...onPage.map(x => x.top + x.height)) > H - 54 + 1; await ctx.sync(); }
-        }
-      }
       r.fitsReal = pl.bottom <= pkg.slideH - UR.FOOT;
       ctx.presentation.setSelectedSlides([newId]); await ctx.sync();
       try { ctx.presentation.slides.getItem(newId).setSelectedShapes([]); await ctx.sync(); } catch (e) {}
     });
     await unmark(newId);
-    const nm = tplName(tid); tsay(r.fitsReal === false ? L('تمت إضافة «' + nm[0] + '»، لكنه تجاوز أسفل الصفحة.', '«' + nm[1] + '» was added, but it goes past the bottom of the page.') : r.pushed ? (r.pushOver ? L('تمت إضافة «' + nm[0] + '» أعلى الصفحة ونزل المحتوى تحته، لكن المحتوى تجاوز أسفل الصفحة.', '«' + nm[1] + '» was added at the top and the content moved down, but it now goes past the bottom of the page.') : L('تمت إضافة «' + nm[0] + '» أعلى الصفحة، ونزل المحتوى تحته.', '«' + nm[1] + '» was added at the top; the content moved down under it.')) : L('تمت إضافة «' + nm[0] + '» في الأسفل.', '«' + nm[1] + '» was added at the bottom.'));
+    const nm = tplName(tid); tsay(r.fitsReal === false ? L('تمت إضافة «' + nm[0] + '»، لكنه تجاوز أسفل الصفحة.', '«' + nm[1] + '» was added, but it goes past the bottom of the page.') : L('تمت إضافة «' + nm[0] + '» في الأسفل.', '«' + nm[1] + '» was added at the bottom.'));
   } catch (e) { tsay(L('تعذّرت الإضافة: ', 'Could not insert: ') + errText(e)); }
   finally { busy = false; lock(); }
 }
@@ -4281,7 +4139,7 @@ const ROLES = [
 ];
 // the same buttons beside «Hide solutions» only mark: the colour stays as it is (colours are set in «Format»)
 const SOL_TIP = {
-  answer: ['يعلّم المحدد كحل فيُخفى عند «إخفاء الحلول». لا يغيّر اللون ولا يتحرك شيء، إلا الجدول: تصير كتابته زرقاء مباشرة.', 'Marks the selection as a solution, so «Hide solutions» hides it. The colour stays and nothing moves — except a table: its text turns blue at once.'],
+  answer: ['يعلّم المحدد كحل فيُخفى عند «إخفاء الحلول». لا يغيّر اللون ولا يتحرك شيء.', 'Marks the selection as a solution, so «Hide solutions» hides it. The colour stays and nothing moves.'],
   correct: ['يعلّم المحدد كخيار صحيح، فيتحول للأسود عند «إخفاء الحلول». لا يغيّر اللون.', 'Marks the selection as the correct choice; it turns black when solutions are hidden. The colour stays.'],
   given: ['شكل أو نص من السؤال نفسه: يبقى ظاهرًا عند «إخفاء الحلول» حتى لو كان أزرق.', 'A shape or text that belongs to the question: it stays when solutions are hidden, even if blue.'],
   graph: ['تمثيل بياني هو حل: عند «إخفاء الحلول» تحل مكانه شبكة بيانية فارغة بنفس مقاسه، ويرجع عند «إظهار الحلول». (أي رسم آخر كالمثلث ميّزه «حل السؤال» فيُخفى بلا شبكة)', 'A graph that is a solution: on «Hide solutions» an empty graph grid of the same size takes its place; it comes back on «Show solutions». (Other drawings, like a triangle: mark them «Solution» to hide them without a grid)']
@@ -4341,124 +4199,9 @@ function dirSeg() {
   });
   return d;
 }
-// «ⓐ ⓑ»: the answer circles as text — «ⓐ    ⓑ» (four spaces) in one text box. Nothing selected: inserted under the
-// last object; drawn shapes selected: replaced by it in their place (one box per line of shapes)
-const AB_TEXT = 'ⓐ    ⓑ';
-async function abPress() {
-  if (busy || !supported) return;
-  busy = true; lock();
-  const id = await currentId().catch(() => null);
-  await snapOp(id ? [id] : []);
-  try {
-    if (!id) { say(L('حدّد شريحة أولًا.', 'Select a slide first.')); return; }
-    const top = await (async () => { const pkg = await UR.openPackage(await exportSlide(id)); return URT.freeTop(pkg, 1).top / PT; })().catch(() => 60);
-    const n = await run(async ctx => {
-      const ss = ctx.presentation.getSelectedShapes(); ss.load('items/id,items/left,items/top,items/width,items/height'); await ctx.sync();
-      const sh = ctx.presentation.slides.getItem(id).shapes;
-      // the places: shapes that overlap in height make a line; in a line, shapes close to each other make one place
-      // (two pairs side by side → two places); each place gets its own box where the shapes were
-      const lines = [];
-      for (const s of [...ss.items].sort((a, b) => a.top - b.top)) {
-        const ln = lines.find(l => l.some(o => Math.min(o.top + o.height, s.top + s.height) - Math.max(o.top, s.top) > Math.min(o.height, s.height) * 0.3));
-        if (ln) ln.push(s); else lines.push([s]);
-      }
-      const spots = [];
-      for (const ln of lines) {
-        ln.sort((a, b) => a.left - b.left);
-        let cur = null;
-        for (const s of ln) {
-          const near = cur && s.left - cur.r < Math.max(24, 1.5 * Math.max(...cur.shapes.map(o => o.width), s.width)) && cur.shapes.length < 2;
-          if (near) { cur.l = Math.min(cur.l, s.left); cur.r = Math.max(cur.r, s.left + s.width); cur.t = Math.min(cur.t, s.top); cur.b = Math.max(cur.b, s.top + s.height); cur.shapes.push(s); }
-          else { cur = { l: s.left, r: s.left + s.width, t: s.top, b: s.top + s.height, shapes: [s] }; spots.push(cur); }
-        }
-      }
-      if (!spots.length) spots.push({ l: 36, r: 110, t: top, b: top + 20, shapes: [] });
-      const made = [];
-      for (const p of spots) {
-        const h = 20, t = sh.addTextBox(AB_TEXT, { left: p.l, top: (p.t + p.b) / 2 - h / 2, width: Math.max(60, p.r - p.l + 8), height: h });
-        t.name = 'UULA ab';
-        try {
-          const tf = t.textFrame; tf.wordWrap = false; tf.autoSizeSetting = 'AutoSizeShapeToFitText';
-          tf.leftMargin = 0; tf.rightMargin = 0; tf.topMargin = 0; tf.bottomMargin = 0; tf.verticalAlignment = 'Middle';
-          tf.textRange.font.size = 12; tf.textRange.font.color = '#000000'; tf.textRange.paragraphFormat.horizontalAlignment = 'Left';
-        } catch (e) {}
-        made.push(t);
-      }
-      await ctx.sync();
-      spots.forEach(p => p.shapes.forEach(s => s.delete()));
-      made.forEach(t => t.load('id')); await ctx.sync();
-      try { ctx.presentation.slides.getItem(id).setSelectedShapes(made.map(t => t.id)); await ctx.sync(); } catch (e) {}
-      return { boxes: made.length, replaced: spots.reduce((k, p) => k + p.shapes.length, 0) };
-    });
-    say(n.replaced ? L('استُبدلت الأشكال المحددة بـ «ⓐ    ⓑ» (' + n.boxes + (n.boxes > 1 ? ' مربعات' : ' مربع') + ').', 'The selected shapes were replaced by «ⓐ    ⓑ» (' + n.boxes + ').') : L('تمت إضافة «ⓐ    ⓑ» في الأسفل.', '«ⓐ    ⓑ» was added at the bottom.'));
-  } catch (e) { say(L('تعذّر: ', 'Could not: ') + errText(e)); }
-  finally { busy = false; lock(); }
-}
-// how many text boxes are selected now (for the options buttons)
-async function selCount() {
-  // an equation box can be reported as another type: every selected object counts except pictures, tables, lines and groups
-  return run(async ctx => { const s = ctx.presentation.getSelectedShapes(); s.load('items/type'); await ctx.sync(); return s.items.filter(x => !['Image', 'Table', 'Line', 'Group', 'Chart', 'SmartArt', 'Media'].includes(x.type)).length; }).catch(() => 0);
-}
-// several selected text boxes become options: in one row, or one under the other; they stay selected afterwards
-async function arrangeSelected(layout) {
-  if (busy || !supported) return;
-  busy = true; lock();
-  await snapOp([await currentId().catch(() => null)].filter(Boolean));
-  let slideId = null;
-  try {
-    slideId = await run(async ctx => {
-      const slides = ctx.presentation.getSelectedSlides(); slides.load('items/id');
-      const shapes = ctx.presentation.getSelectedShapes(); shapes.load('items/name'); await ctx.sync();
-      if (!slides.items.length || !shapes.items.length) return null;
-      shapes.items.forEach(x => { x.name = (x.name || '').replace(/ #ursel$/, '') + ' #ursel'; });
-      await ctx.sync(); return slides.items[0].id;
-    });
-    if (!slideId) return;
-    const pkg = await UR.openPackage(await exportSlide(slideId));
-    const r = UR.arrangeChoices(pkg, layout, mcqDir);
-    if (!r.count) { await clearSel(slideId); say(L('حدّد مربعَي نص أو أكثر.', 'Select two or more text boxes.')); return; }
-    let newId = slideId;
-    if (!(await UQ.apply(slideId, pkg.files.slide, r.xml, exportSlide).catch(() => false))) {
-      newId = await insertAfter(await UR.buildPackage(pkg, r.xml, null), slideId);
-      await deleteSlide(slideId);
-    }
-    await run(async ctx => {
-      ctx.presentation.setSelectedSlides([newId]); await ctx.sync();
-      const sh = ctx.presentation.slides.getItem(newId).shapes; sh.load('items/id,items/name'); await ctx.sync();
-      const sel = sh.items.filter(x => / #ursel$/.test(x.name || ''));
-      // one under the other: by their real heights, each starting on the page grid right after the one above
-      // (the UULA rule for options that follow each other: no empty line between them)
-      if (layout !== 'row' && sel.length > 1) {
-        // each box as wide as its text and a little more (no wrapping; it grows when more is typed), on the right
-        // edge of the page in right-to-left, on the left edge in left-to-right
-        // the real widths of the texts (no wrapping), then all the boxes as wide as the widest and a little more
-        sel.forEach(x => { try { const tf = x.textFrame; tf.wordWrap = false; tf.autoSizeSetting = 'AutoSizeShapeToFitText'; } catch (e) {} });
-        await ctx.sync();
-        sel.forEach(x => x.load('left,top,width,height')); await ctx.sync();
-        const { W: SW } = await getSize(), Mx = 36;
-        const bw = Math.min(SW - 2 * Mx, Math.max(...sel.map(x => x.width)) + 8);
-        sel.forEach(x => { try { x.textFrame.wordWrap = true; } catch (e) {} x.width = bw; x.left = r.dir === 'rtl' ? SW - Mx - bw : Mx; });
-        await ctx.sync();
-        sel.forEach(x => x.load('top,height')); await ctx.sync();
-        const Y0 = 22.58, G = 6.695, snap = y => Y0 + Math.max(0, Math.ceil((y - Y0 - 0.3) / G)) * G;
-        const list = [...sel].sort((a, b) => a.top - b.top);
-        let y = list[0].top;
-        for (const x of list) { x.top = y; y = snap(y + x.height); }
-        await ctx.sync();
-      }
-      sel.forEach(x => { x.name = x.name.replace(/ #ursel$/, ''); }); await ctx.sync();
-      try { ctx.presentation.slides.getItem(newId).setSelectedShapes(sel.map(x => x.id)); await ctx.sync(); } catch (e) {}
-    }).catch(() => {});
-    slideId = null;
-    say((layout === 'row' ? L('رُتّبت ' + r.count + ' خيارات أفقيًا', r.count + ' options arranged in a row') : L('رُتّبت ' + r.count + ' خيارات عموديًا', r.count + ' options arranged in a column'))
-      + (r.dir === 'rtl' ? L('، من اليمين لليسار.', ', right-to-left.') : L('، من اليسار لليمين.', ', left-to-right.')));
-  } catch (e) { if (slideId) await clearSel(slideId); say(L('تعذّر ترتيب الخيارات: ', 'Could not arrange the options: ') + errText(e)); }
-  finally { busy = false; lock(); }
-}
 async function flipSelected(dir) {
   if (busy || !supported) return;
   busy = true; lock();
-  await snapOp([await currentId().catch(() => null)].filter(Boolean));
   let slideId = null;
   try {
     slideId = await run(async ctx => {
@@ -4539,8 +4282,7 @@ const MERGED = [
     { label: 'اختياري', le: 'Choice', dir: true, items: [
       { id: 'mcq', ar: 'خيارات أفقية', en: 'Options in a row', col: 'FF0000', role: 'choice', tpl: 'mcq' },
       { id: 'mcqV', ar: 'خيارات عمودية', en: 'Options in a column', col: 'FF0000', tpl: 'mcqV' },
-      { id: 'correct', ar: 'الخيار الصحيح', en: 'Correct choice', col: '2070DF', role: 'correct' },
-      { id: 'ab', ar: 'ⓐ ⓑ', en: 'ⓐ ⓑ circles', col: 'FFFFFF' }] }] },
+      { id: 'correct', ar: 'الخيار الصحيح', en: 'Correct choice', col: '2070DF', role: 'correct' }] }] },
   { g: 'إطارات', ge: 'Frames', items: [
     { id: 'note', ar: 'ملاحظة', en: 'Note', role: 'note', tpl: 'note' },
     { id: 'quote', ar: 'نص مقتطف', en: 'Quote', role: 'quote', tpl: 'quote' },
@@ -4565,9 +4307,7 @@ function tplName(tid) { const it = ALL_ITEMS.find(x => x.tpl === tid); return it
 function mergedTip(it) {
   const own = ROLE_TIP[it.role || it.id];
   const parts = [];
-  if (it.id === 'ab') parts.push(L('بدون تحديد: يُدرج مربع نص فيه «ⓐ    ⓑ». مع تحديد أشكال مرسومة (دوائر الإجابة): تُستبدل بهذا المربع في مكانها، ولكل سطر مربعه.', 'Nothing selected: inserts a text box with «ⓐ    ⓑ». With drawn shapes selected (answer circles): they are replaced by that box in their place, one box per line.'));
-  else   if (it.id === 'mcq' || it.id === 'mcqV') parts.push(L('مع تحديد مربعَي نص أو أكثر: تُرتَّب خيارات ' + (it.id === 'mcq' ? 'في صف واحد' : 'بعضها تحت بعض') + ' بحروفها ⓐ ⓑ … وباتجاه زر الاتجاه.', 'With two or more text boxes selected: they become options ' + (it.id === 'mcq' ? 'in one row' : 'one under the other') + ', lettered ⓐ ⓑ … in the chosen direction.'));
-  else if (it.role && own) parts.push(L('مع تحديد: ', 'With a selection: ') + L(own[0], own[1]));
+  if (it.role && own) parts.push(L('مع تحديد: ', 'With a selection: ') + L(own[0], own[1]));
   else if (it.role) parts.push(L('حدّد مربعًا ثم اضغط ليتحوّل إلى «' + it.ar + '».', 'Select a box, then press to turn it into «' + it.en + '».'));
   if (it.tpl === 'grid') parts.push(L('مع تحديد صور: توضع الشبكة مكان كل صورة وبمقاسها. بدون تحديد: تُضاف شبكة جديدة في الأسفل.', 'With pictures selected: the grid takes each picture\'s place and size. Nothing selected: a new grid is added at the bottom.'));
   else if (it.tpl && it.role) parts.push(L('بدون تحديد: يُضاف «' + it.ar + '» جديد في الأسفل.', 'Nothing selected: a new «' + it.en + '» is added at the bottom.'));
@@ -4592,12 +4332,8 @@ async function selCheck() {
 async function mergedPress(id) {
   const it = ITEM[id]; if (!it || busy || !supported) return;
   await selCheck();
-  if (id === 'ab') return abPress();
-  if ((id === 'mcq' || id === 'mcqV') && (await selCount()) > 1) return arrangeSelected(id === 'mcq' ? 'row' : 'column');
-  if (id === 'mcqV' && selNow === 1) return pinRole('choice');
   if (id === 'cancelled') {
     if (busy) return; busy = true; lock();
-    await snapOp([await currentId().catch(() => null)].filter(Boolean));
     try { say(suspendSay(await suspendSelected())); } catch (e) { say(L('تعذّر: ', 'Could not: ') + errText(e)); }
     finally { busy = false; lock(); }
     return;
@@ -4638,7 +4374,6 @@ async function undoRedo(dir) {
   } catch (e) { say(L('تعذّر: ', 'Could not: ') + errText(e)); }
   finally { busy = false; lock(); }
 }
-$('opUndo').addEventListener('click', undoOp);
 $('undoBtn').addEventListener('click', () => undoRedo(-1));
 $('redoBtn').addEventListener('click', () => undoRedo(1));
 $('solRoles').addEventListener('click', e => { const b = e.target.closest('.tbtn'); if (b) pinRole(b.dataset.role, true); });
@@ -4652,63 +4387,8 @@ async function clearSel(slideId) {
 }
 // solution marks change only the selected objects, in place: no slide is rebuilt, nothing moves
 const QUIET = { answer: '1F71DE', correct: '2070DF', given: null, graph: null };
-// ---------- quick undo: the whole last operation at once ----------
-// before every operation of the tool the slides it may change are copied (by their place in the deck);
-// «تراجع» puts those copies back in their places, so one press undoes the whole operation (not step by step)
-const opStack = [];
-async function snapOp(ids) {
-  if (!ids || !ids.length || !supported || isWord || ids.length > 40) return;   // a very long deck: no copy (too heavy)
-  try {
-    const pos = await run(async ctx => { const sl = ctx.presentation.slides; sl.load('items/id'); await ctx.sync(); return ids.map(id => sl.items.findIndex(x => x.id === id)); });
-    const copies = [];
-    for (let k = 0; k < ids.length; k++) if (pos[k] >= 0) copies.push({ pos: pos[k], b64: await exportSlide(ids[k]) });
-    if (!copies.length) return;
-    opStack.push(copies); if (opStack.length > 10) opStack.shift();
-    opPaint();
-  } catch (e) {}
-}
-function opPaint() { const b = $('opUndo'); if (b) b.disabled = busy || !supported || !opStack.length; }
-async function undoOp() {
-  if (busy || !supported || !opStack.length) return;
-  busy = true; lock();
-  try {
-    const copies = opStack.pop();
-    let back = null;
-    for (const c of copies) {
-      const id = await run(async ctx => { const sl = ctx.presentation.slides; sl.load('items/id'); await ctx.sync(); return sl.items[c.pos] ? sl.items[c.pos].id : null; });
-      if (!id) continue;
-      back = await insertAfter(c.b64, id);
-      await deleteSlide(id);
-    }
-    if (back) await run(async ctx => { ctx.presentation.setSelectedSlides([back]); await ctx.sync(); }).catch(() => {});
-    solSlideId = null; await solLabel().catch(() => {});
-    say(L('رجعت الشريحة كما كانت قبل آخر عملية.', 'The slide is back as it was before the last operation.'));
-  } catch (e) { say(L('تعذّر التراجع: ', 'Could not undo: ') + errText(e)); }
-  finally { busy = false; lock(); }
-}
 // «Undo» / «Redo» of the marks given with the solution buttons (name, text colour, place), in place
 const undoStack = [], redoStack = [];
-// the text colour of every cell of a table (null where PowerPoint can't tell, or the API is missing)
-async function tableCells(ctx, shape) {
-  try {
-    const t = shape.getTable(); t.load('rowCount,columnCount'); await ctx.sync();
-    const cells = [];
-    for (let r = 0; r < t.rowCount; r++) for (let c = 0; c < t.columnCount; c++) {
-      const cell = t.getCellOrNullObject(r, c); cell.load('isNullObject'); cell.font.load('color'); cells.push({ r, c, cell });
-    }
-    await ctx.sync();
-    return cells.filter(x => !x.cell.isNullObject);
-  } catch (e) { return null; }
-}
-async function tableColours(ctx, shape) {
-  const cells = await tableCells(ctx, shape);
-  return cells ? cells.map(x => ({ r: x.r, c: x.c, color: x.cell.font.color || null })) : null;
-}
-async function paintTable(ctx, shape, colour) {
-  const cells = await tableCells(ctx, shape); if (!cells) return false;
-  cells.forEach(x => { try { x.cell.font.color = colour; } catch (e) {} });
-  await ctx.sync(); return true;
-}
 function undoPaint() {
   const u = $('undoBtn'), r = $('redoBtn');
   if (u) u.disabled = busy || !supported || !undoStack.length;
@@ -4720,8 +4400,7 @@ async function snapState(ctx, slide, ids) {
   const list = ids.map(id => sh.items.find(x => x.id === id)).filter(Boolean);
   const fonts = list.map(x => { if (!['TextBox', 'GeometricShape'].includes(x.type)) return null; try { const f = x.textFrame.textRange.font; f.load('color,bold'); return f; } catch (e) { return null; } });
   await ctx.sync();
-  const cells = []; for (const x of list) cells.push(x.type === 'Table' ? await tableColours(ctx, x) : null);
-  return { slide, items: list.map((x, k) => ({ id: x.id, name: x.name, left: x.left, color: fonts[k] ? fonts[k].color : null, bold: fonts[k] ? fonts[k].bold : null, cells: cells[k] })) };
+  return { slide, items: list.map((x, k) => ({ id: x.id, name: x.name, left: x.left, color: fonts[k] ? fonts[k].color : null, bold: fonts[k] ? fonts[k].bold : null })) };
 }
 async function stepMark(dir) {
   const from = dir < 0 ? undoStack : redoStack, to = dir < 0 ? redoStack : undoStack;
@@ -4734,7 +4413,6 @@ async function stepMark(dir) {
       const s = sh.items.find(x => x.id === it.id); if (!s) continue;
       s.name = it.name; s.left = it.left; n++;
       if (it.color || it.bold != null) { try { const f = s.textFrame.textRange.font; if (it.color) f.color = it.color; if (it.bold != null) f.bold = it.bold; } catch (e) {} }
-      if (it.cells) { try { const t = s.getTable(); for (const c of it.cells) if (c.color) t.getCellOrNullObject(c.r, c.c).font.color = c.color; } catch (e) {} }
     }
     await ctx.sync(); return n;
   });
@@ -4751,10 +4429,7 @@ async function quietMark(role, keepColour) {
     // what they were, for «Undo»
     const fonts = sel.map(x => { if (!['TextBox', 'GeometricShape'].includes(x.type)) return null; try { const f = x.textFrame.textRange.font; f.load('color,bold'); return f; } catch (e) { return null; } });
     sel.forEach(x => x.load('id')); await ctx.sync();
-    // a table marked as (part of) a solution: its text turns solution blue at once
-    const blueTable = role === 'answer';
-    const cells = []; for (const x of sel) cells.push(blueTable && x.type === 'Table' ? await tableColours(ctx, x) : null);
-    undoStack.push({ slide: id, items: sel.map((x, k) => ({ id: x.id, name: x.name, left: x.left, color: fonts[k] ? fonts[k].color : null, bold: fonts[k] ? fonts[k].bold : null, cells: cells[k] })) });
+    undoStack.push({ slide: id, items: sel.map((x, k) => ({ id: x.id, name: x.name, left: x.left, color: fonts[k] ? fonts[k].color : null, bold: fonts[k] ? fonts[k].bold : null })) });
     if (undoStack.length > 30) undoStack.shift();
     redoStack.length = 0;
     undoPaint();
@@ -4769,7 +4444,6 @@ async function quietMark(role, keepColour) {
         s.delete(); continue;
       }
       s.name = 'UULA:' + role + ' ' + base(s.name);
-      if (blueTable && s.type === 'Table') await paintTable(ctx, s, '#' + (QUIET.answer || '1F71DE'));
       if (QUIET[role] && !keepColour && ['TextBox', 'GeometricShape'].includes(s.type)) {
         try { const f = s.textFrame.textRange.font; f.color = '#' + QUIET[role]; if (role === 'correct') f.bold = true; } catch (e) {}
       }
@@ -4834,7 +4508,6 @@ async function suspendSelected() {
 async function pinRole(role, keepColour) {
   if (busy || !supported) return;
   busy = true; lock(); rsay('');
-  await snapOp([await currentId().catch(() => null)].filter(Boolean));
   if (role === 'cancelled') {
     try { rsay(suspendSay(await suspendSelected())); }
     catch (e) { rsay(L('تعذّر: ', 'Could not: ') + errText(e)); }
@@ -4935,14 +4608,13 @@ async function pinRole(role, keepColour) {
 }
 
 // ---------- vertical spacing only ----------
-// only: the ids of the selected objects (two or more) — then the gaps are set between those only, the rest stays
-async function spaceSlide(id, only) {
+async function spaceSlide(id) {
   const { W, H } = await getSize();
   return run(async ctx => {
     const sh = ctx.presentation.slides.getItem(id).shapes;
-    sh.load('items/id,items/name,items/type,items/left,items/top,items/width,items/height'); await ctx.sync();
+    sh.load('items/name,items/type,items/left,items/top,items/width,items/height'); await ctx.sync();
     // text boxes take the height of their text (so the gaps are real)
-    for (const s of sh.items) if (s.type === 'TextBox' && (!only || only.includes(s.id))) { try { s.textFrame.autoSizeSetting = 'AutoSizeShapeToFitText'; } catch (e) {} }
+    for (const s of sh.items) if (s.type === 'TextBox') { try { s.textFrame.autoSizeSetting = 'AutoSizeShapeToFitText'; } catch (e) {} }
     await ctx.sync();
     const fills = sh.items.map(s => { try { s.fill.load('type'); return s.fill; } catch (e) { return null; } });
     sh.items.forEach(s => s.load('top,height'));
@@ -4954,95 +4626,53 @@ async function spaceSlide(id, only) {
       const box = (s.type === 'GeometricShape' && solid && s.width > W * 0.5) || /Container$/.test(nm);
       return { key: k, x: s.left * PT, y: s.top * PT, w: s.width * PT, h: s.height * PT, fixed, box };
     });
-    const mine = only ? rects.filter(r => only.includes(sh.items[r.key].id)) : rects;
-    const mv = UR.spacing(mine, W * PT, H * PT);
-    // with a selection, the others stay where they are but still count: a selected object that would land on one of
-    // them goes under it (one grid row lower, on the page grid), and the selected ones after it follow by as much
-    if (only) {
-      const others = rects.filter(r => !mine.includes(r) && !r.fixed);
-      const ROWE = 2 * 6.695 * PT, Y0 = 22.58 * PT, snap = y => Y0 + Math.ceil((y - Y0 - 0.3 * PT) / ROWE * 2) * ROWE / 2;
-      const placed = mine.map(r => ({ r, y: mv[r.key] && mv[r.key].y != null ? mv[r.key].y : r.y, h: mv[r.key] && mv[r.key].h != null ? mv[r.key].h : r.h })).sort((a, b) => a.y - b.y);
-      let push = 0;
-      for (const p of placed) {
-        p.y += push;
-        for (let guard = 0; guard < 20; guard++) {
-          const hit = others.find(o => o.x < p.r.x + p.r.w - PT && o.x + o.w > p.r.x + PT && o.y < p.y + p.h - PT && o.y + o.h > p.y + PT);
-          if (!hit) break;
-          const ny = snap(hit.y + hit.h + ROWE); push += ny - p.y; p.y = ny;
-        }
-        mv[p.r.key] = Object.assign(mv[p.r.key] || {}, { y: p.y });
-      }
-    }
+    const mv = UR.spacing(rects, W * PT, H * PT);
     let moved = 0, low = 0;
     for (const [k, m] of Object.entries(mv)) {
       const s = sh.items[+k];
       if (m.y != null && Math.abs(m.y / PT - s.top) > 0.2) { s.top = m.y / PT; moved++; }
       if (m.h != null) s.height = m.h / PT;
-      const rk = rects.find(r => r.key === +k) || { y: 0, h: 0 };
-      low = Math.max(low, (m.y != null ? m.y : rk.y) + (m.h != null ? m.h : rk.h));
+      low = Math.max(low, (m.y != null ? m.y : rects[+k].y) + (m.h != null ? m.h : rects[+k].h));
     }
     await ctx.sync();
     return { moved, over: low > (H - 54) * PT + PT };
-  }).then(async r => { await frameTop(id); return r; });
+  });
 }
-// distribute: after the gaps are fixed, the whole page is used — the content is cut into bands (objects that overlap in
-// height stay together, so a box keeps its content and a figure stays beside its question), the first band goes up to the
-// top margin and the free space (top, middle, bottom) is shared out equally under every band, in whole page-grid lines.
-// Nothing is resized or restyled: whole bands only move down. With a selection only the selected objects move, inside the
-// room between the first of them and the next unselected object under them.
-async function distributeSlide(id, only) {
-  await spaceSlide(id, only);
+// distribute: after the gaps are fixed, the free space at the bottom of the page is shared out under the questions
+// (room for the student to write), as long as there is room; the first question keeps its place
+async function distributeSlide(id) {
+  await spaceSlide(id);
   const { W, H } = await getSize();
+  const flags = UR.questionFlags(await UR.openPackage(await exportSlide(id)));
   return run(async ctx => {
     const sh = ctx.presentation.slides.getItem(id).shapes;
-    sh.load('items/id,items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
-    const lim = H - 54, G2 = 13.39, Y0 = 22.58;
-    const isFixed = s => /^UULA (Footer|Watermark)|^CustomPageNumber_/.test(s.name || '') || s.top >= lim || s.left + s.width <= 0 || s.left >= W || s.top + s.height <= 0 || (s.width > W * 0.85 && s.height > H * 0.6);
-    const all = sh.items.filter(s => !isFixed(s));
-    const free = all.filter(s => !only || only.includes(s.id));
+    sh.load('items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
+    const lim = H - 54, G2 = 13.39;
+    const free = sh.items.map((s, k) => ({ s, k, q: !!flags[k],
+      fixed: /^UULA (Footer|Watermark)|^CustomPageNumber_/.test(s.name || '') || s.top >= lim || s.left + s.width <= 0 || s.left >= W || s.top + s.height <= 0 || (s.width > W * 0.85 && s.height > H * 0.6) })).filter(o => !o.fixed);
     if (!free.length) return { status: 'none' };
-    // bands
-    const bands = [];
-    for (const s of free.slice().sort((a, b) => a.top - b.top)) {
-      const b = bands[bands.length - 1];
-      if (b && s.top < b.bottom - 0.5) { b.items.push(s); b.bottom = Math.max(b.bottom, s.top + s.height); }
-      else bands.push({ top: s.top, bottom: s.top + s.height, items: [s] });
+    const bottom = Math.max(...free.map(o => o.s.top + o.s.height));
+    // the question starts (one per row)
+    const tops = [];
+    for (const o of free.filter(o => o.q).sort((a, b) => a.s.top - b.s.top)) {
+      // the row of the question starts with whatever sits beside it (its figure can begin a little higher)
+      const q0 = o.s.top, q1 = o.s.top + o.s.height;
+      const row = free.filter(x => x.s.top < q1 && x.s.top + x.s.height > q0 && x.s.top >= q0 - 3 * G2 && x.s.height < (lim - 30));
+      const t = Math.min(q0, ...row.map(x => x.s.top));
+      if (!tops.length || t - tops[tops.length - 1] > G2) tops.push(t);
     }
-    // the room: from the top margin (or, with a selection, from the first selected object) down to the footer,
-    // or to the first unselected object that sits under the selection
-    let top = only ? bands[0].top : Math.min(bands[0].top, Y0), floor = lim - G2 / 2;
-    // something fixed at the top of the page (a header) keeps its place: the content starts under it
-    if (!only) for (const s of sh.items) if (isFixed(s) && s.top < bands[0].top && s.top + s.height > top && s.top + s.height <= bands[0].top && s.left < W && s.left + s.width > 0 && s.top < lim) top = s.top + s.height + G2;
-    if (only) {
-      const last = bands[bands.length - 1].bottom;
-      const under = all.filter(s => !only.includes(s.id) && s.top >= last - 0.5).map(s => s.top);
-      if (under.length) floor = Math.min(...under) - G2;
+    if (tops.length < 2) return { status: tops.length ? 'one' : 'noq' };
+    const room = lim - bottom - G2;
+    // each question gets the same extra room under it, in whole lines; the last one's share stays at the bottom of the page
+    const share = Math.floor(room / tops.length / G2) * G2;
+    if (share < G2) return { status: 'full' };
+    for (const o of free) {
+      const n = tops.slice(1).filter(t => o.s.top >= t - 0.5).length;
+      if (n) o.s.top = o.s.top + n * share;
     }
-    const lift = Math.max(0, bands[0].top - top);
-    const room = floor - (bands[bands.length - 1].bottom - lift);
-    // the free space goes into the gaps between the parts (the last part ends at the bottom of the room), in half
-    // page-grid steps; only real gaps get it (a question and the next one, a question and its options…), not lines
-    // that sit tight together (the options of one question), so the look of each part stays as it is
-    const G = G2 / 2, units = Math.max(0, Math.floor((room + 0.3) / G));
-    const gaps = bands.slice(0, -1).map((b, k) => ({ k, g: bands[k + 1].top - b.bottom }));
-    let cand = gaps.filter(x => x.g >= G2 * 0.75);
-    if (!cand.length) cand = gaps;
-    if (lift < 0.5 && (!cand.length || units < 1)) return { status: 'full' };
-    const add = new Array(bands.length).fill(0);
-    if (cand.length) {
-      const per = Math.floor(units / cand.length); let rem = units - per * cand.length;
-      cand.forEach(x => { add[x.k] = per; });
-      // what is left over goes to the widest gaps first (between questions rather than inside one)
-      for (const x of cand.slice().sort((p, q) => q.g - p.g || p.k - q.k)) { if (rem <= 0) break; add[x.k]++; rem--; }
-    }
-    // too little room for a half step in every gap: every gap gets the same small share instead (fair before on-grid)
-    const step = cand.length && units < cand.length ? Math.max(0, room) / cand.length / G : 1;
-    if (step !== 1) cand.forEach(x => { add[x.k] = 1; });
-    let dy = -lift;
-    bands.forEach((b, k) => { if (Math.abs(dy) > 0.2) b.items.forEach(s => { s.top = s.top + dy; }); dy += add[k] * G * step; });
     await ctx.sync();
-    return { status: 'ok', pts: Math.round(units * G), gaps: cand.length };
-  }).then(async r => { await frameTop(id); return r; });
+    return { status: 'ok', lines: Math.round(share / G2) };
+  });
 }
 // horizontal: to the right / left margin (selected objects only, if any are selected on the current slide)
 let hMode = load('ur-halign', 'auto');
@@ -5067,7 +4697,7 @@ async function alignSlide(id, mode, useSel) {
     });
     const only = selIds.length ? sh.items.map((s, k) => selIds.includes(s.id) ? k : -1).filter(k => k >= 0) : null;
     const mv = UR.align(rects, W * PT, mode, only);
-    for (const [k, m] of Object.entries(mv)) { if (m.w != null) sh.items[+k].width = m.w / PT; if (m.x != null) sh.items[+k].left = m.x / PT; }
+    for (const [k, m] of Object.entries(mv)) sh.items[+k].left = m.x / PT;
     await ctx.sync();
     return Object.keys(mv).length;
   });
@@ -5075,19 +4705,15 @@ async function alignSlide(id, mode, useSel) {
 async function spacingRun(kind) {
   if (busy || !supported) return;
   busy = true; lock(); res.innerHTML = '';
-  await snapOp(await targetIds().catch(() => []));
   try {
     const ids = await targetIds();
     if (!ids.length) { say(L('حدّد شريحة أولًا.', 'Select a slide first.')); return; }
     const over = [], skipped = [], spread = [];
-    // two or more objects selected: only those are spaced (vertical, distribute and horizontal alike)
-    const only = await run(async ctx => { const ss = ctx.presentation.getSelectedShapes(); ss.load('items/id'); await ctx.sync(); return ss.items.map(x => x.id); }).catch(() => []);
-    const sel = only.length > 1 ? only : null;
     for (let k = 0; k < ids.length; k++) {
       prog(k / ids.length); say(L('تنسيق المسافات ', 'Spacing ') + (k + 1) + L(' من ', ' of ') + ids.length + '…');
       try {
-        if (kind === 'v') { const r = await spaceSlide(ids[k], sel); if (r.over) over.push(ids[k]); }
-        else if (kind === 'd') { const r = await distributeSlide(ids[k], sel); if (r.status !== 'ok') skipped.push({ id: ids[k], why: r.status }); else spread.push(r.pts); }
+        if (kind === 'v') { const r = await spaceSlide(ids[k]); if (r.over) over.push(ids[k]); }
+        else if (kind === 'd') { const r = await distributeSlide(ids[k]); if (r.status !== 'ok') skipped.push({ id: ids[k], why: r.status }); else spread.push(r.lines); }
         else await alignSlide(ids[k], hMode, scope === 'cur');
       } catch (e) { line('err', '✗ ' + esc(errText(e))); }
     }
@@ -5095,11 +4721,11 @@ async function spacingRun(kind) {
     if (over.length) { const all = await allIds(); line('warn', L('• المحتوى أطول من الصفحة: ', '• Longer than the page: ') + slideLinks(over, i => all.indexOf(i) + 1)); }
     if (kind === 'd') {
       const all = await allIds(), num = i => all.indexOf(i) + 1;
-      if (spread.length) line('ok', L('✓ وُزّعت المساحة الفارغة بالتساوي على المسافات بين أجزاء الشريحة.', '✓ The free space was shared out evenly between the parts of the slide.'));
-      const why = { full: L('لا توجد مساحة فارغة', 'no free space'), none: L('فارغة', 'empty') };
-      for (const w of ['full', 'none']) { const list = skipped.filter(x => x.why === w).map(x => x.id); if (list.length) line('', '• ' + why[w] + ': ' + slideLinks(list, num)); }
+      if (spread.length) line('ok', L('✓ وُزّعت المساحة تحت الأسئلة (' + Math.min(...spread) + (Math.max(...spread) !== Math.min(...spread) ? '–' + Math.max(...spread) : '') + ' سطر إضافي لكل سؤال).', '✓ The free space was shared under the questions (' + Math.min(...spread) + '+ extra lines each).'));
+      const why = { full: L('لا توجد مساحة كافية', 'no room left'), one: L('سؤال واحد فقط، والمساحة تحته أصلًا', 'only one question, the space is already under it'), noq: L('لا توجد أسئلة', 'no questions'), none: L('فارغة', 'empty') };
+      for (const w of ['full', 'one', 'noq', 'none']) { const list = skipped.filter(x => x.why === w).map(x => x.id); if (list.length) line('', '• ' + why[w] + ': ' + slideLinks(list, num)); }
     }
-    say(sel ? L('تم تنسيق المسافات بين ' + sel.length + ' عناصر محددة فقط.', 'Spacing done between the ' + sel.length + ' selected objects only.') : L('تم تنسيق المسافات.', 'Spacing done.'));
+    say(L('تم تنسيق المسافات.', 'Spacing done.'));
   } catch (e) { prog(null); say(L('حدث خطأ: ', 'Error: ') + errText(e)); }
   finally { busy = false; lock(); }
 }
@@ -5267,7 +4893,6 @@ async function solSlide(id, mode) {
 $('solBtn').addEventListener('click', async () => {
   if (busy || !supported) return;
   busy = true; lock(); res.innerHTML = '';
-  await snapOp(await targetIds().catch(() => []));
   solState = await slideSolHidden(await currentId().catch(() => null));
   const mode = solState ? 'show' : 'hide';
   try {
@@ -5638,18 +5263,19 @@ function lock() {
   $('solBtn').disabled = busy || !supported;
   $('spV').disabled = busy || !supported; $('spH').disabled = busy || !supported;
   document.querySelectorAll('.tbtn').forEach(b => { b.disabled = busy || !supported; });
-  undoPaint(); opPaint();
+  undoPaint();
   ['docxBtn', 'numDel', 'wAuto', 'wUntag', 'wClear', 'wMark', 'wUnmark'].forEach(k => { if ($(k)) $(k).disabled = busy || !supported; });
 }
 $('goBtn').addEventListener('click', async () => {
   if (busy || !supported) return;
   busy = true; lock(); res.innerHTML = '';
-  await snapOp(await targetIds().catch(() => []));
   try { await doConvert(); }
   catch (e) { prog(null); say(L('حدث خطأ: ', 'Error: ') + errText(e)); }
   finally { busy = false; lock(); }
 });
-
+function setScope(v) { scope = v; save('ur-scope', v); document.querySelectorAll('.scopeSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v))); }
+document.querySelectorAll('.scopeSeg').forEach(sg => sg.addEventListener('click', e => { const b = e.target.closest('button'); if (b) setScope(b.dataset.v); }));
+setScope(scope);
 // tabs
 function setTab(t) {
   document.querySelectorAll('#tabs button, #wtabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === t)));

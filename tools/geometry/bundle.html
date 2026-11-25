@@ -375,6 +375,8 @@ function outward(P,i){ const n=P.length, a=P[(i-1+n)%n], b=P[(i+1)%n], u=nrm(sub
 /* ---------- الأشكال المستوية ---------- */
 function buildFree(){
   const G=S.p, P=G.pts, fs=LK().fs, C=cen(P);
+  // دوائر الشكل المركب (من صورة دائرة فيها أوتار ومماسات وقواطع)
+  (G.circles||[]).forEach(o=>PR.push({t:'ell',c:o.c,rx:o.r,ry:o.r,a0:0,a1:360,c2:o.col||LK().line,w:o.w||LK().w,dash:false}));
   G.sides.forEach(sd=>{ seg(P[sd.a],P[sd.b],{c:sd.c,w:sd.w,dash:segDash(sd)}); segArrows(P[sd.a],P[sd.b],sd.arr,sd.c); });
   G.sides.forEach(sd=>{ const a=P[sd.a], b=P[sd.b], both=sd.ticks&&sd.par; sideTicks(a,b,sd.ticks,both?-9:0); parMarks(a,b,sd.par,both?9:0);
     if(sd.show){ const m=mid(a,b); let nn=perp(nrm(sub(b,a))); if(dot(nn,sub(m,C))<0) nn=mul(nn,-1); lbl(add(m,mul(nn,fs*1.1)),sd.len||fmtLen(len(sub(b,a))/40),{from:m}); } });
@@ -875,8 +877,8 @@ document.addEventListener('pointerdown',e=>{ if(!$('pal').hidden&&!e.target.clos
 
 /* ---------- أزرار المعاينة ---------- */
 $('undoBtn').onclick=undo;
-$('rotBtn').onclick=()=>{ if(S.tab!=='p') return; push(); const c=cen(S.p.pts); S.p.pts=S.p.pts.map(p=>rot(p,c,-15)); draw(); save(); };
-$('flipBtn').onclick=()=>{ if(S.tab!=='p') return; push(); const c=cen(S.p.pts); S.p.pts=S.p.pts.map(p=>[2*c[0]-p[0],p[1]]); draw(); save(); };
+$('rotBtn').onclick=()=>{ if(S.tab!=='p') return; push(); const c=cen(S.p.pts); S.p.pts=S.p.pts.map(p=>rot(p,c,-15)); (S.p.circles||[]).forEach(o=>{ o.c=rot(o.c,c,-15); }); draw(); save(); };
+$('flipBtn').onclick=()=>{ if(S.tab!=='p') return; push(); const c=cen(S.p.pts); S.p.pts=S.p.pts.map(p=>[2*c[0]-p[0],p[1]]); (S.p.circles||[]).forEach(o=>{ o.c=[2*c[0]-o.c[0],o.c[1]]; }); draw(); save(); };
 $('clearBtn').onclick=()=>{ push(); closePop(); S.empty=true; setEdit(null); syncUI(); draw(); save(); };
 $('resetBtn').onclick=()=>{ push(); S.empty=false; const d=defaults(); if(S.tab==='p'&&S.p.kind==='free'){ S.p.sides.forEach(s=>Object.assign(s,{len:'',show:false,ticks:0,par:0,dash:false})); S.p.angs={}; } else if(S.tab==='p') S.p=mkPlane(S.p.kind,S.p.sub,S.p.n); else if(S.tab==='c') S.c=d.c; else { S.s.size[S.s.kind]=d.s.size[S.s.kind]; S.s.lab[S.s.kind]=d.s.lab[S.s.kind]; if(S.s.ax) delete S.s.ax[S.s.kind]; if(S.s.rot) delete S.s.rot[S.s.kind]; }
   closePop(); syncUI(); draw(); save(); };
@@ -1100,7 +1102,7 @@ function recognize(im){
       let pk=t2; for(let i=t2;i<th;i++) if(hist[i]>hist[pk]) pk=i;   // قمة التعبئة
       th=Math.max(t2,pk-6); } }
   // العلامات الحمراء (ارتفاع، زاوية قائمة) ليست من الشكل
-  const dark=new Uint8Array(N); for(let i=0;i<N;i++){ const r0=D[4*i], g0=D[4*i+1], b0=D[4*i+2]; dark[i]=gray[i]<th&&!(r0>140&&r0-g0>70&&r0-b0>70)?1:0; }
+  const dark=new Uint8Array(N); for(let i=0;i<N;i++){ const r0=D[4*i], g0=D[4*i+1], b0=D[4*i+2]; const mx=Math.max(r0,g0,b0), mn=Math.min(r0,g0,b0), red=r0>140&&r0-g0>70&&r0-b0>70; dark[i]=(gray[i]<th||(mx>0&&(mx-mn)/mx>.45&&mn<150&&gray[i]<180))&&!red?1:0; }   /* الخطوط الملونة (أزرق، أخضر، برتقالي) حبر أيضًا */
   // المكوّنات المتصلة: الشكل أكبرها امتدادًا، والكتابة الصغيرة تُهمل
   const lab=new Int32Array(N).fill(-1), comps=[], st=[];
   for(let i=0;i<N;i++){ if(!dark[i]||lab[i]>=0) continue; const id=comps.length; let x0=W,y0=H,x1=0,y1=0,n=0; st.push(i); lab[i]=id;
@@ -1139,6 +1141,22 @@ function recognize(im){
   const res={W,H,stroke,inner:Md,all,gray,fd:F.d,texts,dark};
   if(sd/m<.05&&Math.abs(area/(Math.PI*m*m)-1)<.15) return Object.assign(res,{type:'circle',c:C,r:m-stroke/2});
   // المجسمات أولًا: أحرف الصندوق أو الأسطوانة قد تشبه دائرة بمماس
+  // دائرة (بحث عشوائي على كل الحبر): قبل المجسمات، فالأشعة والأوتار الخارجة منها تفسد الصورة الظلية
+  { const anyInk=i=>{ if(dark[i]) return true; const r0=D[4*i], g0=D[4*i+1], b0=D[4*i+2]; return r0>140&&r0-g0>70&&r0-b0>70; };   // الحبر + الأحمر (قوس ملوّن على الدائرة)
+    const IP=[]; comps.forEach(c=>{ if(c.d<F.d*.25) return; }); for(let i=0;i<N;i++) if(lab[i]>=0&&comps.find(c=>c.id===lab[i]).d>=F.d*.25) IP.push(i);
+    const cv=(c,r)=>{ let n=0; for(let k=0;k<120;k++){ const a=k*Math.PI/60, x=c[0]+Math.cos(a)*r, y=c[1]+Math.sin(a)*r; let on=false;
+      for(let o=-stroke-1;o<=stroke+1&&!on;o++){ const X=Math.round(x+Math.cos(a)*o), Y=Math.round(y+Math.sin(a)*o); if(X>=0&&Y>=0&&X<W&&Y<H&&anyInk(Y*W+X)) on=true; } if(on) n++; } return n/120; };
+    let bc=null, bs=0, seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+    if(IP.length>30) for(let it=0;it<500;it++){ const P3=[0,1,2].map(()=>{ const j=IP[Math.floor(rnd()*IP.length)]; return [j%W,(j-j%W)/W]; });
+      const ax=P3[0][0],ay=P3[0][1],bx=P3[1][0],by=P3[1][1],cx3=P3[2][0],cy3=P3[2][1], d3=2*(ax*(by-cy3)+bx*(cy3-ay)+cx3*(ay-by)); if(Math.abs(d3)<1e-6) continue;
+      const ux=((ax*ax+ay*ay)*(by-cy3)+(bx*bx+by*by)*(cy3-ay)+(cx3*cx3+cy3*cy3)*(ay-by))/d3, uy=((ax*ax+ay*ay)*(cx3-bx)+(bx*bx+by*by)*(ax-cx3)+(cx3*cx3+cy3*cy3)*(bx-ax))/d3, r3=Math.hypot(ax-ux,ay-uy);
+      if(r3<Math.min(W,H)*.15||r3>Math.max(W,H)*.6) continue; const sc=cv([ux,uy],r3); if(sc>bs){ bs=sc; bc=[ux,uy,r3]; } }
+    if(bc&&bs>=.72){ // تحسين بالمربعات على البكسلات القريبة
+      for(let it=0;it<3;it++){ const near=[]; IP.forEach(j=>{ const x=j%W, y=(j-x)/W; if(Math.abs(Math.hypot(x-bc[0],y-bc[1])-bc[2])<Math.max(2,stroke*1.5)) near.push([x,y]); }); if(near.length<20) break;
+        let sx=0,sy=0,sxx=0,syy=0,sxy=0,sxz=0,syz=0,sz=0; near.forEach(([x,y])=>{ const z=x*x+y*y; sx+=x; sy+=y; sxx+=x*x; syy+=y*y; sxy+=x*y; sxz+=x*z; syz+=y*z; sz+=z; });
+        const A3=[[sxx,sxy,sx],[sxy,syy,sy],[sx,sy,near.length]], B3=[-sxz,-syz,-sz], det=m=>m[0][0]*(m[1][1]*m[2][2]-m[1][2]*m[2][1])-m[0][1]*(m[1][0]*m[2][2]-m[1][2]*m[2][0])+m[0][2]*(m[1][0]*m[2][1]-m[1][1]*m[2][0]);
+        const d0=det(A3); if(Math.abs(d0)<1e-9) break; const so=[0,1,2].map(c=>det(A3.map((row,i)=>row.map((v,j)=>j===c?B3[i]:v)))/d0); const nx=-so[0]/2, ny=-so[1]/2, nr=Math.sqrt(Math.max(0,nx*nx+ny*ny-so[2])); if(!(nr>0)) break; bc=[nx,ny,nr]; }
+      const CF=circleFig(W,H,lab,comps,F,stroke,res,[bc[0],bc[1]],bc[2],dark); if(CF) return CF; return Object.assign(res,{type:'circle',c:[bc[0],bc[1]],r:bc[2]}); } }
   const LF0=lineFig(W,H,lab,comps,F,stroke,res); { const SD=solidFig(res); if(SD) return SD; }
   // دائرة تخرج منها خطوط (مماس، قطر ممتد): ملاءمة دائرة لنقاط الحدود مع إهمال الشاذ
   const fitC=pts=>{ let sx=0,sy=0,sxx=0,syy=0,sxy=0,sxz=0,syz=0,sz=0; const n2=pts.length;
@@ -1150,7 +1168,10 @@ function recognize(im){
   let fc=fitC(cont), inl=cont;
   for(let it=0;fc&&it<4;it++){ const tol=it<2?Math.max(3,stroke*2.5,fc[2]*.04):Math.max(2,stroke*1.5); inl=cont.filter(([x,y])=>Math.abs(Math.hypot(x-fc[0],y-fc[1])-fc[2])<tol); if(inl.length<20) break; fc=fitC(inl); }
   if(fc&&fc[2]>Math.min(W,H)*.08){ const tolD=Math.max(3,stroke*2.5,fc[2]*.04); inl=cont.filter(([x,y])=>Math.abs(Math.hypot(x-fc[0],y-fc[1])-fc[2])<tolD); const bins=new Set(); inl.forEach(([x,y])=>bins.add(Math.floor(((Math.atan2(y-fc[1],x-fc[0])*180/Math.PI)+360)%360/10)));
-    if(inl.length/cont.length>.55&&bins.size>=31) return Object.assign(res,{type:'circle',c:[fc[0],fc[1]],r:fc[2]-stroke/2}); }
+    if(inl.length/cont.length>.55&&bins.size>=31){ const cc=[fc[0],fc[1]], rr=fc[2]-stroke/2;
+      // دائرة مع أوتار ومماسات وقواطع ونقاط: شكل مركب فيه دائرة (أدق من القالب الثابت)
+      const CF=circleFig(W,H,lab,comps,F,stroke,res,cc,rr,dark); if(CF) return CF;
+      return Object.assign(res,{type:'circle',c:cc,r:rr}); } }
   // مستقيمات مفتوحة (متوازيات وقواطع بأسهم): لا تُقرأ كمضلع مغلق
   if(LF0) return LF0;
   // تبسيط الحدود إلى مضلع
@@ -1181,11 +1202,11 @@ function recognize(im){
   return Object.assign(res,{type:'poly',pts:P});
 }
 // شكل من مستقيمات مفتوحة: كشف المستقيمات بتحويل هاف، ثم نقاط التقاطع والأسهم وأسهم التوازي
-function lineFig(W,H,lab,comps,F,stroke,res){
+function lineFig(W,H,lab,comps,F,stroke,res,skip){
   // القطع الطويلة، وقطع الخطوط المتقطعة (رفيعة ومستطيلة داخل الشكل)
   const big=new Set(comps.filter(c=>c.d>=F.d*.2||(c.d>=stroke*4&&c.n<=c.d*(2*stroke+2)&&c.x0>=F.x0-2&&c.x1<=F.x1+2&&c.y0>=F.y0-2&&c.y1<=F.y1+2)).map(c=>c.id));
-  const M=new Uint8Array(W*H), px=[]; for(let i=0;i<W*H;i++) if(lab[i]>=0&&big.has(lab[i])){ M[i]=1; px.push(i); }
-  if(px.length<50||px.length>70000) return null;
+  const M=new Uint8Array(W*H), px=[]; for(let i=0;i<W*H;i++) if(lab[i]>=0&&big.has(lab[i])&&!(skip&&skip(i%W,(i-i%W)/W))){ M[i]=1; px.push(i); }
+  if(px.length<20||px.length>70000) return null;
   const ink=(q)=>{ const x=Math.round(q[0]), y=Math.round(q[1]); return x>=0&&y>=0&&x<W&&y<H&&M[y*W+x]===1; };
   const NT=180, CS=[], SN=[]; for(let t=0;t<NT;t++){ CS.push(Math.cos(t*Math.PI/NT)); SN.push(Math.sin(t*Math.PI/NT)); }
   const RM=Math.ceil(Math.hypot(W,H)), RW=2*RM+1, alive=new Uint8Array(px.length).fill(1), band=stroke+1.5, minL=F.d*.16, gapMax=Math.max(4,stroke*3+2), dashGap=Math.max(8,F.d*.045), lines=[];
@@ -1263,7 +1284,7 @@ function lineFig(W,H,lab,comps,F,stroke,res){
   const G=mkFree(pts,segs); G.sides.forEach((sd,i)=>{ Object.assign(sd,meta[i]); if(!sd.arr) delete sd.arr; });
   // متقطع؟ فجوات متكررة على الخط نفسه (بلا توسيع)
   G.sides.forEach(sd=>{ const a=pts[sd.a], b=pts[sd.b], L=len(sub(b,a)), dd=nrm(sub(b,a)), nn=perp(dd), tr=band*2+2; if(L<tr*2+8) return; let n=0,c=0,gaps=0,run=0;
-    for(let t=tr;t<=L-tr;t+=1){ const q=add(a,mul(dd,t)); let on=false; for(let o=-2;o<=2&&!on;o++) if(ink(add(q,mul(nn,o)))) on=true; n++; if(on){ c++; if(run>=2) gaps++; run=0; } else run++; }
+    for(let t=tr;t<=L-tr;t+=1){ const q=add(a,mul(dd,t)); let on=false; for(let o=-2;o<=2&&!on;o++) if(ink(add(q,mul(nn,o)))) on=true; if(!on&&skip&&(res.skipWide||skip)(Math.round(q[0]),Math.round(q[1]))) on=true; n++; if(on){ c++; if(run>=2) gaps++; run=0; } else run++; }
     if(n&&gaps>=2&&c/n<.9&&c/n>.25) sd.dash=true; });
   // العلامات والأقواس تُقرأ من حبر الشكل فقط، لا من الكتابة القريبة
   const Mall=new Uint8Array(W*H); for(let y=0;y<H;y++) for(let x=0;x<W;x++){ if(!M[y*W+x]) continue; for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){ const xx=x+dx,yy=y+dy; if(xx>=0&&yy>=0&&xx<W&&yy<H) Mall[yy*W+xx]=1; } }
@@ -1362,6 +1383,30 @@ function solidFig(r){ const lines=r.lineL, G=r.lineG; if(!lines) return null;
     const A=f[bi], B=f[(bi+1)%3], Cp=f[(bi+2)%3], w=len(sub(B,A)), ex=nrm(sub(B,A)), t=dot(sub(Cp,A),ex)/w, ev=sub(Cp,add(A,mul(ex,t*w))), h=len(ev);
     const dv=sub(bk[bi],A), pts=f.concat(bk), bb=bboxPts(pts);
     return Object.assign(r,{type:'solid',kind:'prism',w,h,d:len(dv),px:t,ax:{x:ex,y:nrm(ev),z:nrm(dv)},hidden:best.hid||lines.some(l=>l.dash)?'dash':'hide',c:[bb.x+bb.w/2,bb.y+bb.h/2]}); }
+}
+// صورة دائرة: الدائرة نفسها + المستقيمات (أوتار، أنصاف أقطار، مماسات، قواطع، أشعة بأسهم) + النقاط المرسومة عليها
+function circleFig(W,H,lab,comps,F,stroke,res,cc,rr,dark){
+  const band=Math.max(3,stroke*2+2), onC=(x,y)=>Math.abs(Math.hypot(x-cc[0],y-cc[1])-rr)<band;
+  // النقاط المرسومة (دوائر صغيرة ممتلئة): قبل إزالة حبر الدائرة
+  const dots=[]; comps.forEach(c=>{ const w=c.x1-c.x0+1, h=c.y1-c.y0+1; if(w>=stroke*2&&h>=stroke*2&&w<=Math.max(10,stroke*6)&&h<=Math.max(10,stroke*6)&&Math.abs(w-h)<=Math.max(2,w*.35)&&c.n>=w*h*.55) dots.push([(c.x0+c.x1)/2,(c.y0+c.y1)/2]); });
+  // نقطة ممتلئة ملتصقة بالدائرة أو بخط: كتلة حبر أعرض من الخط
+  const r2=Math.max(2,stroke*1.6), fat=(x,y)=>{ let n=0,t=0; for(let dy=-r2;dy<=r2;dy++) for(let dx=-r2;dx<=r2;dx++){ if(dx*dx+dy*dy>r2*r2) continue; t++; const X=Math.round(x+dx), Y=Math.round(y+dy); if(X>=0&&Y>=0&&X<W&&Y<H&&dark[Y*W+X]) n++; } return n/t>.92; };
+  for(let k=0;k<360;k+=1.5){ const a=rad(k), q=[cc[0]+Math.cos(a)*rr,cc[1]+Math.sin(a)*rr]; if(fat(q[0],q[1])&&!dots.some(d=>len(sub(d,q))<band*2)) dots.push(q); }
+  res.skipWide=(x,y)=>Math.abs(Math.hypot(x-cc[0],y-cc[1])-rr)<band*2.5;   // فجوة عبور الدائرة ليست تقطّعًا
+  const LF=lineFig(W,H,lab,comps,F,stroke,res,onC); const G0=res.lineG; delete res.skipWide;
+  const pts=[], segs=[], meta=[], tol=band*1.5;
+  const addPt=q=>{ for(let k=0;k<pts.length;k++) if(len(sub(pts[k],q))<tol) return k; pts.push(q.slice()); return pts.length-1; };
+  // نقاط قريبة من الدائرة تُلصق عليها
+  const snapC=q=>{ const d=len(sub(q,cc)); return Math.abs(d-rr)<band*2.5&&d>1?add(cc,mul(sub(q,cc),rr/d)):q; };
+  if(G0){ const idx=G0.pts.map(p=>addPt(snapC(p))); G0.sides.forEach(sd=>{ const a=idx[sd.a], b=idx[sd.b]; if(a!==b){ segs.push([a,b]); meta.push({arr:sd.arr,dash:sd.dash}); } }); }
+  // نقطة على الدائرة لا يمر بها خط (مثل أ، ب، ج المرسومة على المحيط)، والمركز إن كان مرسومًا
+  // نقطة معتبرة فقط إن كانت على الدائرة أو على خط أو في المركز (لا حروف التسمية)
+  const onSeg=q=>segs.some(([a,b])=>{ const A=pts[a], B=pts[b], L=len(sub(B,A)); if(L<1) return false; const t=dot(sub(q,A),sub(B,A))/(L*L); return t>-.05&&t<1.05&&Math.abs(crs(nrm(sub(B,A)),sub(q,A)))<band*1.5; });
+  dots.forEach(d=>{ const dc=len(sub(d,cc)); if(dc<band*2){ addPt(cc); return; } if(Math.abs(dc-rr)<band*1.5||onSeg(d)) addPt(snapC(d)); });
+  if(!segs.length&&pts.length<1) return null;
+  const G=mkFree(pts.length?pts:[cc],segs); G.sides.forEach((sd,i)=>{ if(meta[i]){ if(meta[i].arr) sd.arr=meta[i].arr; if(meta[i].dash) sd.dash=true; } });
+  G.circles=[{c:cc.slice(),r:rr}];
+  return Object.assign(res,{type:'lines',G});
 }
 // هل يوجد خط مرسوم بين نقطتين في الصورة؟
 function lineIn(r,a,b){ let hit=0,n=0; for(let t=.12;t<=.88;t+=.02){ const x=Math.round(a[0]+(b[0]-a[0])*t), y=Math.round(a[1]+(b[1]-a[1])*t); if(x<0||y<0||x>=r.W||y>=r.H) continue; n++; if(r.inner[y*r.W+x]) hit++; } return n&&hit/n>.85; }
@@ -1527,8 +1572,8 @@ async function pictureToShape(src,ed){
     else { const s0=Math.min(260/Math.max(1,r.w+r.d),195/Math.max(1,r.h+r.d)), s=Math.min(1.6,s0); fit={s,cx:r.c[0],cy:r.c[1]};
       Z.size[k]=Object.assign({},Z.size[k],{w:r.w*s,h:r.h*s,d:r.d*s}); if(k==='prism') Z.size.prism.px=r.px; // جهة الرؤية: الوجه الأمامي z=0 (المرسوم كاملًا) ظاهر
       Z.ax[k]=Object.assign({},r.ax,{s:-Math.sign(crs(r.ax.x,r.ax.y))||1}); } }
-  else if((r.type==='lines'&&(FREE0=r.G))||(r.type==='poly'&&(FREE0=r.alt||compose(r,classify(r))))){ const G=FREE0, bb=bboxPts(G.pts), s=Math.min(260/bb.w,195/bb.h), cxi=bb.x+bb.w/2, cyi=bb.y+bb.h/2; fit={s,cx:cxi,cy:cyi};
-    G.pts=G.pts.map(p=>[160+(p[0]-cxi)*s,122+(p[1]-cyi)*s]); S.tab='p'; S.p=G; FT='move'; }
+  else if((r.type==='lines'&&(FREE0=r.G))||(r.type==='poly'&&(FREE0=r.alt||compose(r,classify(r))))){ const G=FREE0, bb=bboxPts(G.pts.concat(...(G.circles||[]).map(o=>[[o.c[0]-o.r,o.c[1]-o.r],[o.c[0]+o.r,o.c[1]+o.r]]))), s=Math.min(260/bb.w,195/bb.h), cxi=bb.x+bb.w/2, cyi=bb.y+bb.h/2; fit={s,cx:cxi,cy:cyi};
+    G.pts=G.pts.map(p=>[160+(p[0]-cxi)*s,122+(p[1]-cyi)*s]); (G.circles||[]).forEach(o=>{ o.c=[160+(o.c[0]-cxi)*s,122+(o.c[1]-cyi)*s]; o.r*=s; }); S.tab='p'; S.p=G; FT='move'; }
   else { const c0=classify(r), c=idealize(c0), bb=bboxPts(c.pts), s=Math.min(260/bb.w,195/bb.h), cxi=bb.x+bb.w/2, cyi=bb.y+bb.h/2; fit={s,cx:cxi,cy:cyi};
     const G=mkPlane(c.kind,c.sub,c.pts.length); G.pts=c.pts.map(p=>[160+(p[0]-cxi)*s,122+(p[1]-cyi)*s]);
     if(G.pts.length!==G.sides.length){ const g2=mkPlane('poly','iso',G.pts.length); g2.pts=G.pts; Object.assign(G,g2); }
