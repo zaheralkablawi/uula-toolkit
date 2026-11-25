@@ -570,8 +570,9 @@ let SEL=null;   // {k:'side'|'vert', i, ak: مفتاح الزاوية المحد
 // منطقة نقر للزاوية: قطاع صغير عند الرأس
 function secHit(p,a,b,i,key){ const s=angSpan(p,a,b), r=s.sw<40?34:26, A0=rad(s.a0), A1=rad(s.a0+s.sw), q0=add(p,[Math.cos(A0)*r,Math.sin(A0)*r]), q1=add(p,[Math.cos(A1)*r,Math.sin(A1)*r]);
   return `<path class="ha${SEL&&SEL.ak===key?' sel':''}" data-h="ang" data-i="${i}" data-k="${key}" d="M${f2(p[0])} ${f2(p[1])}L${f2(q0[0])} ${f2(q0[1])}A${r} ${r} 0 ${s.sw>180?1:0} 1 ${f2(q1[0])} ${f2(q1[1])}Z"/>`; }
+let BG=null;   // الصورة الأصلية تحت الرسم للمقارنة (لا تُحفظ ولا تُدرج)
 function draw(){
-  const pr=build(); let h='<g>'+pr.map(primSVG).join('')+'</g><g id="hits">';
+  const pr=build(); let h=(BG&&EDIT&&EDIT.pic&&!BG.off?`<image href="${BG.src}" x="${f2(BG.x)}" y="${f2(BG.y)}" width="${f2(BG.w)}" height="${f2(BG.h)}" opacity=".35" preserveAspectRatio="none" pointer-events="none"/>`:'')+'<g>'+pr.map(primSVG).join('')+'</g><g id="hits">';
   if(S.empty){}
   else if(S.tab==='p'&&S.p.kind==='free'){ const G=S.p, P=G.pts;
     G.sides.forEach((sd,i)=>{ const a=P[sd.a], b=P[sd.b]; h+=`<path class="hs${SEL&&SEL.k==='side'&&SEL.i===i?' sel':''}" data-h="side" data-i="${i}" d="M${f2(a[0])} ${f2(a[1])}L${f2(b[0])} ${f2(b[1])}"/>`; });
@@ -644,7 +645,10 @@ function freeTool(t,e){ const G=S.p, h=t.dataset.h, i=+t.dataset.i;
   if(FT==='del'){ push(); if(h==='side') G.sides.splice(i,1); else if(h==='vert'&&G.pts.length>2) freeDelPoint(G,i); draw(); save(); syncChips(); return; } }
 $('fig').addEventListener('pointerdown',e=>{
   if(e.button!==0&&e.pointerType==='mouse') return;   // الزر الأيمن للقائمة فقط
-  const t=e.target.closest('[data-h]'); if(!t) { closePop(); if(LINK!=null){ LINK=null; draw(); } return; }
+  const t=e.target.closest('[data-h]');
+  if(!t&&S.tab==='p'&&S.p.kind==='free'&&FT==='addpt'){ const G=S.p; let q=svgPt(e); (G.circles||[]).forEach(o=>{ const d=len(sub(q,o.c)); if(Math.abs(d-o.r)<9&&d>0) q=add(o.c,mul(sub(q,o.c),o.r/d)); });   // نقطة حرة، وتلتصق بالدائرة إن كانت قريبة
+    push(); G.pts.push(q); G.verts.push({name:NAMES.find(x=>!G.verts.some(v=>v.name===x))||'',showName:false}); G.n=G.pts.length; draw(); save(); return; }
+  if(!t) { closePop(); if(LINK!=null){ LINK=null; draw(); } return; }
   if(S.tab==='p'&&S.p.kind==='free'&&FT!=='move'){ e.preventDefault(); closePop(); freeTool(t,e); return; }
   e.preventDefault(); $('fig').setPointerCapture(e.pointerId);
   DRAG={h:t.dataset.h, i:t.dataset.i, k:t.dataset.k, p0:svgPt(e), st:JSON.stringify(S), moved:false, cx:e.clientX, cy:e.clientY};
@@ -1045,7 +1049,13 @@ async function insertNative(pr,json,bb,slideId){
     const g=shapes.addGroup(made.map(s=>s.id)); g.name=TITLE; g.tags.add(TAG,json); await ctx.sync();
     if(EDIT){ const old=shapes.getItemOrNullObject(EDIT.id); await ctx.sync();
       // الصورة الأصلية لا تُحذف: تُنقل خارج الشريحة إلى يسارها للمراجعة
-      if(!old.isNullObject){ if(EDIT.pic){ old.load('width'); await ctx.sync(); old.left=-old.width-20; try{ old.tags.add('UULA_GEO_SRC','1'); }catch(e){} } else old.delete(); await ctx.sync(); }
+      if(!old.isNullObject){ if(EDIT.pic){
+          if(EDIT.legacy){ const lg=shapes.getItemOrNullObject(EDIT.legacy); await ctx.sync(); if(!lg.isNullObject) lg.delete(); old.tags.add('UULA_GEO_SRC',JSON.stringify({left:EDIT.left,top:EDIT.top})); }
+          if(EDIT.redo){ shapes.load('items/id'); await ctx.sync(); const prev=shapes.items.map(x=>({x,t:x.tags.getItemOrNullObject('UULA_GEO_FROM')})); prev.forEach(o=>o.t.load('value')); await ctx.sync();
+            prev.forEach(o=>{ if(!o.t.isNullObject&&o.t.value===String(EDIT.id)&&o.x.id!==g.id) o.x.delete(); }); }
+          else { old.load('width'); await ctx.sync(); old.tags.add('UULA_GEO_SRC',JSON.stringify({left:EDIT.left,top:EDIT.top})); old.left=-old.width-20; }
+          g.tags.add('UULA_GEO_FROM',String(EDIT.id)); }
+        else old.delete(); await ctx.sync(); }
       g.load('id'); await ctx.sync(); EDIT.id=g.id; }
   });
 }
@@ -1642,6 +1652,7 @@ async function pictureToShape(src,ed){
   if(S.tab==='p'){ S.p.verts.forEach(v=>{ Object.assign(v,{showName:false,showAng:false,ang:'',arc:false,arcs:0,right:false,sym:'',num:'',dir:'',alt:false,med:false,bis:false}); });
     S.p.sides.forEach(sd=>{ Object.assign(sd,{show:false,len:'',ticks:0,par:0}); }); if(S.p.angs) S.p.angs={}; }
   else if(S.tab==='c'){ S.c.show.names=false; S.c.show.meas=false; }
+  BG={src, x:160-fit.cx*fit.s, y:(S.tab==='p'?122:125)-fit.cy*fit.s, w:r.W*fit.s, h:(r.H||r.W*im.naturalHeight/im.naturalWidth)*fit.s};
   if(ed){ const e=Object.assign({},ed,{pic:true}); if(A&&!ed.word){ const a=A/fit.s; e.place={a, bx:ed.left+(fit.cx-160/fit.s)*A, by:ed.top+(fit.cy-(S.tab==='p'?122:125)/fit.s)*A}; } setEdit(e); }
   syncUI(); draw(); save();
   msg(ed&&!ed.word?L('picDone'):L('picDoneW'),'good');
@@ -1651,7 +1662,15 @@ async function selectedPicture(){
   if(HOST==='PowerPoint'){ let out=null;
     await PowerPoint.run(async ctx=>{ const ss=ctx.presentation.getSelectedShapes(); ss.load('items/id,items/left,items/top,items/width,items/height'); await ctx.sync();
       if(!ss.items.length) throw L('picSel'); const s=ss.items[0], img=s.getImageAsBase64({format:'Png'}); await ctx.sync();
-      out={src:'data:image/png;base64,'+img.value, ed:{id:s.id,left:s.left,top:s.top,width:s.width,height:s.height}}; });
+      const tg=s.tags.getItemOrNullObject('UULA_GEO_SRC'); tg.load('value'); await ctx.sync();
+      out={src:'data:image/png;base64,'+img.value, ed:{id:s.id,left:s.left,top:s.top,width:s.width,height:s.height}};
+      // صورة أصلية نُقلت سابقًا إلى يسار الشريحة: الشكل يعود إلى مكانها الأصلي ويحل محل الشكل السابق
+      if(!tg.isNullObject){ let o=null; try{ o=JSON.parse(tg.value); }catch(e){}
+        if(o&&o.left!=null){ out.ed.left=o.left; out.ed.top=o.top; out.ed.redo=true; }
+        else { // تحويل قديم بلا موضع محفوظ: الشكل السابق على نفس الارتفاع يدل على المكان
+          const sh=ctx.presentation.getSelectedSlides().getItemAt(0).shapes; sh.load('items/id,items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
+          const cy=s.top+s.height/2; let best=null; sh.items.forEach(x=>{ if(x.name!==TITLE||x.left<0) return; const d=Math.abs(x.top+x.height/2-cy); if(d<s.height*.6&&(!best||d<best.d)) best={x,d}; });
+          if(best){ const x=best.x; out.ed.left=x.left+x.width/2-s.width/2; out.ed.top=x.top+x.height/2-s.height/2; out.ed.redo=true; out.ed.legacy=x.id; } } } });
     return out; }
   let out=null;
   await Word.run(async ctx=>{ const pics=ctx.document.getSelection().inlinePictures; pics.load('items'); await ctx.sync(); if(!pics.items.length) throw L('picSel');
