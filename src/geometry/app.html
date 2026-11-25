@@ -646,9 +646,14 @@ function freeTool(t,e){ const G=S.p, h=t.dataset.h, i=+t.dataset.i;
     const k=G.pts.length; G.pts.push(add(A,mul(d,tt))); let nmv=NAMES.find(x=>!G.verts.some(v=>v.name===x))||''; G.verts.push({name:nmv,showName:true}); G.on[k]=[sd.a,sd.b,tt];
     G.sides.splice(i,1,{a:sd.a,b:k,len:'',show:false,ticks:0,par:0,dash:sd.dash},{a:k,b:sd.b,len:'',show:false,ticks:0,par:0,dash:sd.dash}); G.n=G.pts.length; draw(); save(); return; }
   if(FT==='del'){ push(); if(h==='side') G.sides.splice(i,1); else if(h==='vert'&&G.pts.length>2) freeDelPoint(G,i); draw(); save(); syncChips(); return; } }
+// النقر على خط ضلع داخل منطقة زاوية (ضلع قصير): الضلع أولى من الزاوية
+function sideUnder(t,e){ if(!t||t.dataset.h!=='ang'||S.tab!=='p') return t; const q=svgPt(e), G=S.p, P=G.pts, n=P.length;
+  const segs=G.kind==='free'?G.sides.map((sd,i)=>[P[sd.a],P[sd.b],i]):P.map((p,i)=>[p,P[(i+1)%n],i]);
+  let best=null, bd=3.5; segs.forEach(([a,b,i])=>{ const d=sub(b,a), L2=dot(d,d)||1, u=Math.max(0,Math.min(1,dot(sub(q,a),d)/L2)), dd=len(sub(q,add(a,mul(d,u)))); if(u>.08&&u<.92&&dd<bd){ bd=dd; best=i; } });
+  if(best==null) return t; return $('fig').querySelector(`[data-h="side"][data-i="${best}"]`)||t; }
 $('fig').addEventListener('pointerdown',e=>{
   if(e.button!==0&&e.pointerType==='mouse') return;   // الزر الأيمن للقائمة فقط
-  const t=e.target.closest('[data-h]');
+  const t=sideUnder(e.target.closest('[data-h]'),e);
   if(S.tab==='p'&&S.p.kind==='free'&&FT==='circ'){ const G=S.p, q=(t&&t.dataset.h==='vert')?G.pts[+t.dataset.i].slice():svgPt(e);   // دائرة: المركز ثم نقطة على المحيط
     if(!CIRC0){ CIRC0=q; draw(); return; } const r=len(sub(q,CIRC0)); if(r>3){ push(); (G.circles||(G.circles=[])).push({c:CIRC0,r}); } CIRC0=null; draw(); save(); return; }
   if(!t&&S.tab==='p'&&S.p.kind==='free'&&FT==='addpt'){ const G=S.p; let q=svgPt(e); (G.circles||[]).forEach(o=>{ const d=len(sub(q,o.c)); if(Math.abs(d-o.r)<9&&d>0) q=add(o.c,mul(sub(q,o.c),o.r/d)); });   // نقطة حرة، وتلتصق بالدائرة إن كانت قريبة
@@ -934,7 +939,7 @@ function ctxOpen(x,y){ const m=$('ctx'), c=CTX; if(!c) return; const G=S.p;
   m.innerHTML=rows.map(r=>`<div class="r">${r}</div>`).join(''); m.hidden=false; m.dir=document.documentElement.lang==='en'?'ltr':'rtl';
   if(x!=null){ const w=m.offsetWidth, hh=m.offsetHeight; m.style.left=Math.max(4,Math.min(innerWidth-w-4,x))+'px'; m.style.top=Math.max(4,Math.min(innerHeight-hh-4,y))+'px'; } }
 $('fig').addEventListener('contextmenu',e=>{ e.preventDefault(); if(DRAG) return; closePop();
-  const t=e.target.closest('[data-h]'), h=t&&t.dataset.h, i=t&&t.dataset.i;
+  const t=sideUnder(e.target.closest('[data-h]'),e), h=t&&t.dataset.h, i=t&&t.dataset.i;
   if(S.tab==='p'&&h==='side') CTX={k:'side',i:+i}; else if(S.tab==='p'&&h==='vert') CTX={k:'vert',i:+i};
   else if(S.tab==='p'&&h==='ang') CTX={k:'ang',i:+i,key:t.dataset.k};
   else if(h==='pt'||h==='cp'||h==='cen') CTX={k:'pt',i:h==='pt'?i:h==='cp'?'c:'+i:'c:C'}; else CTX={k:'none'};
