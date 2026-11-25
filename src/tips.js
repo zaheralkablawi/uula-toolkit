@@ -133,6 +133,8 @@
       ['#segCons [data-k="k_eq"]', E('انقر وترًا ثم نقطة على الدائرة نفسها: وتر مساوٍ له يبقى مساويًا.', 'Click a chord, then a point on the same circle: an equal chord that stays equal.', 'وتر مساوٍ', 'Equal chord')],
       ['#segCons [data-k="k_par"]', E('انقر قطعة ثم نقطة: مستقيم موازٍ، ومن نقطة على الدائرة وتر موازٍ.', 'Click a segment, then a point: a parallel line, or a parallel chord from a point on the circle.', 'موازٍ', 'Parallel')],
       ['#segCons [data-k="k_arc"]', E('انقر نقطتين على الدائرة لتمييز القوس. انقر القوس لكتابة قياسه أو تعبير.', 'Click two points on the circle to highlight the arc. Click the arc to write its measure or an expression.', 'تمييز قوس', 'Arc')],
+      ['#favBtn', E('يحفظ الشكل الحالي في المفضلة؛ تظهر أعلى قائمة القوالب. اضغطه مرة أخرى لإزالته.', 'Saves the current figure to favorites, shown at the top of the templates list. Click again to remove it.', 'المفضلة', 'Favorites')],
+      ['#snapItem', E('عند التفعيل تلتصق النقاط بالدائرة القريبة عند رسمها.', 'When on, new points snap to a nearby circle.')],
       ['#tplSel', E('أشكال جاهزة مبنية بالأدوات نفسها، تبقى علاقاتها صحيحة عند السحب ويمكن الإضافة عليها.', 'Ready figures built with the same tools; their relations hold when dragging and you can add to them.', 'قوالب', 'Templates')],
       ['#segView [data-k="reset"]', E('يعيد المجسم إلى زاوية الرؤية الأصلية. اسحب في الفراغ لتدويره.', 'Back to the original view. Drag on empty space to rotate the solid.', 'زاوية الرؤية', 'View')],
       ['#segView [data-k="persp"]', E('إسقاط منظوري: الأجزاء البعيدة أصغر.', 'Perspective: far parts look smaller.', 'منظور', 'Perspective')],
