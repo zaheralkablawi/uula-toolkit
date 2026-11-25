@@ -1114,7 +1114,7 @@ function recognize(im){
       let pk=t2; for(let i=t2;i<th;i++) if(hist[i]>hist[pk]) pk=i;   // قمة التعبئة
       th=Math.max(t2,pk-6); } }
   // العلامات الحمراء (ارتفاع، زاوية قائمة) ليست من الشكل
-  const dark=new Uint8Array(N); for(let i=0;i<N;i++){ const r0=D[4*i], g0=D[4*i+1], b0=D[4*i+2]; const mx=Math.max(r0,g0,b0), mn=Math.min(r0,g0,b0), red=r0>140&&r0-g0>70&&r0-b0>70; dark[i]=(gray[i]<th||(mx>0&&(mx-mn)/mx>.45&&mn<150&&gray[i]<180))&&!red?1:0; }   /* الخطوط الملونة (أزرق، أخضر، برتقالي) حبر أيضًا */
+  const dark=new Uint8Array(N); for(let i=0;i<N;i++){ const r0=D[4*i], g0=D[4*i+1], b0=D[4*i+2]; const mx=Math.max(r0,g0,b0), mn=Math.min(r0,g0,b0), red=r0>140&&r0-g0>70&&r0-b0>70; dark[i]=(gray[i]<th||(mx>0&&(mx-mn)/mx>.45&&mn<150&&gray[i]<180)||red)?1:0; }   /* الخطوط الملونة (أزرق، أخضر، برتقالي) حبر أيضًا */
   // المكوّنات المتصلة: الشكل أكبرها امتدادًا، والكتابة الصغيرة تُهمل
   const lab=new Int32Array(N).fill(-1), comps=[], st=[];
   for(let i=0;i<N;i++){ if(!dark[i]||lab[i]>=0) continue; const id=comps.length; let x0=W,y0=H,x1=0,y1=0,n=0; st.push(i); lab[i]=id;
@@ -1151,7 +1151,7 @@ function recognize(im){
   const all=new Uint8Array(N); for(let y=by0;y<=by1;y++) for(let x=bx0;x<=bx1;x++){ if(!dark[y*W+x]) continue; for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){ const xx=x+dx,yy=y+dy; if(xx>=0&&yy>=0&&xx<W&&yy<H) all[yy*W+xx]=1; } }
   const texts=comps.filter(c=>c.id!==F.id&&c.d<F.d*.2&&c.d>2).map(c=>({c:[(c.x0+c.x1)/2,(c.y0+c.y1)/2],d:c.d}));
   const res={W,H,stroke,inner:Md,all,gray,fd:F.d,texts,dark};
-  if(sd/m<.05&&Math.abs(area/(Math.PI*m*m)-1)<.15) return Object.assign(res,{type:'circle',c:C,r:m-stroke/2});
+  if(sd/m<.05&&Math.abs(area/(Math.PI*m*m)-1)<.15){ const CF=circleFig(W,H,lab,comps,F,stroke,res,C,m-stroke/2,dark); if(CF&&CF.G.pts.length) return CF; return Object.assign(res,{type:'circle',c:C,r:m-stroke/2}); }
   // المجسمات أولًا: أحرف الصندوق أو الأسطوانة قد تشبه دائرة بمماس
   // دائرة (بحث عشوائي على كل الحبر): قبل المجسمات، فالأشعة والأوتار الخارجة منها تفسد الصورة الظلية
   { const anyInk=i=>{ if(dark[i]) return true; const r0=D[4*i], g0=D[4*i+1], b0=D[4*i+2]; return r0>140&&r0-g0>70&&r0-b0>70; };   // الحبر + الأحمر (قوس ملوّن على الدائرة)
@@ -1404,7 +1404,10 @@ function circleFig(W,H,lab,comps,F,stroke,res,cc,rr,dark){
   const dots=[]; comps.forEach(c=>{ const w=c.x1-c.x0+1, h=c.y1-c.y0+1; if(w>=stroke*2&&h>=stroke*2&&w<=Math.max(10,stroke*6)&&h<=Math.max(10,stroke*6)&&Math.abs(w-h)<=Math.max(2,w*.35)&&c.n>=w*h*.55) dots.push([(c.x0+c.x1)/2,(c.y0+c.y1)/2]); });
   // نقطة ممتلئة ملتصقة بالدائرة أو بخط: كتلة حبر أعرض من الخط
   const r2=Math.max(2,stroke*1.6), fat=(x,y)=>{ let n=0,t=0; for(let dy=-r2;dy<=r2;dy++) for(let dx=-r2;dx<=r2;dx++){ if(dx*dx+dy*dy>r2*r2) continue; t++; const X=Math.round(x+dx), Y=Math.round(y+dy); if(X>=0&&Y>=0&&X<W&&Y<H&&dark[Y*W+X]) n++; } return n/t>.92; };
-  for(let k=0;k<360;k+=1.5){ const a=rad(k), q=[cc[0]+Math.cos(a)*rr,cc[1]+Math.sin(a)*rr]; if(fat(q[0],q[1])&&!dots.some(d=>len(sub(d,q))<band*2)) dots.push(q); }
+  // سماكة الحبر عبر المحيط: النقطة المرسومة أعرض بوضوح من خط الدائرة
+  const thick=[]; for(let k=0;k<360;k+=1){ const a=rad(k); let n=0; for(let o=-band*2;o<=band*2;o+=.5){ const X=Math.round(cc[0]+Math.cos(a)*(rr+o)), Y=Math.round(cc[1]+Math.sin(a)*(rr+o)); if(X>=0&&Y>=0&&X<W&&Y<H&&dark[Y*W+X]) n+=.5; } thick.push(n); }
+  const tmed=thick.slice().sort((a,b)=>a-b)[180]||stroke;
+  for(let k=0;k<360;k++){ if(thick[k]>=Math.max(tmed*2.2,tmed+3)&&thick[k]>=thick[(k+359)%360]&&thick[k]>=thick[(k+1)%360]){ const a=rad(k), q=[cc[0]+Math.cos(a)*rr,cc[1]+Math.sin(a)*rr]; if(!dots.some(d=>len(sub(d,q))<band*2)) dots.push(q); } }
   res.skipWide=(x,y)=>Math.abs(Math.hypot(x-cc[0],y-cc[1])-rr)<band*2.5;   // فجوة عبور الدائرة ليست تقطّعًا
   const LF=lineFig(W,H,lab,comps,F,stroke,res,onC); const G0=res.lineG; delete res.skipWide;
   const pts=[], segs=[], meta=[], tol=band*1.5;
@@ -1416,8 +1419,7 @@ function circleFig(W,H,lab,comps,F,stroke,res,cc,rr,dark){
   // نقطة معتبرة فقط إن كانت على الدائرة أو على خط أو في المركز (لا حروف التسمية)
   const onSeg=q=>segs.some(([a,b])=>{ const A=pts[a], B=pts[b], L=len(sub(B,A)); if(L<1) return false; const t=dot(sub(q,A),sub(B,A))/(L*L); return t>-.05&&t<1.05&&Math.abs(crs(nrm(sub(B,A)),sub(q,A)))<band*1.5; });
   dots.forEach(d=>{ const dc=len(sub(d,cc)); if(dc<band*2){ addPt(cc); return; } if(Math.abs(dc-rr)<band*1.5||onSeg(d)) addPt(snapC(d)); });
-  if(!segs.length&&pts.length<1) return null;
-  const G=mkFree(pts.length?pts:[cc],segs); G.sides.forEach((sd,i)=>{ if(meta[i]){ if(meta[i].arr) sd.arr=meta[i].arr; if(meta[i].dash) sd.dash=true; } });
+  const G=mkFree(pts,segs); G.sides.forEach((sd,i)=>{ if(meta[i]){ if(meta[i].arr) sd.arr=meta[i].arr; if(meta[i].dash) sd.dash=true; } });
   G.circles=[{c:cc.slice(),r:rr}];
   return Object.assign(res,{type:'lines',G});
 }
