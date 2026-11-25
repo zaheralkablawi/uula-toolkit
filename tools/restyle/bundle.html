@@ -4475,29 +4475,42 @@ async function abPress() {
 // «QR برابط»: the QR picture becomes the page's small QR and opens the address written beside it; the address goes
 async function qrPress() {
   if (busy || !supported) return;
-  busy = true; lock();
-  const id = await currentId().catch(() => null);
-  await snapOp(id ? [id] : []);
+  busy = true; lock(); res.innerHTML = '';
+  const ids = await selIds().catch(() => []);
+  await snapOp(ids);
   try {
-    if (!id) { say(L('حدّد شريحة أولًا.', 'Select a slide first.')); return; }
-    await run(async ctx => {
+    if (!ids.length) { say(L('حدّد شريحة أولًا.', 'Select a slide first.')); return; }
+    // one slide: the selected picture / address count; several slides: every address with its nearest picture
+    if (ids.length === 1) await run(async ctx => {
       const ss = ctx.presentation.getSelectedShapes(); ss.load('items/name'); await ctx.sync();
       ss.items.forEach(x => { x.name = (x.name || '').replace(/ #ursel$/, '') + ' #ursel'; }); await ctx.sync();
     }).catch(() => {});
-    const pkg = await UR.openPackage(await exportSlide(id));
-    const r = UR.qrLink(pkg);
-    if (!r.count) {
-      await clearSel(id);
-      say(!r.urls ? L('لم أجد رابطًا مكتوبًا في الشريحة (يبدأ بـ https:// أو www).', 'No written address on the slide (starting with https:// or www).')
-        : L('لم أجد صورة QR بجانب الرابط.', 'No QR picture beside the address.'));
+    let pics = 0, slides = 0, noUrl = 0, noPic = 0;
+    const keep = [];
+    for (let k = 0; k < ids.length; k++) {
+      const id = ids[k];
+      prog(k / ids.length); if (ids.length > 1) say(L('QR برابط ', 'Linked QR ') + (k + 1) + L(' من ', ' of ') + ids.length + '…');
+      try {
+        const pkg = await UR.openPackage(await exportSlide(id));
+        const r = UR.qrLink(pkg);
+        if (!r.count) { await clearSel(id); if (!r.urls) noUrl++; else noPic++; keep.push(id); continue; }
+        const newId = await insertAfter(await UR.buildPackage(pkg, r.xml, r.rels), id);
+        await deleteSlide(id);
+        await clearSel(newId); await unmark(newId);
+        keep.push(newId); pics += r.count; slides++;
+      } catch (e) { keep.push(id); line('err', '✗ ' + esc(errText(e))); }
+    }
+    prog(null);
+    await run(async ctx => { ctx.presentation.setSelectedSlides(keep); await ctx.sync(); }).catch(() => {});
+    if (!pics) {
+      say(noPic ? L('لم أجد صورة QR بجانب الرابط.', 'No QR picture beside the address.') : L('لم أجد رابطًا مكتوبًا ' + (ids.length > 1 ? 'في الشرائح المحددة' : 'في الشريحة') + ' (يبدأ بـ https:// أو www).', 'No written address on the ' + (ids.length > 1 ? 'selected slides' : 'slide') + ' (starting with https:// or www).'));
       return;
     }
-    const newId = await insertAfter(await UR.buildPackage(pkg, r.xml, r.rels), id);
-    await deleteSlide(id);
-    await clearSel(newId); await unmark(newId);
-    say(r.count > 1 ? L('رُبطت ' + r.count + ' صور QR بروابطها وحُذفت الروابط المكتوبة.', r.count + ' QR pictures were linked and the written addresses removed.')
-      : L('صُغّرت صورة الـQR ونُقلت إلى الهامش الأيسر وحافتها العلوية في مكانها، وصارت تفتح الرابط عند الضغط عليها، وحُذف الرابط المكتوب.', 'The QR picture was resized into its place; a click on it opens the address, and the written address was removed.'));
-  } catch (e) { say(L('تعذّر: ', 'Could not: ') + errText(e)); }
+    if (ids.length > 1 && slides < ids.length) line('', L('• شرائح بلا رابط مكتوب أو بلا صورة QR بقيت كما هي: ', '• Slides with no written address or QR picture stayed as they were: ') + (ids.length - slides) + '.');
+    say(ids.length > 1 ? L('رُبطت ' + pics + ' صور QR بروابطها في ', pics + ' QR pictures were linked in ') + (lang !== 'en' && slides === 2 ? 'شريحتين' : cnt(slides)) + L('، وحُذفت الروابط المكتوبة.', '; the written addresses were removed.')
+      : pics > 1 ? L('رُبطت ' + pics + ' صور QR بروابطها وحُذفت الروابط المكتوبة.', pics + ' QR pictures were linked and the written addresses removed.')
+      : L('صُغّرت صورة الـQR ونُقلت إلى الهامش الأيسر وحافتها العلوية في مكانها، وصارت تفتح الرابط عند الضغط عليها، وحُذف الرابط المكتوب.', 'The QR picture was resized onto the left margin, its top edge kept; a click on it opens the address, and the written address was removed.'));
+  } catch (e) { prog(null); say(L('تعذّر: ', 'Could not: ') + errText(e)); }
   finally { busy = false; lock(); }
 }
 // how many text boxes are selected now (for the options buttons)
