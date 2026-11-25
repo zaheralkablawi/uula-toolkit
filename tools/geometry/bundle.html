@@ -1062,9 +1062,11 @@ async function insertNative(pr,json,bb,slideId){
       // الصورة الأصلية لا تُحذف: تُنقل خارج الشريحة إلى يسارها للمراجعة
       if(!old.isNullObject){ if(EDIT.pic){
           if(EDIT.legacy){ const lg=shapes.getItemOrNullObject(EDIT.legacy); await ctx.sync(); if(!lg.isNullObject) lg.delete(); old.tags.add('UULA_GEO_SRC',JSON.stringify({left:EDIT.left,top:EDIT.top})); }
-          if(EDIT.redo){ shapes.load('items/id'); await ctx.sync(); const prev=shapes.items.map(x=>({x,t:x.tags.getItemOrNullObject('UULA_GEO_FROM')})); prev.forEach(o=>o.t.load('value')); await ctx.sync();
-            let hit=false; prev.forEach(o=>{ if(!o.t.isNullObject&&o.t.value===String(EDIT.id)&&o.x.id!==g.id){ o.x.delete(); hit=true; } });
-            if(!hit&&EDIT.near&&EDIT.near!==g.id){ const nr=shapes.getItemOrNullObject(EDIT.near); await ctx.sync(); if(!nr.isNullObject) nr.delete(); } }
+          if(EDIT.redo){ let hit=false;
+            // الوسوم تُقرأ من أشكال Geometry فقط: بعض أنواع الأشكال (جداول، رسومات) قد تفشل عند قراءة وسومها
+            try{ shapes.load('items/id,items/name'); await ctx.sync(); const prev=shapes.items.filter(x=>x.name===TITLE&&x.id!==g.id).map(x=>({x,t:x.tags.getItemOrNullObject('UULA_GEO_FROM')})); prev.forEach(o=>o.t.load('value')); await ctx.sync();
+              prev.forEach(o=>{ if(!o.t.isNullObject&&o.t.value===String(EDIT.id)){ o.x.delete(); hit=true; } }); await ctx.sync(); }catch(e){ console.error(e); }
+            if(!hit&&EDIT.near&&EDIT.near!==g.id){ try{ const nr=shapes.getItemOrNullObject(EDIT.near); await ctx.sync(); if(!nr.isNullObject) nr.delete(); await ctx.sync(); }catch(e){ console.error(e); } } }
           else { old.load('width'); await ctx.sync(); old.tags.add('UULA_GEO_SRC',JSON.stringify({left:EDIT.left,top:EDIT.top})); old.left=-old.width-20; }
           g.tags.add('UULA_GEO_FROM',String(EDIT.id)); }
         else old.delete(); await ctx.sync(); }
@@ -1101,7 +1103,7 @@ $('insert').onclick=async()=>{
       else { await insertPicPPT(out.svg,json); note=L('asPic'); }
     } else await insertWord(out.svg,json);
     msg(note||L(EDIT?'updated':'inserted'),note?'':'good');
-  }catch(e){ console.error(e); msg(typeof e==='string'?e:L('insFail'),'bad'); }
+  }catch(e){ console.error(e); msg(typeof e==='string'?e:L('insFail')+(e&&e.message?' ('+String(e.message).slice(0,80)+')':''),'bad'); }
   $('insert').disabled=false;
 };
 function setEdit(e){ EDIT=e; $('edBar').hidden=!e; $('insTxt').textContent=L(e?(e.pic?'insert':'update'):'insert'); const sp=$('edBar').querySelector('span'); sp.textContent=L(e&&e.pic?'picEdit':'editing'); }
