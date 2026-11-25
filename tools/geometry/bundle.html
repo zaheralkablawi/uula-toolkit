@@ -364,7 +364,7 @@ function seg(a,b,o){ o=o||{}; PR.push({t:'seg',a,b,c:o.c||LK().line,w:o.w||LK().
 function aux(a,b){ seg(a,b,{dash:true,w:Math.max(1,LK().w*.75)}); }
 function mk(a,b){ seg(a,b,{c:LK().mark,w:Math.max(1,LK().w*.7),dash:false}); }
 function arcP(c,r,a0,a1,o){ o=o||{}; PR.push({t:'ell',c,rx:r,ry:o.ry||r,a0,a1,c2:o.c||LK().mark,w:o.w||Math.max(1,LK().w*.7),dash:!!o.dash}); }
-function txt(p,s,o){ if(s==null||s==='') return; o=o||{}; const en=isEn(); PR.push({t:'txt',p,s:en?mathify(digits(String(s))):digits(String(s)),c:o.c||LK().text,fs:o.fs||LK().fs,font:en?MATHFONT:undefined,from:o.from,arcR:o.arcR}); }
+function txt(p,s,o){ if(s==null||s==='') return; o=o||{}; const t0=mathify(digits(String(s))), hasM=/[\uD835]/.test(t0); PR.push({t:'txt',p,s:t0,c:o.c||LK().text,fs:o.fs||LK().fs,font:hasM?MATHFONT:undefined,from:o.from,arcR:o.arcR}); }
 // كتابة يعتبرها المستخدم اسمًا (طول ضلع، زاوية): الحرف الواحد يُكتب رمزًا إذا كانت الأسماء رموزًا، والرقم وحده في الزاوية يأخذ °
 function lbl(p,s,o){ if(s==null||s==='') return; o=o||{}; const k=String(s).trim();
   if(!isEn()&&LK().names==='sym'&&SYM[k]){ PR.push({t:'txt',p,s:SYM[k],c:LK().text,fs:(o.fs||LK().fs)*1.1,font:SYMFONT,from:o.from,arcR:o.arcR}); return; }
@@ -408,14 +408,27 @@ function buildFree(){
   (G.circles||[]).forEach(o=>PR.push({t:'ell',c:o.c,rx:o.r,ry:o.r,a0:0,a1:360,c2:o.col||LK().line,w:o.w||LK().w,dash:false}));
   G.sides.forEach(sd=>{ seg(P[sd.a],P[sd.b],{c:sd.c,w:sd.w,dash:segDash(sd)}); segArrows(P[sd.a],P[sd.b],sd.arr,sd.c); });
   G.sides.forEach(sd=>{ const a=P[sd.a], b=P[sd.b], both=sd.ticks&&sd.par; sideTicks(a,b,sd.ticks,both?-9:0); parMarks(a,b,sd.par,both?9:0);
-    if(sd.show){ const m=mid(a,b); let nn=perp(nrm(sub(b,a))); if(dot(nn,sub(m,C))<0) nn=mul(nn,-1); lbl(add(m,mul(nn,fs*1.1)),sd.len||fmtLen(len(sub(b,a))/40),{from:m}); } });
+    if(sd.show){ const m=mid(a,b); let nn=perp(nrm(sub(b,a))); if(dot(nn,sub(m,C))<0) nn=mul(nn,-1);
+      // الجهة الأبعد عن الخطوط والدوائر الأخرى
+      const cl=q=>{ let mm=1e9; G.sides.forEach(s2=>{ if(s2===sd) return; const A2=P[s2.a], B2=P[s2.b], dd=sub(B2,A2), L2=dot(dd,dd)||1, t=Math.max(0,Math.min(1,dot(sub(q,A2),dd)/L2)); mm=Math.min(mm,len(sub(q,add(A2,mul(dd,t))))); }); (G.circles||[]).forEach(o=>{ mm=Math.min(mm,Math.abs(len(sub(q,o.c))-o.r)); }); return mm; };
+      const q1=add(m,mul(nn,fs*1.15)), q2=sub(m,mul(nn,fs*1.15)); const q=cl(q2)>cl(q1)+fs*.4?q2:q1;
+      lbl(q,sd.len||fmtLen(len(sub(b,a))/40),{from:m}); } });
   Object.entries(G.angs||{}).forEach(([key,A])=>{ const [i,ab]=key.split(':'), [a,b]=ab.split('-').map(Number), p=P[+i]; if(!p||!P[a]||!P[b]) return;
     if(A.right) rightMark(p,P[a],P[b]); let r0=18; if(A.arcs){ angleArcs(p,P[a],P[b],A.arcs,18); r0=18+A.arcs*4.5; } else if((A.arc||A.showAng)&&!A.right){ angleArcs(p,P[a],P[b],1,16); r0=20; }
     if(A.dir){ const rr=Math.max(r0+6,26); angleArrow(p,P[a],P[b],A.dir,rr); r0=rr+4; }
     if(A.sym||A.num) r0=angleSym(p,P[a],P[b],A.sym,A.num,A.right?12:r0)-fs*.5;
     if(A.showAng){ const s=angSpan(p,P[a],P[b]), bi=rad((s.a0+s.a1)/2), rr=r0+fs*.95+(s.sw<45?10:0); lbl(add(p,[Math.cos(bi)*rr,Math.sin(bi)*rr]),A.ang||fmtAng(s.sw),{fs:fs*.85,from:p,deg:1,arcR:r0}); } });
+  // الأسماء في أبعد مكان ممكن عن الخطوط والدوائر والأسماء الأخرى
+  const segD=(q,a,b)=>{ const d=sub(b,a), L2=dot(d,d)||1, t=Math.max(0,Math.min(1,dot(sub(q,a),d)/L2)); return len(sub(q,add(a,mul(d,t)))); };
+  const placed=[];
+  const clear=q=>{ let m=1e9; G.sides.forEach(sd=>{ m=Math.min(m,segD(q,P[sd.a],P[sd.b])); }); (G.circles||[]).forEach(o=>{ m=Math.min(m,Math.abs(len(sub(q,o.c))-o.r)); }); placed.forEach(z=>{ m=Math.min(m,len(sub(q,z))-fs*.4); }); return m; };
   P.forEach((p,i)=>{ const V=G.verts[i]; ptP(p,V); if(!V||!V.showName) return; const nb=freeNb(G,i); let d=[0,0]; nb.forEach(j=>{ d=add(d,nrm(sub(P[j],p))); });
-    d=mul(d,-1); if(len(d)<.3){ d=nb.length?perp(nrm(sub(P[nb[0]],p))):sub(p,C); if(dot(d,sub(p,C))<0) d=mul(d,-1); } nm(add(p,mul(nrm(d),fs*1.05)),V.name,p); });
+    d=mul(d,-1); if(len(d)<.3){ d=nb.length?perp(nrm(sub(P[nb[0]],p))):sub(p,C); if(dot(d,sub(p,C))<0) d=mul(d,-1); }
+    // نقطة على دائرة: الاسم خارج الدائرة أولى
+    (G.circles||[]).forEach(o=>{ const r=len(sub(p,o.c)); if(Math.abs(r-o.r)<4&&r>1) d=add(nrm(d),mul(nrm(sub(p,o.c)),1.5)); });
+    const pref=len(d)>1e-6?nrm(d):[0,-1]; let best=null;
+    for(const D of [fs*1.05,fs*1.35]) for(let k=0;k<32;k++){ const a=k*Math.PI/16, u=[Math.cos(a),Math.sin(a)], q=add(p,mul(u,D)); const sc=Math.min(clear(q),fs*.9)+fs*.18*dot(u,pref)-(D>fs*1.1?fs*.12:0); if(!best||sc>best.sc) best={sc,q}; }
+    placed.push(best.q); nm(best.q,V.name,p); });
 }
 function buildPlane(){
   if(S.p.kind==='free') return buildFree();
