@@ -172,6 +172,7 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
     <svg id="fig" viewBox="0 0 320 250" xmlns="http://www.w3.org/2000/svg"></svg>
     <div class="pvt">
       <button type="button" class="ib" id="picBtn" data-ti="fromPic" title="تحويل الصورة المحددة إلى شكل"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><rect x="3" y="4" width="10" height="9" rx="1.5"/><path d="M3 11l3-3 3 3"/><path d="M15 9h3l-1.5-1.5M18 9l-1.5 1.5"/><path d="M14 20l3.5-6 3.5 6z"/></svg></button>
+      <button type="button" class="ib" id="editBtn" data-ti="loadSel" title="تعديل الشكل المحدد"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>
       <button type="button" class="ib" id="picSlideBtn" data-ti="picSlide" title="تحويل كل صور الأشكال في هذه الشريحة"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15l3-4 3 3 2-2 3 3"/><circle cx="16" cy="9" r="1.3" fill="currentColor"/></svg></button>
       <button type="button" class="ib" id="picAllBtn" data-ti="picAll" title="تحويل كل صور الأشكال في كل الشرائح"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="6" y="3" width="15" height="12" rx="2"/><path d="M3 7v12a2 2 0 0 0 2 2h12"/><path d="M9 12l2.5-3 2.5 2.5 1.5-1.5 2.5 2"/></svg></button>
       <button type="button" class="ib" id="undoBtn" data-ti="undo" title="تراجع"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
@@ -1078,17 +1079,22 @@ $('insert').onclick=async()=>{
 };
 function setEdit(e){ EDIT=e; $('edBar').hidden=!e; $('insTxt').textContent=L(e?(e.pic?'insert':'update'):'insert'); const sp=$('edBar').querySelector('span'); sp.textContent=L(e&&e.pic?'picEdit':'editing'); }
 $('edCancel').onclick=()=>{ setEdit(null); msg(''); };
-$('loadSelItem').addEventListener('click',async()=>{
-  if(!HOST){ msg(L('noHost'),'bad'); return; }
+async function loadSelected(quiet){
+  if(!HOST){ if(!quiet) msg(L('noHost'),'bad'); return false; }
   try{ let data=null, ed=null;
     if(HOST==='PowerPoint'){ await PowerPoint.run(async ctx=>{ const ss=ctx.presentation.getSelectedShapes(); ss.load('items/id,items/left,items/top,items/width'); await ctx.sync();
         if(!ss.items.length) throw L('selFirst'); const s=ss.items[0], t=s.tags.getItemOrNullObject(TAG); t.load('value'); await ctx.sync();
         if(t.isNullObject) throw L('notOurs'); data=JSON.parse(t.value); ed={id:s.id,left:s.left,top:s.top,width:s.width,w:data.w}; }); }
     else { await Word.run(async ctx=>{ const pics=ctx.document.getSelection().inlinePictures; pics.load('items/altTextTitle,items/altTextDescription'); await ctx.sync();
         if(!pics.items.length) throw L('selFirst'); const p=pics.items[0]; if(p.altTextTitle!==TITLE) throw L('notOurs'); data=JSON.parse(p.altTextDescription); ed={word:true}; }); }
-    const d=defaults(); S=Object.assign(d,data.s); S.look=Object.assign(d.look,data.s.look||{}); push(); closePop(); syncUI(); draw(); save(); setEdit(ed); msg(L('loaded'));
-  }catch(e){ console.error(e); msg(typeof e==='string'?e:L('insFail'),'bad'); }
-});
+    if(quiet&&EDIT&&EDIT.id===ed.id) return true;
+    const d=defaults(); push(); S=Object.assign(d,data.s); S.look=Object.assign(d.look,data.s.look||{}); closePop(); syncUI(); draw(); save(); setEdit(ed); msg(L('loaded'),'good'); return true;
+  }catch(e){ if(!quiet){ console.error(e); msg(typeof e==='string'?e:L('insFail'),'bad'); } return false; }
+}
+$('loadSelItem').addEventListener('click',()=>loadSelected(false));
+$('editBtn').addEventListener('click',()=>loadSelected(false));
+// تحديد شكل رسمته الأداة سابقًا في الشريحة يفتحه للتعديل تلقائيًا
+function watchSel(){ try{ Office.context.document.addHandlerAsync(Office.EventType.DocumentSelectionChanged,()=>{ clearTimeout(watchSel.t); watchSel.t=setTimeout(()=>loadSelected(true),250); }); }catch(e){} }
 
 /* ---------- تحويل صورة شكل إلى شكل هندسي (تعرّف تلقائي) ---------- */
 function loadImg(src){ return new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=src; }); }
@@ -1651,6 +1657,7 @@ async function selectedPicture(){
   return out;
 }
 const fromPic=async()=>{ if(!HOST){ $('picFile').value=''; $('picFile').click(); return; }
+  if(await loadSelected(true)) return;   // شكل من الأداة: تعديل لا تحويل
   try{ const s=await selectedPicture(); await pictureToShape(s.src,s.ed); }catch(e){ console.error(e); msg(typeof e==='string'?e:L('picFail'),'bad'); } };
 $('fromPicItem').addEventListener('click',fromPic); $('picBtn').addEventListener('click',fromPic);
 // تحويل دفعة: كل صور الأشكال في الشريحة أو العرض، والأصل يُنقل إلى يسار الشريحة
@@ -1690,7 +1697,7 @@ $('picFile').addEventListener('change',()=>{ const f=$('picFile').files[0]; if(!
 /* ---------- البدء ---------- */
 $('ver').textContent=VERSION;
 applyLang(); draw();
-try{ if(window.Office&&Office.onReady) Office.onReady(info=>{ HOST=info&&(info.host==='PowerPoint'||info.host==='Word')?info.host:null; }); }catch(e){}
+try{ if(window.Office&&Office.onReady) Office.onReady(info=>{ HOST=info&&(info.host==='PowerPoint'||info.host==='Word')?info.host:null; if(HOST==='PowerPoint') watchSel(); }); }catch(e){}
 </script>
 </body>
 </html>
