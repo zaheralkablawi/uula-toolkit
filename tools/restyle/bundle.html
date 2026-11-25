@@ -4342,7 +4342,7 @@ function dirSeg() {
   });
   return d;
 }
-// «ⓐ ⓑ»: the answer circles as text — «ⓐ    ⓑ» (four spaces) in one text box. Nothing selected: inserted under the
+// «ⓐ ⓑ»: the answer circles as text — two text boxes «ⓐ» and «ⓑ», as far apart as four spaces. Nothing selected: inserted under the
 // last object; drawn shapes selected: replaced by it in their place (one box per line of shapes)
 const AB_TEXT = 'ⓐ    ⓑ';
 async function abPress() {
@@ -4375,23 +4375,36 @@ async function abPress() {
       }
       if (!spots.length) spots.push({ l: 36, r: 110, t: top, b: top + 20, shapes: [] });
       const made = [];
-      for (const p of spots) {
-        const h = 20, t = sh.addTextBox(AB_TEXT, { left: p.l, top: (p.t + p.b) / 2 - h / 2, width: Math.max(60, p.r - p.l + 8), height: h });
-        t.name = 'UULA ab';
+      // two text boxes, «ⓐ» and «ⓑ», with the same gap as «ⓐ    ⓑ» (four spaces) in one box: the gap is measured once
+      // from a hidden sample (the whole pair, minus the two letters alone)
+      const style = t => {
         try {
           const tf = t.textFrame; tf.wordWrap = false; tf.autoSizeSetting = 'AutoSizeShapeToFitText';
           tf.leftMargin = 0; tf.rightMargin = 0; tf.topMargin = 0; tf.bottomMargin = 0; tf.verticalAlignment = 'Middle';
           tf.textRange.font.size = 12; tf.textRange.font.color = '#000000'; tf.textRange.paragraphFormat.horizontalAlignment = 'Left';
         } catch (e) {}
-        made.push(t);
+        return t;
+      };
+      const probe = [AB_TEXT, 'ⓐ', 'ⓑ'].map(x => style(sh.addTextBox(x, { left: -400, top: -400, width: 80, height: 20 })));
+      await ctx.sync();
+      probe.forEach(t => t.load('width')); await ctx.sync();
+      let gap = probe[0].width - probe[1].width - probe[2].width;
+      if (!(gap > 2 && gap < 60)) gap = 13;
+      probe.forEach(t => t.delete());
+      for (const p of spots) {
+        const h = 20, y = (p.t + p.b) / 2 - h / 2;
+        const a = style(sh.addTextBox('ⓐ', { left: p.l, top: y, width: 14, height: h })); a.name = 'UULA ab a';
+        await ctx.sync(); a.load('left,width'); await ctx.sync();
+        const b = style(sh.addTextBox('ⓑ', { left: a.left + a.width + gap, top: y, width: 14, height: h })); b.name = 'UULA ab b';
+        made.push(a, b);
       }
       await ctx.sync();
       spots.forEach(p => p.shapes.forEach(s => s.delete()));
       made.forEach(t => t.load('id')); await ctx.sync();
       try { ctx.presentation.slides.getItem(id).setSelectedShapes(made.map(t => t.id)); await ctx.sync(); } catch (e) {}
-      return { boxes: made.length, replaced: spots.reduce((k, p) => k + p.shapes.length, 0) };
+      return { boxes: made.length / 2, replaced: spots.reduce((k, p) => k + p.shapes.length, 0) };
     });
-    say(n.replaced ? L('استُبدلت الأشكال المحددة بـ «ⓐ    ⓑ» (' + n.boxes + (n.boxes > 1 ? ' مربعات' : ' مربع') + ').', 'The selected shapes were replaced by «ⓐ    ⓑ» (' + n.boxes + ').') : L('تمت إضافة «ⓐ    ⓑ» في الأسفل.', '«ⓐ    ⓑ» was added at the bottom.'));
+    say(n.replaced ? L('استُبدلت الأشكال المحددة بمربعي «ⓐ» و«ⓑ»' + (n.boxes > 1 ? ' (' + n.boxes + ' أزواج)' : '') + '.', 'The selected shapes were replaced by the «ⓐ» and «ⓑ» boxes' + (n.boxes > 1 ? ' (' + n.boxes + ' pairs)' : '') + '.') : L('تمت إضافة مربعي «ⓐ» و«ⓑ» في الأسفل.', 'The «ⓐ» and «ⓑ» boxes were added at the bottom.'));
   } catch (e) { say(L('تعذّر: ', 'Could not: ') + errText(e)); }
   finally { busy = false; lock(); }
 }
@@ -4566,7 +4579,7 @@ function tplName(tid) { const it = ALL_ITEMS.find(x => x.tpl === tid); return it
 function mergedTip(it) {
   const own = ROLE_TIP[it.role || it.id];
   const parts = [];
-  if (it.id === 'ab') parts.push(L('بدون تحديد: يُدرج مربع نص فيه «ⓐ    ⓑ». مع تحديد أشكال مرسومة (دوائر الإجابة): تُستبدل بهذا المربع في مكانها، ولكل سطر مربعه.', 'Nothing selected: inserts a text box with «ⓐ    ⓑ». With drawn shapes selected (answer circles): they are replaced by that box in their place, one box per line.'));
+  if (it.id === 'ab') parts.push(L('بدون تحديد: يُدرج مربعي نص، «ⓐ» و«ⓑ»، بينهما مسافة أربع فراغات. مع تحديد أشكال مرسومة (دوائر الإجابة): تُستبدل بهما في مكانها، ولكل زوج مربعان.', 'Nothing selected: inserts two text boxes, «ⓐ» and «ⓑ», four spaces apart. With drawn shapes selected (answer circles): they are replaced by them in their place, two boxes per pair.'));
   else   if (it.id === 'mcq' || it.id === 'mcqV') parts.push(L('مع تحديد مربعَي نص أو أكثر: تُرتَّب خيارات ' + (it.id === 'mcq' ? 'في صف واحد' : 'بعضها تحت بعض') + ' بحروفها ⓐ ⓑ … وباتجاه زر الاتجاه.', 'With two or more text boxes selected: they become options ' + (it.id === 'mcq' ? 'in one row' : 'one under the other') + ', lettered ⓐ ⓑ … in the chosen direction.'));
   else if (it.role && own) parts.push(L('مع تحديد: ', 'With a selection: ') + L(own[0], own[1]));
   else if (it.role) parts.push(L('حدّد مربعًا ثم اضغط ليتحوّل إلى «' + it.ar + '».', 'Select a box, then press to turn it into «' + it.en + '».'));
