@@ -1466,6 +1466,12 @@ function circleFig(W,H,lab,comps,F,stroke,res,cc,rr,dark){
   // نقطة معتبرة فقط إن كانت على الدائرة أو على خط أو في المركز (لا حروف التسمية)
   const onSeg=q=>segs.some(([a,b])=>{ const A=pts[a], B=pts[b], L=len(sub(B,A)); if(L<1) return false; const t=dot(sub(q,A),sub(B,A))/(L*L); return t>-.05&&t<1.05&&Math.abs(crs(nrm(sub(B,A)),sub(q,A)))<band*1.5; });
   dots.forEach(d=>{ const dc=len(sub(d,cc)); if(dc<band*2){ addPt(cc); return; } if(Math.abs(dc-rr)<band*1.5||onSeg(d)) addPt(snapC(d)); });
+  // نقطة تقع داخل قطعة تقسمها إلى قطعتين (فيُسمّى كل جزء ويُوسم وحده)
+  for(let guard=0,ch=true;ch&&guard<50;guard++){ ch=false;
+    for(let i=0;i<segs.length&&!ch;i++){ const [a,b]=segs[i], A=pts[a], B=pts[b], L=len(sub(B,A)); if(L<tol*2) continue;
+      for(let k=0;k<pts.length;k++){ if(k===a||k===b) continue; const q=pts[k], t=dot(sub(q,A),sub(B,A))/(L*L); if(t<=.04||t>=.96||Math.abs(crs(nrm(sub(B,A)),sub(q,A)))>band) continue;
+        if(segs.some(([x,y])=>(x===a&&y===k)||(x===k&&y===a)||(x===k&&y===b)||(x===b&&y===k))) continue;
+        segs.splice(i,1,[a,k],[k,b]); const m0=meta[i]||{}, ar=m0.arr||0; meta.splice(i,1,Object.assign({},m0,{arr:ar&2}),Object.assign({},m0,{arr:ar&1})); ch=true; break; } } }
   const G=mkFree(pts,segs); G.sides.forEach((sd,i)=>{ if(meta[i]){ if(meta[i].arr) sd.arr=meta[i].arr; if(meta[i].dash) sd.dash=true; } });
   G.circles=[{c:cc.slice(),r:rr}];
   return Object.assign(res,{type:'lines',G});
