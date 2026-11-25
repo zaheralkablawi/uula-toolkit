@@ -560,7 +560,7 @@ function primSVG(p){
   if(p.t==='ell') return `<path d="${arcPath(p.c,p.rx,p.ry,p.a0,p.a1)}"${p.rot?` transform="rotate(${f2(p.rot)} ${f2(p.c[0])} ${f2(p.c[1])})"`:''} stroke="${p.c2}" stroke-width="${p.w}" fill="${p.fill||'none'}"${p.dash?` stroke-dasharray="${dashA(p.w)}"`:''}/>`;
   if(p.t==='pie'){ const a=ellPt(p.c,p.r,p.r,p.a0); return `<path d="M${f2(p.c[0])} ${f2(p.c[1])}L${f2(a[0])} ${f2(a[1])}${arcPath(p.c,p.r,p.r,p.a0,p.a1).replace(/^M[^A]*/,'')}Z" fill="${p.fill}" stroke="none"/>`; }
   if(p.t==='poly') return `<path d="M${p.pts.map(q=>f2(q[0])+' '+f2(q[1])).join('L')}Z" fill="${p.fill}" stroke="none"/>`;
-  if(p.t==='txt') return `<text x="${f2(p.p[0])}" y="${f2(p.p[1])}" font-family="${p.font||'UULA Sans'}" font-size="${p.fs}" fill="${p.c}" text-anchor="middle" dominant-baseline="central" direction="${p.font?'ltr':'rtl'}">${esc(p.s)}</text>`;
+  if(p.t==='txt') return `<text x="${f2(p.p[0])}" y="${f2(p.p[1])}" font-family="${p.font||'UULA Sans'}" font-size="${p.fs}" fill="${p.c}" text-anchor="middle" dominant-baseline="central" direction="${p.font||!/[\u0600-\u06FF]/.test(p.s)?'ltr':'rtl'}">${esc(p.s)}</text>`;
   if(p.t==='dot') return p.fill===false?`<circle cx="${f2(p.p[0])}" cy="${f2(p.p[1])}" r="${p.r}" fill="#ffffff" stroke="${p.c}" stroke-width="${p.w}"/>`:`<circle cx="${f2(p.p[0])}" cy="${f2(p.p[1])}" r="${p.r}" fill="${p.c}"/>`;
   return '';
 }
@@ -1043,7 +1043,8 @@ async function insertNative(pr,json,bb,slideId){
       else if(p.t==='txt'){ const w=p.fs*(.62*Math.max(1,p.s.length)+1.2), h=p.fs*1.5;
         // بُعد الاسم عن الخط بالنقاط كما في المعاينة، لأن الخط لا يُصغَّر مع الشكل
         const tx=p.from?X(p.from[0])+(p.p[0]-p.from[0])*Math.max(1,sc):X(p.p[0]), ty=p.from?Y(p.from[1])+(p.p[1]-p.from[1])*Math.max(1,sc):Y(p.p[1]);
-        const s=shapes.addTextBox(p.s,{left:tx-w/2,top:ty-h/2,width:w,height:h}); const tf=s.textFrame;
+        // كتابة بلا حروف عربية (x°، 6.8) تبقى بترتيبها في فقرة عربية الاتجاه
+        const s=shapes.addTextBox(/[\u0600-\u06FF]/.test(p.s)?p.s:'\u200E'+p.s+'\u200E',{left:tx-w/2,top:ty-h/2,width:w,height:h}); const tf=s.textFrame;
         tf.wordWrap=false; tf.autoSizeSetting='AutoSizeNone'; tf.leftMargin=0; tf.rightMargin=0; tf.topMargin=0; tf.bottomMargin=0; tf.verticalAlignment='Middle';
         tf.textRange.font.name=p.font||'UULA Sans'; tf.textRange.font.size=p.fs; tf.textRange.font.color=p.c; tf.textRange.paragraphFormat.horizontalAlignment='Center';
         s.fill.clear(); s.lineFormat.visible=false; made.push(s); }
