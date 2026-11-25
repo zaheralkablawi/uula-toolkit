@@ -4966,7 +4966,7 @@ function makeDot(ctx, shapes, d) {
 // off the slide and PowerPoint's own width of it gives where the letter ends (from the start side of the line).
 // Returns null when the letter can't be placed for sure (then the caller highlights the letter in the text instead).
 let dotMeasure = '';
-async function dotCorrect(ctx, shapes, s) {
+async function dotCorrect(ctx, shapes, s, slideId) {
   dotMeasure = '';
   if (!['TextBox', 'GeometricShape'].includes(s.type)) return null;
   const tf = s.textFrame, tr = tf.textRange;
@@ -5012,23 +5012,49 @@ async function dotCorrect(ctx, shapes, s) {
   const rtl = /^[\s]*‏/.test(first) || (/[؀-ۿ]/.test(text) && !/^[\s]*‎/.test(first));
   const al = tr.paragraphFormat.horizontalAlignment;
   const lm = tf.leftMargin || 0, rm = tf.rightMargin || 0, tm = tf.topMargin || 0, bm = tf.bottomMargin || 0;
+  // the paragraph's own margins (marL / indent) and alignment, and the box insets, read from the slide itself
+  let geo = null;
+  try {
+    const nm0 = s.name; s.name = nm0 + ' #urdot'; await ctx.sync();
+    const ex = ctx.presentation.slides.getItem(slideId).exportAsBase64(); await ctx.sync();
+    s.name = nm0; await ctx.sync();
+    const pkg = await UR.openPackage(ex.value), doc = UR.parseXml(pkg.files.slide), A = UR.NS.a, P = UR.NS.p;
+    const nv = [...doc.getElementsByTagNameNS(P, 'cNvPr')].find(n => / #urdot$/.test(n.getAttribute('name') || ''));
+    const sp = nv && nv.parentNode && nv.parentNode.parentNode;
+    if (sp) {
+      const bp = sp.getElementsByTagNameNS(A, 'bodyPr')[0], p0 = sp.getElementsByTagNameNS(A, 'p')[0], pr = p0 && [...p0.children].find(c => c.localName === 'pPr');
+      const at = (el, a, d) => el && el.hasAttribute(a) ? +el.getAttribute(a) : d;
+      geo = { lIns: at(bp, 'lIns', 91440) / 12700, rIns: at(bp, 'rIns', 91440) / 12700, tIns: at(bp, 'tIns', 45720) / 12700, bIns: at(bp, 'bIns', 45720) / 12700,
+        marL: at(pr, 'marL', 0) / 12700, indent: at(pr, 'indent', 0) / 12700, algn: pr && pr.getAttribute('algn') || null, rtl: pr && pr.getAttribute('rtl') === '1' };
+    }
+  } catch (e) { geo = null; }
+  const RTL = geo ? (geo.rtl || (geo.algn === 'r' && rtl)) : rtl;
+  const L0 = geo ? geo.lIns : lm, R0 = geo ? geo.rIns : rm, T0 = geo ? geo.tIns : tm, B0 = geo ? geo.bIns : bm;
+  // the line starts after the paragraph margin and the first-line indent (on the right for right-to-left)
+  const inStart = geo ? geo.marL + geo.indent : 0;
+  const atStart = geo ? (RTL ? geo.algn !== 'l' && geo.algn !== 'ctr' : geo.algn !== 'r' && geo.algn !== 'ctr') : al !== 'Center';
   let cx;
-  if (al === 'Center') {
-    const all = sample(first + TEN), t2 = sample(TEN); await ctx.sync(); all.load('width'); t2.load('width'); await ctx.sync(); const wl = all.width - t2.width - pad; all.delete(); t2.delete(); await ctx.sync();
-    const start = rtl ? s.left + s.width / 2 + wl / 2 : s.left + s.width / 2 - wl / 2;
-    cx = rtl ? start - (wPre - gw / 2) : start + (wPre - gw / 2);
-  } else cx = rtl ? s.left + s.width - rm - (wPre - gw / 2) : s.left + lm + (wPre - gw / 2);
-  const lines = text.split(/[\r\n\v]/).length;
-  const va = tf.verticalAlignment;
-  const lineTop = va === 'Middle' && lines === 1 ? s.top + (s.height - lh) / 2 : va === 'Bottom' && lines === 1 ? s.top + s.height - bm - lh : s.top + tm;
-  const cy = lineTop + lh * 0.5;
+  if (atStart) cx = RTL ? s.left + s.width - R0 - inStart - (wPre - gw / 2) : s.left + L0 + inStart + (wPre - gw / 2);
+  else {
+    const all = sample(first + TEN), t2 = sample(TEN); await ctx.sync(); all.load('width'); t2.load('width'); await ctx.sync(); const wl = all.width - t2.width; all.delete(); t2.delete(); await ctx.sync();
+    const inner0 = s.left + L0 + (RTL ? 0 : inStart), inner1 = s.left + s.width - R0 - (RTL ? inStart : 0);
+    const lineL = (geo ? geo.algn === 'ctr' : al === 'Center') ? (inner0 + inner1) / 2 - wl / 2 : RTL ? inner0 : inner1 - wl;
+    cx = RTL ? lineL + wl - (wPre - gw / 2) : lineL + (wPre - gw / 2);
+  }
+  const lines0 = text.split(/[\r\n\v]/).length;
+  // one line in its box: the line is the box minus its insets (exact); otherwise the measured line height
+  const lineH = lines0 === 1 && s.height - T0 - B0 > fs * 0.6 ? Math.min(lh, s.height - T0 - B0) : lh;
+  const va0 = tf.verticalAlignment;
+  const top0 = va0 === 'Middle' && lines0 === 1 ? s.top + (s.height - lineH) / 2 : va0 === 'Bottom' && lines0 === 1 ? s.top + s.height - B0 - lineH : s.top + T0;
+  const cyM = top0 + lineH * 0.5;
+  const cy = cyM;
   // the circle drawn in the glyph is about the size of the font (its advance has room on both sides)
   const dia = Math.round(Math.min(gw * 0.92, fs * 0.98) * 10) / 10;
   // already done (pressed twice): one circle is enough
   const all = shapes; all.load('items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
   if (all.items.some(x => /UULA CorrectDot/.test(x.name || '') && Math.abs(x.left + x.width / 2 - cx) < dia / 2 && Math.abs(x.top + x.height / 2 - cy) < dia / 2)) return { id: null };
   sub.font.color = '#FFFFFF';
-  const d = { left: Math.round((cx - dia / 2) * 10) / 10, top: Math.round((cy - dia / 2) * 10) / 10, size: dia, font: Math.round(fs * 0.62 * 2) / 2, letter: String.fromCharCode(first.charCodeAt(idx) - 0x24D0 + 97), name: null };
+  const d = { left: Math.round((cx - dia / 2) * 10) / 10, top: Math.round((cy - dia / 2) * 10) / 10, size: dia, font: Math.round(fs * 0.8 * 2) / 2, letter: String.fromCharCode(first.charCodeAt(idx) - 0x24D0 + 97), name: null };
   const c = makeDot(ctx, shapes, d);
   c.load('id'); await ctx.sync();
   return { id: c.id, d };
@@ -5071,7 +5097,7 @@ async function quietMark(role, keepColour) {
       // the correct choice: its circled letter is filled in the text itself right after (see fillSlide)
       if (role === 'correct' && ['TextBox', 'GeometricShape'].includes(s.type)) {
         await ctx.sync();
-        const dot = await dotCorrect(ctx, ctx.presentation.slides.getItem(id).shapes, s).catch(e => { dotMeasure = (dotMeasure ? dotMeasure + ' ' : '') + 'err: ' + errText(e); return null; });
+        const dot = await dotCorrect(ctx, ctx.presentation.slides.getItem(id).shapes, s, id).catch(e => { dotMeasure = (dotMeasure ? dotMeasure + ' ' : '') + 'err: ' + errText(e); return null; });
         if (dot && dot.id) (undoStack[undoStack.length - 1].added = undoStack[undoStack.length - 1].added || []).push(dot);
         // the place could not be measured: the letter is highlighted in the text instead (see fillSlide)
         if (!dot) { s.name = s.name + ' #urfill'; fillAfter = true; }
