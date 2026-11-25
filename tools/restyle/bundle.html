@@ -4992,20 +4992,27 @@ async function dotCorrect(ctx, shapes, s) {
     try { const f = t.textFrame; f.wordWrap = false; f.autoSizeSetting = 'AutoSizeShapeToFitText'; f.leftMargin = 0; f.rightMargin = 0; f.topMargin = 0; f.bottomMargin = 0; const ft = f.textRange.font; ft.size = fs; if (fname) ft.name = fname; } catch (e) {}
     return t;
   };
-  const pre = sample(first.slice(0, idx + 1)), one = sample(first[idx]);
+  // PowerPoint adds its own room around a sample (a minimum size / padding): it is taken out by difference —
+  // one letter vs the letter twice (width), one line vs two lines (height)
+  const L1 = first[idx];
+  const pre = sample(first.slice(0, idx + 1)), one = sample(L1), two = sample(L1 + L1), rows = sample(L1 + '\n' + L1);
   await ctx.sync();
-  pre.load('width,height'); one.load('width,height'); await ctx.sync();
-  const wPre = pre.width, gw = one.width, lh = one.height;
-  pre.delete(); one.delete(); await ctx.sync();
-  // the sizes did not follow the text (the box kept its first size): not sure → the other way
-  if (!(gw > 1 && gw < 200 && Math.abs(gw - 400) > 0.5 && Math.abs(lh - 40) > 0.5 && wPre >= gw - 0.5)) return null;
+  [pre, one, two, rows].forEach(x => x.load('width,height')); await ctx.sync();
+  const w1 = one.width, w2 = two.width, h1 = one.height, h2 = rows.height;
+  const g = w2 - w1, pad = w1 - g, lh = h2 - h1, padV = h1 - lh;
+  const wPre = pre.width - pad;
+  [pre, one, two, rows].forEach(x => x.delete()); await ctx.sync();
+  // the sizes did not follow the text: not sure → the other way
+  if (!(g > fs * 0.4 && g < fs * 1.6 && lh > fs * 0.6 && lh < fs * 3 && wPre >= g - 0.5)) return null;
+  const gw = g;
+  void padV;
   // the start side of the line: right for Arabic text (or a right-to-left mark), left otherwise
   const rtl = /^[\s]*‏/.test(first) || (/[؀-ۿ]/.test(text) && !/^[\s]*‎/.test(first));
   const al = tr.paragraphFormat.horizontalAlignment;
   const lm = tf.leftMargin || 0, rm = tf.rightMargin || 0, tm = tf.topMargin || 0, bm = tf.bottomMargin || 0;
   let cx;
   if (al === 'Center') {
-    const all = sample(first); await ctx.sync(); all.load('width'); await ctx.sync(); const wl = all.width; all.delete(); await ctx.sync();
+    const all = sample(first); await ctx.sync(); all.load('width'); await ctx.sync(); const wl = all.width - pad; all.delete(); await ctx.sync();
     const start = rtl ? s.left + s.width / 2 + wl / 2 : s.left + s.width / 2 - wl / 2;
     cx = rtl ? start - (wPre - gw / 2) : start + (wPre - gw / 2);
   } else cx = rtl ? s.left + s.width - rm - (wPre - gw / 2) : s.left + lm + (wPre - gw / 2);
@@ -5013,7 +5020,7 @@ async function dotCorrect(ctx, shapes, s) {
   const va = tf.verticalAlignment;
   const lineTop = va === 'Middle' && lines === 1 ? s.top + (s.height - lh) / 2 : va === 'Bottom' && lines === 1 ? s.top + s.height - bm - lh : s.top + tm;
   const cy = lineTop + lh * 0.5;
-  const dia = Math.round(Math.min(gw, lh) * 0.92 * 10) / 10;
+  const dia = Math.round(Math.min(gw * 0.92, fs * 0.95) * 10) / 10;
   // already done (pressed twice): one circle is enough
   const all = shapes; all.load('items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
   if (all.items.some(x => /UULA CorrectDot/.test(x.name || '') && Math.abs(x.left + x.width / 2 - cx) < dia / 2 && Math.abs(x.top + x.height / 2 - cy) < dia / 2)) return { id: null };
