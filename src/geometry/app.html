@@ -1193,9 +1193,13 @@ function recognize(im){
   // دائرة (بحث عشوائي على كل الحبر): قبل المجسمات، فالأشعة والأوتار الخارجة منها تفسد الصورة الظلية
   { // الحبر الفاتح الملون (دائرة زرقاء فاتحة في الكتب) يدخل في البحث عن الدائرة فقط
     // خط رفيع لا تعبئة: على جانبيه بياض قريب
-    const wht=(x,y)=>{ if(x<0||y<0||x>=W||y>=H) return true; const j=y*W+x, r0=D[4*j], g0=D[4*j+1], b0=D[4*j+2]; return gray[j]>238&&Math.max(r0,g0,b0)-Math.min(r0,g0,b0)<30; };
+    // خط رفيع لا تعبئة: على جانبيه خلفية متشابهة (بيضاء أو ملونة فاتحة) تختلف عن لون الخط
+    const cd=(i,j)=>Math.abs(D[4*i]-D[4*j])+Math.abs(D[4*i+1]-D[4*j+1])+Math.abs(D[4*i+2]-D[4*j+2]);
     const lite=i=>{ const r0=D[4*i], g0=D[4*i+1], b0=D[4*i+2], mx=Math.max(r0,g0,b0), mn=Math.min(r0,g0,b0); if(!(gray[i]<238&&mx-mn>38)) return false;
-      const x=i%W, y=(i-x)/W, k=Math.max(3,stroke+1); return (wht(x-k,y)&&wht(x+k,y))||(wht(x,y-k)&&wht(x,y+k))||(wht(x-k,y-k)&&wht(x+k,y+k))||(wht(x-k,y+k)&&wht(x+k,y-k)); };
+      const x=i%W, y=(i-x)/W, k=Math.max(3,stroke+1);
+      const side=(dx,dy)=>{ const x1=x-dx*k, y1=y-dy*k, x2=x+dx*k, y2=y+dy*k; if(x1<0||y1<0||x2<0||y2<0||x1>=W||x2>=W||y1>=H||y2>=H) return false; const j1=y1*W+x1, j2=y2*W+x2;
+        return gray[j1]>200&&gray[j2]>200&&cd(j1,j2)<36&&cd(i,j1)>60&&cd(i,j2)>60&&!dark[j1]&&!dark[j2]; };
+      return side(1,0)||side(0,1)||side(1,1)||side(1,-1); };
     const anyInk=i=>{ if(dark[i]) return true; const r0=D[4*i], g0=D[4*i+1], b0=D[4*i+2]; return (r0>140&&r0-g0>70&&r0-b0>70)||lite(i); };   // الحبر + الأحمر (قوس ملوّن على الدائرة)
     const IP=[]; const bigC=new Set(comps.filter(c=>c.d>=F.d*.25).map(c=>c.id)); for(let i=0;i<N;i++) if(lab[i]>=0?bigC.has(lab[i]):lite(i)) IP.push(i);
     const cv=(c,r)=>{ let n=0; for(let k=0;k<120;k++){ const a=k*Math.PI/60, x=c[0]+Math.cos(a)*r, y=c[1]+Math.sin(a)*r; let on=false;
