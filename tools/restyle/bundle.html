@@ -79,8 +79,8 @@ h1 .sub{color:#9aa3b0;font-size:13px;line-height:15px;font-weight:500}
 .selhint b{color:#9aa3ad;font-weight:400}
 .selhint[data-on="1"]{color:#1f71de;background:#e7effc;border-color:#b9d0f5}
 .selhint[data-on="1"] b{color:#1f71de}
-.selhint[data-on="need"]{color:#b4541a;background:#fff4e5;border-color:#f3c58f}
-.selhint[data-on="need"] b{color:#b4541a;font-weight:700}
+.selhint[data-on="need"]{color:#c62828;background:#fdecec;border-color:#f2a7a7}
+.selhint[data-on="need"] b{color:#c62828;font-weight:700}
 .tbtn[style*="background"]:hover{filter:brightness(.95)}
 .tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
 .tbtn{font:inherit;font-size:.72rem;min-height:24px;padding:1px 5px;white-space:nowrap;overflow:hidden;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);cursor:pointer;text-align:start;display:flex;align-items:center;gap:4px;line-height:1.2}
@@ -4815,7 +4815,7 @@ function needSel(it) {
   const msg = L('حدّد أولًا الكائن الذي تريد تحويله إلى «' + it.ar + '»', 'First select the object to turn into «' + it.en + '»');
   say(msg + '.');
   const h = $('selHint'); if (!h) return;
-  h.dataset.on = 'need'; h.innerHTML = '<b>!</b> ' + msg;
+  h.dataset.on = 'need'; h.innerHTML = msg + ' <b>!</b>';
   clearTimeout(needTimer); needTimer = setTimeout(selPaint, 3500);
 }
 $('roles').addEventListener('click', e => { const b = e.target.closest('.tbtn'); if (b) mergedPress(b.dataset.item); });
@@ -5098,7 +5098,7 @@ function needCorrect() {
   const msg = L('حدّد الخيار الصحيح أولًا', 'Select the correct choice first');
   say(msg + '.');
   const h = $('selHint'); if (!h) return;
-  h.dataset.on = 'need'; h.innerHTML = '<b>!</b> ' + msg;
+  h.dataset.on = 'need'; h.innerHTML = msg + ' <b>!</b>';
   clearTimeout(needTimer); needTimer = setTimeout(selPaint, 3500);
 }
 // (kept, not on a button now) every choice marked correct before (or whose circled letter is blue) on the
