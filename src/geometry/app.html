@@ -649,7 +649,8 @@ function freeTool(t,e){ const G=S.p, h=t.dataset.h, i=+t.dataset.i;
 // النقر على خط ضلع داخل منطقة زاوية (ضلع قصير): الضلع أولى من الزاوية
 function sideUnder(t,e){ if(!t||t.dataset.h!=='ang'||S.tab!=='p') return t; const q=svgPt(e), G=S.p, P=G.pts, n=P.length;
   const segs=G.kind==='free'?G.sides.map((sd,i)=>[P[sd.a],P[sd.b],i]):P.map((p,i)=>[p,P[(i+1)%n],i]);
-  let best=null, bd=3.5; segs.forEach(([a,b,i])=>{ const d=sub(b,a), L2=dot(d,d)||1, u=Math.max(0,Math.min(1,dot(sub(q,a),d)/L2)), dd=len(sub(q,add(a,mul(d,u)))); if(u>.08&&u<.92&&dd<bd){ bd=dd; best=i; } });
+  // فقط للأضلاع القصيرة (تقع كلها تقريبًا داخل منطقة الزاوية)، وإلا فالنقر داخل الزاوية الضيقة يبقى للزاوية
+  let best=null, bd=3; segs.forEach(([a,b,i])=>{ const d=sub(b,a), L2=dot(d,d)||1, u=Math.max(0,Math.min(1,dot(sub(q,a),d)/L2)), dd=len(sub(q,add(a,mul(d,u)))); if(L2<70*70&&u>.08&&u<.92&&dd<bd){ bd=dd; best=i; } });
   if(best==null) return t; return $('fig').querySelector(`[data-h="side"][data-i="${best}"]`)||t; }
 $('fig').addEventListener('pointerdown',e=>{
   if(e.button!==0&&e.pointerType==='mouse') return;   // الزر الأيمن للقائمة فقط
