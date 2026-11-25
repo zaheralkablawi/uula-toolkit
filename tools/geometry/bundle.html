@@ -1005,7 +1005,9 @@ const canNative=()=>{ try{ return Office.context.requirements.isSetSupported('Po
 function normA(a){ return ((a%360)+360)%360; }
 
 // يبني الشكل في الشريحة أشكالاً عادية مجمّعة
+let GROUP_MADE=false;
 async function insertNative(pr,json,bb,slideId){
+  GROUP_MADE=false;
   await PowerPoint.run(async ctx=>{
     const shapes=slideId?ctx.presentation.slides.getItem(slideId).shapes:ctx.presentation.getSelectedSlides().getItemAt(0).shapes;
     let ox=60, oy=60, sc=1;
@@ -1055,7 +1057,7 @@ async function insertNative(pr,json,bb,slideId){
       arcs.forEach(a=>{ a.s.adjustments.set(0,conv(a.a0)); a.s.adjustments.set(1,conv(a.a1)); }); }
     if(tris.length){ const v=tris[0].s.adjustments.get(0); await ctx.sync(); const k=(v.value||.5)/.5; tris.forEach(o=>o.s.adjustments.set(0,o.t*k)); }
     made.forEach(s=>s.load('id')); await ctx.sync();
-    const g=shapes.addGroup(made.map(s=>s.id)); g.name=TITLE; g.tags.add(TAG,json); await ctx.sync();
+    const g=shapes.addGroup(made.map(s=>s.id)); g.name=TITLE; g.tags.add(TAG,json); g.load('id'); await ctx.sync(); GROUP_MADE=true;
     if(EDIT){ const old=shapes.getItemOrNullObject(EDIT.id); await ctx.sync();
       // الصورة الأصلية لا تُحذف: تُنقل خارج الشريحة إلى يسارها للمراجعة
       if(!old.isNullObject){ if(EDIT.pic){
@@ -1070,10 +1072,14 @@ async function insertNative(pr,json,bb,slideId){
   });
 }
 async function insertPicPPT(svg,json){
+  // الصورة الأصلية المحددة لا تُستبدل: يُلغى التحديد أولاً ثم تُنقل إلى يسار الشريحة
+  if(EDIT&&EDIT.pic){ try{ await PowerPoint.run(async ctx=>{ ctx.presentation.setSelectedShapes([]); await ctx.sync(); }); }catch(e){} }
   await setSel(svg);
   await PowerPoint.run(async ctx=>{ const shapes=ctx.presentation.getSelectedSlides().getItemAt(0).shapes; shapes.load('items/id'); await ctx.sync();
     const s=shapes.items[shapes.items.length-1]; s.name=TITLE; s.tags.add(TAG,json);
-    if(EDIT){ s.left=EDIT.left; s.top=EDIT.top; const old=shapes.getItemOrNullObject(EDIT.id); await ctx.sync(); if(!old.isNullObject) old.delete(); EDIT.id=s.id; }
+    if(EDIT){ s.left=EDIT.left; s.top=EDIT.top; const old=shapes.getItemOrNullObject(EDIT.id); old.load('id,width,left'); await ctx.sync();
+      if(!old.isNullObject&&old.id!==s.id){ if(EDIT.pic){ if(old.left>=0){ old.tags.add('UULA_GEO_SRC',JSON.stringify({left:EDIT.left,top:EDIT.top})); old.left=-old.width-20; } } else old.delete(); }
+      EDIT.id=s.id; }
     await ctx.sync(); });
 }
 async function insertWord(svg,json){
@@ -1090,7 +1096,8 @@ $('insert').onclick=async()=>{
   try{
     let note='';
     if(HOST==='PowerPoint'){
-      if(canNative()){ try{ await insertNative(pr,json,bb); } catch(err){ console.error(err); await insertPicPPT(out.svg,json); note=L('asPic'); } }
+      // إذا بُني الشكل فعلاً ثم حدث خطأ في الخطوات الأخيرة فلا يُدرج كصورة فوقه
+      if(canNative()){ try{ await insertNative(pr,json,bb); } catch(err){ console.error(err); if(GROUP_MADE) throw err; await insertPicPPT(out.svg,json); note=L('asPic'); } }
       else { await insertPicPPT(out.svg,json); note=L('asPic'); }
     } else await insertWord(out.svg,json);
     msg(note||L(EDIT?'updated':'inserted'),note?'':'good');
