@@ -5005,7 +5005,8 @@ async function dotCorrect(ctx, shapes, s) {
   [pre, ten, eleven, r2, r3].forEach(x => x.delete()); await ctx.sync();
   // the sizes did not follow the text: not sure → the other way
   dotMeasure = 'g=' + g.toFixed(1) + ' lh=' + lh.toFixed(1) + ' pre=' + wPre.toFixed(1) + ' fs=' + fs;
-  if (!(g > fs * 0.4 && g < fs * 1.6 && lh > fs * 0.6 && lh < fs * 3 && wPre >= g - 0.5)) return null;
+  // (the circled letter's advance is wide in the Mac fonts — about 1.65 × the size — so only absurd values are refused)
+  if (!(g > fs * 0.4 && g < fs * 3 && lh > fs * 0.6 && lh < fs * 4 && wPre >= g - 0.5)) return null;
   const gw = g, pad = 0;
   // the start side of the line: right for Arabic text (or a right-to-left mark), left otherwise
   const rtl = /^[\s]*‏/.test(first) || (/[؀-ۿ]/.test(text) && !/^[\s]*‎/.test(first));
@@ -5021,7 +5022,8 @@ async function dotCorrect(ctx, shapes, s) {
   const va = tf.verticalAlignment;
   const lineTop = va === 'Middle' && lines === 1 ? s.top + (s.height - lh) / 2 : va === 'Bottom' && lines === 1 ? s.top + s.height - bm - lh : s.top + tm;
   const cy = lineTop + lh * 0.5;
-  const dia = Math.round(Math.min(gw * 0.92, fs * 0.95) * 10) / 10;
+  // the circle drawn in the glyph is about the size of the font (its advance has room on both sides)
+  const dia = Math.round(Math.min(gw * 0.92, fs * 0.98) * 10) / 10;
   // already done (pressed twice): one circle is enough
   const all = shapes; all.load('items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
   if (all.items.some(x => /UULA CorrectDot/.test(x.name || '') && Math.abs(x.left + x.width / 2 - cx) < dia / 2 && Math.abs(x.top + x.height / 2 - cy) < dia / 2)) return { id: null };
