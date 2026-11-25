@@ -4254,7 +4254,7 @@ const ROLES = [
 ];
 // the same buttons beside «Hide solutions» only mark: the colour stays as it is (colours are set in «Format»)
 const SOL_TIP = {
-  answer: ['يعلّم المحدد كحل فيُخفى عند «إخفاء الحلول». لا يغيّر اللون ولا يتحرك شيء.', 'Marks the selection as a solution, so «Hide solutions» hides it. The colour stays and nothing moves.'],
+  answer: ['يعلّم المحدد كحل فيُخفى عند «إخفاء الحلول». لا يغيّر اللون ولا يتحرك شيء، إلا الجدول: تصير كتابته زرقاء مباشرة.', 'Marks the selection as a solution, so «Hide solutions» hides it. The colour stays and nothing moves — except a table: its text turns blue at once.'],
   correct: ['يعلّم المحدد كخيار صحيح، فيتحول للأسود عند «إخفاء الحلول». لا يغيّر اللون.', 'Marks the selection as the correct choice; it turns black when solutions are hidden. The colour stays.'],
   given: ['شكل أو نص من السؤال نفسه: يبقى ظاهرًا عند «إخفاء الحلول» حتى لو كان أزرق.', 'A shape or text that belongs to the question: it stays when solutions are hidden, even if blue.'],
   graph: ['تمثيل بياني هو حل: عند «إخفاء الحلول» تحل مكانه شبكة بيانية فارغة بنفس مقاسه، ويرجع عند «إظهار الحلول». (أي رسم آخر كالمثلث ميّزه «حل السؤال» فيُخفى بلا شبكة)', 'A graph that is a solution: on «Hide solutions» an empty graph grid of the same size takes its place; it comes back on «Show solutions». (Other drawings, like a triangle: mark them «Solution» to hide them without a grid)']
@@ -4661,6 +4661,27 @@ async function undoOp() {
 }
 // «Undo» / «Redo» of the marks given with the solution buttons (name, text colour, place), in place
 const undoStack = [], redoStack = [];
+// the text colour of every cell of a table (null where PowerPoint can't tell, or the API is missing)
+async function tableCells(ctx, shape) {
+  try {
+    const t = shape.getTable(); t.load('rowCount,columnCount'); await ctx.sync();
+    const cells = [];
+    for (let r = 0; r < t.rowCount; r++) for (let c = 0; c < t.columnCount; c++) {
+      const cell = t.getCellOrNullObject(r, c); cell.load('isNullObject'); cell.font.load('color'); cells.push({ r, c, cell });
+    }
+    await ctx.sync();
+    return cells.filter(x => !x.cell.isNullObject);
+  } catch (e) { return null; }
+}
+async function tableColours(ctx, shape) {
+  const cells = await tableCells(ctx, shape);
+  return cells ? cells.map(x => ({ r: x.r, c: x.c, color: x.cell.font.color || null })) : null;
+}
+async function paintTable(ctx, shape, colour) {
+  const cells = await tableCells(ctx, shape); if (!cells) return false;
+  cells.forEach(x => { try { x.cell.font.color = colour; } catch (e) {} });
+  await ctx.sync(); return true;
+}
 function undoPaint() {
   const u = $('undoBtn'), r = $('redoBtn');
   if (u) u.disabled = busy || !supported || !undoStack.length;
@@ -4672,7 +4693,8 @@ async function snapState(ctx, slide, ids) {
   const list = ids.map(id => sh.items.find(x => x.id === id)).filter(Boolean);
   const fonts = list.map(x => { if (!['TextBox', 'GeometricShape'].includes(x.type)) return null; try { const f = x.textFrame.textRange.font; f.load('color,bold'); return f; } catch (e) { return null; } });
   await ctx.sync();
-  return { slide, items: list.map((x, k) => ({ id: x.id, name: x.name, left: x.left, color: fonts[k] ? fonts[k].color : null, bold: fonts[k] ? fonts[k].bold : null })) };
+  const cells = []; for (const x of list) cells.push(x.type === 'Table' ? await tableColours(ctx, x) : null);
+  return { slide, items: list.map((x, k) => ({ id: x.id, name: x.name, left: x.left, color: fonts[k] ? fonts[k].color : null, bold: fonts[k] ? fonts[k].bold : null, cells: cells[k] })) };
 }
 async function stepMark(dir) {
   const from = dir < 0 ? undoStack : redoStack, to = dir < 0 ? redoStack : undoStack;
@@ -4685,6 +4707,7 @@ async function stepMark(dir) {
       const s = sh.items.find(x => x.id === it.id); if (!s) continue;
       s.name = it.name; s.left = it.left; n++;
       if (it.color || it.bold != null) { try { const f = s.textFrame.textRange.font; if (it.color) f.color = it.color; if (it.bold != null) f.bold = it.bold; } catch (e) {} }
+      if (it.cells) { try { const t = s.getTable(); for (const c of it.cells) if (c.color) t.getCellOrNullObject(c.r, c.c).font.color = c.color; } catch (e) {} }
     }
     await ctx.sync(); return n;
   });
@@ -4701,7 +4724,10 @@ async function quietMark(role, keepColour) {
     // what they were, for «Undo»
     const fonts = sel.map(x => { if (!['TextBox', 'GeometricShape'].includes(x.type)) return null; try { const f = x.textFrame.textRange.font; f.load('color,bold'); return f; } catch (e) { return null; } });
     sel.forEach(x => x.load('id')); await ctx.sync();
-    undoStack.push({ slide: id, items: sel.map((x, k) => ({ id: x.id, name: x.name, left: x.left, color: fonts[k] ? fonts[k].color : null, bold: fonts[k] ? fonts[k].bold : null })) });
+    // a table marked as (part of) a solution: its text turns solution blue at once
+    const blueTable = role === 'answer';
+    const cells = []; for (const x of sel) cells.push(blueTable && x.type === 'Table' ? await tableColours(ctx, x) : null);
+    undoStack.push({ slide: id, items: sel.map((x, k) => ({ id: x.id, name: x.name, left: x.left, color: fonts[k] ? fonts[k].color : null, bold: fonts[k] ? fonts[k].bold : null, cells: cells[k] })) });
     if (undoStack.length > 30) undoStack.shift();
     redoStack.length = 0;
     undoPaint();
@@ -4716,6 +4742,7 @@ async function quietMark(role, keepColour) {
         s.delete(); continue;
       }
       s.name = 'UULA:' + role + ' ' + base(s.name);
+      if (blueTable && s.type === 'Table') await paintTable(ctx, s, '#' + (QUIET.answer || '1F71DE'));
       if (QUIET[role] && !keepColour && ['TextBox', 'GeometricShape'].includes(s.type)) {
         try { const f = s.textFrame.textRange.font; f.color = '#' + QUIET[role]; if (role === 'correct') f.bold = true; } catch (e) {}
       }
