@@ -1087,7 +1087,7 @@ $('loadSelItem').addEventListener('click',async()=>{
 /* ---------- تحويل صورة شكل إلى شكل هندسي (تعرّف تلقائي) ---------- */
 function loadImg(src){ return new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=src; }); }
 function recognize(im){
-  const MAX=480, k=Math.min(1,MAX/Math.max(im.naturalWidth,im.naturalHeight)), W=Math.max(8,Math.round(im.naturalWidth*k)), H=Math.max(8,Math.round(im.naturalHeight*k));
+  const IW=im.naturalWidth||im.width, IH=im.naturalHeight||im.height, MAX=480, k=Math.min(1,MAX/Math.max(IW,IH)), W=Math.max(8,Math.round(IW*k)), H=Math.max(8,Math.round(IH*k));   // الصور الصغيرة تُكبَّر حتى مرتين
   const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,W,H); g.drawImage(im,0,0,W,H);
   const D=g.getImageData(0,0,W,H).data, N=W*H, gray=new Uint8Array(N), hist=new Array(256).fill(0);
   for(let i=0;i<N;i++){ const v=Math.round(.299*D[4*i]+.587*D[4*i+1]+.114*D[4*i+2]); gray[i]=v; hist[v]++; }
@@ -1211,12 +1211,13 @@ function lineFig(W,H,lab,comps,F,stroke,res,skip){
   const NT=180, CS=[], SN=[]; for(let t=0;t<NT;t++){ CS.push(Math.cos(t*Math.PI/NT)); SN.push(Math.sin(t*Math.PI/NT)); }
   const RM=Math.ceil(Math.hypot(W,H)), RW=2*RM+1, alive=new Uint8Array(px.length).fill(1), band=stroke+1.5, minL=F.d*.16, gapMax=Math.max(4,stroke*3+2), dashGap=Math.max(8,F.d*.045), lines=[];
   const cover=(p0,d,t)=>{ const n=perp(d), q=add(p0,mul(d,t)); for(let o=-band;o<=band;o+=1) if(ink(add(q,mul(n,o)))) return true; return false; };
-  const run=(p0,d)=>{ const cv=[]; for(let t=-RM;t<=RM;t++) cv.push(cover(p0,d,t)?1:0);
+  const run=(p0,d)=>{ const cv=[]; for(let t=-RM;t<=RM;t++){ const c1=cover(p0,d,t); let v=c1?1:0; if(!v&&skip){ const q=add(p0,mul(d,t)); if(skip(Math.round(q[0]),Math.round(q[1]))) v=2; } cv.push(v); }
     let best=null, cur=null, gap=0;
     for(let k=0;k<=cv.length;k++){ const v=k<cv.length&&cv[k];
       if(v){ if(cur&&gap<=dashGap){ cur.t1=k; cur.on+=1; if(gap>gapMax) cur.dg++; } else { cur={t0:k,t1:k,on:1,dg:0}; } gap=0; }
       else if(cur){ gap++; if(gap>dashGap||k===cv.length){ if(!best||cur.t1-cur.t0>best.t1-best.t0) best=cur; cur=null; gap=0; } } }
-    if(!best) return null; return {t0:best.t0-RM,t1:best.t1-RM,cov:best.on/(best.t1-best.t0+1),dg:best.dg}; };
+    if(!best) return null; while(best.t0<best.t1&&cv[best.t0]===2) best.t0++; while(best.t1>best.t0&&cv[best.t1]===2) best.t1--;   // الطرفان على حبر حقيقي
+    return {t0:best.t0-RM,t1:best.t1-RM,cov:best.on/(best.t1-best.t0+1),dg:best.dg}; };
   const AL=M.slice();   // البكسلات التي لم تُنسب لمستقيم بعد
   for(let it=0;it<16;it++){
     const acc=new Int32Array(NT*RW);
@@ -1408,6 +1409,33 @@ function circleFig(W,H,lab,comps,F,stroke,res,cc,rr,dark){
   G.circles=[{c:cc.slice(),r:rr}];
   return Object.assign(res,{type:'lines',G});
 }
+// صورة فيها أكثر من شكل منفصل (الشكل 1، الشكل 2…): كل شكل يُقرأ وحده ثم تُجمع في شكل مركب واحد
+function recognizeMulti(im){
+  const IW=im.naturalWidth||im.width, IH=im.naturalHeight||im.height, k=Math.min(1,900/Math.max(IW,IH)), W=Math.round(IW*k), H=Math.round(IH*k);
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,W,H); g.drawImage(im,0,0,W,H);
+  const D=g.getImageData(0,0,W,H).data, C=6, GW=Math.ceil(W/C), GH=Math.ceil(H/C), occ=new Uint8Array(GW*GH);
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){ const i=4*(y*W+x), r0=D[i], g0=D[i+1], b0=D[i+2], gr=.299*r0+.587*g0+.114*b0, mx=Math.max(r0,g0,b0), mn=Math.min(r0,g0,b0);
+    if(gr<170||(mx>0&&(mx-mn)/mx>.45&&gr<185)) occ[Math.floor(y/C)*GW+Math.floor(x/C)]=1; }
+  const lab=new Int32Array(GW*GH).fill(-1), cl=[];
+  for(let i=0;i<GW*GH;i++){ if(!occ[i]||lab[i]>=0) continue; const st=[i]; lab[i]=cl.length; let x0=1e9,y0=1e9,x1=-1,y1=-1,n=0;
+    while(st.length){ const j=st.pop(), x=j%GW, y=(j-x)/GW; n++; x0=Math.min(x0,x); y0=Math.min(y0,y); x1=Math.max(x1,x); y1=Math.max(y1,y);
+      for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){ const xx=x+dx, yy=y+dy; if(xx<0||yy<0||xx>=GW||yy>=GH) continue; const q=yy*GW+xx; if(occ[q]&&lab[q]<0){ lab[q]=cl.length; st.push(q); } } }
+    cl.push({x0:x0*C,y0:y0*C,x1:(x1+1)*C,y1:(y1+1)*C,n,d:Math.hypot(x1-x0,y1-y0)*C}); }
+  if(cl.length<2) return null; const md=Math.max(...cl.map(c=>c.d)); const big=cl.filter(c=>c.d>=md*.35);
+  if(big.length<2) return null;
+  const G={kind:'free',sub:'',n:0,pts:[],verts:[],sides:[],angs:{},on:{},circles:[]};
+  let ok=0;
+  big.forEach(c=>{ const m=Math.round(Math.max(c.x1-c.x0,c.y1-c.y0)*.06), x0=Math.max(0,c.x0-m), y0=Math.max(0,c.y0-m), x1=Math.min(W,c.x1+m), y1=Math.min(H,c.y1+m);
+    const cc=document.createElement('canvas'); cc.width=x1-x0; cc.height=y1-y0; cc.getContext('2d').drawImage(cv,x0,y0,x1-x0,y1-y0,0,0,x1-x0,y1-y0);
+    const r=recognize(cc); if(!r) return; let Gi=null;
+    if(r.type==='lines') Gi=r.G; else if(r.type==='poly') Gi=r.alt||compose(r,classify(r)); else if(r.type==='circle'){ Gi=mkFree([],[]); Gi.circles=[{c:r.c,r:r.r}]; }
+    if(!Gi) return; const f=(x1-x0)/r.W, T=p=>[x0+p[0]*f,y0+p[1]*f], off=G.pts.length;
+    Gi.pts.forEach((p,i)=>{ G.pts.push(T(p)); G.verts.push(Object.assign({},Gi.verts[i],{name:NAMES[G.verts.length]||''})); });
+    Gi.sides.forEach(sd=>G.sides.push(Object.assign({},sd,{a:sd.a+off,b:sd.b+off})));
+    (Gi.circles||[]).forEach(o=>G.circles.push({c:T(o.c),r:o.r*f})); ok++; });
+  if(ok<2) return null; G.n=G.pts.length;
+  return {type:'lines',G,W,H};
+}
 // هل يوجد خط مرسوم بين نقطتين في الصورة؟
 function lineIn(r,a,b){ let hit=0,n=0; for(let t=.12;t<=.88;t+=.02){ const x=Math.round(a[0]+(b[0]-a[0])*t), y=Math.round(a[1]+(b[1]-a[1])*t); if(x<0||y<0||x>=r.W||y>=r.H) continue; n++; if(r.inner[y*r.W+x]) hit++; } return n&&hit/n>.85; }
 const PX=(r,p)=>{ const x=Math.round(p[0]), y=Math.round(p[1]); return x>=0&&y>=0&&x<r.W&&y<r.H&&r.all[y*r.W+x]; };
@@ -1553,7 +1581,7 @@ function classify(r){
 }
 async function pictureToShape(src,ed){
   msg(L('picReading'));
-  const im=await loadImg(src), r=recognize(im);
+  const im=await loadImg(src), r0=recognize(im), r=(r0&&r0.type==='solid')?r0:(recognizeMulti(im)||r0);   // المجسم يبقى شكلًا واحدًا
   if(!r){ msg(L('picFail'),'bad'); return; }
   push(); closePop(); S.empty=false;
   const A=ed&&ed.width?ed.width/r.W:0;   // من بكسلات الصورة إلى نقاط الشريحة
