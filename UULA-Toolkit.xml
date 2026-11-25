@@ -5,7 +5,7 @@
   xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
   xsi:type="TaskPaneApp">
   <Id>36f5f959-c945-487a-b5d3-c33d6c76f199</Id>
-  <Version>1.5.0.0</Version>
+  <Version>1.6.0.0</Version>
   <ProviderName>Zaher Alkablawi</ProviderName>
   <DefaultLocale>ar-SA</DefaultLocale>
   <DisplayName DefaultValue="UULA Toolkit"/>
@@ -100,6 +100,16 @@
                   <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_cover</TaskpaneId><SourceLocation resid="T.cover.u"/></Action>
                 </Control>
               </Group>
+              <Group id="UULATK.GMoreP">
+                <Label resid="TK.More"/>
+                <Icon><bt:Image size="16" resid="TK.MoreI16"/><bt:Image size="32" resid="TK.MoreI32"/><bt:Image size="80" resid="TK.MoreI80"/></Icon>
+                <Control xsi:type="Button" id="UULATK.MoreP">
+                  <Label resid="TK.More"/>
+                  <Supertip><Title resid="TK.More"/><Description resid="TK.MoreTip"/></Supertip>
+                  <Icon><bt:Image size="16" resid="TK.MoreI16"/><bt:Image size="32" resid="TK.MoreI32"/><bt:Image size="80" resid="TK.MoreI80"/></Icon>
+                  <Action xsi:type="ShowTaskpane"><TaskpaneId>UULAToolkitMore</TaskpaneId><SourceLocation resid="TK.MoreU"/></Action>
+                </Control>
+              </Group>
               <Label resid="TK.Tab"/>
             </CustomTab>
           </ExtensionPoint>
@@ -159,6 +169,16 @@
                   <Action xsi:type="ShowTaskpane"><TaskpaneId>UULA_geometry</TaskpaneId><SourceLocation resid="T.geometry.u"/></Action>
                 </Control>
               </Group>
+              <Group id="UULATK.GMoreD">
+                <Label resid="TK.More"/>
+                <Icon><bt:Image size="16" resid="TK.MoreI16"/><bt:Image size="32" resid="TK.MoreI32"/><bt:Image size="80" resid="TK.MoreI80"/></Icon>
+                <Control xsi:type="Button" id="UULATK.MoreD">
+                  <Label resid="TK.More"/>
+                  <Supertip><Title resid="TK.More"/><Description resid="TK.MoreTip"/></Supertip>
+                  <Icon><bt:Image size="16" resid="TK.MoreI16"/><bt:Image size="32" resid="TK.MoreI32"/><bt:Image size="80" resid="TK.MoreI80"/></Icon>
+                  <Action xsi:type="ShowTaskpane"><TaskpaneId>UULAToolkitMore</TaskpaneId><SourceLocation resid="TK.MoreU"/></Action>
+                </Control>
+              </Group>
               <Label resid="TK.Tab"/>
             </CustomTab>
           </ExtensionPoint>
@@ -170,6 +190,9 @@
         <bt:Image id="TK.Icon16" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icon-16.png"/>
         <bt:Image id="TK.Icon32" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icon-32.png"/>
         <bt:Image id="TK.Icon80" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icon-80.png"/>
+        <bt:Image id="TK.MoreI16" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/more-16.png"/>
+        <bt:Image id="TK.MoreI32" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/more-32.png"/>
+        <bt:Image id="TK.MoreI80" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/more-80.png"/>
         <bt:Image id="T.restyle.i16" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/restyle-16.png"/>
         <bt:Image id="T.restyle.i32" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/restyle-32.png"/>
         <bt:Image id="T.restyle.i80" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/icons/restyle-80.png"/>
@@ -191,6 +214,7 @@
       </bt:Images>
       <bt:Urls>
         <bt:Url id="TK.Url" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html"/>
+        <bt:Url id="TK.MoreU" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?more=1"/>
         <bt:Url id="T.restyle.u" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?tool=restyle"/>
         <bt:Url id="T.math.u" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?tool=math"/>
         <bt:Url id="T.graph.u" DefaultValue="https://zaheralkablawi.github.io/uula-toolkit/taskpane.html?tool=graph"/>
@@ -202,6 +226,7 @@
         <bt:String id="TK.Tab" DefaultValue="UULA Toolkit"/>
         <bt:String id="TK.Group" DefaultValue="UULA"/>
         <bt:String id="TK.Button" DefaultValue="UULA Toolkit"/>
+        <bt:String id="TK.More" DefaultValue="أدوات أخرى"/>
         <bt:String id="T.restyle" DefaultValue="Design"/>
         <bt:String id="T.math" DefaultValue="Arabic Math"/>
         <bt:String id="T.graph" DefaultValue="Graph"/>
@@ -211,6 +236,7 @@
       </bt:ShortStrings>
       <bt:LongStrings>
         <bt:String id="TK.Tip" DefaultValue="كل أدوات علا في مكان واحد"/>
+        <bt:String id="TK.MoreTip" DefaultValue="الأدوات الجديدة: تظهر هنا تلقائيًا دون تثبيت جديد."/>
         <bt:String id="T.restyle.tip" DefaultValue="تحويل الشرائح لستايل علا وقوالب المذكرة. تفتح في نافذة خاصة بها."/>
         <bt:String id="T.math.tip" DefaultValue="كتابة المعادلات العربية وإدراجها. تفتح في نافذة خاصة بها."/>
         <bt:String id="T.graph.tip" DefaultValue="رسم الدوال وإدراجها صورةً. تفتح في نافذة خاصة بها."/>
