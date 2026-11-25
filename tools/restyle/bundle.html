@@ -4420,7 +4420,7 @@ const ROLES = [
 // the same buttons beside «Hide solutions» only mark: the colour stays as it is (colours are set in «Format»)
 const SOL_TIP = {
   answer: ['● ← حل يُخفى مع «إخفاء الحلول» · الجدول يصير أزرق', '● → a solution hidden by «Hide solutions» · a table turns blue'],
-  correct: ['● حدّد الخيار الصحيح ← حرفه مظلّل ⓑ', '● Select the correct choice → its letter highlighted ⓑ'],
+  correct: ['● حدّد الخيار الصحيح ← حرفه في دائرة مملوءة', '● Select the correct choice → its letter in a filled circle'],
   given: ['● ← جزء من السؤال: يبقى ظاهرًا', '● → part of the question: stays visible'],
   graph: ['● ← حل بياني: شبكة فارغة مكانه عند الإخفاء', '● → graph solution: an empty grid in its place when hidden']
 };
@@ -4962,27 +4962,63 @@ function makeDot(ctx, shapes, d) {
   } catch (e) {}
   return c;
 }
+// the place of the letter is measured, not guessed: a hidden sample box with the same letters, font and size is written
+// off the slide and PowerPoint's own width of it gives where the letter ends (from the start side of the line).
+// Returns null when the letter can't be placed for sure (then the caller highlights the letter in the text instead).
 async function dotCorrect(ctx, shapes, s) {
   if (!['TextBox', 'GeometricShape'].includes(s.type)) return null;
   const tf = s.textFrame, tr = tf.textRange;
-  tr.load('text'); try { tf.load('leftMargin,rightMargin,topMargin,verticalAlignment'); } catch (e) {} try { tr.paragraphFormat.load('horizontalAlignment'); } catch (e) {}
+  tr.load('text'); try { tf.load('leftMargin,rightMargin,topMargin,bottomMargin,verticalAlignment'); } catch (e) {} try { tr.paragraphFormat.load('horizontalAlignment'); } catch (e) {}
   s.load('left,top,width,height'); await ctx.sync();
   const text = tr.text || '';
-  const m = /[\u24D0-\u24E9]/.exec(text); if (!m) return null;
-  const sub = tr.getSubstring(m.index, 1); try { sub.font.load('size,name'); } catch (e) {} await ctx.sync();
-  const fs = sub.font.size || 12, dia = Math.round(fs * 0.92 * 10) / 10, gw = fs * 0.98;
-  const only = text.replace(/[\s\u200e\u200f]/g, '').length === 1;
-  let cx, cy;
-  if (only) { cx = s.left + s.width / 2; cy = tf.verticalAlignment === 'Top' ? s.top + (tf.topMargin || 0) + fs * 0.62 : s.top + s.height / 2; }
-  else {
-    cx = tr.paragraphFormat.horizontalAlignment === 'Right' ? s.left + s.width - (tf.rightMargin || 0) - gw / 2 : s.left + (tf.leftMargin || 0) + gw / 2;
-    cy = s.top + (tf.topMargin || 0) + fs * 0.62;
+  const first = text.split(/[\r\n\v]/)[0];
+  // the circled letters of the first line; several → the blue one
+  const at = []; for (let i = 0; i < first.length; i++) if (/[ⓐ-ⓩ]/.test(first[i])) at.push(i);
+  if (!at.length) return null;
+  let idx = at[0];
+  if (at.length > 1) {
+    const subs = at.map(i => { const x = tr.getSubstring(i, 1); try { x.font.load('color'); } catch (e) {} return x; });
+    await ctx.sync();
+    const blue = c => { const h = /^#?([0-9a-f]{6})$/i.exec(c || ''); if (!h) return false; const v = parseInt(h[1], 16), r = v >> 16, b = v & 255; return b > 150 && r < 120 && b - r > 60; };
+    const k = subs.findIndex(x => { try { return blue(x.font.color); } catch (e) { return false; } });
+    if (k < 0) return null;
+    idx = at[k];
   }
+  const sub = tr.getSubstring(idx, 1); try { sub.font.load('size,name'); } catch (e) {} await ctx.sync();
+  const fs = sub.font.size || 12, fname = sub.font.name || null;
+  // the two samples: the line up to the letter (included), and the letter alone
+  const sample = str => {
+    const t = shapes.addTextBox(str, { left: -3000, top: -3000, width: 400, height: 40 });
+    try { const f = t.textFrame; f.wordWrap = false; f.autoSizeSetting = 'AutoSizeShapeToFitText'; f.leftMargin = 0; f.rightMargin = 0; f.topMargin = 0; f.bottomMargin = 0; const ft = f.textRange.font; ft.size = fs; if (fname) ft.name = fname; } catch (e) {}
+    return t;
+  };
+  const pre = sample(first.slice(0, idx + 1)), one = sample(first[idx]);
+  await ctx.sync();
+  pre.load('width,height'); one.load('width,height'); await ctx.sync();
+  const wPre = pre.width, gw = one.width, lh = one.height;
+  pre.delete(); one.delete(); await ctx.sync();
+  // the sizes did not follow the text (the box kept its first size): not sure → the other way
+  if (!(gw > 1 && gw < 200 && Math.abs(gw - 400) > 0.5 && Math.abs(lh - 40) > 0.5 && wPre >= gw - 0.5)) return null;
+  // the start side of the line: right for Arabic text (or a right-to-left mark), left otherwise
+  const rtl = /^[\s]*‏/.test(first) || (/[؀-ۿ]/.test(text) && !/^[\s]*‎/.test(first));
+  const al = tr.paragraphFormat.horizontalAlignment;
+  const lm = tf.leftMargin || 0, rm = tf.rightMargin || 0, tm = tf.topMargin || 0, bm = tf.bottomMargin || 0;
+  let cx;
+  if (al === 'Center') {
+    const all = sample(first); await ctx.sync(); all.load('width'); await ctx.sync(); const wl = all.width; all.delete(); await ctx.sync();
+    const start = rtl ? s.left + s.width / 2 + wl / 2 : s.left + s.width / 2 - wl / 2;
+    cx = rtl ? start - (wPre - gw / 2) : start + (wPre - gw / 2);
+  } else cx = rtl ? s.left + s.width - rm - (wPre - gw / 2) : s.left + lm + (wPre - gw / 2);
+  const lines = text.split(/[\r\n\v]/).length;
+  const va = tf.verticalAlignment;
+  const lineTop = va === 'Middle' && lines === 1 ? s.top + (s.height - lh) / 2 : va === 'Bottom' && lines === 1 ? s.top + s.height - bm - lh : s.top + tm;
+  const cy = lineTop + lh * 0.5;
+  const dia = Math.round(Math.min(gw, lh) * 0.92 * 10) / 10;
   // already done (pressed twice): one circle is enough
   const all = shapes; all.load('items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
-  if (all.items.some(x => /UULA CorrectDot/.test(x.name || '') && Math.abs(x.left + x.width / 2 - cx) < dia / 2 && Math.abs(x.top + x.height / 2 - cy) < dia / 2)) return null;
+  if (all.items.some(x => /UULA CorrectDot/.test(x.name || '') && Math.abs(x.left + x.width / 2 - cx) < dia / 2 && Math.abs(x.top + x.height / 2 - cy) < dia / 2)) return { id: null };
   sub.font.color = '#FFFFFF';
-  const d = { left: Math.round((cx - dia / 2) * 10) / 10, top: Math.round((cy - dia / 2) * 10) / 10, size: dia, font: Math.round(fs * 0.7 * 2) / 2, letter: String.fromCharCode(m[0].charCodeAt(0) - 0x24D0 + 97), name: sub.font.name || null };
+  const d = { left: Math.round((cx - dia / 2) * 10) / 10, top: Math.round((cy - dia / 2) * 10) / 10, size: dia, font: Math.round(fs * 0.62 * 2) / 2, letter: String.fromCharCode(first.charCodeAt(idx) - 0x24D0 + 97), name: null };
   const c = makeDot(ctx, shapes, d);
   c.load('id'); await ctx.sync();
   return { id: c.id, d };
@@ -5023,7 +5059,13 @@ async function quietMark(role, keepColour) {
         try { const f = s.textFrame.textRange.font; f.color = '#' + QUIET[role]; if (role === 'correct') f.bold = true; } catch (e) {}
       }
       // the correct choice: its circled letter is filled in the text itself right after (see fillSlide)
-      if (role === 'correct' && ['TextBox', 'GeometricShape'].includes(s.type)) { s.name = s.name + ' #urfill'; fillAfter = true; }
+      if (role === 'correct' && ['TextBox', 'GeometricShape'].includes(s.type)) {
+        await ctx.sync();
+        const dot = await dotCorrect(ctx, ctx.presentation.slides.getItem(id).shapes, s).catch(() => null);
+        if (dot && dot.id) (undoStack[undoStack.length - 1].added = undoStack[undoStack.length - 1].added || []).push(dot);
+        // the place could not be measured: the letter is highlighted in the text instead (see fillSlide)
+        if (!dot) { s.name = s.name + ' #urfill'; fillAfter = true; }
+      }
       // the solutions of this slide are hidden now: this one goes aside too, and «Show solutions» brings it back
       // (a graph leaves the empty grid in its place)
       if (hiddenNow && role === 'graph') { await ctx.sync(); await gridOverShape(ctx, ctx.presentation.slides.getItem(id).shapes, s, W, []); continue; }
@@ -5149,7 +5191,7 @@ async function pinRole(role, keepColour) {
       if (n < 0) { rsay(L('عُلِّم كحل وأُخفي، لأن حلول الشريحة مخفية الآن. يظهر مع «إظهار الحلول».', 'Marked as a solution and hidden, since the slide\'s solutions are hidden now. «Show solutions» brings it back.')); return; }
       rsay(!n ? L('حدّد أولًا الكائن الذي تريد تمييزه.', 'First select the object to mark.')
         : role === 'given' ? L('عُلِّم كجزء من السؤال: يبقى ظاهرًا عند إخفاء الحلول.', 'Marked as part of the question: it stays when solutions are hidden.')
-        : role === 'correct' ? L('عُلِّم كخيار صحيح: صار حرفه أبيض على تظليل أزرق، فيظهر حتى في الطباعة بالأبيض والأسود، ويعود حرفًا عاديًا عند إخفاء الحلول.', 'Marked as the correct choice: its letter is now white on a blue highlight, clear even in black-and-white print; it turns back to a plain letter when solutions are hidden.')
+        : role === 'correct' ? L('عُلِّم كخيار صحيح: صار حرفه دائرة مملوءة تظهر حتى في الطباعة بالأبيض والأسود، ويعود حرفًا عاديًا عند إخفاء الحلول.', 'Marked as the correct choice: its letter is now white on a blue highlight, clear even in black-and-white print; it turns back to a plain letter when solutions are hidden.')
         : role === 'graph' ? L('عُلِّم كحل بياني: تحل مكانه شبكة فارغة عند إخفاء الحلول.', 'Marked as a graph solution: an empty grid takes its place when solutions are hidden.')
         : keepColour ? L('عُلِّم كحل: يُخفى عند إخفاء الحلول.', 'Marked as a solution: it is hidden when solutions are hidden.') : L('عُلِّم كحل (أزرق): يُخفى عند إخفاء الحلول.', 'Marked as a solution (blue): it is hidden when solutions are hidden.'));
     } catch (e) { rsay(L('تعذّر التمييز: ', 'Could not mark: ') + errText(e)); }
